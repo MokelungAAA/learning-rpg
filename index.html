@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>学习RPG · 认知操作系统 v0.4.2</title>
+  <title>学习RPG · 认知操作系统 v0.4.6</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
@@ -570,221 +570,6 @@
       height: 100%;
       border-radius: 2px;
       transition: width 0.5s ease;
-    }
-    
-    /* ========== 数据模板展示页 (v0.4.1新增) ========== */
-    .template-section {
-      margin-bottom: 32px;
-    }
-    
-    .template-card {
-      background: rgba(255,255,255,0.95);
-      border: 1px solid rgba(200, 200, 220, 0.3);
-      border-radius: 16px;
-      padding: 20px;
-      margin-bottom: 16px;
-      position: relative;
-      overflow: hidden;
-    }
-    
-    .template-card::before {
-      content: '';
-      position: absolute;
-      left: 0;
-      top: 0;
-      bottom: 0;
-      width: 4px;
-    }
-    
-    .template-card.practice::before { background: var(--type-practice); }
-    .template-card.exam::before { background: var(--type-exam); }
-    .template-card.recitation::before { background: var(--type-recitation); }
-    
-    .template-header {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      margin-bottom: 16px;
-    }
-    
-    .template-type-badge {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      padding: 6px 12px;
-      border-radius: 20px;
-      font-size: 12px;
-      font-weight: 600;
-      color: #fff;
-    }
-    
-    .template-type-badge.practice { background: var(--type-practice); }
-    .template-type-badge.exam { background: var(--type-exam); }
-    .template-type-badge.recitation { background: var(--type-recitation); }
-    
-    .template-type-icon {
-      font-size: 16px;
-    }
-    
-    .template-name {
-      font-size: 15px;
-      font-weight: 600;
-      color: var(--text-primary);
-    }
-    
-    .template-code {
-      background: #1a1a2e;
-      border-radius: 8px;
-      padding: 16px;
-      overflow-x: auto;
-      font-family: 'Monaco', 'Menlo', monospace;
-      font-size: 12px;
-      line-height: 1.6;
-      color: #e2e8f0;
-    }
-    
-    .template-code .key {
-      color: #93c5fd;
-    }
-    
-    .template-code .string {
-      color: #86efac;
-    }
-    
-    .template-code .number {
-      color: #fcd34d;
-    }
-    
-    .template-code .comment {
-      color: #6b7280;
-      font-style: italic;
-    }
-    
-    /* 字段说明 */
-    .field-list {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-      gap: 8px;
-      margin-top: 12px;
-    }
-    
-    .field-item {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      padding: 8px 12px;
-      background: rgba(200, 200, 220, 0.1);
-      border-radius: 8px;
-      font-size: 12px;
-    }
-    
-    .field-name {
-      font-family: monospace;
-      color: var(--accent-blue);
-      font-weight: 500;
-    }
-    
-    .field-type {
-      color: var(--text-muted);
-      font-size: 11px;
-    }
-    
-    .field-required {
-      color: var(--accent-coral);
-      font-size: 10px;
-    }
-    
-    /* 统一记录结构展示 */
-    .unified-structure {
-      background: linear-gradient(135deg, rgba(59, 130, 246, 0.08), rgba(139, 92, 246, 0.08));
-      border: 1px solid rgba(59, 130, 246, 0.2);
-      border-radius: 16px;
-      padding: 24px;
-      margin-bottom: 24px;
-    }
-    
-    .unified-structure-title {
-      font-size: 16px;
-      font-weight: 600;
-      color: var(--text-primary);
-      margin-bottom: 16px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    
-    /* 示例记录卡片 */
-    .sample-records {
-      margin-top: 24px;
-    }
-    
-    .sample-record {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 12px 16px;
-      background: rgba(255,255,255,0.9);
-      border-radius: 10px;
-      margin-bottom: 8px;
-      transition: all 0.2s;
-    }
-    
-    .sample-record:hover {
-      transform: translateX(4px);
-      box-shadow: 0 2px 8px rgba(100, 110, 140, 0.1);
-    }
-    
-    .sample-record-type {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      flex-shrink: 0;
-    }
-    
-    .sample-record-type.practice { background: var(--type-practice); }
-    .sample-record-type.exam { background: var(--type-exam); }
-    .sample-record-type.recitation { background: var(--type-recitation); }
-    
-    .sample-record-content {
-      flex: 1;
-      font-size: 13px;
-    }
-    
-    .sample-record-subject {
-      font-weight: 600;
-      color: var(--text-primary);
-    }
-    
-    .sample-record-desc {
-      color: var(--text-secondary);
-      margin-left: 8px;
-    }
-    
-    .sample-record-time {
-      font-size: 11px;
-      color: var(--text-muted);
-    }
-    
-    .sample-record-score {
-      font-weight: 600;
-      padding: 4px 10px;
-      border-radius: 12px;
-      font-size: 12px;
-    }
-    
-    .sample-record-score.excellent {
-      background: rgba(16, 185, 129, 0.15);
-      color: var(--accent-green);
-    }
-    
-    .sample-record-score.good {
-      background: rgba(59, 130, 246, 0.15);
-      color: var(--accent-blue);
-    }
-    
-    .sample-record-score.failed {
-      background: rgba(239, 68, 68, 0.15);
-      color: var(--accent-coral);
     }
     
     /* ========== 技能树页 ========== */
@@ -1503,7 +1288,6 @@
       .about-content { max-height: 80vh; }
       .forget-chart { height: 280px; }
       .chart-tips { display: none; }
-      .field-list { grid-template-columns: 1fr; }
       .node-detail-stats { grid-template-columns: repeat(2, 1fr); }
     }
     
@@ -1553,7 +1337,7 @@
           <div class="brand-icon">📚</div>
           <div class="brand-text">
             <h1>学习RPG · 认知操作系统</h1>
-            <p>v0.4.2</p>
+            <p>v0.4.6</p>
           </div>
         </div>
       </header>
@@ -1599,173 +1383,6 @@
         <div class="subject-section">
           <div class="section-title">📊 学科等级</div>
           <div class="subject-grid" id="subjectGrid"></div>
-        </div>
-      </div>
-      
-      <!-- 数据模板页 (v0.4.1新增) -->
-      <div class="page-content" id="page-template">
-        <div class="section-title">📋 数据模板标准化</div>
-        
-        <div class="glass-card">
-          <!-- 统一记录结构 -->
-          <div class="unified-structure">
-            <div class="unified-structure-title">
-              <span>🔷</span>
-              <span>统一记录数据结构 (Unified Record Schema)</span>
-            </div>
-            <div class="template-code">
-<span class="comment">// 基础字段 - 所有活动类型共有</span>
-{
-  <span class="key">"recordID"</span>: <span class="string">"uuid"</span>,           <span class="comment">// 唯一标识符</span>
-  <span class="key">"timestamp"</span>: <span class="string">"Date"</span>,           <span class="comment">// 记录时间</span>
-  <span class="key">"subject"</span>: <span class="string">"数学|语文|..."</span>, <span class="comment">// 九大学科</span>
-  <span class="key">"knowledgePoints"</span>: [<span class="string">"知识点1"</span>], <span class="comment">// 涉及的知识点</span>
-  <span class="key">"durationMinutes"</span>: <span class="number">45</span>,          <span class="comment">// 学习时长(分钟)</span>
-  <span class="key">"activityType"</span>: <span class="string">"practice|exam|recitation"</span>,
-  <span class="comment">// ↑ 活动类型字段，下方根据类型扩展</span>
-  
-  <span class="comment">// ↓ 根据 activityType 扩展的字段</span>
-}
-            </div>
-            <div class="field-list">
-              <div class="field-item">
-                <span class="field-name">recordID</span>
-                <span class="field-type">string</span>
-                <span class="field-required">必填</span>
-              </div>
-              <div class="field-item">
-                <span class="field-name">timestamp</span>
-                <span class="field-type">Date</span>
-                <span class="field-required">必填</span>
-              </div>
-              <div class="field-item">
-                <span class="field-name">subject</span>
-                <span class="field-type">enum</span>
-                <span class="field-required">必填</span>
-              </div>
-              <div class="field-item">
-                <span class="field-name">knowledgePoints</span>
-                <span class="field-type">string[]</span>
-                <span class="field-required">必填</span>
-              </div>
-              <div class="field-item">
-                <span class="field-name">durationMinutes</span>
-                <span class="field-type">number</span>
-              </div>
-              <div class="field-item">
-                <span class="field-name">activityType</span>
-                <span class="field-type">enum</span>
-                <span class="field-required">必填</span>
-              </div>
-            </div>
-          </div>
-          
-          <!-- 三种活动类型模板 -->
-          <div class="template-section">
-            <div class="section-title" style="font-size: 13px; margin-bottom: 12px;">📝 三种活动类型模板</div>
-            
-            <!-- 刷题记录 -->
-            <div class="template-card practice">
-              <div class="template-header">
-                <span class="template-type-badge practice">
-                  <span class="template-type-icon">✍️</span>
-                  <span>刷题记录</span>
-                </span>
-                <span class="template-name">Practice Record</span>
-              </div>
-              <div class="template-code">
-{
-  <span class="key">"activityType"</span>: <span class="string">"practice"</span>,
-  <span class="key">"totalQuestions"</span>: <span class="number">20</span>,      <span class="comment">// 总题数</span>
-  <span class="key">"correctCount"</span>: <span class="number">14</span>,         <span class="comment">// 正确题数</span>
-  <span class="key">"accuracy"</span>: <span class="number">70</span>               <span class="comment">// 正确率%</span>
-}
-              </div>
-              <div class="field-list">
-                <div class="field-item">
-                  <span class="field-name">totalQuestions</span>
-                  <span class="field-type">number</span>
-                  <span class="field-required">必填</span>
-                </div>
-                <div class="field-item">
-                  <span class="field-name">correctCount</span>
-                  <span class="field-type">number</span>
-                  <span class="field-required">必填</span>
-                </div>
-                <div class="field-item">
-                  <span class="field-name">accuracy</span>
-                  <span class="field-type">number</span>
-                  <span class="field-required">必填</span>
-                </div>
-              </div>
-            </div>
-            
-            <!-- 考试记录 -->
-            <div class="template-card exam">
-              <div class="template-header">
-                <span class="template-type-badge exam">
-                  <span class="template-type-icon">📝</span>
-                  <span>考试记录</span>
-                </span>
-                <span class="template-name">Exam Record</span>
-              </div>
-              <div class="template-code">
-{
-  <span class="key">"activityType"</span>: <span class="string">"exam"</span>,
-  <span class="key">"totalScore"</span>: <span class="number">150</span>,         <span class="comment">// 满分</span>
-  <span class="key">"obtainedScore"</span>: <span class="number">112</span>,       <span class="comment">// 实得分</span>
-  <span class="key">"accuracy"</span>: <span class="number">74.67</span>             <span class="comment">// 得分的正确率%</span>
-}
-              </div>
-              <div class="field-list">
-                <div class="field-item">
-                  <span class="field-name">totalScore</span>
-                  <span class="field-type">number</span>
-                  <span class="field-required">必填</span>
-                </div>
-                <div class="field-item">
-                  <span class="field-name">obtainedScore</span>
-                  <span class="field-type">number</span>
-                  <span class="field-required">必填</span>
-                </div>
-                <div class="field-item">
-                  <span class="field-name">accuracy</span>
-                  <span class="field-type">number</span>
-                  <span class="field-required">必填</span>
-                </div>
-              </div>
-            </div>
-            
-            <!-- 背诵记录 -->
-            <div class="template-card recitation">
-              <div class="template-header">
-                <span class="template-type-badge recitation">
-                  <span class="template-type-icon">🗣️</span>
-                  <span>背诵记录</span>
-                </span>
-                <span class="template-name">Recitation Record</span>
-              </div>
-              <div class="template-code">
-{
-  <span class="key">"activityType"</span>: <span class="string">"recitation"</span>,
-  <span class="key">"result"</span>: <span class="string">"perfect"</span>           <span class="comment">// perfect=100%, partial=50%, failed=0%</span>
-}
-              </div>
-              <div class="field-list">
-                <div class="field-item">
-                  <span class="field-name">result</span>
-                  <span class="field-type">"perfect"|"partial"|"failed"</span>
-                  <span class="field-required">必填</span>
-                </div>
-              </div>
-            </div>
-          </div>
-          
-          <!-- 示例数据 -->
-          <div class="sample-records">
-            <div class="section-title" style="font-size: 13px; margin-bottom: 12px;">💡 示例学习记录</div>
-            <div id="sampleRecordsList"></div>
-          </div>
         </div>
       </div>
       
@@ -1946,7 +1563,7 @@
         </div>
         <div class="about-system-name">📚 学习RPG认知操作系统</div>
         <div class="about-version">
-          <span class="about-version-badge">v0.4.2</span>
+          <span class="about-version-badge">v0.4.6</span>
         </div>
         <div class="about-developer-info">
           <div class="about-developer-name">墨澜的Miku</div>
@@ -1959,12 +1576,48 @@
         
         <div class="changelog-version">
           <div class="changelog-version-header current">
-            v0.4.2（当前版本 - 温度模型重构）
+            v0.4.6（当前版本 - 合并迭代）
             <span class="changelog-current-tag">当前</span>
           </div>
           <div class="changelog-items">
             <div class="changelog-item">
-              <span class="changelog-item-version">v0.4.2 (2026-05-15):</span> 温度模型重构：复习后温度可上升（升温机制）；实现动态半衰期三层因子模型（全局基础×学科修正×个体修正）；九大学科中文名称（数学、语文、英语、物理、化学、生物、政治、历史、地理）；指数衰减温度计算。
+              <span class="changelog-item-version">v0.4.6 (2026-05-18):</span> 合并v0.4.4（删除模板页面、恢复设置页面）和v0.4.5（GitHub数据读取功能）的改动；以v0.4.4为基础，整合GitHub远程数据同步能力。
+            </div>
+          </div>
+        </div>
+        
+        <div class="changelog-version">
+          <div class="changelog-version-header">v0.4.5（GitHub数据读取）</div>
+          <div class="changelog-items">
+            <div class="changelog-item">
+              <span class="changelog-item-version">v0.4.5 (2026-05-17):</span> 新增GitHub数据读取功能：支持从GitHub仓库加载学习数据；添加数据加载状态动画和数据错误处理机制。
+            </div>
+          </div>
+        </div>
+        
+        <div class="changelog-version">
+          <div class="changelog-version-header">v0.4.4（模板删除）</div>
+          <div class="changelog-items">
+            <div class="changelog-item">
+              <span class="changelog-item-version">v0.4.4 (2026-05-17):</span> 删除"数据模板"页面（模板数据结构为AI内部使用，无需展示给用户）；恢复设置页面到底部导航栏。
+            </div>
+          </div>
+        </div>
+        
+        <div class="changelog-version">
+          <div class="changelog-version-header">v0.4.3（算法优化迭代）</div>
+          <div class="changelog-items">
+            <div class="changelog-item">
+              <span class="changelog-item-version">v0.4.3 (2026-05-16):</span> 学科等级算法重构：采用三维标准化权重设计（广度B×深度D^0.4×经验E^0.3几何加权）；统一温度数据源，废弃temperatureMap双源；等级进度由综合分小数部分平滑显示；遗忘衰减阻尼机制。阴影队列与推荐算法优化：新阴影队列指标urgency=(100-temp)×decayRatePerDay；推荐优先级乘法模型；背诵类特殊推荐（24h内partial/failed保持高权重）；复习频率自适应机制。全局参数自校准：全局基础半衰期指数移动平均更新；学科难度系数基于最近10次复习ratio自动调整；温度回升参数自校准。
+            </div>
+          </div>
+        </div>
+        
+        <div class="changelog-version">
+          <div class="changelog-version-header">v0.4.2（温度模型重构）</div>
+          <div class="changelog-items">
+            <div class="changelog-item">
+              <span class="changelog-item-version">v0.4.2 (2026-05-15):</span> 温度模型重构：复习后温度可上升（升温机制）；实现动态半衰期三层因子模型（全局基础×学科修正×个体修正）；九大学科中文名称；指数衰减温度计算。
             </div>
           </div>
         </div>
@@ -2000,10 +1653,6 @@
         <span class="nav-icon">🏠</span>
         <span class="nav-label">概览</span>
       </button>
-      <button class="nav-item" onclick="switchPage('template')">
-        <span class="nav-icon">📋</span>
-        <span class="nav-label">模板</span>
-      </button>
       <button class="nav-item" onclick="switchPage('skills')">
         <span class="nav-icon">🌳</span>
         <span class="nav-label">技能树</span>
@@ -2016,13 +1665,17 @@
         <span class="nav-icon">📜</span>
         <span class="nav-label">日志</span>
       </button>
+      <button class="nav-item" onclick="switchPage('settings')">
+        <span class="nav-icon">⚙️</span>
+        <span class="nav-label">设置</span>
+      </button>
     </div>
   </nav>
   
   <div id="toast" class="toast" style="display:none"></div>
   
   <script>
-    // ========== v0.4.2 温度模型重构系统 ==========
+    // ========== v0.4.6 算法迭代系统 ==========
     
     // ========== 核心配置 ==========
     const CONFIG = {
@@ -2031,7 +1684,7 @@
       MIN_HALFLIFE: 0.5,           // 最小半衰期（天）
       MAX_HALFLIFE: 30,            // 最大半衰期（天）
       
-      // 学科修正系数
+      // 学科修正系数（初始值，后续会动态调整）
       SUBJECT_MODIFIERS: {
         '数学': 1.2,
         '物理': 1.2,
@@ -2050,7 +1703,8 @@
         RATIO_THRESHOLD_LOW: 0.9,   // 低于此比率缩短半衰期
         EXTEND_FACTOR: 1.15,         // 延长因子
         SHRINK_FACTOR: 0.8,          // 缩短因子
-        FINE_TUNE_FACTOR: 0.9       // 微调基准
+        FINE_TUNE_FACTOR: 0.9,       // 微调基准
+        EMA_ALPHA: 0.3               // 指数移动平均alpha (v0.4.3新增)
       },
       
       // 温度参数
@@ -2061,6 +1715,32 @@
         BOOST_FACTOR: 0.4,          // 正确率影响因子
         MAX_PEAK: 100,               // 最大峰值
         DECAY_BASE: 2               // 衰减底数
+      },
+      
+      // v0.4.3 新增：学科等级三维评分权重
+      SUBJECT_LEVEL: {
+        BROADNESS_FULL_COUNT: 20,   // 广度满分节点数
+        XP_MAX_FOR_LEVEL: 50000,   // 经验分满分XP
+        WEIGHT_B: 0.3,              // 广度权重
+        WEIGHT_D: 0.4,              // 深度权重
+        WEIGHT_E: 0.3               // 经验权重
+      },
+      
+      // v0.4.3 新增：阴影队列与推荐算法
+      SHADOW_QUEUE: {
+        TEMP_THRESHOLD_COLD: 40,   // 进入阴影队列的温度阈值
+        TEMP_THRESHOLD_URGENT: 20, // 紧急复习阈值
+        URGENCY_MIN: 0.01,          // 最小紧迫度
+        RECITATION_BOOST_HOURS: 24, // 背诵类推荐权重保持时间
+        RECITATION_BOOST_FACTOR: 1.5 // 背诵类特殊权重倍数
+      },
+      
+      // v0.4.3 新增：复习频率自适应
+      ADAPTIVE: {
+        EMA_ALPHA: 0.2,             // 复习频率EMA平滑因子
+        DANGER_THRESHOLD_DEFAULT: 0.5, // 默认危险阈值
+        RECOMMEND_MAX_DEFAULT: 5,   // 默认推荐列表上限
+        REVIEW_INTERVAL_IDEAL_DAYS: 1.5 // 理想复习间隔（天）
       }
     };
     
@@ -2268,7 +1948,244 @@
       return "#D1D5DB";
     }
     
-    // ========== 默认数据 (v0.4.2) ==========
+    // ========== v0.4.5 GitHub数据配置 ==========
+    const GITHUB_CONFIG = {
+      DATA_URL: 'https://raw.githubusercontent.com/MokelungAAA/learning-rpg/main/data.json',
+      OWNER: 'MokelungAAA',
+      REPO: 'learning-rpg',
+      BRANCH: 'main'
+    };
+
+    // ========== 数据加载状态 ==========
+    let dataLoadState = {
+      isLoading: false,
+      hasError: false,
+      lastUpdate: null
+    };
+
+    // ========== GitHub数据加载核心函数 ==========
+
+    /**
+     * 从GitHub加载数据
+     * @returns {Promise<Object>} 加载的数据或默认数据
+     */
+    async function loadDataFromGitHub() {
+      dataLoadState.isLoading = true;
+      showDataLoading(true);
+      
+      try {
+        // 添加时间戳参数避免缓存
+        const url = `${GITHUB_CONFIG.DATA_URL}?t=${Date.now()}`;
+        console.log('[v0.4.6] 正在从GitHub加载数据...', url);
+        
+        const response = await fetch(url, {
+          method: 'GET',
+          headers: {
+            'Accept': 'application/json',
+            'Cache-Control': 'no-cache, no-store, must-revalidate'
+          }
+        });
+        
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        
+        const rawData = await response.json();
+        console.log('[v0.4.6] 数据加载成功:', rawData);
+        
+        dataLoadState.hasError = false;
+        dataLoadState.lastUpdate = new Date(rawData.lastUpdated);
+        
+        // 将GitHub数据转换为appData格式
+        return convertGitHubDataToAppData(rawData);
+        
+      } catch (error) {
+        console.error('[v0.4.6] 数据加载失败:', error);
+        dataLoadState.hasError = true;
+        
+        // 显示错误提示
+        showDataLoadError(error.message);
+        
+        // 返回默认空数据
+        return null;
+      } finally {
+        dataLoadState.isLoading = false;
+        showDataLoading(false);
+      }
+    }
+
+    /**
+     * 将GitHub数据格式转换为appData格式
+     * @param {Object} githubData - GitHub原始数据
+     * @returns {Object} appData格式数据
+     */
+    function convertGitHubDataToAppData(githubData) {
+      const now = Date.now();
+      const hour = 3600000;
+      const day = 24 * hour;
+      
+      // 转换profile
+      const profile = {
+        level: 1,
+        xp: 0,
+        totalXp: 0,
+        combo: 0,
+        title: '初学者',
+        titleJp: 'Shogakusha',
+        achievements: []
+      };
+      
+      // 计算总XP和各学科数据
+      let totalXp = 0;
+      const subjects = {};
+      
+      for (const [subjectName, subjectData] of Object.entries(githubData.subjects || {})) {
+        const totalSubjectXp = subjectData.totalXp || 0;
+        totalXp += totalSubjectXp;
+        
+        // 转换知识点节点
+        const nodes = (subjectData.nodes || []).map(node => ({
+          id: node.id || generateUUID(),
+          name: node.name,
+          subject: subjectName,
+          peakTemp: node.peakTemp || 85,
+          lastStudy: node.lastStudy || now,
+          halfLifeDays: node.halfLifeDays || calculateHalfLife(subjectName, 1.0),
+          repetitions: node.repetitions || 0,
+          accuracyHistory: node.accuracyHistory || [],
+          totalXp: node.totalXp || 0
+        }));
+        
+        subjects[subjectName] = {
+          name: subjectName,
+          level: 1,
+          xp: totalSubjectXp,
+          nodes: nodes
+        };
+      }
+      
+      // 计算全局等级
+      profile.totalXp = totalXp;
+      profile.xp = totalXp;
+      
+      // 根据总XP计算等级
+      const levelInfo = calculateGlobalLevel(totalXp);
+      profile.level = levelInfo.level;
+      profile.title = levelInfo.title;
+      profile.titleJp = levelInfo.titleJp;
+      
+      // 转换records/log
+      const records = (githubData.log || []).map(log => ({
+        recordID: log.id || generateUUID(),
+        timestamp: new Date(log.timestamp).getTime(),
+        subject: log.subject,
+        knowledgePoints: log.knowledgePoints || [],
+        durationMinutes: log.durationMinutes || 0,
+        activityType: log.activityType || 'practice',
+        totalQuestions: log.totalQuestions || 0,
+        correctCount: log.correctCount || 0,
+        accuracy: log.accuracy || 0,
+        xp: log.xp || 0
+      }));
+      
+      // 更新CONFIG中的学科修正系数和基础半衰期
+      if (githubData.profile) {
+        if (githubData.profile.globalBaseHalfLife) {
+          CONFIG.GLOBAL_BASE_HALFLIFE = githubData.profile.globalBaseHalfLife;
+        }
+        if (githubData.profile.subjectModifiers) {
+          Object.assign(CONFIG.SUBJECT_MODIFIERS, githubData.profile.subjectModifiers);
+        }
+      }
+      
+      return {
+        profile,
+        subjects,
+        records,
+        version: 'v0.4.6',
+        _githubData: githubData // 保留原始数据引用
+      };
+    }
+
+    /**
+     * 计算全局等级
+     * @param {number} totalXp - 总经验值
+     * @returns {Object} 等级信息
+     */
+    function calculateGlobalLevel(totalXp) {
+      let level = 1;
+      let title = '初学者';
+      let titleJp = 'Shogakusha';
+      
+      for (let i = LEVELS.length - 1; i >= 0; i--) {
+        if (totalXp >= LEVELS[i].r) {
+          level = LEVELS[i].l;
+          title = LEVELS[i].t;
+          titleJp = LEVELS[i].j;
+          break;
+        }
+      }
+      
+      return { level, title, titleJp };
+    }
+
+    /**
+     * 显示数据加载状态
+     */
+    function showDataLoading(isLoading) {
+      let loadingEl = document.getElementById('dataLoadingOverlay');
+      if (!loadingEl) {
+        // 创建加载覆盖层
+        loadingEl = document.createElement('div');
+        loadingEl.id = 'dataLoadingOverlay';
+        loadingEl.style.cssText = `
+          position: fixed;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background: rgba(248, 249, 252, 0.95);
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          z-index: 10000;
+          transition: opacity 0.3s ease;
+        `;
+        document.body.appendChild(loadingEl);
+      }
+      
+      if (isLoading) {
+        loadingEl.innerHTML = `
+          <div style="font-size: 48px; margin-bottom: 20px; animation: float 2s ease-in-out infinite;">📚</div>
+          <div style="font-size: 18px; font-weight: 600; color: var(--text-primary); margin-bottom: 8px;">加载学习数据...</div>
+          <div style="font-size: 13px; color: var(--text-muted);">正在从GitHub同步</div>
+          <style>
+            @keyframes float {
+              0%, 100% { transform: translateY(0); }
+              50% { transform: translateY(-10px); }
+            }
+          </style>
+        `;
+        loadingEl.style.display = 'flex';
+        loadingEl.style.opacity = '1';
+      } else {
+        loadingEl.style.opacity = '0';
+        setTimeout(() => {
+          loadingEl.style.display = 'none';
+        }, 300);
+      }
+    }
+
+    /**
+     * 显示数据加载错误
+     */
+    function showDataLoadError(message) {
+      console.warn('[v0.4.6] 使用默认空数据，错误信息:', message);
+      // 可以添加一个toast提示，但不影响用户使用
+    }
+    
+    // ========== 默认数据 (v0.4.6) ==========
     const DEFAULT_DATA = {
       profile: {
         level: 1,
@@ -2281,7 +2198,7 @@
       },
       subjects: {},
       records: [],
-      version: 'v0.4.2'
+      version: 'v0.4.6'
     };
     
     // 初始化九大学科
@@ -2290,8 +2207,8 @@
         name: name,
         level: 1,
         xp: 0,
-        nodes: [],
-        temperatureMap: {}
+        nodes: []
+        // v0.4.3: 废弃temperatureMap双源，温度统一由getCurrentTemp()实时计算
       };
     });
     
@@ -2344,47 +2261,138 @@
       }
     }
     
-    // ========== 学科等级计算 ==========
+    // ========== v0.4.3 学科等级计算（三维标准化权重） ==========
+    /**
+     * 计算学科等级综合评分
+     * 采用三维标准化权重设计：
+     * - 广度分(B)：知识点数量
+     * - 深度分(D)：当前平均温度
+     * - 经验分(E)：累计XP
+     * 综合分 S = (B^0.3) * (D^0.4) * (E^0.3)
+     */
     function calculateSubjectLevel(subjectKey) {
       const subject = appData.subjects[subjectKey];
-      if (!subject) return { level: 1, xp: 0, progress: 0 };
+      if (!subject) return { level: 1, xp: 0, progress: 0, score: 0 };
       
-      let avgTemp = 0;
-      const nodeCount = subject.nodes ? subject.nodes.length : 0;
-      if (nodeCount > 0) {
-        let totalTemp = 0;
+      const { SUBJECT_LEVEL } = CONFIG;
+      const now = Date.now();
+      
+      // 收集该学科所有节点的当前温度
+      let nodeCount = 0;
+      let totalTemp = 0;
+      let totalXp = 0;
+      let daysWithoutReview = 0;
+      let maxDaysWithoutReview = 0;
+      
+      if (subject.nodes && subject.nodes.length > 0) {
         subject.nodes.forEach(node => {
-          totalTemp += getCurrentTemp(node);
+          const currentTemp = getCurrentTemp(node, now);
+          totalTemp += currentTemp;
+          totalXp += node.totalXp || 0;
+          nodeCount++;
+          
+          // 计算连续未复习天数
+          const daysAgo = (now - node.lastStudy) / (24 * 3600 * 1000);
+          if (daysAgo > daysWithoutReview) {
+            maxDaysWithoutReview = daysAgo;
+          }
         });
-        avgTemp = totalTemp / nodeCount;
       }
       
-      const baseXp = subject.xp || 0;
-      const tempBonus = avgTemp * 10;
-      const xpScore = Math.min(baseXp, 50000);
+      // 一、广度分 B = min(100, (nodeCount / FULL_COUNT) * 100)
+      const B = Math.min(100, (nodeCount / SUBJECT_LEVEL.BROADNESS_FULL_COUNT) * 100);
       
-      const score = (xpScore / 50000 * 50) + (tempBonus / 100 * 30) + (nodeCount * 5);
+      // 二、深度分 D = avgCurrentTemp（所有节点当前平均温度）
+      // 应用遗忘衰减阻尼：连续多日无复习时施加短期阻尼
+      let D = nodeCount > 0 ? totalTemp / nodeCount : 0;
       
+      // 遗忘衰减阻尼：超过7天无复习时，深度分开始衰减
+      // 阻尼系数：maxDaysWithoutReview > 7 时，每多一天衰减5%
+      if (maxDaysWithoutReview > 7) {
+        const dampingDays = maxDaysWithoutReview - 7;
+        const dampingFactor = Math.max(0.5, 1 - dampingDays * 0.05);
+        D = D * dampingFactor;
+      }
+      
+      // 三、经验分 E = 100 * log2(1 + totalXp / 1000) / log2(1 + MAX_XP / 1000)
+      const xpRatio = Math.log2(1 + totalXp / 1000);
+      const maxXpRatio = Math.log2(1 + SUBJECT_LEVEL.XP_MAX_FOR_LEVEL / 1000);
+      const E = Math.min(100, (xpRatio / maxXpRatio) * 100);
+      
+      // 四、综合分 S = (B^0.3) * (D^0.4) * (E^0.3)
+      // 任一分量为零则总分归零
+      const { WEIGHT_B, WEIGHT_D, WEIGHT_E } = SUBJECT_LEVEL;
+      let S = 0;
+      
+      if (B > 0 && D > 0 && E > 0) {
+        S = Math.pow(B, WEIGHT_B) * Math.pow(D, WEIGHT_D) * Math.pow(E, WEIGHT_E);
+      }
+      
+      // 五、线性映射到1-100学科等级
+      // S范围约为 0~100，使用分段映射
       let level = 1;
-      if (score >= 95) level = 100;
-      else if (score >= 85) level = 90;
-      else if (score >= 75) level = 80;
-      else if (score >= 65) level = 70;
-      else if (score >= 55) level = 60;
-      else if (score >= 45) level = 50;
-      else if (score >= 35) level = 40;
-      else if (score >= 20) level = 30;
-      else if (score >= 8) level = 20;
-      
-      const levelThreshold = [0, 500, 1500, 3000, 5000, 8000, 12000, 18000, 25000, 35000][Math.min(level - 1, 9)] || 0;
-      const currentThreshold = [0, 500, 1500, 3000, 5000, 8000, 12000, 18000, 25000, 35000][Math.min(level - 2, 9)] || 0;
-      
       let progress = 0;
-      if (levelThreshold > currentThreshold) {
-        progress = Math.min(100, ((baseXp - currentThreshold) / (levelThreshold - currentThreshold)) * 100);
+      
+      if (S >= 95) {
+        level = 100;
+        progress = (S - 95) * 20; // 95-100范围映射到0-100
+      } else if (S >= 85) {
+        level = 90;
+        progress = ((S - 85) / 10) * 100;
+      } else if (S >= 75) {
+        level = 80;
+        progress = ((S - 75) / 10) * 100;
+      } else if (S >= 65) {
+        level = 70;
+        progress = ((S - 65) / 10) * 100;
+      } else if (S >= 55) {
+        level = 60;
+        progress = ((S - 55) / 10) * 100;
+      } else if (S >= 45) {
+        level = 50;
+        progress = ((S - 45) / 10) * 100;
+      } else if (S >= 35) {
+        level = 40;
+        progress = ((S - 35) / 10) * 100;
+      } else if (S >= 20) {
+        level = 30;
+        progress = ((S - 20) / 15) * 100;
+      } else if (S >= 8) {
+        level = 20;
+        progress = ((S - 8) / 12) * 100;
+      } else if (S > 0) {
+        level = 10;
+        progress = (S / 8) * 100;
+      } else {
+        level = 1;
+        progress = S * 100; // 接近0的分数映射
       }
       
-      return { level, xp: baseXp, progress, avgTemp, nodeCount };
+      // 计算遗忘衰减阻尼提示
+      const hasDamping = maxDaysWithoutReview > 7;
+      const dampingIntensity = hasDamping ? Math.min(1, (maxDaysWithoutReview - 7) * 0.1) : 0;
+      
+      return { 
+        level, 
+        xp: totalXp, 
+        progress: Math.min(100, Math.max(0, progress)),
+        score: S,
+        avgTemp: D,
+        nodeCount,
+        maxDaysWithoutReview,
+        B, D, E, // 分解得分
+        hasDamping,
+        dampingIntensity
+      };
+    }
+    
+    // ========== v0.4.3 学科等级等级数字颜色（衰减时变淡） ==========
+    function getSubjectLevelStyle(levelInfo) {
+      if (levelInfo.hasDamping) {
+        const opacity = Math.max(0.4, 1 - levelInfo.dampingIntensity * 0.5);
+        return `opacity: ${opacity}; filter: saturate(${1 - levelInfo.dampingIntensity * 0.3})`;
+      }
+      return '';
     }
     
     // ========== 渲染学科卡片 ==========
@@ -2395,12 +2403,13 @@
       for (const [name, subject] of Object.entries(appData.subjects)) {
         const info = SUBJECTS[name];
         const calc = calculateSubjectLevel(name);
+        const levelStyle = getSubjectLevelStyle(calc);
         
         html += `
           <div class="subject-card" onclick="switchPage('skills')" style="--subject-color: ${info?.color || '#666'}">
             <div class="subject-icon">${info?.icon || '📚'}</div>
             <div class="subject-name">${name}</div>
-            <div class="subject-level" style="color: ${info?.color || '#666'}">Lv${calc.level}</div>
+            <div class="subject-level" style="color: ${info?.color || '#666'}; ${levelStyle}">Lv${calc.level}</div>
             <div class="subject-bar">
               <div class="subject-bar-fill" style="width: ${calc.progress}%; background: ${info?.color || '#666'}"></div>
             </div>
@@ -2409,37 +2418,6 @@
       }
       
       grid.innerHTML = html;
-    }
-    
-    // ========== 渲染示例记录 (v0.4.1) ==========
-    function renderSampleRecords() {
-      const container = document.getElementById('sampleRecordsList');
-      
-      if (appData.records.length === 0) {
-        container.innerHTML = '<div class="log-empty">暂无示例记录</div>';
-        return;
-      }
-      
-      container.innerHTML = appData.records.slice().reverse().slice(0, 6).map(r => {
-        const typeInfo = ACTIVITY_TYPES[r.activityType] || { color: '#6B7280' };
-        const score = getRecordScore(r);
-        const scoreClass = score >= 80 ? 'excellent' : (score >= 60 ? 'good' : 'failed');
-        const scoreText = r.activityType === 'recitation' 
-          ? (r.result === 'perfect' ? '完美' : r.result === 'partial' ? '部分' : '失败')
-          : `${score}%`;
-        
-        return `
-          <div class="sample-record">
-            <span class="sample-record-type ${r.activityType}"></span>
-            <span class="sample-record-content">
-              <span class="sample-record-subject">${r.subject}</span>
-              <span class="sample-record-desc">${r.knowledgePoints?.join(', ') || '未知'}</span>
-            </span>
-            <span class="sample-record-time">${formatRelativeTime(r.timestamp)}</span>
-            <span class="sample-record-score ${scoreClass}">${scoreText}</span>
-          </div>
-        `;
-      }).join('');
     }
     
     // ========== 渲染日志 (v0.4.1 增强) ==========
@@ -2496,23 +2474,42 @@
       }
     }
     
-    // ========== 渲染阴影队列 ==========
+    // ========== v0.4.3 渲染阴影队列（基于新urgency指标） ==========
+    /**
+     * 阴影队列指标计算：
+     * urgency = (100 - currentTemp) * decayRatePerDay
+     * decayRatePerDay = currentTemp * ln(2) / halfLifeDays
+     */
     function renderShadowQueue() {
       const container = document.getElementById('shadowQueueList');
       const now = Date.now();
       const shadowItems = [];
       
+      // 复习频率自适应：根据历史记录计算当前复习频率
+      const { dangerThreshold, recommendMax } = calculateAdaptiveParams();
+      const tempThreshold = CONFIG.SHADOW_QUEUE.TEMP_THRESHOLD_COLD * (1 + (1 - dangerThreshold) * 0.3);
+      
       for (const [subjectName, subject] of Object.entries(appData.subjects)) {
         if (!subject.nodes) continue;
         for (const node of subject.nodes) {
           const temp = getCurrentTemp(node, now);
-          if (temp > 0 && temp < 40) {
-            const hoursSinceStudy = (now - node.lastStudy) / (1000 * 60 * 60);
+          const hoursSinceStudy = (now - node.lastStudy) / (1000 * 60 * 60);
+          
+          // decayRatePerDay = currentTemp * ln(2) / halfLifeDays
+          const decayRatePerDay = temp * Math.LN2 / node.halfLifeDays;
+          // urgency = (100 - currentTemp) * decayRatePerDay
+          const urgency = Math.max(CONFIG.SHADOW_QUEUE.URGENCY_MIN, (100 - temp) * decayRatePerDay);
+          
+          if (temp > 0 && temp < tempThreshold) {
             shadowItems.push({
               subject: subjectName,
               name: node.name,
               temp,
-              hours: Math.round(hoursSinceStudy)
+              hours: Math.round(hoursSinceStudy),
+              urgency: urgency,
+              decayRate: decayRatePerDay,
+              halfLifeDays: node.halfLifeDays,
+              nodeId: node.id
             });
           }
         }
@@ -2523,12 +2520,13 @@
         return;
       }
       
-      shadowItems.sort((a, b) => a.temp - b.temp);
+      // 按urgency降序排列
+      shadowItems.sort((a, b) => b.urgency - a.urgency);
       
-      container.innerHTML = shadowItems.map(item => {
+      container.innerHTML = shadowItems.slice(0, recommendMax).map(item => {
         const subjectColor = SUBJECTS[item.subject]?.color || '#6B7280';
         const isColdGlow = item.temp < 30;
-        const isUrgent = item.temp < 20;
+        const isUrgent = item.temp < CONFIG.SHADOW_QUEUE.TEMP_THRESHOLD_URGENT;
         
         return `
           <div class="shadow-card ${isColdGlow ? 'cold-glow' : ''} ${isUrgent ? 'urgent-border' : ''}" 
@@ -2540,41 +2538,202 @@
                 <span>${item.name}</span>
               </div>
               <span class="shadow-badge">
-                <span style="color: ${getTempColor(item.temp)}; font-weight: 600;">${item.temp}%</span>
+                <span style="color: ${getTempColor(item.temp)}; font-weight: 600;">${item.temp.toFixed(1)}%</span>
                 <span>·</span>
                 <span>${item.hours}h前</span>
+                <span style="margin-left: 4px; color: var(--accent-coral);">⚡${item.urgency.toFixed(2)}</span>
               </span>
             </div>
             <div class="shadow-temp-bar">
               <div class="shadow-temp-fill" style="width: ${item.temp}%; background: ${getTempColor(item.temp)}"></div>
             </div>
-            <div class="shadow-reason">温度降至${item.temp.toFixed(1)}%，建议尽快复习巩固</div>
+            <div class="shadow-reason">紧迫度指数 ${item.urgency.toFixed(2)}，建议 ${item.decayRate < 0.5 ? '近期' : '尽快'}复习巩固</div>
           </div>
         `;
       }).join('');
     }
     
-    // ========== 渲染推荐 ==========
+    // ========== v0.4.3 全局参数自校准系统 ==========
+    
+    // 自适应参数缓存
+    let adaptiveState = {
+      globalBaseHalfLifeEMA: CONFIG.GLOBAL_BASE_HALFLIFE,
+      subjectDifficultyEMA: {},
+      recentRatios: [],
+      reviewFrequencyEMA: CONFIG.ADAPTIVE.REVIEW_INTERVAL_IDEAL_DAYS,
+      lastUpdateTime: Date.now()
+    };
+    
+    /**
+     * 计算自适应参数
+     * 根据用户复习频率自动调整阴影队列温度门槛和推荐列表数量
+     */
+    function calculateAdaptiveParams() {
+      const avgReviewInterval = adaptiveState.reviewFrequencyEMA;
+      const { REVIEW_INTERVAL_IDEAL_DAYS, DANGER_THRESHOLD_DEFAULT, RECOMMEND_MAX_DEFAULT } = CONFIG.ADAPTIVE;
+      
+      // 危险阈值：实际复习间隔/理想复习间隔
+      const dangerThreshold = Math.min(1, avgReviewInterval / REVIEW_INTERVAL_IDEAL_DAYS);
+      
+      // 推荐数量上限：根据危险程度调整
+      const recommendMax = Math.max(3, Math.round(RECOMMEND_MAX_DEFAULT * (1 + (1 - dangerThreshold) * 0.5)));
+      
+      return { dangerThreshold, recommendMax };
+    }
+    
+    /**
+     * 全局基础半衰期在线更新（指数移动平均）
+     * @param {number} newRatio - 新观察到的记忆比率
+     */
+    function updateGlobalBaseHalfLifeEMA(newRatio) {
+      const { EMA_ALPHA } = CONFIG.HALFLIFE_UPDATE;
+      // 如果记忆比预期好（ratio > 1），延长半衰期
+      // 如果记忆比预期差（ratio < 1），缩短半衰期
+      const adjustment = newRatio > 1 ? 1.05 : 0.95;
+      adaptiveState.globalBaseHalfLifeEMA = adaptiveState.globalBaseHalfLifeEMA * (1 - EMA_ALPHA) + 
+        CONFIG.GLOBAL_BASE_HALFLIFE * adjustment * EMA_ALPHA;
+      
+      // 限制范围
+      adaptiveState.globalBaseHalfLifeEMA = Math.max(CONFIG.MIN_HALFLIFE, 
+        Math.min(CONFIG.MAX_HALFLIFE, adaptiveState.globalBaseHalfLifeEMA));
+    }
+    
+    /**
+     * 学科难度系数自动调整
+     * 基于最近N个复习事件的ratio来调整
+     */
+    function updateSubjectDifficulty(subject, ratio) {
+      const recentRatios = adaptiveState.recentRatios.filter(r => r.subject === subject).slice(-10);
+      recentRatios.push({ subject, ratio, time: Date.now() });
+      
+      if (recentRatios.length >= 5) {
+        // 计算加权平均（最近的时间权重更高）
+        let weightedSum = 0;
+        let weightTotal = 0;
+        recentRatios.forEach((r, i) => {
+          const weight = Math.pow(0.9, recentRatios.length - 1 - i);
+          weightedSum += r.ratio * weight;
+          weightTotal += weight;
+        });
+        const avgRatio = weightedSum / weightTotal;
+        
+        // 更新学科修正系数
+        let newMod = CONFIG.SUBJECT_MODIFIERS[subject] || 1.0;
+        if (avgRatio > 1.1) {
+          newMod *= 1.1; // 记忆比预期好，延长半衰期
+        } else if (avgRatio < 0.9) {
+          newMod *= 0.9; // 记忆比预期差，缩短半衰期
+        }
+        CONFIG.SUBJECT_MODIFIERS[subject] = Math.max(0.5, Math.min(2.0, newMod));
+      }
+      
+      adaptiveState.recentRatios = recentRatios;
+    }
+    
+    /**
+     * 复习频率更新
+     * 每次复习后调用，更新复习频率EMA
+     */
+    function updateReviewFrequency() {
+      const now = Date.now();
+      const timeSinceLastReview = (now - adaptiveState.lastUpdateTime) / (24 * 3600 * 1000); // 转换为天
+      adaptiveState.lastUpdateTime = now;
+      
+      // 更新EMA
+      adaptiveState.reviewFrequencyEMA = adaptiveState.reviewFrequencyEMA * (1 - CONFIG.ADAPTIVE.EMA_ALPHA) + 
+        timeSinceLastReview * CONFIG.ADAPTIVE.EMA_ALPHA;
+    }
+    
+    /**
+     * 温度回升参数自校准
+     * 根据用户表现动态调整升温参数
+     */
+    function getAdjustedBoostParams(node, accuracy) {
+      const baseBoost = Math.min(
+        CONFIG.TEMP.BOOST_MAX,
+        Math.max(CONFIG.TEMP.BOOST_MIN, accuracy * CONFIG.TEMP.BOOST_FACTOR + 10)
+      );
+      
+      // 根据节点历史表现调整
+      const avgAccuracy = node.accuracyHistory.length > 0 
+        ? node.accuracyHistory.reduce((a, b) => a + b, 0) / node.accuracyHistory.length 
+        : 50;
+      
+      // 如果历史正确率高，适当降低升温幅度（已经掌握良好）
+      // 如果历史正确率低，适当提高升温幅度（需要更多复习）
+      let adjustmentFactor = 1.0;
+      if (avgAccuracy >= 85) {
+        adjustmentFactor = 0.8;
+      } else if (avgAccuracy >= 70) {
+        adjustmentFactor = 0.95;
+      } else if (avgAccuracy < 55) {
+        adjustmentFactor = 1.15;
+      }
+      
+      return {
+        boost: Math.min(CONFIG.TEMP.BOOST_MAX, baseBoost * adjustmentFactor),
+        adjustmentFactor
+      };
+    }
+    
+    // ========== v0.4.3 渲染推荐（基于新priority乘法模型） ==========
+    /**
+     * 推荐优先级乘法模型：
+     * priority = (100 - currentTemp) * log2(elapsedHours + 1)
+     * 背诵类特殊推荐：最近一次背诵结果为 partial 或 failed 的节点，24小时内保持较高推荐权重
+     */
     function renderRecommend() {
       const container = document.getElementById('recommendList');
       const now = Date.now();
       const recs = [];
       
+      // 获取自适应参数
+      const { recommendMax } = calculateAdaptiveParams();
+      
       for (const [subjectName, subject] of Object.entries(appData.subjects)) {
         if (!subject.nodes) continue;
         for (const node of subject.nodes) {
           const temp = getCurrentTemp(node, now);
-          if (temp < 60 || (now - node.lastStudy) / (1000 * 60 * 60) > 24) {
-            const hoursSinceStudy = (now - node.lastStudy) / (1000 * 60 * 60);
-            const urgency = Math.min(100, hoursSinceStudy * 2 + (100 - temp));
+          const hoursSinceStudy = (now - node.lastStudy) / (1000 * 60 * 60);
+          const elapsedDays = hoursSinceStudy / 24;
+          
+          // 基础条件：温度低于60%或超过24小时未复习
+          if (temp < 60 || elapsedDays > 1) {
+            // priority = (100 - currentTemp) * log2(elapsedHours + 1)
+            const priority = (100 - temp) * Math.log2(hoursSinceStudy + 1);
+            
+            // 查找该节点最近一次背诵记录
+            let recType = 'normal';
+            let hasRecitationBoost = false;
+            
+            for (let i = appData.records.length - 1; i >= 0; i--) {
+              const record = appData.records[i];
+              if (record.subject === subjectName && 
+                  record.activityType === 'recitation' &&
+                  record.knowledgePoints?.includes(node.name)) {
+                // 检查是否在24小时内
+                const hoursSinceRecitation = (now - record.timestamp) / (1000 * 60 * 60);
+                if (hoursSinceRecitation <= CONFIG.SHADOW_QUEUE.RECITATION_BOOST_HOURS) {
+                  if (record.result === 'partial' || record.result === 'failed') {
+                    recType = 'urgent-recitation';
+                    hasRecitationBoost = true;
+                  } else if (record.result === 'perfect') {
+                    recType = 'progression';
+                  }
+                }
+                break;
+              }
+            }
             
             recs.push({
-              type: urgency > 70 ? 'urgent' : 'weakness',
+              type: recType,
               subject: subjectName,
               name: node.name,
               temp,
               hours: Math.round(hoursSinceStudy),
-              priority: Math.round(urgency)
+              priority: hasRecitationBoost ? priority * CONFIG.SHADOW_QUEUE.RECITATION_BOOST_FACTOR : priority,
+              originalPriority: priority,
+              hasRecitationBoost
             });
           }
         }
@@ -2588,14 +2747,18 @@
       recs.sort((a, b) => b.priority - a.priority);
       
       function getPriorityColor(priority) {
-        if (priority >= 80) return '#ef4444';
-        if (priority >= 60) return '#f59e0b';
+        if (priority >= 200) return '#ef4444';
+        if (priority >= 100) return '#f59e0b';
         return '#fbbf24';
       }
       
-      container.innerHTML = recs.slice(0, 5).map(r => {
+      container.innerHTML = recs.slice(0, recommendMax).map(r => {
         const priorityColor = getPriorityColor(r.priority);
-        const isUrgent = r.type === 'urgent';
+        const isUrgent = r.type === 'urgent-recitation';
+        const isProgression = r.type === 'progression';
+        
+        let badgeText = isProgression ? '进阶' : (r.hasRecitationBoost ? '需巩固' : (r.type === 'weakness' ? '薄弱' : '建议'));
+        let badgeClass = isProgression ? 'progression' : (isUrgent ? 'urgent' : 'weakness');
         
         return `
           <div class="recommend-card ${isUrgent ? 'urgent-type' : ''}">
@@ -2606,15 +2769,19 @@
                 <span>${r.name}</span>
               </div>
               <div class="priority-badge" style="background: linear-gradient(135deg, ${priorityColor}, ${priorityColor}dd);">
-                ${r.priority}
+                ${Math.round(r.priority)}
               </div>
             </div>
             <div class="temp-bar">
               <div class="temp-fill" style="width:${r.temp}%;background:${getTempColor(r.temp)}"></div>
             </div>
-            <div class="shadow-reason" style="margin-top: 8px;">
-              温度${r.temp.toFixed(1)}%，${r.hours > 24 ? '已超过24小时未复习' : '遗忘风险较高'}
-              ${isUrgent ? ' ⚠️ 紧急' : ''}
+            <div style="margin-top: 8px;">
+              <span class="recommend-badge ${badgeClass}">${badgeText}</span>
+              ${r.hasRecitationBoost ? '<span style="margin-left: 6px; font-size: 11px; color: var(--accent-coral);">🗣️背诵待强化</span>' : ''}
+            </div>
+            <div class="shadow-reason" style="margin-top: 6px;">
+              温度${r.temp.toFixed(1)}%，${r.hours > 24 ? '已超过24小时未复习' : `约${r.hours}小时前学习`}
+              ${isUrgent ? ' ⚠️ 需重点复习' : ''}
             </div>
           </div>
         `;
@@ -3027,7 +3194,6 @@
       
       renderSubjectGrid();
       renderLog();
-      renderSampleRecords();
       renderShadowQueue();
       renderRecommend();
       
@@ -3258,7 +3424,7 @@
           }
         },
         records: sampleRecords,
-        version: 'v0.4.2'
+        version: 'v0.4.4'
       };
     }
     
@@ -3275,13 +3441,23 @@
     }
     
     // ========== 初始化 ==========
-    function init() {
-      loadDemoData();
+    async function init() {
+      // v0.4.6: 优先从GitHub加载数据
+      const githubData = await loadDataFromGitHub();
+      
+      if (githubData) {
+        // 使用GitHub数据
+        appData = githubData;
+        console.log('[v0.4.6] 使用GitHub数据初始化完成');
+      } else {
+        // GitHub数据加载失败，使用demo数据作为演示
+        console.log('[v0.4.6] GitHub数据加载失败，使用演示数据');
+        loadDemoData();
+      }
+      
       renderAll();
       initEvents();
     }
-    
-    init();
-  </script>
+    </script>
 </body>
 </html>
