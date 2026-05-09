@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>学习RPG · 认知操作系统 v0.4.1</title>
+  <title>学习RPG · 认知操作系统 v0.4.2</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
@@ -34,6 +34,8 @@
       --chemistry: #813D9C;
       --biology: #2EC27E;
       --politics: #E01B24;
+      --history: #9141AC;
+      --geography: #1A5FB4;
       --temp-searing: #FF4500;
       --temp-hot: #FF8C00;
       --temp-warm: #FFD700;
@@ -877,7 +879,7 @@
     
     .node-detail-stats {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns: repeat(4, 1fr);
       gap: 12px;
       margin-bottom: 16px;
     }
@@ -999,21 +1001,19 @@
     }
     
     .shadow-title {
+      font-size: 14px;
       font-weight: 600;
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 6px;
     }
     
     .shadow-badge {
       display: flex;
       align-items: center;
       gap: 6px;
-      padding: 4px 10px;
-      background: rgba(100, 100, 120, 0.1);
-      border-radius: 12px;
       font-size: 12px;
-      color: #6B7280;
+      color: var(--text-muted);
     }
     
     .shadow-temp-bar {
@@ -1021,81 +1021,42 @@
       background: rgba(200, 200, 220, 0.3);
       border-radius: 3px;
       overflow: hidden;
-      margin-top: 8px;
-      position: relative;
+      margin-bottom: 8px;
     }
     
     .shadow-temp-fill {
       height: 100%;
       border-radius: 3px;
-      transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-      position: relative;
-    }
-    
-    .shadow-temp-fill::after {
-      content: '';
-      position: absolute;
-      right: 0;
-      top: 50%;
-      transform: translateY(-50%);
-      width: 10px;
-      height: 10px;
-      background: inherit;
-      border-radius: 50%;
-      border: 2px solid #fff;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+      transition: width 0.5s ease;
     }
     
     .shadow-reason {
-      font-size: 13px;
-      color: var(--text-secondary);
-      margin-top: 10px;
-    }
-    
-    .shadow-meta {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-top: 6px;
       font-size: 12px;
       color: var(--text-muted);
     }
     
+    /* ========== 推荐卡片 ========== */
     .recommend-section {
-      margin-bottom: 24px;
+      margin-top: 24px;
     }
     
     .recommend-card {
       padding: 16px;
-      background: rgba(59, 130, 246, 0.04);
-      border: 1px solid rgba(59, 130, 246, 0.1);
+      background: rgba(255, 255, 255, 0.9);
+      border: 1px solid rgba(200, 200, 220, 0.25);
       border-radius: 12px;
       margin-bottom: 12px;
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      position: relative;
-      overflow: hidden;
-    }
-    
-    @keyframes urgentPulse {
-      0%, 100% {
-        border-color: rgba(239, 68, 68, 0.4);
-        box-shadow: 0 0 15px rgba(239, 68, 68, 0.15);
-      }
-      50% {
-        border-color: rgba(239, 68, 68, 0.7);
-        box-shadow: 0 0 25px rgba(239, 68, 68, 0.25);
-      }
-    }
-    
-    .recommend-card.urgent-type {
-      animation: urgentPulse 1.8s ease-in-out infinite;
-      background: rgba(239, 68, 68, 0.04);
-      border-color: rgba(239, 68, 68, 0.3);
+      transition: all 0.25s;
     }
     
     .recommend-card:hover {
-      background: rgba(59, 130, 246, 0.08);
       transform: translateX(4px);
+      box-shadow: 0 4px 16px rgba(100, 110, 140, 0.1);
+    }
+    
+    .recommend-card.urgent-type {
+      border-color: rgba(239, 68, 68, 0.25);
+      background: rgba(239, 68, 68, 0.04);
     }
     
     .recommend-header {
@@ -1543,6 +1504,7 @@
       .forget-chart { height: 280px; }
       .chart-tips { display: none; }
       .field-list { grid-template-columns: 1fr; }
+      .node-detail-stats { grid-template-columns: repeat(2, 1fr); }
     }
     
     @media (max-width: 480px) {
@@ -1591,7 +1553,7 @@
           <div class="brand-icon">📚</div>
           <div class="brand-text">
             <h1>学习RPG · 认知操作系统</h1>
-            <p>v0.4.1</p>
+            <p>v0.4.2</p>
           </div>
         </div>
       </header>
@@ -1656,7 +1618,7 @@
 {
   <span class="key">"recordID"</span>: <span class="string">"uuid"</span>,           <span class="comment">// 唯一标识符</span>
   <span class="key">"timestamp"</span>: <span class="string">"Date"</span>,           <span class="comment">// 记录时间</span>
-  <span class="key">"subject"</span>: <span class="string">"logos|mythos|..."</span>, <span class="comment">// 学科</span>
+  <span class="key">"subject"</span>: <span class="string">"数学|语文|..."</span>, <span class="comment">// 九大学科</span>
   <span class="key">"knowledgePoints"</span>: [<span class="string">"知识点1"</span>], <span class="comment">// 涉及的知识点</span>
   <span class="key">"durationMinutes"</span>: <span class="number">45</span>,          <span class="comment">// 学习时长(分钟)</span>
   <span class="key">"activityType"</span>: <span class="string">"practice|exam|recitation"</span>,
@@ -1816,7 +1778,7 @@
           <div class="legend-item"><span class="legend-dot" style="background:var(--temp-hot)"></span>温热(80-95%)</div>
           <div class="legend-item"><span class="legend-dot" style="background:var(--temp-warm)"></span>温暖(60-80%)</div>
           <div class="legend-item"><span class="legend-dot" style="background:var(--temp-normal)"></span>常温(40-60%)</div>
-          <div class="legend-item"><span class="legend-dot" style="background:var(--temp-cold)"></span>微凉(20-40%)</div>
+          <div class="legend-item"><span class="legend-dot" style="background:var(--temp-cool)"></span>微凉(20-40%)</div>
           <div class="legend-item"><span class="legend-dot" style="background:var(--temp-frozen)"></span>冷却(<20%)</div>
         </div>
         
@@ -1834,7 +1796,11 @@
             <div class="node-detail-stats">
               <div class="node-stat">
                 <div class="node-stat-value" id="nodeStudyCount">0</div>
-                <div class="node-stat-label">学习次数</div>
+                <div class="node-stat-label">复习次数</div>
+              </div>
+              <div class="node-stat">
+                <div class="node-stat-value" id="nodeHalfLife">0天</div>
+                <div class="node-stat-label">半衰期</div>
               </div>
               <div class="node-stat">
                 <div class="node-stat-value" id="nodeAvgAccuracy">0%</div>
@@ -1891,13 +1857,15 @@
           <div class="log-filters">
             <select class="filter-select" id="logFilterSubject">
               <option value="">全部科目</option>
-              <option value="logos">数学</option>
-              <option value="mythos">语文</option>
-              <option value="lingua">英语</option>
-              <option value="physis">物理</option>
-              <option value="khēmeia">化学</option>
-              <option value="zōē">生物</option>
-              <option value="politeia">政治</option>
+              <option value="数学">数学</option>
+              <option value="语文">语文</option>
+              <option value="英语">英语</option>
+              <option value="物理">物理</option>
+              <option value="化学">化学</option>
+              <option value="生物">生物</option>
+              <option value="政治">政治</option>
+              <option value="历史">历史</option>
+              <option value="地理">地理</option>
             </select>
             <select class="filter-select" id="logFilterType">
               <option value="">全部类型</option>
@@ -1978,7 +1946,7 @@
         </div>
         <div class="about-system-name">📚 学习RPG认知操作系统</div>
         <div class="about-version">
-          <span class="about-version-badge">v0.4.1</span>
+          <span class="about-version-badge">v0.4.2</span>
         </div>
         <div class="about-developer-info">
           <div class="about-developer-name">墨澜的Miku</div>
@@ -1991,12 +1959,21 @@
         
         <div class="changelog-version">
           <div class="changelog-version-header current">
-            v0.4.x（当前阶段 - 数据模板标准化）
+            v0.4.2（当前版本 - 温度模型重构）
             <span class="changelog-current-tag">当前</span>
           </div>
           <div class="changelog-items">
             <div class="changelog-item">
-              <span class="changelog-item-version">v0.4.1 (2026-05-10):</span> 数据模板标准化：实现统一记录数据结构，支持三种活动类型（practice刷题/exam考试/recitation背诵）；新增数据类型页面展示模板规范；新增活动类型筛选器。
+              <span class="changelog-item-version">v0.4.2 (2026-05-15):</span> 温度模型重构：复习后温度可上升（升温机制）；实现动态半衰期三层因子模型（全局基础×学科修正×个体修正）；九大学科中文名称（数学、语文、英语、物理、化学、生物、政治、历史、地理）；指数衰减温度计算。
+            </div>
+          </div>
+        </div>
+        
+        <div class="changelog-version">
+          <div class="changelog-version-header">v0.4.x（数据模板标准化）</div>
+          <div class="changelog-items">
+            <div class="changelog-item">
+              <span class="changelog-item-version">v0.4.1 (2026-05-10):</span> 数据模板标准化：实现统一记录数据结构，支持三种活动类型（practice刷题/exam考试/recitation背诵）。
             </div>
           </div>
         </div>
@@ -2005,13 +1982,10 @@
           <div class="changelog-version-header">v0.3.x（界面优化）</div>
           <div class="changelog-items">
             <div class="changelog-item">
-              <span class="changelog-item-version">v0.3.5:</span> 玻璃效果全面升级：参考苹果液态玻璃效果
+              <span class="changelog-item-version">v0.3.5:</span> 玻璃效果全面升级
             </div>
             <div class="changelog-item">
               <span class="changelog-item-version">v0.3.4:</span> 遗忘曲线页面全面优化
-            </div>
-            <div class="changelog-item">
-              <span class="changelog-item-version">v0.3.0:</span> 进入V0.3阶段，锁定版本号
             </div>
           </div>
         </div>
@@ -2048,18 +2022,78 @@
   <div id="toast" class="toast" style="display:none"></div>
   
   <script>
-    // ========== v0.4.1 数据模板系统 ==========
+    // ========== v0.4.2 温度模型重构系统 ==========
     
-    // 生成UUID
-    function generateUUID() {
-      return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-        const r = Math.random() * 16 | 0;
-        const v = c === 'x' ? r : (r & 0x3 | 0x8);
-        return v.toString(16);
-      });
-    }
+    // ========== 核心配置 ==========
+    const CONFIG = {
+      // 动态半衰期配置
+      GLOBAL_BASE_HALFLIFE: 4.0,  // 全局基础半衰期（天）
+      MIN_HALFLIFE: 0.5,           // 最小半衰期（天）
+      MAX_HALFLIFE: 30,            // 最大半衰期（天）
+      
+      // 学科修正系数
+      SUBJECT_MODIFIERS: {
+        '数学': 1.2,
+        '物理': 1.2,
+        '化学': 1.1,
+        '语文': 1.0,
+        '英语': 1.0,
+        '历史': 1.0,
+        '地理': 1.0,
+        '生物': 0.9,
+        '政治': 0.8
+      },
+      
+      // 半衰期更新参数
+      HALFLIFE_UPDATE: {
+        RATIO_THRESHOLD_HIGH: 1.1,  // 超过此比率延长半衰期
+        RATIO_THRESHOLD_LOW: 0.9,   // 低于此比率缩短半衰期
+        EXTEND_FACTOR: 1.15,         // 延长因子
+        SHRINK_FACTOR: 0.8,          // 缩短因子
+        FINE_TUNE_FACTOR: 0.9       // 微调基准
+      },
+      
+      // 温度参数
+      TEMP: {
+        INITIAL_PEAK: 85,           // 初始峰值温度
+        BOOST_MIN: 10,              // 最小升温
+        BOOST_MAX: 50,              // 最大升温
+        BOOST_FACTOR: 0.4,          // 正确率影响因子
+        MAX_PEAK: 100,               // 最大峰值
+        DECAY_BASE: 2               // 衰减底数
+      }
+    };
     
-    // 活动类型定义
+    // ========== 学科定义（九大学科） ==========
+    const SUBJECTS = {
+      '数学': { icon: '📐', color: '#1A5FB4' },
+      '语文': { icon: '📜', color: '#E5A50A' },
+      '英语': { icon: '📖', color: '#26A269' },
+      '物理': { icon: '⚡', color: '#1C71D8' },
+      '化学': { icon: '🧪', color: '#813D9C' },
+      '生物': { icon: '🧬', color: '#2EC27E' },
+      '政治': { icon: '🏛️', color: '#E01B24' },
+      '历史': { icon: '📜', color: '#9141AC' },
+      '地理': { icon: '🌍', color: '#1A5FB4' }
+    };
+    
+    // ========== 等级数据 ==========
+    const LEVELS = [
+      { l: 1, t: '初学者', j: 'Shogakusha', r: 0, s: 0 },
+      { l: 20, t: '見舞い', j: 'Minarai', r: 5000, s: 0.8 },
+      { l: 30, t: '半人前', j: 'Hanninmae', r: 12000, s: 0.9 },
+      { l: 40, t: '修行者', j: 'Shugyōsha', r: 25000, s: 0.4 },
+      { l: 50, t: '門下生', j: 'Monkasei', r: 45000, s: 0.5 },
+      { l: 60, t: '術士', j: 'Jutsushi', r: 70000, s: 0.6 },
+      { l: 70, t: '指南役', j: 'Shinan\'yaku', r: 100000, s: 0.7 },
+      { l: 80, t: '免許皆伝', j: 'Menkyo Kaiden', r: 140000, s: 0.8 },
+      { l: 90, t: '達人', j: 'Tatsujin', r: 190000, s: 0.87 },
+      { l: 100, t: '極意', j: 'Gokui', r: 250000, s: 0.92 }
+    ];
+    
+    const H24 = 24 * 60 * 60 * 1000;
+    
+    // ========== 活动类型定义 ==========
     const ACTIVITY_TYPES = {
       practice: {
         name: '刷题记录',
@@ -2088,45 +2122,153 @@
       failed: 0
     };
     
-    // ========== 关于页面 ==========
-    function openAbout() {
-      document.getElementById('aboutModal').classList.add('active');
-      document.body.style.overflow = 'hidden';
+    // ========== 工具函数 ==========
+    function generateUUID() {
+      return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+        const r = Math.random() * 16 | 0;
+        const v = c === 'x' ? r : (r & 0x3 | 0x8);
+        return v.toString(16);
+      });
     }
     
-    function closeAbout() {
-      document.getElementById('aboutModal').classList.remove('active');
-      document.body.style.overflow = '';
+    function formatRelativeTime(timestamp) {
+      const now = Date.now();
+      const diff = now - timestamp;
+      const minutes = Math.floor(diff / 60000);
+      const hours = Math.floor(diff / 3600000);
+      const days = Math.floor(diff / 86400000);
+      
+      if (minutes < 60) return `${minutes}分钟前`;
+      if (hours < 24) return `${hours}小时前`;
+      return `${days}天前`;
     }
     
-    // ========== 学科定义 ==========
-    const SUBJECTS = {
-      logos: { name: '数学', rootName: 'Logos', icon: '📐', color: '#1A5FB4' },
-      mythos: { name: '语文', rootName: 'Mythos', icon: '📜', color: '#E5A50A' },
-      lingua: { name: '英语', rootName: 'Lingua', icon: '📖', color: '#26A269' },
-      physis: { name: '物理', rootName: 'Physis', icon: '⚡', color: '#1C71D8' },
-      khēmeia: { name: '化学', rootName: 'Khēmeia', icon: '🧪', color: '#813D9C' },
-      zōē: { name: '生物', rootName: 'Zōē', icon: '🧬', color: '#2EC27E' },
-      politeia: { name: '政治', rootName: 'Politeia', icon: '🏛️', color: '#E01B24' }
-    };
+    function getRecordScore(record) {
+      if (record.activityType === 'recitation') {
+        return RECITATION_SCORES[record.result] || 0;
+      }
+      return record.accuracy || 0;
+    }
     
-    // ========== 等级数据 ==========
-    const LEVELS = [
-      { l: 1, t: '初学者', j: 'Shogakusha', r: 0, s: 0 },
-      { l: 20, t: '見舞い', j: 'Minarai', r: 5000, s: 0.8 },
-      { l: 30, t: '半人前', j: 'Hanninmae', r: 12000, s: 0.9 },
-      { l: 40, t: '修行者', j: 'Shugyōsha', r: 25000, s: 0.4 },
-      { l: 50, t: '門下生', j: 'Monkasei', r: 45000, s: 0.5 },
-      { l: 60, t: '術士', j: 'Jutsushi', r: 70000, s: 0.6 },
-      { l: 70, t: '指南役', j: 'Shinan\'yaku', r: 100000, s: 0.7 },
-      { l: 80, t: '免許皆伝', j: 'Menkyo Kaiden', r: 140000, s: 0.8 },
-      { l: 90, t: '達人', j: 'Tatsujin', r: 190000, s: 0.87 },
-      { l: 100, t: '極意', j: 'Gokui', r: 250000, s: 0.92 }
-    ];
+    // ========== v0.4.2 温度模型核心算法 ==========
     
-    const H24 = 24 * 60 * 60 * 1000;
+    /**
+     * 获取当前温度（指数衰减模型）
+     * @param {Object} node - 知识点节点
+     * @param {number} now - 当前时间戳
+     * @returns {number} 当前温度值
+     */
+    function getCurrentTemp(node, now = Date.now()) {
+      if (!node || !node.lastStudy) return 0;
+      
+      const elapsedDays = (now - node.lastStudy) / (24 * 3600 * 1000);
+      const retention = Math.pow(CONFIG.TEMP.DECAY_BASE, -elapsedDays / node.halfLifeDays);
+      return Math.max(0, +(node.peakTemp * retention).toFixed(1));
+    }
     
-    // ========== 默认数据 (v0.4.1 新版结构) ==========
+    /**
+     * 计算综合半衰期（三层因子模型）
+     * @param {string} subject - 学科名称
+     * @param {number} itemModifier - 个体修正系数
+     * @returns {number} 综合半衰期（天）
+     */
+    function calculateHalfLife(subject, itemModifier = 1.0) {
+      const subjectModifier = CONFIG.SUBJECT_MODIFIERS[subject] || 1.0;
+      return CONFIG.GLOBAL_BASE_HALFLIFE * subjectModifier * itemModifier;
+    }
+    
+    /**
+     * 更新动态半衰期
+     * @param {Object} node - 知识点节点
+     * @param {number} observedRetention - 观察到的记忆保留率
+     * @returns {number} 新的半衰期
+     */
+    function updateHalfLife(node, observedRetention) {
+      const predictedRetention = getCurrentTemp(node) / 100;
+      const ratio = observedRetention / (predictedRetention + 0.01);
+      
+      const { RATIO_THRESHOLD_HIGH, RATIO_THRESHOLD_LOW, EXTEND_FACTOR, SHRINK_FACTOR, FINE_TUNE_FACTOR } = CONFIG.HALFLIFE_UPDATE;
+      
+      let newHL;
+      if (ratio > RATIO_THRESHOLD_HIGH) {
+        // 记忆比预期好 → 延长半衰期
+        newHL = node.halfLifeDays * EXTEND_FACTOR;
+      } else if (ratio < RATIO_THRESHOLD_LOW) {
+        // 记忆比预期差 → 缩短半衰期
+        newHL = node.halfLifeDays * SHRINK_FACTOR;
+      } else {
+        // 微调
+        newHL = node.halfLifeDays * (FINE_TUNE_FACTOR + ratio * 0.2);
+      }
+      
+      // 限制范围
+      return Math.max(CONFIG.MIN_HALFLIFE, Math.min(CONFIG.MAX_HALFLIFE, +newHL.toFixed(2)));
+    }
+    
+    /**
+     * 复习升温逻辑
+     * @param {Object} node - 知识点节点
+     * @param {number} accuracy - 正确率(0-100)
+     */
+    function applyStudyBoost(node, accuracy) {
+      const currentTemp = getCurrentTemp(node);
+      
+      // 计算升温幅度
+      const boost = Math.min(
+        CONFIG.TEMP.BOOST_MAX,
+        Math.max(CONFIG.TEMP.BOOST_MIN, accuracy * CONFIG.TEMP.BOOST_FACTOR + 10)
+      );
+      
+      // 更新峰值温度
+      node.peakTemp = Math.min(CONFIG.TEMP.MAX_PEAK, +(currentTemp + boost).toFixed(1));
+      node.lastStudy = Date.now();
+      node.repetitions++;
+      
+      // 更新历史正确率
+      node.accuracyHistory.push(accuracy);
+      
+      // 更新动态半衰期
+      const observedRetention = accuracy / 100;
+      node.halfLifeDays = updateHalfLife(node, observedRetention);
+    }
+    
+    /**
+     * 创建新知识点节点
+     * @param {string} name - 知识点名称
+     * @param {string} subject - 学科名称
+     * @returns {Object} 新节点
+     */
+    function createKnowledgeNode(name, subject) {
+      const halfLifeDays = calculateHalfLife(subject, 1.0);
+      return {
+        id: generateUUID(),
+        name: name,
+        subject: subject,
+        peakTemp: CONFIG.TEMP.INITIAL_PEAK,
+        lastStudy: Date.now(),
+        halfLifeDays: halfLifeDays,
+        repetitions: 0,
+        accuracyHistory: [],
+        totalXp: 0
+      };
+    }
+    
+    /**
+     * 获取温度颜色
+     * @param {number} temp - 温度值
+     * @returns {string} 颜色代码
+     */
+    function getTempColor(temp) {
+      if (temp >= 95) return "#FF4500";
+      if (temp >= 80) return "#FF8C00";
+      if (temp >= 60) return "#FFD700";
+      if (temp >= 40) return "#62A0EA";
+      if (temp >= 20) return "#6B7280";
+      if (temp > 0) return "#9CA3AF";
+      return "#D1D5DB";
+    }
+    
+    // ========== 默认数据 (v0.4.2) ==========
     const DEFAULT_DATA = {
       profile: {
         level: 1,
@@ -2137,23 +2279,36 @@
         titleJp: 'Shogakusha',
         achievements: []
       },
-      subjects: {
-        logos: { name: '数学', level: 1, xp: 0, nodes: [], temperatureMap: {} },
-        mythos: { name: '语文', level: 1, xp: 0, nodes: [], temperatureMap: {} },
-        lingua: { name: '英语', level: 1, xp: 0, nodes: [], temperatureMap: {} },
-        physis: { name: '物理', level: 1, xp: 0, nodes: [], temperatureMap: {} },
-        khēmeia: { name: '化学', level: 1, xp: 0, nodes: [], temperatureMap: {} },
-        zōē: { name: '生物', level: 1, xp: 0, nodes: [], temperatureMap: {} },
-        politeia: { name: '政治', level: 1, xp: 0, nodes: [], temperatureMap: {} }
-      },
-      // v0.4.1: 统一记录格式
+      subjects: {},
       records: [],
-      version: 'v0.4.1'
+      version: 'v0.4.2'
     };
+    
+    // 初始化九大学科
+    Object.keys(SUBJECTS).forEach(name => {
+      DEFAULT_DATA.subjects[name] = {
+        name: name,
+        level: 1,
+        xp: 0,
+        nodes: [],
+        temperatureMap: {}
+      };
+    });
     
     let appData = JSON.parse(JSON.stringify(DEFAULT_DATA));
     let skillTreeChart = null;
     let forgetChart = null;
+    
+    // ========== 关于页面 ==========
+    function openAbout() {
+      document.getElementById('aboutModal').classList.add('active');
+      document.body.style.overflow = 'hidden';
+    }
+    
+    function closeAbout() {
+      document.getElementById('aboutModal').classList.remove('active');
+      document.body.style.overflow = '';
+    }
     
     // ========== 启动页进入主页面 ==========
     function enterMain() {
@@ -2189,35 +2344,18 @@
       }
     }
     
-    // ========== 温度计算 ==========
-    function calcTemp(node, now = Date.now()) {
-      if (!node || !node.lastStudy) return 0;
-      const halvings = (now - node.lastStudy) / (H24 * 1.5);
-      return Math.max(0, Math.round(node.temp * Math.pow(0.5, halvings)));
-    }
-    
-    function getTempColor(temp) {
-      if (temp >= 95) return "#FF4500";
-      if (temp >= 80) return "#FF8C00";
-      if (temp >= 60) return "#FFD700";
-      if (temp >= 40) return "#62A0EA";
-      if (temp >= 20) return "#6B7280";
-      if (temp > 0) return "#9CA3AF";
-      return "#D1D5DB";
-    }
-    
     // ========== 学科等级计算 ==========
     function calculateSubjectLevel(subjectKey) {
       const subject = appData.subjects[subjectKey];
       if (!subject) return { level: 1, xp: 0, progress: 0 };
       
       let avgTemp = 0;
-      const nodeCount = Object.keys(subject.temperatureMap || {}).length;
+      const nodeCount = subject.nodes ? subject.nodes.length : 0;
       if (nodeCount > 0) {
         let totalTemp = 0;
-        for (const temp of Object.values(subject.temperatureMap || {})) {
-          totalTemp += temp;
-        }
+        subject.nodes.forEach(node => {
+          totalTemp += getCurrentTemp(node);
+        });
         avgTemp = totalTemp / nodeCount;
       }
       
@@ -2254,14 +2392,14 @@
       const grid = document.getElementById('subjectGrid');
       let html = '';
       
-      for (const [key, subject] of Object.entries(appData.subjects)) {
-        const info = SUBJECTS[key];
-        const calc = calculateSubjectLevel(key);
+      for (const [name, subject] of Object.entries(appData.subjects)) {
+        const info = SUBJECTS[name];
+        const calc = calculateSubjectLevel(name);
         
         html += `
           <div class="subject-card" onclick="switchPage('skills')" style="--subject-color: ${info?.color || '#666'}">
             <div class="subject-icon">${info?.icon || '📚'}</div>
-            <div class="subject-name">${info?.rootName || key}</div>
+            <div class="subject-name">${name}</div>
             <div class="subject-level" style="color: ${info?.color || '#666'}">Lv${calc.level}</div>
             <div class="subject-bar">
               <div class="subject-bar-fill" style="width: ${calc.progress}%; background: ${info?.color || '#666'}"></div>
@@ -2294,35 +2432,14 @@
           <div class="sample-record">
             <span class="sample-record-type ${r.activityType}"></span>
             <span class="sample-record-content">
-              <span class="sample-record-subject">${SUBJECTS[r.subject]?.name || r.subject}</span>
-              <span class="sample-record-desc">${r.knowledgePoints?.join(', ') || r.knowledge || '未知'}</span>
+              <span class="sample-record-subject">${r.subject}</span>
+              <span class="sample-record-desc">${r.knowledgePoints?.join(', ') || '未知'}</span>
             </span>
             <span class="sample-record-time">${formatRelativeTime(r.timestamp)}</span>
             <span class="sample-record-score ${scoreClass}">${scoreText}</span>
           </div>
         `;
       }).join('');
-    }
-    
-    // ========== 获取记录分数 ==========
-    function getRecordScore(record) {
-      if (record.activityType === 'recitation') {
-        return RECITATION_SCORES[record.result] || 0;
-      }
-      return record.accuracy || 0;
-    }
-    
-    // ========== 格式化相对时间 ==========
-    function formatRelativeTime(timestamp) {
-      const now = Date.now();
-      const diff = now - timestamp;
-      const minutes = Math.floor(diff / 60000);
-      const hours = Math.floor(diff / 3600000);
-      const days = Math.floor(diff / 86400000);
-      
-      if (minutes < 60) return `${minutes}分钟前`;
-      if (hours < 24) return `${hours}小时前`;
-      return `${days}天前`;
     }
     
     // ========== 渲染日志 (v0.4.1 增强) ==========
@@ -2360,8 +2477,8 @@
               <span class="log-time">${new Date(r.timestamp).toLocaleString('zh-CN', {
                 month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit'
               })}</span>
-              <span class="log-subject" style="color: ${SUBJECTS[r.subject]?.color || '#666'}">${SUBJECTS[r.subject]?.name || r.subject}</span>
-              <span class="log-knowledge">${r.knowledgePoints?.join(', ') || r.knowledge || '未知'}</span>
+              <span class="log-subject" style="color: ${SUBJECTS[r.subject]?.color || '#666'}">${r.subject}</span>
+              <span class="log-knowledge">${r.knowledgePoints?.join(', ') || '未知'}</span>
               <span class="log-accuracy">${scoreText}</span>
               <span class="log-xp">+${r.xp || 0}</span>
             </div>
@@ -2385,14 +2502,14 @@
       const now = Date.now();
       const shadowItems = [];
       
-      for (const [sub, subject] of Object.entries(appData.subjects)) {
+      for (const [subjectName, subject] of Object.entries(appData.subjects)) {
         if (!subject.nodes) continue;
         for (const node of subject.nodes) {
-          const temp = calcTemp(node);
+          const temp = getCurrentTemp(node, now);
           if (temp > 0 && temp < 40) {
             const hoursSinceStudy = (now - node.lastStudy) / (1000 * 60 * 60);
             shadowItems.push({
-              subject: sub,
+              subject: subjectName,
               name: node.name,
               temp,
               hours: Math.round(hoursSinceStudy)
@@ -2418,7 +2535,7 @@
                style="--subject-color: ${subjectColor}">
             <div class="shadow-header">
               <div class="shadow-title">
-                <span style="color: ${subjectColor}">${SUBJECTS[item.subject]?.name || item.subject}</span>
+                <span style="color: ${subjectColor}">${item.subject}</span>
                 <span>·</span>
                 <span>${item.name}</span>
               </div>
@@ -2431,7 +2548,7 @@
             <div class="shadow-temp-bar">
               <div class="shadow-temp-fill" style="width: ${item.temp}%; background: ${getTempColor(item.temp)}"></div>
             </div>
-            <div class="shadow-reason">温度降至${item.temp}%，建议尽快复习巩固</div>
+            <div class="shadow-reason">温度降至${item.temp.toFixed(1)}%，建议尽快复习巩固</div>
           </div>
         `;
       }).join('');
@@ -2443,17 +2560,17 @@
       const now = Date.now();
       const recs = [];
       
-      for (const [sub, subject] of Object.entries(appData.subjects)) {
+      for (const [subjectName, subject] of Object.entries(appData.subjects)) {
         if (!subject.nodes) continue;
         for (const node of subject.nodes) {
-          const temp = calcTemp(node);
+          const temp = getCurrentTemp(node, now);
           if (temp < 60 || (now - node.lastStudy) / (1000 * 60 * 60) > 24) {
             const hoursSinceStudy = (now - node.lastStudy) / (1000 * 60 * 60);
             const urgency = Math.min(100, hoursSinceStudy * 2 + (100 - temp));
             
             recs.push({
               type: urgency > 70 ? 'urgent' : 'weakness',
-              sub,
+              subject: subjectName,
               name: node.name,
               temp,
               hours: Math.round(hoursSinceStudy),
@@ -2484,7 +2601,7 @@
           <div class="recommend-card ${isUrgent ? 'urgent-type' : ''}">
             <div class="recommend-header">
               <div class="recommend-title">
-                <span style="color: ${SUBJECTS[r.sub]?.color}">${SUBJECTS[r.sub]?.name || r.sub}</span>
+                <span style="color: ${SUBJECTS[r.subject]?.color}">${r.subject}</span>
                 <span>·</span>
                 <span>${r.name}</span>
               </div>
@@ -2496,7 +2613,7 @@
               <div class="temp-fill" style="width:${r.temp}%;background:${getTempColor(r.temp)}"></div>
             </div>
             <div class="shadow-reason" style="margin-top: 8px;">
-              温度${r.temp}%，${r.hours > 24 ? '已超过24小时未复习' : '遗忘风险较高'}
+              温度${r.temp.toFixed(1)}%，${r.hours > 24 ? '已超过24小时未复习' : '遗忘风险较高'}
               ${isUrgent ? ' ⚠️ 紧急' : ''}
             </div>
           </div>
@@ -2508,30 +2625,30 @@
     function buildSkillTreeData() {
       const nodes = [];
       const links = [];
-      const categories = Object.entries(SUBJECTS).map(([key, info]) => ({ 
-        name: info.name, 
+      const categories = Object.entries(SUBJECTS).map(([name, info]) => ({ 
+        name: name, 
         color: info.color 
       }));
       
       let index = 0;
       const subjectNodes = {};
       
-      for (const [sub, subject] of Object.entries(appData.subjects)) {
+      for (const [subjectName, subject] of Object.entries(appData.subjects)) {
         if (subject.nodes && subject.nodes.length > 0) {
-          const subjectInfo = SUBJECTS[sub];
-          subjectNodes[sub] = index;
+          const subjectInfo = SUBJECTS[subjectName];
+          subjectNodes[subjectName] = index;
           nodes.push({
             id: index,
-            name: subjectInfo?.name || sub,
+            name: subjectInfo?.name || subjectName,
             symbolSize: 50,
             itemStyle: { color: subjectInfo?.color || '#6B7280' },
-            category: categories.findIndex(c => c.name === subjectInfo?.name) || 0,
+            category: categories.findIndex(c => c.name === subjectName) || 0,
             isSubject: true
           });
           index++;
           
           for (const node of subject.nodes) {
-            const temp = calcTemp(node);
+            const temp = getCurrentTemp(node);
             const isHot = temp >= 80;
             const isWarm = temp >= 60 && temp < 80;
             const isCool = temp < 40;
@@ -2547,17 +2664,20 @@
                 borderWidth: isHot ? 2 : 1,
                 borderColor: isHot ? 'rgba(255,255,255,0.5)' : 'rgba(255,255,255,0.3)'
               },
-              category: categories.findIndex(c => c.name === SUBJECTS[sub]?.name) || 0,
+              category: categories.findIndex(c => c.name === subjectName) || 0,
               isSubject: false,
-              subject: sub,
+              subject: subjectName,
               temp: temp,
-              studyCount: node.studyCount,
-              avgAccuracy: node.accuracy?.length ? Math.round(node.accuracy.reduce((a, b) => a + b, 0) / node.accuracy.length) : 0,
+              halfLifeDays: node.halfLifeDays,
+              repetitions: node.repetitions,
+              avgAccuracy: node.accuracyHistory.length > 0 
+                ? Math.round(node.accuracyHistory.reduce((a, b) => a + b, 0) / node.accuracyHistory.length) 
+                : 0,
               totalXp: node.totalXp
             });
             
             links.push({
-              source: subjectNodes[sub],
+              source: subjectNodes[subjectName],
               target: index,
               lineStyle: { 
                 color: getTempColor(temp),
@@ -2612,9 +2732,9 @@
             }
             const tempLabel = node.temp >= 80 ? '🔥 灼热' : (node.temp >= 60 ? '☀️ 温热' : (node.temp >= 40 ? '🌡️ 常温' : (node.temp >= 20 ? '❄️ 微凉' : '💤 冷却')));
             return `<div style="font-weight:600;font-size:14px">${node.name}</div>
-                    <div style="color:#718096;margin-top:4px">${tempLabel} <span style="color:${node.itemStyle.color};font-weight:600">${node.temp}%</span></div>
-                    <div style="color:#718096;margin-top:4px">学习次数: ${node.studyCount} | 平均正确率: ${node.avgAccuracy}%</div>
-                    <div style="color:#718096">累计XP: ${node.totalXp}</div>`;
+                    <div style="color:#718096;margin-top:4px">${tempLabel} <span style="color:${node.itemStyle.color};font-weight:600">${node.temp.toFixed(1)}%</span></div>
+                    <div style="color:#718096;margin-top:4px">复习次数: ${node.repetitions} | 平均正确率: ${node.avgAccuracy}%</div>
+                    <div style="color:#718096">半衰期: ${node.halfLifeDays?.toFixed(1) || 4.0}天 | 累计XP: ${node.totalXp}</div>`;
           }
         },
         legend: { show: false },
@@ -2676,10 +2796,11 @@
       
       document.getElementById('nodeDetailTitle').textContent = node.name;
       document.getElementById('nodeDetailSubtitle').textContent = 
-        `${SUBJECTS[node.subject]?.name || node.subject} · ${node.studyCount}次学习记录`;
-      document.getElementById('nodeDetailTemp').textContent = `${node.temp}%`;
+        `${node.subject} · ${node.repetitions}次复习记录`;
+      document.getElementById('nodeDetailTemp').textContent = `${node.temp.toFixed(1)}%`;
       document.getElementById('nodeDetailTemp').style.color = getTempColor(node.temp);
-      document.getElementById('nodeStudyCount').textContent = node.studyCount;
+      document.getElementById('nodeStudyCount').textContent = node.repetitions;
+      document.getElementById('nodeHalfLife').textContent = `${node.halfLifeDays?.toFixed(1) || 4.0}天`;
       document.getElementById('nodeAvgAccuracy').textContent = `${node.avgAccuracy}%`;
       document.getElementById('nodeTotalXp').textContent = node.totalXp;
       
@@ -2693,21 +2814,24 @@
       
       forgetChart = echarts.init(container);
       
+      // 默认使用全局基础半衰期
+      const baseHL = CONFIG.GLOBAL_BASE_HALFLIFE;
       const timePoints = [];
       const curveData = [];
       
       for (let i = 0; i <= 168; i += 6) {
         timePoints.push(i);
+        const retention = Math.pow(2, -i / (24 * baseHL)) * 100;
         curveData.push({
-          value: Math.round(100 * Math.pow(0.5, i / (24 * 1.5))),
+          value: Math.round(retention),
           name: i === 0 ? '刚学习' : i < 24 ? `${i}h` : `${Math.round(i/24)}d`
         });
       }
       
       const reviewPoints = [
-        { retention: 60, hours: Math.round(24 * 1.5 * Math.log2(100/60)), label: '60%复习点' },
-        { retention: 40, hours: Math.round(24 * 1.5 * Math.log2(100/40)), label: '40%复习点' },
-        { retention: 20, hours: Math.round(24 * 1.5 * Math.log2(100/20)), label: '20%复习点' }
+        { retention: 60, hours: Math.round(24 * baseHL * Math.log2(100/60)), label: '60%复习点' },
+        { retention: 40, hours: Math.round(24 * baseHL * Math.log2(100/40)), label: '40%复习点' },
+        { retention: 20, hours: Math.round(24 * baseHL * Math.log2(100/20)), label: '20%复习点' }
       ];
       
       const getClosestIndex = (hours) => {
@@ -2726,7 +2850,7 @@
       const option = {
         backgroundColor: 'transparent',
         title: {
-          text: '遗忘曲线 (Ebbinghaus)',
+          text: '遗忘曲线 (Ebbinghaus) - 动态半衰期模型',
           left: 'center',
           textStyle: { fontSize: 14, fontWeight: 600, color: '#4a5568' }
         },
@@ -2912,18 +3036,43 @@
       }
     }
     
-    // ========== v0.4.1 加载示例数据 (标准化格式) ==========
+    // ========== v0.4.2 加载示例数据 (新版温度模型) ==========
     function loadDemoData() {
       const now = Date.now();
-      const day = 24 * 3600000;
+      const hour = 3600000;
+      const day = 24 * hour;
+      
+      // 创建知识点节点（新数据结构）
+      const createNode = (name, subject, daysAgo, hoursAgo, accuracies) => {
+        const node = createKnowledgeNode(name, subject);
+        node.lastStudy = now - daysAgo * day - hoursAgo * hour;
+        node.repetitions = accuracies.length;
+        node.accuracyHistory = [...accuracies];
+        node.totalXp = accuracies.length * 80;
+        node.peakTemp = CONFIG.TEMP.INITIAL_PEAK;
+        
+        // 计算实际峰值温度（基于复习历史）
+        let peak = CONFIG.TEMP.INITIAL_PEAK;
+        accuracies.forEach(acc => {
+          const boost = Math.min(CONFIG.TEMP.BOOST_MAX, Math.max(CONFIG.TEMP.BOOST_MIN, acc * CONFIG.TEMP.BOOST_FACTOR + 10));
+          peak = Math.min(CONFIG.TEMP.MAX_PEAK, +(peak + boost).toFixed(1));
+        });
+        node.peakTemp = peak;
+        
+        // 计算个体修正系数（基于记忆表现）
+        const avgAcc = accuracies.reduce((a, b) => a + b, 0) / accuracies.length;
+        const itemMod = avgAcc >= 85 ? 1.15 : (avgAcc >= 70 ? 1.0 : (avgAcc >= 55 ? 0.85 : 0.7));
+        node.halfLifeDays = calculateHalfLife(subject, itemMod);
+        
+        return node;
+      };
       
       // 统一记录格式示例
       const sampleRecords = [
-        // 刷题记录 (practice)
         {
           recordID: generateUUID(),
-          timestamp: now - 2 * 3600000, // 2小时前
-          subject: 'logos',
+          timestamp: now - 2 * hour,
+          subject: '数学',
           knowledgePoints: ['三角函数·辅助角公式', '三角函数·二倍角公式'],
           durationMinutes: 45,
           activityType: 'practice',
@@ -2934,8 +3083,8 @@
         },
         {
           recordID: generateUUID(),
-          timestamp: now - 5 * 3600000, // 5小时前
-          subject: 'logos',
+          timestamp: now - 5 * hour,
+          subject: '数学',
           knowledgePoints: ['导数的运算'],
           durationMinutes: 30,
           activityType: 'practice',
@@ -2946,8 +3095,8 @@
         },
         {
           recordID: generateUUID(),
-          timestamp: now - 8 * 3600000, // 8小时前
-          subject: 'lingua',
+          timestamp: now - 8 * hour,
+          subject: '英语',
           knowledgePoints: ['高考核心词汇'],
           durationMinutes: 40,
           activityType: 'practice',
@@ -2956,11 +3105,10 @@
           accuracy: 84,
           xp: 88
         },
-        // 考试记录 (exam)
         {
           recordID: generateUUID(),
-          timestamp: now - 1 * day, // 1天前
-          subject: 'logos',
+          timestamp: now - 1 * day,
+          subject: '数学',
           knowledgePoints: ['数列综合', '函数与导数'],
           durationMinutes: 120,
           activityType: 'exam',
@@ -2971,8 +3119,8 @@
         },
         {
           recordID: generateUUID(),
-          timestamp: now - 2 * day, // 2天前
-          subject: 'physis',
+          timestamp: now - 2 * day,
+          subject: '物理',
           knowledgePoints: ['牛顿运动定律', '力学综合'],
           durationMinutes: 90,
           activityType: 'exam',
@@ -2981,36 +3129,59 @@
           accuracy: 78,
           xp: 120
         },
-        // 背诵记录 (recitation)
         {
           recordID: generateUUID(),
-          timestamp: now - 3 * day, // 3天前
-          subject: 'mythos',
+          timestamp: now - 3 * day,
+          subject: '语文',
           knowledgePoints: ['《赤壁赋》全文背诵', '文言实词积累'],
           durationMinutes: 25,
           activityType: 'recitation',
-          result: 'perfect', // 100%
+          result: 'perfect',
           xp: 100
         },
         {
           recordID: generateUUID(),
-          timestamp: now - 4 * day, // 4天前
-          subject: 'politeia',
+          timestamp: now - 4 * day,
+          subject: '政治',
           knowledgePoints: ['政治经济学概念', '哲学原理背诵'],
           durationMinutes: 30,
           activityType: 'recitation',
-          result: 'partial', // 50%
+          result: 'partial',
           xp: 50
         },
         {
           recordID: generateUUID(),
-          timestamp: now - 6 * day, // 6天前
-          subject: 'khēmeia',
+          timestamp: now - 6 * day,
+          subject: '化学',
           knowledgePoints: ['化学方程式默写', '元素周期表记忆'],
           durationMinutes: 20,
           activityType: 'recitation',
-          result: 'perfect', // 100%
+          result: 'perfect',
           xp: 100
+        },
+        {
+          recordID: generateUUID(),
+          timestamp: now - 1 * day,
+          subject: '历史',
+          knowledgePoints: ['中国古代史', '近代史纲要'],
+          durationMinutes: 60,
+          activityType: 'practice',
+          totalQuestions: 30,
+          correctCount: 22,
+          accuracy: 73,
+          xp: 90
+        },
+        {
+          recordID: generateUUID(),
+          timestamp: now - 3 * day,
+          subject: '地理',
+          knowledgePoints: ['气候类型', '洋流分布'],
+          durationMinutes: 45,
+          activityType: 'practice',
+          totalQuestions: 25,
+          correctCount: 18,
+          accuracy: 72,
+          xp: 85
         }
       ];
       
@@ -3025,51 +3196,69 @@
           achievements: ['First Light', 'Week Warrior', 'Perfect Reciter']
         },
         subjects: {
-          logos: {
+          '数学': {
             name: '数学', level: 40, xp: 5200,
             nodes: [
-              { name: '三角函数·辅助角公式', temp: 72, lastStudy: now - 8 * 3600000, accuracy: [85, 78, 82], studyCount: 3, totalXp: 280, failCount: 0 },
-              { name: '数列·等比数列', temp: 58, lastStudy: now - 18 * 3600000, accuracy: [65, 70], studyCount: 2, totalXp: 180, failCount: 0 },
-              { name: '导数的运算', temp: 85, lastStudy: now - 4 * 3600000, accuracy: [80, 88, 85], studyCount: 3, totalXp: 320, failCount: 0 },
-              { name: '函数的图像变换', temp: 35, lastStudy: now - 48 * 3600000, accuracy: [55, 40], studyCount: 2, totalXp: 120, failCount: 1 }
-            ],
-            temperatureMap: { '三角函数·辅助角公式': 72, '数列·等比数列': 58, '导数的运算': 85, '函数的图像变换': 35 }
+              createNode('三角函数·辅助角公式', '数学', 0, 8, [85, 78, 82]),
+              createNode('数列·等比数列', '数学', 0, 18, [65, 70]),
+              createNode('导数的运算', '数学', 0, 4, [80, 88, 85]),
+              createNode('函数的图像变换', '数学', 2, 0, [55, 40])
+            ]
           },
-          mythos: {
+          '语文': {
             name: '语文', level: 30, xp: 3500,
             nodes: [
-              { name: '文言文阅读', temp: 68, lastStudy: now - 12 * 3600000, accuracy: [70, 65], studyCount: 2, totalXp: 180, failCount: 0 },
-              { name: '古代诗歌鉴赏', temp: 42, lastStudy: now - 30 * 3600000, accuracy: [55, 50], studyCount: 2, totalXp: 140, failCount: 0 }
-            ],
-            temperatureMap: { '文言文阅读': 68, '古代诗歌鉴赏': 42 }
+              createNode('文言文阅读', '语文', 0, 12, [70, 65]),
+              createNode('古代诗歌鉴赏', '语文', 1, 6, [55, 50])
+            ]
           },
-          lingua: {
+          '英语': {
             name: '英语', level: 35, xp: 4800,
             nodes: [
-              { name: '高考核心词汇', temp: 78, lastStudy: now - 6 * 3600000, accuracy: [80, 75, 78], studyCount: 3, totalXp: 260, failCount: 0 },
-              { name: '从句·定语从句', temp: 62, lastStudy: now - 14 * 3600000, accuracy: [65, 60], studyCount: 2, totalXp: 160, failCount: 0 }
-            ],
-            temperatureMap: { '高考核心词汇': 78, '从句·定语从句': 62 }
+              createNode('高考核心词汇', '英语', 0, 6, [80, 75, 78]),
+              createNode('从句·定语从句', '英语', 0, 14, [65, 60])
+            ]
           },
-          physis: {
+          '物理': {
             name: '物理', level: 25, xp: 2800,
             nodes: [
-              { name: '牛顿运动定律', temp: 55, lastStudy: now - 22 * 3600000, accuracy: [58, 52], studyCount: 2, totalXp: 150, failCount: 0 }
-            ],
-            temperatureMap: { '牛顿运动定律': 55 }
+              createNode('牛顿运动定律', '物理', 0, 22, [58, 52])
+            ]
           },
-          khēmeia: {
+          '化学': {
             name: '化学', level: 20, xp: 1500,
             nodes: [
-              { name: '化学平衡', temp: 28, lastStudy: now - 72 * 3600000, accuracy: [50, 45], studyCount: 2, totalXp: 120, failCount: 1 }
-            ],
-            temperatureMap: { '化学平衡': 28 }
+              createNode('化学平衡', '化学', 3, 0, [50, 45])
+            ]
           },
-          zōē: { name: '生物', level: 20, xp: 1200, nodes: [], temperatureMap: {} },
-          politeia: { name: '政治', level: 20, xp: 800, nodes: [], temperatureMap: {} }
+          '生物': {
+            name: '生物', level: 20, xp: 1200,
+            nodes: [
+              createNode('细胞结构', '生物', 2, 0, [70, 75]),
+              createNode('光合作用', '生物', 4, 0, [60, 65])
+            ]
+          },
+          '政治': {
+            name: '政治', level: 20, xp: 800,
+            nodes: [
+              createNode('哲学基本概念', '政治', 1, 0, [75, 80])
+            ]
+          },
+          '历史': {
+            name: '历史', level: 15, xp: 600,
+            nodes: [
+              createNode('中国古代史', '历史', 1, 0, [73])
+            ]
+          },
+          '地理': {
+            name: '地理', level: 15, xp: 500,
+            nodes: [
+              createNode('气候类型', '地理', 3, 0, [72])
+            ]
+          }
         },
         records: sampleRecords,
-        version: 'v0.4.1'
+        version: 'v0.4.2'
       };
     }
     
