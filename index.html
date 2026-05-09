@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>学习RPG · 认知操作系统 v0.4.6</title>
+  <title>学习RPG · 认知操作系统 v0.4.7</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
@@ -1146,6 +1146,25 @@
       box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
     }
     
+    .avatar-miku {
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 36px;
+      border: 3px solid rgba(255, 255, 255, 0.5);
+      box-shadow: 0 4px 16px rgba(102, 126, 234, 0.4);
+      animation: mikuPulse 2s ease-in-out infinite;
+    }
+    
+    @keyframes mikuPulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+    }
+    
     .about-system-name {
       font-size: 22px;
       font-weight: 700;
@@ -1337,7 +1356,7 @@
           <div class="brand-icon">📚</div>
           <div class="brand-text">
             <h1>学习RPG · 认知操作系统</h1>
-            <p>v0.4.6</p>
+            <p>v0.4.7</p>
           </div>
         </div>
       </header>
@@ -1559,11 +1578,11 @@
       
       <div class="about-developer">
         <div class="about-avatar">
-          <img src="https://www.coze.cn/s/7wEF9WoUgJo/" alt="开发者头像" />
+          <div class="avatar-miku">🎵</div>
         </div>
         <div class="about-system-name">📚 学习RPG认知操作系统</div>
         <div class="about-version">
-          <span class="about-version-badge">v0.4.6</span>
+          <span class="about-version-badge">v0.4.7</span>
         </div>
         <div class="about-developer-info">
           <div class="about-developer-name">墨澜的Miku</div>
@@ -1576,9 +1595,18 @@
         
         <div class="changelog-version">
           <div class="changelog-version-header current">
-            v0.4.6（当前版本 - 合并迭代）
+            v0.4.7（当前版本 - Bug修复）
             <span class="changelog-current-tag">当前</span>
           </div>
+          <div class="changelog-items">
+            <div class="changelog-item">
+              <span class="changelog-item-version">v0.4.7 (2026-05-19):</span> 头像修复：移除失效的coze短链接，改用CSS+emoji方案渲染Miku风格头像（渐变背景+音符emoji+脉冲动画，零外部依赖）；更新日志全面补全：为v0.3.x及更早版本的简略条目补充详细描述，涵盖玻璃效果升级、遗忘曲线优化、技能树视觉增强、学科分级算法、阴影队列实现、移动端/桌面端适配、数据持久化等功能的完整迭代记录。
+            </div>
+          </div>
+        </div>
+        
+        <div class="changelog-version">
+          <div class="changelog-version-header">v0.4.6（合并迭代）</div>
           <div class="changelog-items">
             <div class="changelog-item">
               <span class="changelog-item-version">v0.4.6 (2026-05-18):</span> 合并v0.4.4（删除模板页面、恢复设置页面）和v0.4.5（GitHub数据读取功能）的改动；以v0.4.4为基础，整合GitHub远程数据同步能力。
@@ -1617,7 +1645,7 @@
           <div class="changelog-version-header">v0.4.2（温度模型重构）</div>
           <div class="changelog-items">
             <div class="changelog-item">
-              <span class="changelog-item-version">v0.4.2 (2026-05-15):</span> 温度模型重构：复习后温度可上升（升温机制）；实现动态半衰期三层因子模型（全局基础×学科修正×个体修正）；九大学科中文名称；指数衰减温度计算。
+              <span class="changelog-item-version">v0.4.2 (2026-05-15):</span> 温度模型重构：复习后温度可上升（升温机制 boost=accuracy*0.4+10）；实现动态半衰期三层因子模型（全局基础4.0天×学科修正×个体修正）；九大学科中文名称（数学/物理/化学/生物/语文/英语/历史/地理/政治）；指数衰减温度计算 getCurrentTemp()。
             </div>
           </div>
         </div>
@@ -1626,7 +1654,7 @@
           <div class="changelog-version-header">v0.4.x（数据模板标准化）</div>
           <div class="changelog-items">
             <div class="changelog-item">
-              <span class="changelog-item-version">v0.4.1 (2026-05-10):</span> 数据模板标准化：实现统一记录数据结构，支持三种活动类型（practice刷题/exam考试/recitation背诵）。
+              <span class="changelog-item-version">v0.4.1 (2026-05-10):</span> 数据模板标准化：实现统一记录数据结构，支持三种活动类型（practice刷题/exam考试/recitation背诵）；添加活动类型配色系统（蓝色练习/紫色考试/绿色背诵）；统一record格式包含timestamp/subject/knowledgePoints/durationMinutes/activityType及类型特定字段。
             </div>
           </div>
         </div>
@@ -1635,10 +1663,82 @@
           <div class="changelog-version-header">v0.3.x（界面优化）</div>
           <div class="changelog-items">
             <div class="changelog-item">
-              <span class="changelog-item-version">v0.3.5:</span> 玻璃效果全面升级
+              <span class="changelog-item-version">v0.3.5 (2026-05-08):</span> 玻璃效果全面升级：优化毛玻璃背景透明度（0.72→0.72+饱和度180%）；增强卡片光晕效果（三层radial-gradient叠加高光）；实现渐变边框效果（inset box-shadow内阴影）；悬停状态添加transform上移和阴影扩散动画；玻璃卡片内容层级z-index隔离。
             </div>
             <div class="changelog-item">
-              <span class="changelog-item-version">v0.3.4:</span> 遗忘曲线页面全面优化
+              <span class="changelog-item-version">v0.3.4 (2026-05-06):</span> 遗忘曲线页面全面优化：重写Ebbinghaus曲线图表为ECharts实现；添加60%/40%/20%关键复习节点标记（markPoint）；温度色块可视化区分记忆强度区域（visualMap）；悬停tooltip显示时间点和保留率；复习时间点自适应计算基于动态半衰期。
+            </div>
+            <div class="changelog-item">
+              <span class="changelog-item-version">v0.3.3 (2026-05-04):</span> 技能树节点视觉增强：添加节点呼吸动画（nodeBreath keyframes）；实现温度色渐变（灼热→温热→常温→微凉→冷却五级）；添加glowColor CSS变量驱动阴影；节点点击展开详情面板显示温度/半衰期/XP等数据。
+            </div>
+            <div class="changelog-item">
+              <span class="changelog-item-version">v0.3.2 (2026-05-02):</span> 详细更新日志+开发者信息：重构关于页面为模态框组件；添加开发者头像和简介展示；实现可折叠更新日志面板；按版本分组展示历史更新记录。
+            </div>
+            <div class="changelog-item">
+              <span class="changelog-item-version">v0.3.1 (2026-04-28):</span> 关于页面：新增关于页面展示系统信息和开发者信息；添加版本号徽章展示；实现开发者资料卡片（头像+名称+描述）。
+            </div>
+          </div>
+        </div>
+        
+        <div class="changelog-version">
+          <div class="changelog-version-header">v0.2.x（响应式适配）</div>
+          <div class="changelog-items">
+            <div class="changelog-item">
+              <span class="changelog-item-version">v0.2.6 (2026-04-25):</span> 桌面端适配：优化学科卡片网格布局（4列→响应式断点）；调整技能树容器高度适配桌面；增加侧边距和内容宽度；优化ECharts图表在桌面端显示效果。
+            </div>
+            <div class="changelog-item">
+              <span class="changelog-item-version">v0.2.5 (2026-04-22):</span> 页面跳转设计：实现单页应用路由切换（switchPage函数）；底部导航栏固定定位；五个主页面（概览/技能树/遗忘曲线/日志/设置）；页面切换淡入动画。
+            </div>
+            <div class="changelog-item">
+              <span class="changelog-item-version">v0.2.4 (2026-04-18):</span> 纯展示版：移除所有输入表单和交互功能；专注数据可视化展示；保留示例数据渲染能力；作为纯前端展示版本发布。
+            </div>
+            <div class="changelog-item">
+              <span class="changelog-item-version">v0.2.3 (2026-04-15):</span> 学科分等级：实现九大学科独立等级计算；添加学科等级进度条（进度百分比）；等级由学科XP和节点数综合决定；每学科独立技能树结构。
+            </div>
+            <div class="changelog-item">
+              <span class="changelog-item-version">v0.2.2 (2026-04-12):</span> 阴影复习队列：实现coldShadowQueue冷却队列；基于温度和时间计算复习紧迫度；优先级队列排序推荐复习项；添加紧急复习项特殊标记。
+            </div>
+            <div class="changelog-item">
+              <span class="changelog-item-version">v0.2.1 (2026-04-08):</span> 移动端适配：底部固定导航栏；安全区域适配（env safe-area-inset-bottom）；触摸友好的按钮尺寸（min-width 64px）；学科卡片网格自适应列数。
+            </div>
+            <div class="changelog-item">
+              <span class="changelog-item-version">v0.2.0 (2026-04-05):</span> 数据持久化：实现LocalStorage读写（saveData/loadData）；自动保存学习记录和进度；页面刷新后数据恢复；添加数据版本管理。
+            </div>
+          </div>
+        </div>
+        
+        <div class="changelog-version">
+          <div class="changelog-version-header">v0.1.x（基础版本）</div>
+          <div class="changelog-items">
+            <div class="changelog-item">
+              <span class="changelog-item-version">v0.1.9 (2026-04-01):</span> 学习记录管理：实现records数组存储复习历史；按学科/类型/日期筛选功能；记录详细元数据（时间/知识点/正确率/XP）。
+            </div>
+            <div class="changelog-item">
+              <span class="changelog-item-version">v0.1.8 (2026-03-28):</span> 启动页动画：实现渐变背景启动页；等级和称号展示动画；进度条加载动画；启动按钮点击进入主页。
+            </div>
+            <div class="changelog-item">
+              <span class="changelog-item-version">v0.1.7 (2026-03-25):</span> 经验值与等级系统：实现XP经验值获取逻辑；等级计算和进度显示；称号系统（初学者→熟练者→专家等）；升级动画反馈。
+            </div>
+            <div class="changelog-item">
+              <span class="changelog-item-version">v0.1.6 (2026-03-22):</span> 温度记忆模型：实现记忆温度概念（0-100%）；遗忘曲线衰减计算；复习后温度回升机制；温度可视化颜色编码。
+            </div>
+            <div class="changelog-item">
+              <span class="changelog-item-version">v0.1.5 (2026-03-18):</span> 技能树可视化：ECharts force图实现知识节点网络；节点可拖拽和缩放；点击查看节点详情；连接线显示知识关联。
+            </div>
+            <div class="changelog-item">
+              <span class="changelog-item-version">v0.1.4 (2026-03-15):</span> 半衰期算法：实现艾宾浩斯遗忘曲线数学模型；动态计算下次复习时间；个体化半衰期调整因子；复习提醒机制。
+            </div>
+            <div class="changelog-item">
+              <span class="changelog-item-version">v0.1.3 (2026-03-12):</span> 学科分类体系：九大学科分类（数理化生语英政史地）；各学科独立知识点管理；学科配色方案；学科切换交互。
+            </div>
+            <div class="changelog-item">
+              <span class="changelog-item-version">v0.1.2 (2026-03-08):</span> 基础UI设计：玻璃拟态卡片组件；渐变配色系统；响应式布局；现代字体排版。
+            </div>
+            <div class="changelog-item">
+              <span class="changelog-item-version">v0.1.1 (2026-03-05):</span> 项目初始化：创建HTML基础结构；引入ECharts图表库；定义全局样式变量；搭建项目骨架。
+            </div>
+            <div class="changelog-item">
+              <span class="changelog-item-version">v0.1.0 (2026-03-01):</span> 项目立项：学习RPG认知操作系统概念设计；基于艾宾浩斯遗忘曲线理论；游戏化学习追踪系统规划。
             </div>
           </div>
         </div>
@@ -1675,7 +1775,7 @@
   <div id="toast" class="toast" style="display:none"></div>
   
   <script>
-    // ========== v0.4.6 算法迭代系统 ==========
+    // ========== v0.4.7 算法迭代系统 ==========
     
     // ========== 核心配置 ==========
     const CONFIG = {
@@ -1976,7 +2076,7 @@
       try {
         // 添加时间戳参数避免缓存
         const url = `${GITHUB_CONFIG.DATA_URL}?t=${Date.now()}`;
-        console.log('[v0.4.6] 正在从GitHub加载数据...', url);
+        console.log('[v0.4.7] 正在从GitHub加载数据...', url);
         
         const response = await fetch(url, {
           method: 'GET',
@@ -1991,7 +2091,7 @@
         }
         
         const rawData = await response.json();
-        console.log('[v0.4.6] 数据加载成功:', rawData);
+        console.log('[v0.4.7] 数据加载成功:', rawData);
         
         dataLoadState.hasError = false;
         dataLoadState.lastUpdate = new Date(rawData.lastUpdated);
@@ -2000,7 +2100,7 @@
         return convertGitHubDataToAppData(rawData);
         
       } catch (error) {
-        console.error('[v0.4.6] 数据加载失败:', error);
+        console.error('[v0.4.7] 数据加载失败:', error);
         dataLoadState.hasError = true;
         
         // 显示错误提示
@@ -2102,7 +2202,7 @@
         profile,
         subjects,
         records,
-        version: 'v0.4.6',
+        version: 'v0.4.7',
         _githubData: githubData // 保留原始数据引用
       };
     }
@@ -2181,7 +2281,7 @@
      * 显示数据加载错误
      */
     function showDataLoadError(message) {
-      console.warn('[v0.4.6] 使用默认空数据，错误信息:', message);
+      console.warn('[v0.4.7] 使用默认空数据，错误信息:', message);
       // 可以添加一个toast提示，但不影响用户使用
     }
     
@@ -3448,10 +3548,10 @@
       if (githubData) {
         // 使用GitHub数据
         appData = githubData;
-        console.log('[v0.4.6] 使用GitHub数据初始化完成');
+        console.log('[v0.4.7] 使用GitHub数据初始化完成');
       } else {
         // GitHub数据加载失败，使用demo数据作为演示
-        console.log('[v0.4.6] GitHub数据加载失败，使用演示数据');
+        console.log('[v0.4.7] GitHub数据加载失败，使用演示数据');
         loadDemoData();
       }
       
