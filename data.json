@@ -1,0 +1,61 @@
+{
+  "version": "1.0",
+  "lastUpdated": "2026-05-10T06:00:00+08:00",
+  "profile": {
+    "learnerName": "墨澜",
+    "globalBaseHalfLife": 4.0,
+    "subjectModifiers": {
+      "数学": 1.2,
+      "物理": 1.2,
+      "化学": 1.1,
+      "语文": 1.0,
+      "英语": 1.0,
+      "历史": 1.0,
+      "地理": 1.0,
+      "生物": 0.9,
+      "政治": 0.8
+    },
+    "tempBoostGain": 0.4,
+    "tempBoostBase": 10,
+    "avgReviewsPerWeek": 0
+  },
+  "subjects": {
+    "数学": {
+      "totalXp": 0,
+      "nodes": []
+    },
+    "语文": {
+      "totalXp": 0,
+      "nodes": []
+    },
+    "英语": {
+      "totalXp": 0,
+      "nodes": []
+    },
+    "物理": {
+      "totalXp": 0,
+      "nodes": []
+    },
+    "化学": {
+      "totalXp": 0,
+      "nodes": []
+    },
+    "生物": {
+      "totalXp": 0,
+      "nodes": []
+    },
+    "政治": {
+      "totalXp": 0,
+      "nodes": []
+    },
+    "历史": {
+      "totalXp": 0,
+      "nodes": []
+    },
+    "地理": {
+      "totalXp": 0,
+      "nodes": []
+    }
+  },
+  "log": []
+}
