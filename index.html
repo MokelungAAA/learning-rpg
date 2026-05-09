@@ -1,0 +1,3098 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>学习RPG · 认知操作系统 v0.4.1</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box}
+    
+    :root {
+      --bg-primary: #f8f9fc;
+      --bg-white: #ffffff;
+      --glass-bg: rgba(255, 255, 255, 0.72);
+      --glass-bg-hover: rgba(255, 255, 255, 0.85);
+      --glass-border: rgba(255, 255, 255, 0.5);
+      --glass-border-subtle: rgba(200, 200, 220, 0.35);
+      --glass-shadow: 0 8px 32px rgba(100, 110, 140, 0.08);
+      --glass-blur: 24px;
+      --text-primary: #1a1a2e;
+      --text-secondary: #4a5568;
+      --text-muted: #718096;
+      --accent-green: #10b981;
+      --accent-gold: #f59e0b;
+      --accent-blue: #3b82f6;
+      --accent-orange: #f59e0b;
+      --accent-coral: #ef4444;
+      --math: #1A5FB4;
+      --chinese: #E5A50A;
+      --english: #26A269;
+      --physics: #1C71D8;
+      --chemistry: #813D9C;
+      --biology: #2EC27E;
+      --politics: #E01B24;
+      --temp-searing: #FF4500;
+      --temp-hot: #FF8C00;
+      --temp-warm: #FFD700;
+      --temp-normal: #62A0EA;
+      --temp-cool: #1A5FB4;
+      --temp-frozen: #6B7280;
+      --btn-gap: 16px;
+      --btn-padding-primary: 12px 24px;
+      --btn-padding-secondary: 8px 16px;
+      --btn-padding-tertiary: 6px 12px;
+      /* v0.4.1 活动类型配色 */
+      --type-practice: #3b82f6;
+      --type-exam: #8b5cf6;
+      --type-recitation: #10b981;
+    }
+    
+    body {
+      font-family: 'Inter', 'Noto Sans SC', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+    
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 24px 100px;
+    }
+    
+    /* ========== 启动页样式 ========== */
+    .launch-page {
+      position: fixed;
+      inset: 0;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      transition: opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1), transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    .launch-page.hidden {
+      opacity: 0;
+      transform: scale(1.1);
+      pointer-events: none;
+    }
+    
+    .launch-content {
+      text-align: center;
+      color: #fff;
+    }
+    
+    .launch-icon {
+      font-size: 80px;
+      margin-bottom: 24px;
+      animation: float 3s ease-in-out infinite;
+    }
+    
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-15px); }
+    }
+    
+    .launch-title {
+      font-size: 32px;
+      font-weight: 700;
+      margin-bottom: 8px;
+      text-shadow: 0 4px 20px rgba(0,0,0,0.2);
+    }
+    
+    .launch-subtitle {
+      font-size: 14px;
+      opacity: 0.9;
+      margin-bottom: 48px;
+      letter-spacing: 2px;
+    }
+    
+    .launch-level-display {
+      background: rgba(255,255,255,0.2);
+      backdrop-filter: blur(20px);
+      border-radius: 24px;
+      padding: 32px 64px;
+      margin-bottom: 48px;
+      border: 1px solid rgba(255,255,255,0.3);
+    }
+    
+    .launch-level {
+      font-size: 72px;
+      font-weight: 800;
+      line-height: 1;
+      margin-bottom: 8px;
+      text-shadow: 0 4px 30px rgba(255,255,255,0.5);
+    }
+    
+    .launch-rank {
+      font-size: 24px;
+      font-weight: 600;
+      opacity: 0.95;
+      margin-bottom: 4px;
+    }
+    
+    .launch-rank-jp {
+      font-size: 14px;
+      opacity: 0.8;
+      letter-spacing: 2px;
+    }
+    
+    .launch-progress {
+      width: 280px;
+      margin-bottom: 48px;
+    }
+    
+    .launch-progress-bar {
+      height: 8px;
+      background: rgba(255,255,255,0.3);
+      border-radius: 4px;
+      overflow: hidden;
+      margin-bottom: 8px;
+    }
+    
+    .launch-progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #fff, rgba(255,255,255,0.7));
+      border-radius: 4px;
+      transition: width 1s ease;
+    }
+    
+    .launch-progress-text {
+      font-size: 12px;
+      opacity: 0.8;
+    }
+    
+    .launch-btn {
+      padding: 20px 80px;
+      background: #fff;
+      color: #667eea;
+      border: none;
+      border-radius: 50px;
+      font-size: 20px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+      letter-spacing: 4px;
+    }
+    
+    .launch-btn:hover {
+      transform: translateY(-3px) scale(1.02);
+      box-shadow: 0 15px 50px rgba(0,0,0,0.3);
+    }
+    
+    .launch-btn:active {
+      transform: translateY(0) scale(0.98);
+    }
+    
+    /* ========== 主页面容器 ========== */
+    .main-page {
+      display: none;
+      opacity: 0;
+      transition: opacity 0.4s ease;
+      padding-top: 24px;
+    }
+    
+    .main-page.visible {
+      display: block;
+      opacity: 1;
+    }
+    
+    /* ========== 头部 ========== */
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+    }
+    
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    
+    .brand-icon {
+      width: 48px;
+      height: 48px;
+      background: linear-gradient(135deg, var(--accent-blue), var(--accent-green));
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      box-shadow: 0 4px 16px rgba(59, 130, 246, 0.3);
+    }
+    
+    .brand-text h1 {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--text-primary);
+      letter-spacing: -0.5px;
+    }
+    
+    .brand-text p {
+      font-size: 12px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    
+    /* ========== 玻璃卡片 ========== */
+    .glass-card {
+      position: relative;
+      background: var(--glass-bg);
+      backdrop-filter: blur(var(--glass-blur)) saturate(180%);
+      -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(180%);
+      border: 1px solid var(--glass-border);
+      border-radius: 20px;
+      padding: 24px;
+      box-shadow: var(--glass-shadow);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      overflow: hidden;
+    }
+    
+    .glass-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      background: 
+        radial-gradient(ellipse at 25% 15%, rgba(255,255,255,0.6) 0%, transparent 50%),
+        radial-gradient(ellipse at 75% 0%, rgba(255,255,255,0.3) 0%, transparent 40%),
+        radial-gradient(ellipse at 50% 100%, rgba(100,110,140,0.03) 0%, transparent 50%);
+      pointer-events: none;
+      z-index: 1;
+    }
+    
+    .glass-card::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      background: linear-gradient(135deg, rgba(255,255,255,0.4) 0%, rgba(255,255,255,0.1) 30%, transparent 60%);
+      box-shadow: inset 2px 2px 4px rgba(255,255,255,0.5), inset -1px -1px 2px rgba(100,110,140,0.05);
+      pointer-events: none;
+      z-index: 1;
+    }
+    
+    .glass-card:hover {
+      background: var(--glass-bg-hover);
+      box-shadow: var(--glass-shadow), 0 0 24px rgba(100, 110, 140, 0.12);
+      transform: translateY(-2px);
+    }
+    
+    .glass-card > * {
+      position: relative;
+      z-index: 2;
+    }
+    
+    /* ========== 底部导航 ========== */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: var(--bg-white);
+      border-top: 1px solid rgba(200, 200, 220, 0.3);
+      padding: 8px 0;
+      padding-bottom: max(8px, env(safe-area-inset-bottom));
+      z-index: 100;
+      box-shadow: 0 -4px 20px rgba(100, 110, 140, 0.1);
+    }
+    
+    .nav-items {
+      display: flex;
+      justify-content: space-around;
+      max-width: 500px;
+      margin: 0 auto;
+      gap: 16px;
+    }
+    
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      padding: 10px 16px;
+      min-width: 64px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s;
+      border-radius: 14px;
+    }
+    
+    .nav-item:hover {
+      background: rgba(59, 130, 246, 0.08);
+    }
+    
+    .nav-item:active {
+      background: rgba(59, 130, 246, 0.12);
+      transform: scale(0.95);
+    }
+    
+    .nav-icon {
+      font-size: 26px;
+      transition: transform 0.2s;
+    }
+    
+    .nav-label {
+      font-size: 11px;
+      color: var(--text-muted);
+      font-weight: 500;
+      transition: color 0.2s;
+    }
+    
+    .nav-item.active .nav-icon {
+      transform: scale(1.1);
+    }
+    
+    .nav-item.active .nav-label {
+      color: var(--accent-blue);
+      font-weight: 600;
+    }
+    
+    /* ========== 页面内容 ========== */
+    .page-content {
+      display: none;
+      animation: fadeInUp 0.3s ease;
+    }
+    
+    .page-content.active {
+      display: block;
+    }
+    
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(15px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    /* ========== 概览页 ========== */
+    .overview-hero {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+    }
+    
+    .hero-stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      flex: 1;
+      margin-right: 20px;
+    }
+    
+    .hero-stat {
+      text-align: center;
+      padding: 16px;
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      border-radius: 16px;
+    }
+    
+    .hero-stat-icon {
+      font-size: 24px;
+      margin-bottom: 8px;
+    }
+    
+    .hero-stat-value {
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--text-primary);
+      line-height: 1.2;
+    }
+    
+    .hero-stat-value.green { color: var(--accent-green); }
+    .hero-stat-value.gold { color: var(--accent-gold); }
+    .hero-stat-value.blue { color: var(--accent-blue); }
+    
+    .hero-stat-label {
+      font-size: 11px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-top: 4px;
+    }
+    
+    .hero-level-card {
+      padding: 20px 28px;
+      background: linear-gradient(135deg, rgba(245, 158, 11, 0.12), rgba(245, 158, 11, 0.04));
+      border: 1px solid rgba(245, 158, 11, 0.25);
+      border-radius: 20px;
+      text-align: center;
+      min-width: 140px;
+    }
+    
+    .hero-level-value {
+      font-size: 42px;
+      font-weight: 800;
+      color: var(--accent-gold);
+      line-height: 1;
+    }
+    
+    .hero-level-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-top: 4px;
+    }
+    
+    .hero-level-jp {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+    
+    .total-progress {
+      margin-bottom: 24px;
+    }
+    
+    .progress-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+    
+    .progress-label {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-secondary);
+    }
+    
+    .progress-value {
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+    
+    .progress-bar {
+      height: 12px;
+      background: rgba(200, 200, 220, 0.3);
+      border-radius: 6px;
+      overflow: hidden;
+    }
+    
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent-blue), var(--accent-green));
+      border-radius: 6px;
+      transition: width 0.5s ease;
+    }
+    
+    /* ========== 学科等级网格 ========== */
+    .subject-section {
+      margin-bottom: 24px;
+    }
+    
+    .section-title {
+      font-size: 14px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--text-secondary);
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .subject-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+    }
+    
+    .subject-card {
+      padding: 16px 12px;
+      text-align: center;
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      border-radius: 14px;
+      cursor: pointer;
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+    }
+    
+    .subject-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(100, 110, 140, 0.15);
+    }
+    
+    .subject-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: var(--subject-color);
+      border-radius: 14px 14px 0 0;
+      opacity: 0.8;
+    }
+    
+    .subject-icon {
+      font-size: 28px;
+      margin-bottom: 6px;
+    }
+    
+    .subject-name {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      margin-bottom: 4px;
+    }
+    
+    .subject-level {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+    
+    .subject-bar {
+      height: 4px;
+      background: rgba(200, 200, 220, 0.3);
+      border-radius: 2px;
+      margin-top: 8px;
+      overflow: hidden;
+    }
+    
+    .subject-bar-fill {
+      height: 100%;
+      border-radius: 2px;
+      transition: width 0.5s ease;
+    }
+    
+    /* ========== 数据模板展示页 (v0.4.1新增) ========== */
+    .template-section {
+      margin-bottom: 32px;
+    }
+    
+    .template-card {
+      background: rgba(255,255,255,0.95);
+      border: 1px solid rgba(200, 200, 220, 0.3);
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 16px;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .template-card::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 4px;
+    }
+    
+    .template-card.practice::before { background: var(--type-practice); }
+    .template-card.exam::before { background: var(--type-exam); }
+    .template-card.recitation::before { background: var(--type-recitation); }
+    
+    .template-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    
+    .template-type-badge {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      color: #fff;
+    }
+    
+    .template-type-badge.practice { background: var(--type-practice); }
+    .template-type-badge.exam { background: var(--type-exam); }
+    .template-type-badge.recitation { background: var(--type-recitation); }
+    
+    .template-type-icon {
+      font-size: 16px;
+    }
+    
+    .template-name {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+    
+    .template-code {
+      background: #1a1a2e;
+      border-radius: 8px;
+      padding: 16px;
+      overflow-x: auto;
+      font-family: 'Monaco', 'Menlo', monospace;
+      font-size: 12px;
+      line-height: 1.6;
+      color: #e2e8f0;
+    }
+    
+    .template-code .key {
+      color: #93c5fd;
+    }
+    
+    .template-code .string {
+      color: #86efac;
+    }
+    
+    .template-code .number {
+      color: #fcd34d;
+    }
+    
+    .template-code .comment {
+      color: #6b7280;
+      font-style: italic;
+    }
+    
+    /* 字段说明 */
+    .field-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 8px;
+      margin-top: 12px;
+    }
+    
+    .field-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      background: rgba(200, 200, 220, 0.1);
+      border-radius: 8px;
+      font-size: 12px;
+    }
+    
+    .field-name {
+      font-family: monospace;
+      color: var(--accent-blue);
+      font-weight: 500;
+    }
+    
+    .field-type {
+      color: var(--text-muted);
+      font-size: 11px;
+    }
+    
+    .field-required {
+      color: var(--accent-coral);
+      font-size: 10px;
+    }
+    
+    /* 统一记录结构展示 */
+    .unified-structure {
+      background: linear-gradient(135deg, rgba(59, 130, 246, 0.08), rgba(139, 92, 246, 0.08));
+      border: 1px solid rgba(59, 130, 246, 0.2);
+      border-radius: 16px;
+      padding: 24px;
+      margin-bottom: 24px;
+    }
+    
+    .unified-structure-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    /* 示例记录卡片 */
+    .sample-records {
+      margin-top: 24px;
+    }
+    
+    .sample-record {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      background: rgba(255,255,255,0.9);
+      border-radius: 10px;
+      margin-bottom: 8px;
+      transition: all 0.2s;
+    }
+    
+    .sample-record:hover {
+      transform: translateX(4px);
+      box-shadow: 0 2px 8px rgba(100, 110, 140, 0.1);
+    }
+    
+    .sample-record-type {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    
+    .sample-record-type.practice { background: var(--type-practice); }
+    .sample-record-type.exam { background: var(--type-exam); }
+    .sample-record-type.recitation { background: var(--type-recitation); }
+    
+    .sample-record-content {
+      flex: 1;
+      font-size: 13px;
+    }
+    
+    .sample-record-subject {
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+    
+    .sample-record-desc {
+      color: var(--text-secondary);
+      margin-left: 8px;
+    }
+    
+    .sample-record-time {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+    
+    .sample-record-score {
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-size: 12px;
+    }
+    
+    .sample-record-score.excellent {
+      background: rgba(16, 185, 129, 0.15);
+      color: var(--accent-green);
+    }
+    
+    .sample-record-score.good {
+      background: rgba(59, 130, 246, 0.15);
+      color: var(--accent-blue);
+    }
+    
+    .sample-record-score.failed {
+      background: rgba(239, 68, 68, 0.15);
+      color: var(--accent-coral);
+    }
+    
+    /* ========== 技能树页 ========== */
+    .skill-tree-legend {
+      display: flex;
+      gap: 16px;
+      padding: 12px 16px;
+      background: rgba(255, 255, 255, 0.9);
+      border-radius: 10px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+    
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      color: var(--text-secondary);
+    }
+    
+    .legend-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+    }
+    
+    .skill-tree-container {
+      width: 100%;
+      height: 450px;
+      background: linear-gradient(135deg, #fafbfc, #f0f4f8);
+      border-radius: 16px;
+      position: relative;
+    }
+    
+    @keyframes nodeGlow {
+      0%, 100% {
+        filter: drop-shadow(0 0 8px var(--glow-color, #FF4500));
+        opacity: 1;
+      }
+      50% {
+        filter: drop-shadow(0 0 16px var(--glow-color, #FF4500));
+        opacity: 0.85;
+      }
+    }
+    
+    @keyframes nodeBreath {
+      0%, 100% {
+        transform: scale(1);
+        box-shadow: 0 0 12px var(--glow-color, rgba(255, 140, 0, 0.4));
+      }
+      50% {
+        transform: scale(1.05);
+        box-shadow: 0 0 20px var(--glow-color, rgba(255, 140, 0, 0.6));
+      }
+    }
+    
+    .node-detail-panel {
+      display: none;
+      padding: 20px;
+      background: rgba(255, 255, 255, 0.98);
+      border-radius: 12px;
+      margin-top: 16px;
+      border: 1px solid rgba(200, 200, 220, 0.3);
+      box-shadow: 0 4px 16px rgba(100, 110, 140, 0.08);
+    }
+    
+    .node-detail-panel.active { display: block; }
+    
+    .node-detail-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+    
+    .node-detail-title {
+      font-size: 16px;
+      font-weight: 600;
+    }
+    
+    .node-detail-subtitle {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+    
+    .node-detail-temp {
+      font-size: 24px;
+      font-weight: 700;
+    }
+    
+    .node-detail-stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    
+    .node-stat {
+      padding: 12px;
+      background: rgba(200, 200, 220, 0.1);
+      border-radius: 8px;
+      text-align: center;
+    }
+    
+    .node-stat-value { font-size: 18px; font-weight: 600; color: var(--text-primary); }
+    .node-stat-label { font-size: 11px; color: var(--text-muted); margin-top: 4px; }
+    
+    /* ========== 遗忘曲线页 ========== */
+    .forget-chart-wrapper {
+      position: relative;
+      margin-bottom: 24px;
+    }
+    
+    .forget-chart {
+      width: 100%;
+      height: 320px;
+      background: transparent;
+      border-radius: 16px;
+    }
+    
+    .chart-tips {
+      position: absolute;
+      top: 8px;
+      left: 12px;
+      font-size: 11px;
+      color: var(--text-muted);
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      z-index: 10;
+      pointer-events: none;
+    }
+    
+    .chart-tip {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      opacity: 0.8;
+    }
+    
+    .chart-tip-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+    }
+    
+    .shadow-queue-section {
+      margin-bottom: 24px;
+    }
+    
+    .shadow-card {
+      padding: 16px;
+      padding-left: 20px;
+      background: rgba(100, 100, 120, 0.06);
+      border: 1px solid rgba(100, 100, 120, 0.15);
+      border-radius: 12px;
+      margin-bottom: 12px;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .shadow-card::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 4px;
+      background: var(--subject-color, #6B7280);
+      border-radius: 12px 0 0 12px;
+    }
+    
+    @keyframes coolGlow {
+      0%, 100% {
+        box-shadow: 0 0 8px rgba(59, 130, 246, 0.3), inset 0 0 0 1px rgba(59, 130, 246, 0.1);
+      }
+      50% {
+        box-shadow: 0 0 16px rgba(59, 130, 246, 0.5), inset 0 0 0 1px rgba(59, 130, 246, 0.2);
+      }
+    }
+    
+    .shadow-card.cold-glow {
+      animation: coolGlow 2s ease-in-out infinite;
+    }
+    
+    @keyframes urgentBorder {
+      0%, 100% {
+        border-color: rgba(239, 68, 68, 0.3);
+        box-shadow: 0 0 12px rgba(239, 68, 68, 0.2);
+      }
+      50% {
+        border-color: rgba(239, 68, 68, 0.6);
+        box-shadow: 0 0 20px rgba(239, 68, 68, 0.35);
+      }
+    }
+    
+    .shadow-card.urgent-border {
+      animation: urgentBorder 1.5s ease-in-out infinite;
+    }
+    
+    .shadow-card:hover {
+      background: rgba(100, 100, 120, 0.1);
+      transform: translateX(4px);
+    }
+    
+    .shadow-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+    
+    .shadow-title {
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .shadow-badge {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      background: rgba(100, 100, 120, 0.1);
+      border-radius: 12px;
+      font-size: 12px;
+      color: #6B7280;
+    }
+    
+    .shadow-temp-bar {
+      height: 6px;
+      background: rgba(200, 200, 220, 0.3);
+      border-radius: 3px;
+      overflow: hidden;
+      margin-top: 8px;
+      position: relative;
+    }
+    
+    .shadow-temp-fill {
+      height: 100%;
+      border-radius: 3px;
+      transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+    }
+    
+    .shadow-temp-fill::after {
+      content: '';
+      position: absolute;
+      right: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 10px;
+      height: 10px;
+      background: inherit;
+      border-radius: 50%;
+      border: 2px solid #fff;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+    }
+    
+    .shadow-reason {
+      font-size: 13px;
+      color: var(--text-secondary);
+      margin-top: 10px;
+    }
+    
+    .shadow-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 6px;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+    
+    .recommend-section {
+      margin-bottom: 24px;
+    }
+    
+    .recommend-card {
+      padding: 16px;
+      background: rgba(59, 130, 246, 0.04);
+      border: 1px solid rgba(59, 130, 246, 0.1);
+      border-radius: 12px;
+      margin-bottom: 12px;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    @keyframes urgentPulse {
+      0%, 100% {
+        border-color: rgba(239, 68, 68, 0.4);
+        box-shadow: 0 0 15px rgba(239, 68, 68, 0.15);
+      }
+      50% {
+        border-color: rgba(239, 68, 68, 0.7);
+        box-shadow: 0 0 25px rgba(239, 68, 68, 0.25);
+      }
+    }
+    
+    .recommend-card.urgent-type {
+      animation: urgentPulse 1.8s ease-in-out infinite;
+      background: rgba(239, 68, 68, 0.04);
+      border-color: rgba(239, 68, 68, 0.3);
+    }
+    
+    .recommend-card:hover {
+      background: rgba(59, 130, 246, 0.08);
+      transform: translateX(4px);
+    }
+    
+    .recommend-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 10px;
+    }
+    
+    .recommend-title {
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .priority-badge {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      font-size: 13px;
+      font-weight: 700;
+      color: #fff;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+      background: linear-gradient(135deg, #fbbf24, #f59e0b, #ef4444);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    
+    .priority-badge:hover {
+      transform: scale(1.1);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    }
+    
+    .recommend-badge {
+      padding: 2px 8px;
+      border-radius: 10px;
+      font-size: 11px;
+      font-weight: 500;
+    }
+    
+    .recommend-badge.urgent { background: rgba(239, 68, 68, 0.15); color: #ef4444; }
+    .recommend-badge.weakness { background: rgba(245, 158, 11, 0.15); color: var(--accent-orange); }
+    .recommend-badge.progression { background: rgba(16, 185, 129, 0.15); color: var(--accent-green); }
+    
+    .temp-bar {
+      height: 6px;
+      background: rgba(200, 200, 220, 0.3);
+      border-radius: 3px;
+      overflow: hidden;
+      margin-top: 12px;
+    }
+    
+    .temp-fill {
+      height: 100%;
+      border-radius: 3px;
+      transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    /* ========== 学习日志页 ========== */
+    .log-filters {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+    
+    .filter-select {
+      padding: 8px 12px;
+      background: var(--bg-white);
+      border: 1px solid rgba(200, 200, 220, 0.4);
+      border-radius: 8px;
+      font-size: 12px;
+      color: var(--text-primary);
+    }
+    
+    .log-container {
+      background: rgba(255,255,255,0.95);
+      border-radius: 12px;
+      padding: 8px 16px;
+      max-height: 400px;
+      overflow-y: auto;
+      border: 1px solid rgba(200, 200, 220, 0.3);
+    }
+    
+    .log-entry {
+      padding: 16px 0;
+      border-bottom: 1px solid rgba(200, 200, 220, 0.2);
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      transition: background 0.2s;
+    }
+    
+    .log-entry:last-child { border-bottom: none; }
+    .log-entry:hover { background: rgba(59, 130, 246, 0.04); }
+    
+    .log-activity-type {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    
+    .log-activity-type.practice { background: var(--type-practice); }
+    .log-activity-type.exam { background: var(--type-exam); }
+    .log-activity-type.recitation { background: var(--type-recitation); }
+    
+    .log-time { font-size: 11px; color: var(--text-muted); min-width: 100px; }
+    .log-subject { font-weight: 600; min-width: 50px; }
+    .log-knowledge { flex: 1; color: var(--text-secondary); font-size: 13px; }
+    .log-accuracy { font-size: 12px; padding: 3px 8px; border-radius: 4px; background: rgba(59, 130, 246, 0.1); }
+    .log-xp { font-weight: 700; color: var(--accent-green); font-size: 14px; }
+    
+    .log-empty {
+      text-align: center;
+      padding: 40px;
+      color: var(--text-muted);
+    }
+    
+    .achievements {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-top: 16px;
+    }
+    
+    .achievement-badge {
+      padding: 8px 14px;
+      background: linear-gradient(135deg, rgba(245, 158, 11, 0.15), rgba(245, 158, 11, 0.05));
+      border: 1px solid rgba(245, 158, 11, 0.25);
+      border-radius: 20px;
+      font-size: 12px;
+      color: var(--accent-gold);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    
+    /* ========== 设置页 ========== */
+    .settings-list {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    
+    .settings-item {
+      padding: 18px 20px;
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      border-radius: 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 2px 8px rgba(100, 110, 140, 0.05);
+    }
+    
+    .settings-item:hover {
+      transform: translateX(4px);
+      box-shadow: 0 4px 16px rgba(100, 110, 140, 0.1);
+      background: var(--glass-bg-hover);
+    }
+    
+    .settings-item.disabled {
+      opacity: 0.6;
+      cursor: default;
+    }
+    
+    .settings-info {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    
+    .settings-icon {
+      font-size: 24px;
+    }
+    
+    .settings-name {
+      font-weight: 600;
+      font-size: 14px;
+    }
+    
+    .settings-desc {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+    
+    .settings-value {
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+    
+    .settings-arrow {
+      font-size: 18px;
+      color: var(--text-muted);
+      transition: transform 0.2s;
+    }
+    
+    .settings-item:hover .settings-arrow {
+      transform: translateX(4px);
+    }
+    
+    /* ========== 关于页面模态框 ========== */
+    .about-modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 1000;
+      animation: fadeIn 0.3s ease;
+    }
+    
+    .about-modal.active {
+      display: block;
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    
+    .about-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.4);
+    }
+    
+    .about-content {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      max-height: 85vh;
+      background: var(--bg-primary);
+      border-radius: 24px 24px 0 0;
+      padding: 24px;
+      overflow-y: auto;
+      animation: slideUp 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    @keyframes slideUp {
+      from { transform: translateY(100%); }
+      to { transform: translateY(0); }
+    }
+    
+    .about-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+    }
+    
+    .about-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+    
+    .about-close {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: rgba(200, 200, 220, 0.3);
+      border: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      cursor: pointer;
+      color: var(--text-secondary);
+      transition: all 0.2s;
+    }
+    
+    .about-close:hover {
+      background: rgba(200, 200, 220, 0.5);
+    }
+    
+    .about-developer {
+      background: linear-gradient(135deg, var(--accent-blue), #667eea);
+      border-radius: 16px;
+      padding: 24px;
+      color: #fff;
+      margin-bottom: 24px;
+      text-align: center;
+    }
+    
+    .about-avatar {
+      margin-bottom: 16px;
+    }
+    
+    .about-avatar img {
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
+      border: 3px solid rgba(255, 255, 255, 0.3);
+      object-fit: cover;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+    }
+    
+    .about-system-name {
+      font-size: 22px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+    
+    .about-version {
+      font-size: 14px;
+      opacity: 0.9;
+      margin-bottom: 16px;
+    }
+    
+    .about-version-badge {
+      display: inline-block;
+      padding: 4px 12px;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 12px;
+      font-size: 13px;
+      font-weight: 600;
+    }
+    
+    .about-developer-info {
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    
+    .about-developer-name {
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+    
+    .about-developer-desc {
+      font-size: 13px;
+      opacity: 0.85;
+    }
+    
+    .changelog-section {
+      margin-top: 8px;
+    }
+    
+    .changelog-title {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .changelog-version {
+      margin-bottom: 20px;
+    }
+    
+    .changelog-version-header {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--accent-blue);
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .changelog-version-header.current {
+      color: var(--accent-green);
+    }
+    
+    .changelog-current-tag {
+      padding: 2px 8px;
+      background: rgba(16, 185, 129, 0.15);
+      color: var(--accent-green);
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+    
+    .changelog-items {
+      padding-left: 8px;
+    }
+    
+    .changelog-item {
+      padding: 8px 0 8px 16px;
+      font-size: 13px;
+      color: var(--text-secondary);
+      border-left: 2px solid var(--glass-border);
+      margin-bottom: 6px;
+      line-height: 1.5;
+    }
+    
+    .changelog-item:last-child {
+      margin-bottom: 0;
+    }
+    
+    .changelog-item-version {
+      color: var(--text-primary);
+      font-weight: 500;
+      margin-right: 6px;
+    }
+    
+    /* ========== 动画 ========== */
+    @keyframes breathe-glow {
+      0%, 100% { box-shadow: 0 0 8px rgba(255, 215, 0, 0.3), 0 0 16px rgba(255, 215, 0, 0.1); }
+      50% { box-shadow: 0 0 16px rgba(255, 215, 0, 0.5), 0 0 32px rgba(255, 215, 0, 0.2); }
+    }
+    .breathing-node { animation: breathe-glow 3s ease-in-out infinite; }
+    
+    .toast {
+      position: fixed;
+      top: 24px;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 14px 28px;
+      border-radius: 12px;
+      font-size: 14px;
+      font-weight: 500;
+      z-index: 1001;
+      box-shadow: 0 8px 32px rgba(100, 110, 140, 0.25);
+      animation: toastIn 0.3s ease;
+    }
+    
+    .toast.success { background: linear-gradient(135deg, var(--accent-green), #059669); color: #fff; }
+    .toast.info { background: linear-gradient(135deg, var(--accent-blue), #2563EB); color: #fff; }
+    
+    @keyframes toastIn {
+      from { transform: translateX(-50%) translateY(-20px); opacity: 0; }
+      to { transform: translateX(-50%) translateY(0); opacity: 1; }
+    }
+    
+    /* ========== 响应式 ========== */
+    @media (max-width: 768px) {
+      .container { padding: 16px 16px 100px; }
+      .hero-stats { grid-template-columns: repeat(2, 1fr); }
+      .hero-level-card { min-width: 100px; padding: 16px 20px; }
+      .hero-level-value { font-size: 32px; }
+      .subject-grid { grid-template-columns: repeat(2, 1fr); }
+      .skill-tree-container { height: 350px; }
+      .about-content { max-height: 80vh; }
+      .forget-chart { height: 280px; }
+      .chart-tips { display: none; }
+      .field-list { grid-template-columns: 1fr; }
+    }
+    
+    @media (max-width: 480px) {
+      .hero-stats { grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+      .hero-stat { padding: 12px 8px; }
+      .hero-stat-value { font-size: 22px; }
+      .hero-level-card { display: none; }
+      .launch-level { font-size: 56px; }
+      .launch-level-display { padding: 24px 40px; }
+      .about-content { max-height: 75vh; border-radius: 16px 16px 0 0; }
+    }
+  </style>
+</head>
+<body>
+  <!-- 启动页 -->
+  <div class="launch-page" id="launchPage">
+    <div class="launch-content">
+      <div class="launch-icon">📚</div>
+      <h1 class="launch-title">学习RPG</h1>
+      <p class="launch-subtitle">COGNITIVE OS</p>
+      
+      <div class="launch-level-display">
+        <div class="launch-level" id="launchLevel">Lv1</div>
+        <div class="launch-rank" id="launchRank">初学者</div>
+        <div class="launch-rank-jp" id="launchRankJp">Shogakusha</div>
+      </div>
+      
+      <div class="launch-progress">
+        <div class="launch-progress-bar">
+          <div class="launch-progress-fill" id="launchProgressFill" style="width: 0%"></div>
+        </div>
+        <div class="launch-progress-text">
+          <span id="launchCurrentXp">0</span> / <span id="launchNextXp">5000</span> XP
+        </div>
+      </div>
+      
+      <button class="launch-btn" onclick="enterMain()">LAUNCH</button>
+    </div>
+  </div>
+  
+  <!-- 主页面 -->
+  <div class="main-page" id="mainPage">
+    <div class="container">
+      <header class="header">
+        <div class="brand">
+          <div class="brand-icon">📚</div>
+          <div class="brand-text">
+            <h1>学习RPG · 认知操作系统</h1>
+            <p>v0.4.1</p>
+          </div>
+        </div>
+      </header>
+      
+      <!-- 概览页 -->
+      <div class="page-content active" id="page-overview">
+        <div class="overview-hero">
+          <div class="hero-stats">
+            <div class="hero-stat">
+              <div class="hero-stat-icon">⚡</div>
+              <div class="hero-stat-value green" id="todayXp">+0</div>
+              <div class="hero-stat-label">今日 XP</div>
+            </div>
+            <div class="hero-stat">
+              <div class="hero-stat-icon">🔥</div>
+              <div class="hero-stat-value gold" id="streak">0</div>
+              <div class="hero-stat-label">连续天数</div>
+            </div>
+            <div class="hero-stat">
+              <div class="hero-stat-icon">🏆</div>
+              <div class="hero-stat-value blue" id="totalXp">0</div>
+              <div class="hero-stat-label">总 XP</div>
+            </div>
+          </div>
+          
+          <div class="hero-level-card">
+            <div class="hero-level-value" id="levelDisplay">Lv1</div>
+            <div class="hero-level-title" id="titleDisplay">初学者</div>
+            <div class="hero-level-jp" id="titleJpDisplay">Shogakusha</div>
+          </div>
+        </div>
+        
+        <div class="glass-card total-progress">
+          <div class="progress-header">
+            <span class="progress-label">总等级进度</span>
+            <span class="progress-value"><span id="xpProgress">0</span> / <span id="xpNeeded">5000</span> XP</span>
+          </div>
+          <div class="progress-bar">
+            <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+          </div>
+        </div>
+        
+        <div class="subject-section">
+          <div class="section-title">📊 学科等级</div>
+          <div class="subject-grid" id="subjectGrid"></div>
+        </div>
+      </div>
+      
+      <!-- 数据模板页 (v0.4.1新增) -->
+      <div class="page-content" id="page-template">
+        <div class="section-title">📋 数据模板标准化</div>
+        
+        <div class="glass-card">
+          <!-- 统一记录结构 -->
+          <div class="unified-structure">
+            <div class="unified-structure-title">
+              <span>🔷</span>
+              <span>统一记录数据结构 (Unified Record Schema)</span>
+            </div>
+            <div class="template-code">
+<span class="comment">// 基础字段 - 所有活动类型共有</span>
+{
+  <span class="key">"recordID"</span>: <span class="string">"uuid"</span>,           <span class="comment">// 唯一标识符</span>
+  <span class="key">"timestamp"</span>: <span class="string">"Date"</span>,           <span class="comment">// 记录时间</span>
+  <span class="key">"subject"</span>: <span class="string">"logos|mythos|..."</span>, <span class="comment">// 学科</span>
+  <span class="key">"knowledgePoints"</span>: [<span class="string">"知识点1"</span>], <span class="comment">// 涉及的知识点</span>
+  <span class="key">"durationMinutes"</span>: <span class="number">45</span>,          <span class="comment">// 学习时长(分钟)</span>
+  <span class="key">"activityType"</span>: <span class="string">"practice|exam|recitation"</span>,
+  <span class="comment">// ↑ 活动类型字段，下方根据类型扩展</span>
+  
+  <span class="comment">// ↓ 根据 activityType 扩展的字段</span>
+}
+            </div>
+            <div class="field-list">
+              <div class="field-item">
+                <span class="field-name">recordID</span>
+                <span class="field-type">string</span>
+                <span class="field-required">必填</span>
+              </div>
+              <div class="field-item">
+                <span class="field-name">timestamp</span>
+                <span class="field-type">Date</span>
+                <span class="field-required">必填</span>
+              </div>
+              <div class="field-item">
+                <span class="field-name">subject</span>
+                <span class="field-type">enum</span>
+                <span class="field-required">必填</span>
+              </div>
+              <div class="field-item">
+                <span class="field-name">knowledgePoints</span>
+                <span class="field-type">string[]</span>
+                <span class="field-required">必填</span>
+              </div>
+              <div class="field-item">
+                <span class="field-name">durationMinutes</span>
+                <span class="field-type">number</span>
+              </div>
+              <div class="field-item">
+                <span class="field-name">activityType</span>
+                <span class="field-type">enum</span>
+                <span class="field-required">必填</span>
+              </div>
+            </div>
+          </div>
+          
+          <!-- 三种活动类型模板 -->
+          <div class="template-section">
+            <div class="section-title" style="font-size: 13px; margin-bottom: 12px;">📝 三种活动类型模板</div>
+            
+            <!-- 刷题记录 -->
+            <div class="template-card practice">
+              <div class="template-header">
+                <span class="template-type-badge practice">
+                  <span class="template-type-icon">✍️</span>
+                  <span>刷题记录</span>
+                </span>
+                <span class="template-name">Practice Record</span>
+              </div>
+              <div class="template-code">
+{
+  <span class="key">"activityType"</span>: <span class="string">"practice"</span>,
+  <span class="key">"totalQuestions"</span>: <span class="number">20</span>,      <span class="comment">// 总题数</span>
+  <span class="key">"correctCount"</span>: <span class="number">14</span>,         <span class="comment">// 正确题数</span>
+  <span class="key">"accuracy"</span>: <span class="number">70</span>               <span class="comment">// 正确率%</span>
+}
+              </div>
+              <div class="field-list">
+                <div class="field-item">
+                  <span class="field-name">totalQuestions</span>
+                  <span class="field-type">number</span>
+                  <span class="field-required">必填</span>
+                </div>
+                <div class="field-item">
+                  <span class="field-name">correctCount</span>
+                  <span class="field-type">number</span>
+                  <span class="field-required">必填</span>
+                </div>
+                <div class="field-item">
+                  <span class="field-name">accuracy</span>
+                  <span class="field-type">number</span>
+                  <span class="field-required">必填</span>
+                </div>
+              </div>
+            </div>
+            
+            <!-- 考试记录 -->
+            <div class="template-card exam">
+              <div class="template-header">
+                <span class="template-type-badge exam">
+                  <span class="template-type-icon">📝</span>
+                  <span>考试记录</span>
+                </span>
+                <span class="template-name">Exam Record</span>
+              </div>
+              <div class="template-code">
+{
+  <span class="key">"activityType"</span>: <span class="string">"exam"</span>,
+  <span class="key">"totalScore"</span>: <span class="number">150</span>,         <span class="comment">// 满分</span>
+  <span class="key">"obtainedScore"</span>: <span class="number">112</span>,       <span class="comment">// 实得分</span>
+  <span class="key">"accuracy"</span>: <span class="number">74.67</span>             <span class="comment">// 得分的正确率%</span>
+}
+              </div>
+              <div class="field-list">
+                <div class="field-item">
+                  <span class="field-name">totalScore</span>
+                  <span class="field-type">number</span>
+                  <span class="field-required">必填</span>
+                </div>
+                <div class="field-item">
+                  <span class="field-name">obtainedScore</span>
+                  <span class="field-type">number</span>
+                  <span class="field-required">必填</span>
+                </div>
+                <div class="field-item">
+                  <span class="field-name">accuracy</span>
+                  <span class="field-type">number</span>
+                  <span class="field-required">必填</span>
+                </div>
+              </div>
+            </div>
+            
+            <!-- 背诵记录 -->
+            <div class="template-card recitation">
+              <div class="template-header">
+                <span class="template-type-badge recitation">
+                  <span class="template-type-icon">🗣️</span>
+                  <span>背诵记录</span>
+                </span>
+                <span class="template-name">Recitation Record</span>
+              </div>
+              <div class="template-code">
+{
+  <span class="key">"activityType"</span>: <span class="string">"recitation"</span>,
+  <span class="key">"result"</span>: <span class="string">"perfect"</span>           <span class="comment">// perfect=100%, partial=50%, failed=0%</span>
+}
+              </div>
+              <div class="field-list">
+                <div class="field-item">
+                  <span class="field-name">result</span>
+                  <span class="field-type">"perfect"|"partial"|"failed"</span>
+                  <span class="field-required">必填</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- 示例数据 -->
+          <div class="sample-records">
+            <div class="section-title" style="font-size: 13px; margin-bottom: 12px;">💡 示例学习记录</div>
+            <div id="sampleRecordsList"></div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- 技能树页 -->
+      <div class="page-content" id="page-skills">
+        <div class="section-title">🌳 技能树图谱</div>
+        
+        <div class="skill-tree-legend">
+          <div class="legend-item"><span class="legend-dot" style="background:var(--temp-searing)"></span>灼热(>95%)</div>
+          <div class="legend-item"><span class="legend-dot" style="background:var(--temp-hot)"></span>温热(80-95%)</div>
+          <div class="legend-item"><span class="legend-dot" style="background:var(--temp-warm)"></span>温暖(60-80%)</div>
+          <div class="legend-item"><span class="legend-dot" style="background:var(--temp-normal)"></span>常温(40-60%)</div>
+          <div class="legend-item"><span class="legend-dot" style="background:var(--temp-cold)"></span>微凉(20-40%)</div>
+          <div class="legend-item"><span class="legend-dot" style="background:var(--temp-frozen)"></span>冷却(<20%)</div>
+        </div>
+        
+        <div class="glass-card">
+          <div class="skill-tree-container" id="skillTreeContainer"></div>
+          
+          <div class="node-detail-panel" id="nodeDetailPanel">
+            <div class="node-detail-header">
+              <div>
+                <div class="node-detail-title" id="nodeDetailTitle">知识点名称</div>
+                <div class="node-detail-subtitle" id="nodeDetailSubtitle">科目 · 历史记录</div>
+              </div>
+              <div class="node-detail-temp" id="nodeDetailTemp">85%</div>
+            </div>
+            <div class="node-detail-stats">
+              <div class="node-stat">
+                <div class="node-stat-value" id="nodeStudyCount">0</div>
+                <div class="node-stat-label">学习次数</div>
+              </div>
+              <div class="node-stat">
+                <div class="node-stat-value" id="nodeAvgAccuracy">0%</div>
+                <div class="node-stat-label">平均正确率</div>
+              </div>
+              <div class="node-stat">
+                <div class="node-stat-value" id="nodeTotalXp">0</div>
+                <div class="node-stat-label">累计XP</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- 遗忘曲线页 -->
+      <div class="page-content" id="page-forget">
+        <div class="section-title">📉 遗忘曲线分析</div>
+        
+        <div class="glass-card">
+          <div class="forget-chart-wrapper">
+            <div class="chart-tips">
+              <div class="chart-tip">
+                <span class="chart-tip-dot" style="background:#10b981"></span>
+                <span>复习最佳时机</span>
+              </div>
+              <div class="chart-tip">
+                <span class="chart-tip-dot" style="background:#3b82f6"></span>
+                <span>记忆保留曲线</span>
+              </div>
+            </div>
+            <div class="forget-chart" id="forgetChart"></div>
+          </div>
+          
+          <div class="shadow-queue-section">
+            <div class="section-title" style="font-size: 13px; margin-top: 24px;">🌙 阴影复习队列</div>
+            <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 16px;">
+              这些知识点已降至"微凉"温度，在后台安静等待复习
+            </p>
+            <div id="shadowQueueList"></div>
+          </div>
+          
+          <div class="recommend-section">
+            <div class="section-title" style="font-size: 13px;">💡 复习建议</div>
+            <div id="recommendList"></div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- 学习日志页 -->
+      <div class="page-content" id="page-log">
+        <div class="section-title">📜 学习日志</div>
+        
+        <div class="glass-card">
+          <div class="log-filters">
+            <select class="filter-select" id="logFilterSubject">
+              <option value="">全部科目</option>
+              <option value="logos">数学</option>
+              <option value="mythos">语文</option>
+              <option value="lingua">英语</option>
+              <option value="physis">物理</option>
+              <option value="khēmeia">化学</option>
+              <option value="zōē">生物</option>
+              <option value="politeia">政治</option>
+            </select>
+            <select class="filter-select" id="logFilterType">
+              <option value="">全部类型</option>
+              <option value="practice">✍️ 刷题</option>
+              <option value="exam">📝 考试</option>
+              <option value="recitation">🗣️ 背诵</option>
+            </select>
+            <select class="filter-select" id="logFilterDate">
+              <option value="">全部时间</option>
+              <option value="today">今天</option>
+              <option value="week">本周</option>
+              <option value="month">本月</option>
+            </select>
+          </div>
+          
+          <div class="log-container" id="logContainer">
+            <div class="log-empty">暂无学习记录 ✨</div>
+          </div>
+          
+          <div class="achievements" id="achievements"></div>
+        </div>
+      </div>
+      
+      <!-- 设置页 -->
+      <div class="page-content" id="page-settings">
+        <div class="section-title">⚙️ 设置</div>
+        
+        <div class="settings-list">
+          <div class="settings-item disabled">
+            <div class="settings-info">
+              <span class="settings-icon">📱</span>
+              <div>
+                <div class="settings-name">数据同步</div>
+                <div class="settings-desc">通过微信AI自动处理</div>
+              </div>
+            </div>
+            <span class="settings-value">已启用</span>
+          </div>
+          
+          <div class="settings-item disabled">
+            <div class="settings-info">
+              <span class="settings-icon">🎨</span>
+              <div>
+                <div class="settings-name">主题模式</div>
+                <div class="settings-desc">当前为浅色模式</div>
+              </div>
+            </div>
+            <span class="settings-value">浅色</span>
+          </div>
+          
+          <div class="settings-item" onclick="openAbout()">
+            <div class="settings-info">
+              <span class="settings-icon">ℹ️</span>
+              <div>
+                <div class="settings-name">关于</div>
+                <div class="settings-desc">学习RPG认知操作系统</div>
+              </div>
+            </div>
+            <span class="settings-arrow">›</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- 关于页面模态框 -->
+  <div class="about-modal" id="aboutModal">
+    <div class="about-overlay" onclick="closeAbout()"></div>
+    <div class="about-content">
+      <div class="about-header">
+        <span class="about-title">关于</span>
+        <button class="about-close" onclick="closeAbout()">✕</button>
+      </div>
+      
+      <div class="about-developer">
+        <div class="about-avatar">
+          <img src="https://www.coze.cn/s/7wEF9WoUgJo/" alt="开发者头像" />
+        </div>
+        <div class="about-system-name">📚 学习RPG认知操作系统</div>
+        <div class="about-version">
+          <span class="about-version-badge">v0.4.1</span>
+        </div>
+        <div class="about-developer-info">
+          <div class="about-developer-name">墨澜的Miku</div>
+          <div class="about-developer-desc">AI学习助手</div>
+        </div>
+      </div>
+      
+      <div class="changelog-section">
+        <div class="changelog-title">📝 更新日志</div>
+        
+        <div class="changelog-version">
+          <div class="changelog-version-header current">
+            v0.4.x（当前阶段 - 数据模板标准化）
+            <span class="changelog-current-tag">当前</span>
+          </div>
+          <div class="changelog-items">
+            <div class="changelog-item">
+              <span class="changelog-item-version">v0.4.1 (2026-05-10):</span> 数据模板标准化：实现统一记录数据结构，支持三种活动类型（practice刷题/exam考试/recitation背诵）；新增数据类型页面展示模板规范；新增活动类型筛选器。
+            </div>
+          </div>
+        </div>
+        
+        <div class="changelog-version">
+          <div class="changelog-version-header">v0.3.x（界面优化）</div>
+          <div class="changelog-items">
+            <div class="changelog-item">
+              <span class="changelog-item-version">v0.3.5:</span> 玻璃效果全面升级：参考苹果液态玻璃效果
+            </div>
+            <div class="changelog-item">
+              <span class="changelog-item-version">v0.3.4:</span> 遗忘曲线页面全面优化
+            </div>
+            <div class="changelog-item">
+              <span class="changelog-item-version">v0.3.0:</span> 进入V0.3阶段，锁定版本号
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- 底部导航 -->
+  <nav class="bottom-nav" id="bottomNav">
+    <div class="nav-items">
+      <button class="nav-item active" onclick="switchPage('overview')">
+        <span class="nav-icon">🏠</span>
+        <span class="nav-label">概览</span>
+      </button>
+      <button class="nav-item" onclick="switchPage('template')">
+        <span class="nav-icon">📋</span>
+        <span class="nav-label">模板</span>
+      </button>
+      <button class="nav-item" onclick="switchPage('skills')">
+        <span class="nav-icon">🌳</span>
+        <span class="nav-label">技能树</span>
+      </button>
+      <button class="nav-item" onclick="switchPage('forget')">
+        <span class="nav-icon">📉</span>
+        <span class="nav-label">遗忘曲线</span>
+      </button>
+      <button class="nav-item" onclick="switchPage('log')">
+        <span class="nav-icon">📜</span>
+        <span class="nav-label">日志</span>
+      </button>
+    </div>
+  </nav>
+  
+  <div id="toast" class="toast" style="display:none"></div>
+  
+  <script>
+    // ========== v0.4.1 数据模板系统 ==========
+    
+    // 生成UUID
+    function generateUUID() {
+      return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+        const r = Math.random() * 16 | 0;
+        const v = c === 'x' ? r : (r & 0x3 | 0x8);
+        return v.toString(16);
+      });
+    }
+    
+    // 活动类型定义
+    const ACTIVITY_TYPES = {
+      practice: {
+        name: '刷题记录',
+        icon: '✍️',
+        color: '#3b82f6',
+        scoreField: 'accuracy'
+      },
+      exam: {
+        name: '考试记录',
+        icon: '📝',
+        color: '#8b5cf6',
+        scoreField: 'accuracy'
+      },
+      recitation: {
+        name: '背诵记录',
+        icon: '🗣️',
+        color: '#10b981',
+        scoreField: 'result'
+      }
+    };
+    
+    // 背诵结果到分数的映射
+    const RECITATION_SCORES = {
+      perfect: 100,
+      partial: 50,
+      failed: 0
+    };
+    
+    // ========== 关于页面 ==========
+    function openAbout() {
+      document.getElementById('aboutModal').classList.add('active');
+      document.body.style.overflow = 'hidden';
+    }
+    
+    function closeAbout() {
+      document.getElementById('aboutModal').classList.remove('active');
+      document.body.style.overflow = '';
+    }
+    
+    // ========== 学科定义 ==========
+    const SUBJECTS = {
+      logos: { name: '数学', rootName: 'Logos', icon: '📐', color: '#1A5FB4' },
+      mythos: { name: '语文', rootName: 'Mythos', icon: '📜', color: '#E5A50A' },
+      lingua: { name: '英语', rootName: 'Lingua', icon: '📖', color: '#26A269' },
+      physis: { name: '物理', rootName: 'Physis', icon: '⚡', color: '#1C71D8' },
+      khēmeia: { name: '化学', rootName: 'Khēmeia', icon: '🧪', color: '#813D9C' },
+      zōē: { name: '生物', rootName: 'Zōē', icon: '🧬', color: '#2EC27E' },
+      politeia: { name: '政治', rootName: 'Politeia', icon: '🏛️', color: '#E01B24' }
+    };
+    
+    // ========== 等级数据 ==========
+    const LEVELS = [
+      { l: 1, t: '初学者', j: 'Shogakusha', r: 0, s: 0 },
+      { l: 20, t: '見舞い', j: 'Minarai', r: 5000, s: 0.8 },
+      { l: 30, t: '半人前', j: 'Hanninmae', r: 12000, s: 0.9 },
+      { l: 40, t: '修行者', j: 'Shugyōsha', r: 25000, s: 0.4 },
+      { l: 50, t: '門下生', j: 'Monkasei', r: 45000, s: 0.5 },
+      { l: 60, t: '術士', j: 'Jutsushi', r: 70000, s: 0.6 },
+      { l: 70, t: '指南役', j: 'Shinan\'yaku', r: 100000, s: 0.7 },
+      { l: 80, t: '免許皆伝', j: 'Menkyo Kaiden', r: 140000, s: 0.8 },
+      { l: 90, t: '達人', j: 'Tatsujin', r: 190000, s: 0.87 },
+      { l: 100, t: '極意', j: 'Gokui', r: 250000, s: 0.92 }
+    ];
+    
+    const H24 = 24 * 60 * 60 * 1000;
+    
+    // ========== 默认数据 (v0.4.1 新版结构) ==========
+    const DEFAULT_DATA = {
+      profile: {
+        level: 1,
+        xp: 0,
+        totalXp: 0,
+        combo: 0,
+        title: '初学者',
+        titleJp: 'Shogakusha',
+        achievements: []
+      },
+      subjects: {
+        logos: { name: '数学', level: 1, xp: 0, nodes: [], temperatureMap: {} },
+        mythos: { name: '语文', level: 1, xp: 0, nodes: [], temperatureMap: {} },
+        lingua: { name: '英语', level: 1, xp: 0, nodes: [], temperatureMap: {} },
+        physis: { name: '物理', level: 1, xp: 0, nodes: [], temperatureMap: {} },
+        khēmeia: { name: '化学', level: 1, xp: 0, nodes: [], temperatureMap: {} },
+        zōē: { name: '生物', level: 1, xp: 0, nodes: [], temperatureMap: {} },
+        politeia: { name: '政治', level: 1, xp: 0, nodes: [], temperatureMap: {} }
+      },
+      // v0.4.1: 统一记录格式
+      records: [],
+      version: 'v0.4.1'
+    };
+    
+    let appData = JSON.parse(JSON.stringify(DEFAULT_DATA));
+    let skillTreeChart = null;
+    let forgetChart = null;
+    
+    // ========== 启动页进入主页面 ==========
+    function enterMain() {
+      const launchPage = document.getElementById('launchPage');
+      const mainPage = document.getElementById('mainPage');
+      
+      launchPage.classList.add('hidden');
+      
+      setTimeout(() => {
+        mainPage.classList.add('visible');
+        setTimeout(() => {
+          initSkillTree();
+          initForgetChart();
+        }, 100);
+      }, 400);
+    }
+    
+    // ========== 页面切换 ==========
+    function switchPage(page) {
+      document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+      const activeNav = document.querySelector(`.nav-item[onclick="switchPage('${page}')"]`);
+      if (activeNav) activeNav.classList.add('active');
+      
+      document.querySelectorAll('.page-content').forEach(p => p.classList.remove('active'));
+      const activePage = document.getElementById(`page-${page}`);
+      if (activePage) activePage.classList.add('active');
+      
+      if (page === 'skills' && skillTreeChart) {
+        setTimeout(() => skillTreeChart.resize(), 100);
+      }
+      if (page === 'forget' && forgetChart) {
+        setTimeout(() => forgetChart.resize(), 100);
+      }
+    }
+    
+    // ========== 温度计算 ==========
+    function calcTemp(node, now = Date.now()) {
+      if (!node || !node.lastStudy) return 0;
+      const halvings = (now - node.lastStudy) / (H24 * 1.5);
+      return Math.max(0, Math.round(node.temp * Math.pow(0.5, halvings)));
+    }
+    
+    function getTempColor(temp) {
+      if (temp >= 95) return "#FF4500";
+      if (temp >= 80) return "#FF8C00";
+      if (temp >= 60) return "#FFD700";
+      if (temp >= 40) return "#62A0EA";
+      if (temp >= 20) return "#6B7280";
+      if (temp > 0) return "#9CA3AF";
+      return "#D1D5DB";
+    }
+    
+    // ========== 学科等级计算 ==========
+    function calculateSubjectLevel(subjectKey) {
+      const subject = appData.subjects[subjectKey];
+      if (!subject) return { level: 1, xp: 0, progress: 0 };
+      
+      let avgTemp = 0;
+      const nodeCount = Object.keys(subject.temperatureMap || {}).length;
+      if (nodeCount > 0) {
+        let totalTemp = 0;
+        for (const temp of Object.values(subject.temperatureMap || {})) {
+          totalTemp += temp;
+        }
+        avgTemp = totalTemp / nodeCount;
+      }
+      
+      const baseXp = subject.xp || 0;
+      const tempBonus = avgTemp * 10;
+      const xpScore = Math.min(baseXp, 50000);
+      
+      const score = (xpScore / 50000 * 50) + (tempBonus / 100 * 30) + (nodeCount * 5);
+      
+      let level = 1;
+      if (score >= 95) level = 100;
+      else if (score >= 85) level = 90;
+      else if (score >= 75) level = 80;
+      else if (score >= 65) level = 70;
+      else if (score >= 55) level = 60;
+      else if (score >= 45) level = 50;
+      else if (score >= 35) level = 40;
+      else if (score >= 20) level = 30;
+      else if (score >= 8) level = 20;
+      
+      const levelThreshold = [0, 500, 1500, 3000, 5000, 8000, 12000, 18000, 25000, 35000][Math.min(level - 1, 9)] || 0;
+      const currentThreshold = [0, 500, 1500, 3000, 5000, 8000, 12000, 18000, 25000, 35000][Math.min(level - 2, 9)] || 0;
+      
+      let progress = 0;
+      if (levelThreshold > currentThreshold) {
+        progress = Math.min(100, ((baseXp - currentThreshold) / (levelThreshold - currentThreshold)) * 100);
+      }
+      
+      return { level, xp: baseXp, progress, avgTemp, nodeCount };
+    }
+    
+    // ========== 渲染学科卡片 ==========
+    function renderSubjectGrid() {
+      const grid = document.getElementById('subjectGrid');
+      let html = '';
+      
+      for (const [key, subject] of Object.entries(appData.subjects)) {
+        const info = SUBJECTS[key];
+        const calc = calculateSubjectLevel(key);
+        
+        html += `
+          <div class="subject-card" onclick="switchPage('skills')" style="--subject-color: ${info?.color || '#666'}">
+            <div class="subject-icon">${info?.icon || '📚'}</div>
+            <div class="subject-name">${info?.rootName || key}</div>
+            <div class="subject-level" style="color: ${info?.color || '#666'}">Lv${calc.level}</div>
+            <div class="subject-bar">
+              <div class="subject-bar-fill" style="width: ${calc.progress}%; background: ${info?.color || '#666'}"></div>
+            </div>
+          </div>
+        `;
+      }
+      
+      grid.innerHTML = html;
+    }
+    
+    // ========== 渲染示例记录 (v0.4.1) ==========
+    function renderSampleRecords() {
+      const container = document.getElementById('sampleRecordsList');
+      
+      if (appData.records.length === 0) {
+        container.innerHTML = '<div class="log-empty">暂无示例记录</div>';
+        return;
+      }
+      
+      container.innerHTML = appData.records.slice().reverse().slice(0, 6).map(r => {
+        const typeInfo = ACTIVITY_TYPES[r.activityType] || { color: '#6B7280' };
+        const score = getRecordScore(r);
+        const scoreClass = score >= 80 ? 'excellent' : (score >= 60 ? 'good' : 'failed');
+        const scoreText = r.activityType === 'recitation' 
+          ? (r.result === 'perfect' ? '完美' : r.result === 'partial' ? '部分' : '失败')
+          : `${score}%`;
+        
+        return `
+          <div class="sample-record">
+            <span class="sample-record-type ${r.activityType}"></span>
+            <span class="sample-record-content">
+              <span class="sample-record-subject">${SUBJECTS[r.subject]?.name || r.subject}</span>
+              <span class="sample-record-desc">${r.knowledgePoints?.join(', ') || r.knowledge || '未知'}</span>
+            </span>
+            <span class="sample-record-time">${formatRelativeTime(r.timestamp)}</span>
+            <span class="sample-record-score ${scoreClass}">${scoreText}</span>
+          </div>
+        `;
+      }).join('');
+    }
+    
+    // ========== 获取记录分数 ==========
+    function getRecordScore(record) {
+      if (record.activityType === 'recitation') {
+        return RECITATION_SCORES[record.result] || 0;
+      }
+      return record.accuracy || 0;
+    }
+    
+    // ========== 格式化相对时间 ==========
+    function formatRelativeTime(timestamp) {
+      const now = Date.now();
+      const diff = now - timestamp;
+      const minutes = Math.floor(diff / 60000);
+      const hours = Math.floor(diff / 3600000);
+      const days = Math.floor(diff / 86400000);
+      
+      if (minutes < 60) return `${minutes}分钟前`;
+      if (hours < 24) return `${hours}小时前`;
+      return `${days}天前`;
+    }
+    
+    // ========== 渲染日志 (v0.4.1 增强) ==========
+    function renderLog() {
+      const container = document.getElementById('logContainer');
+      const subjectFilter = document.getElementById('logFilterSubject').value;
+      const typeFilter = document.getElementById('logFilterType').value;
+      
+      let filtered = appData.records;
+      if (subjectFilter) {
+        filtered = filtered.filter(r => r.subject === subjectFilter);
+      }
+      if (typeFilter) {
+        filtered = filtered.filter(r => r.activityType === typeFilter);
+      }
+      
+      if (filtered.length === 0) {
+        container.innerHTML = '<div class="log-empty">暂无学习记录 ✨</div>';
+        return;
+      }
+      
+      container.innerHTML = filtered
+        .slice()
+        .reverse()
+        .slice(0, 50)
+        .map(r => {
+          const score = getRecordScore(r);
+          const scoreText = r.activityType === 'recitation' 
+            ? (r.result === 'perfect' ? '完美' : r.result === 'partial' ? '部分' : '失败')
+            : `${score}%`;
+          
+          return `
+            <div class="log-entry">
+              <span class="log-activity-type ${r.activityType}"></span>
+              <span class="log-time">${new Date(r.timestamp).toLocaleString('zh-CN', {
+                month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit'
+              })}</span>
+              <span class="log-subject" style="color: ${SUBJECTS[r.subject]?.color || '#666'}">${SUBJECTS[r.subject]?.name || r.subject}</span>
+              <span class="log-knowledge">${r.knowledgePoints?.join(', ') || r.knowledge || '未知'}</span>
+              <span class="log-accuracy">${scoreText}</span>
+              <span class="log-xp">+${r.xp || 0}</span>
+            </div>
+          `;
+        }).join('');
+      
+      const achContainer = document.getElementById('achievements');
+      if (appData.profile.achievements.length > 0) {
+        achContainer.innerHTML = `
+          <div style="font-size: 12px; color: var(--text-muted); width: 100%; margin-bottom: 8px;">已解锁成就</div>
+          ${appData.profile.achievements.map(a => `<span class="achievement-badge"><span>🏆</span><span>${a}</span></span>`).join('')}
+        `;
+      } else {
+        achContainer.innerHTML = '';
+      }
+    }
+    
+    // ========== 渲染阴影队列 ==========
+    function renderShadowQueue() {
+      const container = document.getElementById('shadowQueueList');
+      const now = Date.now();
+      const shadowItems = [];
+      
+      for (const [sub, subject] of Object.entries(appData.subjects)) {
+        if (!subject.nodes) continue;
+        for (const node of subject.nodes) {
+          const temp = calcTemp(node);
+          if (temp > 0 && temp < 40) {
+            const hoursSinceStudy = (now - node.lastStudy) / (1000 * 60 * 60);
+            shadowItems.push({
+              subject: sub,
+              name: node.name,
+              temp,
+              hours: Math.round(hoursSinceStudy)
+            });
+          }
+        }
+      }
+      
+      if (shadowItems.length === 0) {
+        container.innerHTML = '<div style="color: var(--text-muted); font-size: 13px;">暂无需复习的知识点 🎉</div>';
+        return;
+      }
+      
+      shadowItems.sort((a, b) => a.temp - b.temp);
+      
+      container.innerHTML = shadowItems.map(item => {
+        const subjectColor = SUBJECTS[item.subject]?.color || '#6B7280';
+        const isColdGlow = item.temp < 30;
+        const isUrgent = item.temp < 20;
+        
+        return `
+          <div class="shadow-card ${isColdGlow ? 'cold-glow' : ''} ${isUrgent ? 'urgent-border' : ''}" 
+               style="--subject-color: ${subjectColor}">
+            <div class="shadow-header">
+              <div class="shadow-title">
+                <span style="color: ${subjectColor}">${SUBJECTS[item.subject]?.name || item.subject}</span>
+                <span>·</span>
+                <span>${item.name}</span>
+              </div>
+              <span class="shadow-badge">
+                <span style="color: ${getTempColor(item.temp)}; font-weight: 600;">${item.temp}%</span>
+                <span>·</span>
+                <span>${item.hours}h前</span>
+              </span>
+            </div>
+            <div class="shadow-temp-bar">
+              <div class="shadow-temp-fill" style="width: ${item.temp}%; background: ${getTempColor(item.temp)}"></div>
+            </div>
+            <div class="shadow-reason">温度降至${item.temp}%，建议尽快复习巩固</div>
+          </div>
+        `;
+      }).join('');
+    }
+    
+    // ========== 渲染推荐 ==========
+    function renderRecommend() {
+      const container = document.getElementById('recommendList');
+      const now = Date.now();
+      const recs = [];
+      
+      for (const [sub, subject] of Object.entries(appData.subjects)) {
+        if (!subject.nodes) continue;
+        for (const node of subject.nodes) {
+          const temp = calcTemp(node);
+          if (temp < 60 || (now - node.lastStudy) / (1000 * 60 * 60) > 24) {
+            const hoursSinceStudy = (now - node.lastStudy) / (1000 * 60 * 60);
+            const urgency = Math.min(100, hoursSinceStudy * 2 + (100 - temp));
+            
+            recs.push({
+              type: urgency > 70 ? 'urgent' : 'weakness',
+              sub,
+              name: node.name,
+              temp,
+              hours: Math.round(hoursSinceStudy),
+              priority: Math.round(urgency)
+            });
+          }
+        }
+      }
+      
+      if (recs.length === 0) {
+        container.innerHTML = '<div class="recommend-card"><div class="recommend-title">🎉 暂无复习建议</div><div class="shadow-reason">继续保持，当前学习状态良好！</div></div>';
+        return;
+      }
+      
+      recs.sort((a, b) => b.priority - a.priority);
+      
+      function getPriorityColor(priority) {
+        if (priority >= 80) return '#ef4444';
+        if (priority >= 60) return '#f59e0b';
+        return '#fbbf24';
+      }
+      
+      container.innerHTML = recs.slice(0, 5).map(r => {
+        const priorityColor = getPriorityColor(r.priority);
+        const isUrgent = r.type === 'urgent';
+        
+        return `
+          <div class="recommend-card ${isUrgent ? 'urgent-type' : ''}">
+            <div class="recommend-header">
+              <div class="recommend-title">
+                <span style="color: ${SUBJECTS[r.sub]?.color}">${SUBJECTS[r.sub]?.name || r.sub}</span>
+                <span>·</span>
+                <span>${r.name}</span>
+              </div>
+              <div class="priority-badge" style="background: linear-gradient(135deg, ${priorityColor}, ${priorityColor}dd);">
+                ${r.priority}
+              </div>
+            </div>
+            <div class="temp-bar">
+              <div class="temp-fill" style="width:${r.temp}%;background:${getTempColor(r.temp)}"></div>
+            </div>
+            <div class="shadow-reason" style="margin-top: 8px;">
+              温度${r.temp}%，${r.hours > 24 ? '已超过24小时未复习' : '遗忘风险较高'}
+              ${isUrgent ? ' ⚠️ 紧急' : ''}
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+    
+    // ========== 技能树初始化 ==========
+    function buildSkillTreeData() {
+      const nodes = [];
+      const links = [];
+      const categories = Object.entries(SUBJECTS).map(([key, info]) => ({ 
+        name: info.name, 
+        color: info.color 
+      }));
+      
+      let index = 0;
+      const subjectNodes = {};
+      
+      for (const [sub, subject] of Object.entries(appData.subjects)) {
+        if (subject.nodes && subject.nodes.length > 0) {
+          const subjectInfo = SUBJECTS[sub];
+          subjectNodes[sub] = index;
+          nodes.push({
+            id: index,
+            name: subjectInfo?.name || sub,
+            symbolSize: 50,
+            itemStyle: { color: subjectInfo?.color || '#6B7280' },
+            category: categories.findIndex(c => c.name === subjectInfo?.name) || 0,
+            isSubject: true
+          });
+          index++;
+          
+          for (const node of subject.nodes) {
+            const temp = calcTemp(node);
+            const isHot = temp >= 80;
+            const isWarm = temp >= 60 && temp < 80;
+            const isCool = temp < 40;
+            
+            nodes.push({
+              id: index,
+              name: node.name,
+              symbolSize: 28 + temp * 0.45,
+              itemStyle: { 
+                color: getTempColor(temp),
+                shadowBlur: isHot ? 25 : (isWarm ? 15 : (isCool ? 5 : 10)),
+                shadowColor: getTempColor(temp),
+                borderWidth: isHot ? 2 : 1,
+                borderColor: isHot ? 'rgba(255,255,255,0.5)' : 'rgba(255,255,255,0.3)'
+              },
+              category: categories.findIndex(c => c.name === SUBJECTS[sub]?.name) || 0,
+              isSubject: false,
+              subject: sub,
+              temp: temp,
+              studyCount: node.studyCount,
+              avgAccuracy: node.accuracy?.length ? Math.round(node.accuracy.reduce((a, b) => a + b, 0) / node.accuracy.length) : 0,
+              totalXp: node.totalXp
+            });
+            
+            links.push({
+              source: subjectNodes[sub],
+              target: index,
+              lineStyle: { 
+                color: getTempColor(temp),
+                width: isHot ? 2 : (isWarm ? 1.5 : 1),
+                opacity: isCool ? 0.3 : 0.6
+              }
+            });
+            index++;
+          }
+        }
+      }
+      
+      if (nodes.length === 0) {
+        categories.forEach((cat, i) => {
+          nodes.push({
+            id: i,
+            name: cat.name,
+            symbolSize: 40,
+            itemStyle: { color: '#E5E7EB' },
+            category: i,
+            isSubject: true
+          });
+        });
+      }
+      
+      return { nodes, links, categories };
+    }
+    
+    function initSkillTree() {
+      const container = document.getElementById('skillTreeContainer');
+      if (!container) return;
+      
+      skillTreeChart = echarts.init(container);
+      const data = buildSkillTreeData();
+      
+      const option = {
+        backgroundColor: 'transparent',
+        tooltip: {
+          trigger: 'item',
+          backgroundColor: 'rgba(255, 255, 255, 0.98)',
+          borderColor: 'rgba(200, 200, 220, 0.5)',
+          borderWidth: 1,
+          borderRadius: 12,
+          padding: [12, 16],
+          textStyle: { color: '#1a1a2e', fontSize: 13 },
+          extraCssText: 'box-shadow: 0 4px 16px rgba(100,110,140,0.12), inset 0 1px 0 rgba(255,255,255,0.8);',
+          formatter: function(params) {
+            if (params.dataType === 'edge') return '';
+            const node = params.data;
+            if (node.isSubject) {
+              return `<div style="font-weight:600;font-size:14px">${node.name}</div><div style="color:#718096;margin-top:4px">点击查看详情</div>`;
+            }
+            const tempLabel = node.temp >= 80 ? '🔥 灼热' : (node.temp >= 60 ? '☀️ 温热' : (node.temp >= 40 ? '🌡️ 常温' : (node.temp >= 20 ? '❄️ 微凉' : '💤 冷却')));
+            return `<div style="font-weight:600;font-size:14px">${node.name}</div>
+                    <div style="color:#718096;margin-top:4px">${tempLabel} <span style="color:${node.itemStyle.color};font-weight:600">${node.temp}%</span></div>
+                    <div style="color:#718096;margin-top:4px">学习次数: ${node.studyCount} | 平均正确率: ${node.avgAccuracy}%</div>
+                    <div style="color:#718096">累计XP: ${node.totalXp}</div>`;
+          }
+        },
+        legend: { show: false },
+        animation: true,
+        animationDuration: 1200,
+        animationEasing: 'cubicOut',
+        series: [{
+          type: 'graph',
+          layout: 'force',
+          symbol: 'circle',
+          roam: true,
+          draggable: true,
+          focusNodeAdjacency: true,
+          edgeSymbol: ['circle', 'arrow'],
+          edgeSymbolSize: [4, 8],
+          data: data.nodes,
+          categories: data.categories,
+          links: data.links,
+          lineStyle: { opacity: 0.6, curveness: 0.1 },
+          label: {
+            show: true,
+            position: 'bottom',
+            fontSize: 10,
+            color: '#4a5568',
+            formatter: function(params) {
+              return params.data.name.length > 8 ? params.data.name.substring(0, 8) + '...' : params.data.name;
+            }
+          },
+          emphasis: {
+            focus: 'adjacency',
+            lineStyle: { width: 3, color: '#3b82f6', opacity: 0.8 },
+            itemStyle: { 
+              borderWidth: 3, 
+              borderColor: 'rgba(59, 130, 246, 0.8)',
+              shadowBlur: 30,
+              shadowColor: 'rgba(59, 130, 246, 0.6)'
+            }
+          },
+          force: {
+            repulsion: 200,
+            gravity: 0.1,
+            edgeLength: 100,
+            layoutAnimation: true
+          }
+        }]
+      };
+      
+      skillTreeChart.setOption(option);
+      skillTreeChart.on('click', function(params) {
+        if (params.dataType === 'node' && !params.data.isSubject) {
+          showNodeDetail(params.data);
+        }
+      });
+    }
+    
+    function showNodeDetail(node) {
+      const panel = document.getElementById('nodeDetailPanel');
+      panel.classList.add('active');
+      
+      document.getElementById('nodeDetailTitle').textContent = node.name;
+      document.getElementById('nodeDetailSubtitle').textContent = 
+        `${SUBJECTS[node.subject]?.name || node.subject} · ${node.studyCount}次学习记录`;
+      document.getElementById('nodeDetailTemp').textContent = `${node.temp}%`;
+      document.getElementById('nodeDetailTemp').style.color = getTempColor(node.temp);
+      document.getElementById('nodeStudyCount').textContent = node.studyCount;
+      document.getElementById('nodeAvgAccuracy').textContent = `${node.avgAccuracy}%`;
+      document.getElementById('nodeTotalXp').textContent = node.totalXp;
+      
+      panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+    
+    // ========== 遗忘曲线图表 ==========
+    function initForgetChart() {
+      const container = document.getElementById('forgetChart');
+      if (!container) return;
+      
+      forgetChart = echarts.init(container);
+      
+      const timePoints = [];
+      const curveData = [];
+      
+      for (let i = 0; i <= 168; i += 6) {
+        timePoints.push(i);
+        curveData.push({
+          value: Math.round(100 * Math.pow(0.5, i / (24 * 1.5))),
+          name: i === 0 ? '刚学习' : i < 24 ? `${i}h` : `${Math.round(i/24)}d`
+        });
+      }
+      
+      const reviewPoints = [
+        { retention: 60, hours: Math.round(24 * 1.5 * Math.log2(100/60)), label: '60%复习点' },
+        { retention: 40, hours: Math.round(24 * 1.5 * Math.log2(100/40)), label: '40%复习点' },
+        { retention: 20, hours: Math.round(24 * 1.5 * Math.log2(100/20)), label: '20%复习点' }
+      ];
+      
+      const getClosestIndex = (hours) => {
+        let closest = 0;
+        let minDiff = Math.abs(timePoints[0] - hours);
+        for (let i = 1; i < timePoints.length; i++) {
+          const diff = Math.abs(timePoints[i] - hours);
+          if (diff < minDiff) {
+            minDiff = diff;
+            closest = i;
+          }
+        }
+        return closest;
+      };
+      
+      const option = {
+        backgroundColor: 'transparent',
+        title: {
+          text: '遗忘曲线 (Ebbinghaus)',
+          left: 'center',
+          textStyle: { fontSize: 14, fontWeight: 600, color: '#4a5568' }
+        },
+        tooltip: {
+          trigger: 'axis',
+          backgroundColor: 'rgba(255,255,255,0.95)',
+          borderColor: 'rgba(200,200,220,0.4)',
+          formatter: function(params) {
+            const p = params[0];
+            const hours = p.axisValue;
+            const label = hours < 24 ? `${hours}小时` : `${Math.round(hours/24)}天`;
+            return `学习后 ${label}<br/>记忆保留: <b style="color:#3b82f6">${p.value}%</b>`;
+          }
+        },
+        grid: {
+          left: '3%',
+          right: '4%',
+          bottom: '8%',
+          top: '18%',
+          containLabel: true
+        },
+        xAxis: {
+          type: 'category',
+          data: timePoints.map((t, i) => i % 3 === 0 ? (t < 24 ? `${t}h` : `${Math.round(t/24)}d`) : ''),
+          axisLine: { lineStyle: { color: '#E5E7EB' } },
+          axisLabel: { color: '#718096', fontSize: 10 }
+        },
+        yAxis: {
+          type: 'value',
+          min: 0,
+          max: 100,
+          axisLine: { show: false },
+          axisLabel: { color: '#718096', formatter: '{value}%' },
+          splitLine: { lineStyle: { color: '#F3F4F6' } }
+        },
+        visualMap: {
+          show: false,
+          pieces: [
+            { gte: 60, color: 'rgba(255, 140, 0, 0.1)' },
+            { gt: 40, lt: 60, color: 'rgba(98, 160, 234, 0.1)' },
+            { gt: 20, lt: 40, color: 'rgba(107, 114, 128, 0.15)' },
+            { lte: 20, color: 'rgba(59, 130, 246, 0.2)' }
+          ],
+          outOfRange: { color: 'rgba(255, 255, 255, 0)' }
+        },
+        series: [{
+          type: 'line',
+          smooth: true,
+          data: curveData.map(d => d.value),
+          areaStyle: {
+            color: {
+              type: 'linear',
+              x: 0, y: 0, x2: 0, y2: 1,
+              colorStops: [
+                { offset: 0, color: 'rgba(255, 183, 77, 0.25)' },
+                { offset: 0.4, color: 'rgba(96, 165, 250, 0.15)' },
+                { offset: 1, color: 'rgba(59, 130, 246, 0.2)' }
+              ]
+            }
+          },
+          lineStyle: { color: '#3b82f6', width: 3 },
+          itemStyle: { color: '#3b82f6' },
+          markPoint: {
+            symbol: 'circle',
+            symbolSize: function(val, params) {
+              return params.data.isReview ? 16 : 10;
+            },
+            itemStyle: {
+              color: '#10b981',
+              shadowBlur: 10,
+              shadowColor: 'rgba(16, 185, 129, 0.5)'
+            },
+            label: {
+              formatter: function(params) {
+                if (params.data.isReview) {
+                  return `{label|${params.data.retention}%}\n{time|${params.data.timeLabel}}`;
+                }
+                return '';
+              },
+              position: 'top',
+              distance: 8,
+              backgroundColor: 'rgba(16, 185, 129, 0.9)',
+              borderRadius: 6,
+              padding: [4, 8],
+              color: '#fff',
+              fontSize: 11,
+              fontWeight: 600,
+              rich: {
+                label: { fontSize: 12 },
+                time: { fontSize: 9, opacity: 0.8 }
+              }
+            },
+            data: [
+              { coord: [0, 100], itemStyle: { color: '#10b981' } }
+            ].concat(reviewPoints.map(p => ({
+              coord: [getClosestIndex(p.hours), p.retention],
+              isReview: true,
+              retention: p.retention,
+              timeLabel: p.hours < 24 ? `${p.hours}h` : `${Math.round(p.hours/24)}d`
+            })))
+          },
+          markLine: {
+            silent: true,
+            symbol: ['none', 'none'],
+            lineStyle: {
+              type: 'dashed',
+              width: 1,
+              opacity: 0.5
+            },
+            label: {
+              position: 'end',
+              fontSize: 9,
+              color: '#718096'
+            },
+            data: [
+              { yAxis: 60, lineStyle: { color: '#fbbf24' }, label: { formatter: '60%', color: '#f59e0b' } },
+              { yAxis: 40, lineStyle: { color: '#62A0EA' }, label: { formatter: '40%', color: '#3b82f6' } },
+              { yAxis: 20, lineStyle: { color: '#6B7280' }, label: { formatter: '20%', color: '#6B7280' } }
+            ]
+          }
+        }]
+      };
+      
+      forgetChart.setOption(option);
+    }
+    
+    // ========== Toast提示 ==========
+    function showToast(msg, type = 'info') {
+      const t = document.getElementById('toast');
+      t.innerHTML = msg;
+      t.className = `toast ${type}`;
+      t.style.display = 'block';
+      
+      setTimeout(() => {
+        t.style.animation = 'toastIn 0.3s reverse';
+        setTimeout(() => {
+          t.style.display = 'none';
+          t.style.animation = '';
+        }, 300);
+      }, 3000);
+    }
+    
+    // ========== 渲染全部 ==========
+    function renderAll() {
+      document.getElementById('launchLevel').textContent = `Lv${appData.profile.level}`;
+      document.getElementById('launchRank').textContent = appData.profile.title;
+      document.getElementById('launchRankJp').textContent = appData.profile.titleJp;
+      
+      const nextLevel = LEVELS.find(l => l.l > appData.profile.level);
+      const currentLevelStart = LEVELS.find(l => l.l === appData.profile.level)?.r || 0;
+      const currentLevelEnd = nextLevel?.r || currentLevelStart + 50000;
+      
+      document.getElementById('launchCurrentXp').textContent = appData.profile.totalXp;
+      document.getElementById('launchNextXp').textContent = currentLevelEnd;
+      
+      const progressPercent = Math.min(100, ((appData.profile.totalXp - currentLevelStart) / (currentLevelEnd - currentLevelStart)) * 100);
+      setTimeout(() => {
+        document.getElementById('launchProgressFill').style.width = `${progressPercent}%`;
+      }, 300);
+      
+      document.getElementById('todayXp').textContent = `+${appData.profile.xp}`;
+      document.getElementById('streak').textContent = appData.profile.combo || 0;
+      document.getElementById('totalXp').textContent = appData.profile.totalXp >= 1000 
+        ? `${(appData.profile.totalXp / 1000).toFixed(1)}k` 
+        : appData.profile.totalXp;
+      
+      document.getElementById('levelDisplay').textContent = `Lv${appData.profile.level}`;
+      document.getElementById('titleDisplay').textContent = appData.profile.title;
+      document.getElementById('titleJpDisplay').textContent = appData.profile.titleJp;
+      
+      document.getElementById('xpProgress').textContent = appData.profile.totalXp;
+      document.getElementById('xpNeeded').textContent = currentLevelEnd;
+      document.getElementById('progressFill').style.width = `${progressPercent}%`;
+      
+      renderSubjectGrid();
+      renderLog();
+      renderSampleRecords();
+      renderShadowQueue();
+      renderRecommend();
+      
+      if (skillTreeChart) {
+        skillTreeChart.setOption(buildSkillTreeData());
+      }
+    }
+    
+    // ========== v0.4.1 加载示例数据 (标准化格式) ==========
+    function loadDemoData() {
+      const now = Date.now();
+      const day = 24 * 3600000;
+      
+      // 统一记录格式示例
+      const sampleRecords = [
+        // 刷题记录 (practice)
+        {
+          recordID: generateUUID(),
+          timestamp: now - 2 * 3600000, // 2小时前
+          subject: 'logos',
+          knowledgePoints: ['三角函数·辅助角公式', '三角函数·二倍角公式'],
+          durationMinutes: 45,
+          activityType: 'practice',
+          totalQuestions: 20,
+          correctCount: 17,
+          accuracy: 85,
+          xp: 95
+        },
+        {
+          recordID: generateUUID(),
+          timestamp: now - 5 * 3600000, // 5小时前
+          subject: 'logos',
+          knowledgePoints: ['导数的运算'],
+          durationMinutes: 30,
+          activityType: 'practice',
+          totalQuestions: 15,
+          correctCount: 12,
+          accuracy: 80,
+          xp: 80
+        },
+        {
+          recordID: generateUUID(),
+          timestamp: now - 8 * 3600000, // 8小时前
+          subject: 'lingua',
+          knowledgePoints: ['高考核心词汇'],
+          durationMinutes: 40,
+          activityType: 'practice',
+          totalQuestions: 50,
+          correctCount: 42,
+          accuracy: 84,
+          xp: 88
+        },
+        // 考试记录 (exam)
+        {
+          recordID: generateUUID(),
+          timestamp: now - 1 * day, // 1天前
+          subject: 'logos',
+          knowledgePoints: ['数列综合', '函数与导数'],
+          durationMinutes: 120,
+          activityType: 'exam',
+          totalScore: 150,
+          obtainedScore: 112,
+          accuracy: 74.67,
+          xp: 150
+        },
+        {
+          recordID: generateUUID(),
+          timestamp: now - 2 * day, // 2天前
+          subject: 'physis',
+          knowledgePoints: ['牛顿运动定律', '力学综合'],
+          durationMinutes: 90,
+          activityType: 'exam',
+          totalScore: 100,
+          obtainedScore: 78,
+          accuracy: 78,
+          xp: 120
+        },
+        // 背诵记录 (recitation)
+        {
+          recordID: generateUUID(),
+          timestamp: now - 3 * day, // 3天前
+          subject: 'mythos',
+          knowledgePoints: ['《赤壁赋》全文背诵', '文言实词积累'],
+          durationMinutes: 25,
+          activityType: 'recitation',
+          result: 'perfect', // 100%
+          xp: 100
+        },
+        {
+          recordID: generateUUID(),
+          timestamp: now - 4 * day, // 4天前
+          subject: 'politeia',
+          knowledgePoints: ['政治经济学概念', '哲学原理背诵'],
+          durationMinutes: 30,
+          activityType: 'recitation',
+          result: 'partial', // 50%
+          xp: 50
+        },
+        {
+          recordID: generateUUID(),
+          timestamp: now - 6 * day, // 6天前
+          subject: 'khēmeia',
+          knowledgePoints: ['化学方程式默写', '元素周期表记忆'],
+          durationMinutes: 20,
+          activityType: 'recitation',
+          result: 'perfect', // 100%
+          xp: 100
+        }
+      ];
+      
+      appData = {
+        profile: {
+          level: 35,
+          xp: 8500,
+          totalXp: 18500,
+          combo: 12,
+          title: '半人前',
+          titleJp: 'Hanninmae',
+          achievements: ['First Light', 'Week Warrior', 'Perfect Reciter']
+        },
+        subjects: {
+          logos: {
+            name: '数学', level: 40, xp: 5200,
+            nodes: [
+              { name: '三角函数·辅助角公式', temp: 72, lastStudy: now - 8 * 3600000, accuracy: [85, 78, 82], studyCount: 3, totalXp: 280, failCount: 0 },
+              { name: '数列·等比数列', temp: 58, lastStudy: now - 18 * 3600000, accuracy: [65, 70], studyCount: 2, totalXp: 180, failCount: 0 },
+              { name: '导数的运算', temp: 85, lastStudy: now - 4 * 3600000, accuracy: [80, 88, 85], studyCount: 3, totalXp: 320, failCount: 0 },
+              { name: '函数的图像变换', temp: 35, lastStudy: now - 48 * 3600000, accuracy: [55, 40], studyCount: 2, totalXp: 120, failCount: 1 }
+            ],
+            temperatureMap: { '三角函数·辅助角公式': 72, '数列·等比数列': 58, '导数的运算': 85, '函数的图像变换': 35 }
+          },
+          mythos: {
+            name: '语文', level: 30, xp: 3500,
+            nodes: [
+              { name: '文言文阅读', temp: 68, lastStudy: now - 12 * 3600000, accuracy: [70, 65], studyCount: 2, totalXp: 180, failCount: 0 },
+              { name: '古代诗歌鉴赏', temp: 42, lastStudy: now - 30 * 3600000, accuracy: [55, 50], studyCount: 2, totalXp: 140, failCount: 0 }
+            ],
+            temperatureMap: { '文言文阅读': 68, '古代诗歌鉴赏': 42 }
+          },
+          lingua: {
+            name: '英语', level: 35, xp: 4800,
+            nodes: [
+              { name: '高考核心词汇', temp: 78, lastStudy: now - 6 * 3600000, accuracy: [80, 75, 78], studyCount: 3, totalXp: 260, failCount: 0 },
+              { name: '从句·定语从句', temp: 62, lastStudy: now - 14 * 3600000, accuracy: [65, 60], studyCount: 2, totalXp: 160, failCount: 0 }
+            ],
+            temperatureMap: { '高考核心词汇': 78, '从句·定语从句': 62 }
+          },
+          physis: {
+            name: '物理', level: 25, xp: 2800,
+            nodes: [
+              { name: '牛顿运动定律', temp: 55, lastStudy: now - 22 * 3600000, accuracy: [58, 52], studyCount: 2, totalXp: 150, failCount: 0 }
+            ],
+            temperatureMap: { '牛顿运动定律': 55 }
+          },
+          khēmeia: {
+            name: '化学', level: 20, xp: 1500,
+            nodes: [
+              { name: '化学平衡', temp: 28, lastStudy: now - 72 * 3600000, accuracy: [50, 45], studyCount: 2, totalXp: 120, failCount: 1 }
+            ],
+            temperatureMap: { '化学平衡': 28 }
+          },
+          zōē: { name: '生物', level: 20, xp: 1200, nodes: [], temperatureMap: {} },
+          politeia: { name: '政治', level: 20, xp: 800, nodes: [], temperatureMap: {} }
+        },
+        records: sampleRecords,
+        version: 'v0.4.1'
+      };
+    }
+    
+    // ========== 事件绑定 ==========
+    function initEvents() {
+      document.getElementById('logFilterSubject').addEventListener('change', renderLog);
+      document.getElementById('logFilterType').addEventListener('change', renderLog);
+      document.getElementById('logFilterDate').addEventListener('change', renderLog);
+      
+      window.addEventListener('resize', () => {
+        if (skillTreeChart) skillTreeChart.resize();
+        if (forgetChart) forgetChart.resize();
+      });
+    }
+    
+    // ========== 初始化 ==========
+    function init() {
+      loadDemoData();
+      renderAll();
+      initEvents();
+    }
+    
+    init();
+  </script>
+</body>
+</html>
