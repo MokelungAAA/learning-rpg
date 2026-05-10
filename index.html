@@ -2973,94 +2973,145 @@
       return "#D1D5DB";
     }
     
-    // ========== v0.4.5 GitHub数据配置 ==========
-    const GITHUB_CONFIG = {
-      DATA_URL: 'https://raw.githubusercontent.com/MokelungAAA/learning-rpg/main/data.json',
-      LOCAL_URL: './data.json',
-      OWNER: 'MokelungAAA',
-      REPO: 'learning-rpg',
-      BRANCH: 'main'
+    // ========== v0.6.5 四层容错数据加载 ==========
+    // 策略优先级：localStorage缓存 > GitHub Raw CDN > 本地相对路径 > 内嵌兜底数据
+
+    /** 内嵌兜底数据（最后防线，不含log记录） */
+    const FALLBACK_DATA = {
+      version: '1.0',
+      lastUpdated: new Date().toISOString(),
+      profile: {
+        learnerName: '墨澜',
+        globalBaseHalfLife: 4.0,
+        subjectModifiers: { '数学': 1.2, '物理': 1.2, '化学': 1.1, '语文': 1.0, '英语': 1.0, '历史': 1.0, '地理': 1.0, '生物': 0.9, '政治': 0.8 },
+        tempBoostGain: 0.4,
+        tempBoostBase: 10,
+        avgReviewsPerWeek: 0
+      },
+      subjects: {
+        '数学': { totalXp: 0, nodes: [] },
+        '语文': { totalXp: 0, nodes: [] },
+        '英语': { totalXp: 38, nodes: [{ id: '英语-001', name: '期中考试', peakTemp: 75, lastStudy: new Date().toISOString(), halfLifeDays: 4.0, repetitions: 1, accuracyHistory: [75], totalXp: 38 }] },
+        '物理': { totalXp: 0, nodes: [] },
+        '化学': { totalXp: 0, nodes: [] },
+        '生物': { totalXp: 0, nodes: [] },
+        '政治': { totalXp: 0, nodes: [] },
+        '历史': { totalXp: 0, nodes: [] },
+        '地理': { totalXp: 0, nodes: [] }
+      }
     };
 
-    // ========== 数据加载状态 ==========
+    /** 数据加载状态 */
     let dataLoadState = {
       isLoading: false,
       hasError: false,
       lastUpdate: null,
-      dataSource: ''  // 记录数据来源：'github' | 'local' | 'demo'
+      dataSource: ''  // 'cache' | 'github' | 'local' | 'fallback' | 'demo'
     };
 
-    // ========== GitHub数据加载核心函数（v0.6.4 最终版）==========
+    /** 带超时的 fetch（默认5秒） */
+    async function fetchWithTimeout(url, timeoutMs = 5000) {
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), timeoutMs);
+      try {
+        const response = await fetch(url, {
+          signal: controller.signal,
+          method: 'GET',
+          headers: { 'Accept': 'application/json', 'Cache-Control': 'no-cache' }
+        });
+        return response;
+      } catch (e) {
+        if (e.name === 'AbortError') throw new Error('请求超时(5s)');
+        throw e;
+      } finally {
+        clearTimeout(timer);
+      }
+    }
 
-    /**
-     * 检测是否为 file:// 协议（fetch 在此协议下完全不可用）
-     */
+    /** 写入 localStorage 缓存 */
+    function saveDataCache(rawData) {
+      try {
+        localStorage.setItem('learning-rpg-cache', JSON.stringify(rawData));
+        localStorage.setItem('learning-rpg-cache-meta', JSON.stringify({ cachedAt: Date.now() }));
+      } catch (e) { /* 存储满或禁用，静默失败 */ }
+    }
+
+    /** 读取 localStorage 缓存 */
+    function loadDataCache() {
+      try {
+        const raw = localStorage.getItem('learning-rpg-cache');
+        if (!raw) return null;
+        const meta = JSON.parse(localStorage.getItem('learning-rpg-cache-meta') || '{}');
+        const ageHours = ((Date.now() - (meta.cachedAt || 0)) / 3600000).toFixed(1);
+        console.log(`[v0.6.5] 缓存命中 (${ageHours}小时前)`);
+        return JSON.parse(raw);
+      } catch (e) { return null; }
+    }
+
+    /** 检测 file:// 协议 */
     function isFileProtocol() {
       return window.location.protocol === 'file:';
     }
 
     /**
-     * 从 data.json 加载数据
-     * 数据源：本地相对路径（GitHub Pages 或本地服务器环境下可用）
-     * @returns {Promise<Object|null>}
+     * 主数据加载函数（v0.6.5）
+     * 四层容错：localStorage缓存 → GitHub Raw CDN → 本地相对路径 → 内嵌兜底
+     * @returns {Promise<Object>} 始终返回数据（至少为内嵌兜底）
      */
-    async function loadDataFromGitHub() {
+    async function loadAppData() {
       dataLoadState.isLoading = true;
       showDataLoading(true);
       
-      // file:// 协议下 fetch 完全不可用，直接报错
-      if (isFileProtocol()) {
-        const msg = '⚠️ 当前使用 file:// 协议打开，无法加载数据（浏览器安全限制）。\n\n请改为以下方式访问：\n1. 线上版：https://mokelungaaa.github.io/learning-rpg/\n2. 本地服务器：在 learning-rpg 文件夹运行 python -m http.server 8000，然后访问 http://localhost:8000';
-        console.error('[v0.6.4]', msg);
-        dataLoadState.hasError = true;
-        showDataLoadError(msg);
-        return null;
+      // === 第一层：localStorage 缓存（秒开）===
+      const cached = loadDataCache();
+      if (cached) {
+        dataLoadState.isLoading = false;
+        showDataLoading(false);
+        dataLoadState.hasError = false;
+        dataLoadState.dataSource = 'cache';
+        return convertGitHubDataToAppData(cached);
       }
       
-      const sources = [
-        { name: 'local', url: `./data.json?t=${Date.now()}`, desc: '本地相对路径' }
-      ];
-      
-      for (const source of sources) {
-        try {
-          console.log(`[v0.6.4] 尝试从 ${source.desc} 加载... URL: ${source.url}`);
-          
-          const response = await fetch(source.url, {
-            method: 'GET',
-            headers: { 'Accept': 'application/json', 'Cache-Control': 'no-cache' }
-          });
-          
-          console.log(`[v0.6.4] ${source.desc} 响应状态:`, response.status, response.statusText);
-          
-          if (!response.ok) {
-            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      // === 第二层：网络请求（跳过多源）===
+      if (!isFileProtocol()) {
+        const sources = [
+          { name: 'github', url: 'https://raw.githubusercontent.com/MokelungAAA/learning-rpg/main/data.json', desc: 'GitHub Raw CDN' },
+          { name: 'local', url: `./data.json?t=${Date.now()}`, desc: '本地相对路径' }
+        ];
+        
+        for (const source of sources) {
+          try {
+            console.log(`[v0.6.5] 尝试从 ${source.desc} 加载...`);
+            const response = await fetchWithTimeout(source.url);
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+            const rawData = await response.json();
+            if (!rawData || typeof rawData !== 'object') throw new Error('无效数据格式');
+            
+            const totalXp = Object.values(rawData.subjects || {}).reduce((s, sub) => s + (sub.totalXp || 0), 0);
+            console.log(`[v0.6.5] ${source.desc} 成功 ✓ 总XP: ${totalXp}`);
+            
+            dataLoadState.hasError = false;
+            dataLoadState.lastUpdate = new Date(rawData.lastUpdated);
+            dataLoadState.dataSource = source.name;
+            saveDataCache(rawData);
+            showDataLoading(false);
+            return convertGitHubDataToAppData(rawData);
+          } catch (e) {
+            console.warn(`[v0.6.5] ${source.desc} 失败: ${e.name}: ${e.message}`);
+            continue;
           }
-          
-          const rawData = await response.json();
-          
-          if (!rawData || typeof rawData !== 'object') {
-            throw new Error('数据格式无效');
-          }
-          
-          const totalXp = Object.values(rawData.subjects || {}).reduce((s, sub) => s + (sub.totalXp || 0), 0);
-          console.log(`[v0.6.4] ${source.desc} 加载成功 ✓ 总XP: ${totalXp}`, rawData);
-          
-          dataLoadState.hasError = false;
-          dataLoadState.lastUpdate = new Date(rawData.lastUpdated);
-          dataLoadState.dataSource = source.name;
-          
-          return convertGitHubDataToAppData(rawData);
-          
-        } catch (error) {
-          console.error(`[v0.6.4] ${source.desc} 失败:`, error.name, error.message);
-          continue;
         }
+      } else {
+        console.warn('[v0.6.5] file:// 协议，跳过网络请求');
       }
       
-      console.error('[v0.6.4] 所有数据源均失败');
+      // === 第三层：内嵌兜底数据（最后防线）===
+      console.warn('[v0.6.5] 网络加载失败，使用内嵌兜底数据');
       dataLoadState.hasError = true;
-      showDataLoadError('无法加载数据，请检查网络连接或访问线上版：https://mokelungaaa.github.io/learning-rpg/');
-      return null;
+      dataLoadState.dataSource = 'fallback';
+      dataLoadState.lastUpdate = new Date();
+      showDataLoading(false);
+      return convertGitHubDataToAppData(FALLBACK_DATA);
     }
 
     /**
@@ -4812,41 +4863,25 @@
       });
     }
     
-    // ========== 初始化（v0.6.4 增强） ==========
+    // ========== 初始化（v0.6.5 四层容错） ==========
     async function init() {
-      console.log('[v0.6.4] 系统初始化开始...');
+      console.log('[v0.6.5] 系统初始化开始...');
       
-      const githubData = await loadDataFromGitHub();
+      appData = await loadAppData();
+      console.log(`[v0.6.5] 数据加载完成，来源: ${dataLoadState.dataSource}`);
       
-      if (githubData) {
-        appData = githubData;
-        console.log(`[v0.6.4] 使用${dataLoadState.dataSource}数据初始化完成`);
-      } else {
-        // GitHub数据加载失败，使用demo数据作为演示
-        console.log('[v0.6.4] 所有数据源加载失败，使用演示数据');
-        loadDemoData();
-        
-        // 添加重试按钮（增强版：显示具体错误信息）
+      // 如果使用了兜底数据，显示重试按钮让用户可以主动恢复网络加载
+      if (dataLoadState.dataSource === 'fallback') {
         const retryBtn = document.createElement('button');
         retryBtn.textContent = '🔄 重新加载数据';
-        retryBtn.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);padding:14px 36px;background:linear-gradient(135deg,#3b82f6,#6366f1);color:#fff;border:none;border-radius:14px;font-size:15px;cursor:pointer;z-index:10000;box-shadow:0 8px 32px rgba(59,130,246,0.35);font-weight:600;letter-spacing:1px;';
-        retryBtn.onclick = function() { 
-          retryBtn.remove(); 
-          init();  // 完全重新初始化
-        };
+        retryBtn.style.cssText = 'position:fixed;bottom:24px;right:24px;padding:12px 28px;background:linear-gradient(135deg,#3b82f6,#6366f1);color:#fff;border:none;border-radius:14px;font-size:14px;cursor:pointer;z-index:10000;box-shadow:0 8px 32px rgba(59,130,246,0.35);font-weight:600;';
+        retryBtn.onclick = () => { retryBtn.remove(); init(); };
         document.body.appendChild(retryBtn);
-        
-        // 10秒后自动重试一次
-        setTimeout(() => {
-          if (document.body.contains(retryBtn)) {
-            retryBtn.click();
-          }
-        }, 10000);
       }
       
       renderAll();
       initEvents();
-      console.log('[v0.6.4] 系统初始化完成');
+      console.log(`[v0.6.5] 系统初始化完成 (数据源: ${dataLoadState.dataSource})`);
     }
     
     // ========== 启动系统 ==========
