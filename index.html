@@ -2993,7 +2993,11 @@
       dataSource: ''  // 记录数据来源：'github' | 'local' | 'demo'
     };
 
-    // ========== GitHub数据加载核心函数（v0.6.4 修复版）==========
+    // ========== v0.6.4 内嵌数据（所有网络请求均失败时的最后兜底）==========
+    // 仅当 fetch 全部失败时使用，避免本地 file:// 打开完全无数据
+    const EMBEDDED_DATA = {"version":"1.0","lastUpdated":"2026-05-10T12:27:00+08:00","profile":{"learnerName":"墨澜","globalBaseHalfLife":4.0,"subjectModifiers":{"数学":1.2,"物理":1.2,"化学":1.1,"语文":1.0,"英语":1.0,"历史":1.0,"地理":1.0,"生物":0.9,"政治":0.8},"tempBoostGain":0.4,"tempBoostBase":10,"avgReviewsPerWeek":0},"subjects":{"数学":{"totalXp":0,"nodes":[]},"语文":{"totalXp":0,"nodes":[]},"英语":{"totalXp":38,"nodes":[{"id":"英语-001","name":"期中考试","peakTemp":75,"lastStudy":"2026-05-10T12:27:00+08:00","halfLifeDays":4.0,"repetitions":1,"accuracyHistory":[75],"totalXp":38}]},"物理":{"totalXp":0,"nodes":[]},"化学":{"totalXp":0,"nodes":[]},"生物":{"totalXp":0,"nodes":[]},"政治":{"totalXp":0,"nodes":[]},"历史":{"totalXp":0,"nodes":[]},"地理":{"totalXp":0,"nodes":[]}},"log":[{"id":"rec-002","timestamp":"2026-05-10T12:27:00+08:00","subject":"英语","knowledgePoints":["期中考试"],"durationMinutes":10,"activityType":"practice","totalQuestions":0,"correctCount":0,"accuracy":75,"xp":38}]};
+    
+    // ========== GitHub数据加载核心函数（v0.6.4 最终版）==========
 
     /**
      * 带超时的fetch封装
@@ -3008,37 +3012,23 @@
     }
 
     /**
-     * 从GitHub加载数据（优先本地相对路径，失败则尝试GitHub CDN）
-     * @returns {Promise<Object|null>} 加载的数据或null
+     * 从 data.json 加载数据（优先 fetch 网络数据，内嵌数据仅兜底）
+     * 数据源优先级：本地相对路径 → GitHub CDN → 内嵌兜底
+     * @returns {Promise<Object|null>}
      */
     async function loadDataFromGitHub() {
       dataLoadState.isLoading = true;
       showDataLoading(true);
       
-      // v0.6.4 修复：优先使用内嵌数据（解决 file:// 协议下 fetch 被阻止的问题）
-      // 数据源优先级：内嵌数据 → 本地相对路径 → GitHub CDN
-      const embeddedData = EMBEDDED_DATA;
-      if (embeddedData && typeof embeddedData === 'object') {
-        try {
-          console.log('[v0.6.4] 使用内嵌数据（本地兜底）');
-          dataLoadState.hasError = false;
-          dataLoadState.lastUpdate = new Date(embeddedData.lastUpdated);
-          dataLoadState.dataSource = 'embedded';
-          return convertGitHubDataToAppData(embeddedData);
-        } catch (e) {
-          console.warn('[v0.6.4] 内嵌数据解析失败:', e.message);
-        }
-      }
-      
-      // 内嵌数据不可用，尝试 fetch
+      // 优先尝试 fetch 网络数据（支持龙虾助手实时修改 data.json）
       const sources = [
-        { name: 'local', url: `${GITHUB_CONFIG.LOCAL_URL}?t=${Date.now()}` },
-        { name: 'github', url: `${GITHUB_CONFIG.DATA_URL}?t=${Date.now()}` }
+        { name: 'local', url: `./data.json?t=${Date.now()}`, desc: '本地相对路径' },
+        { name: 'github', url: `https://raw.githubusercontent.com/MokelungAAA/learning-rpg/main/data.json?t=${Date.now()}`, desc: 'GitHub CDN' }
       ];
       
       for (const source of sources) {
         try {
-          console.log(`[v0.6.4] 尝试从 ${source.name} 加载数据...`, source.url);
+          console.log(`[v0.6.4] 尝试从 ${source.desc} 加载数据...`, source.url);
           
           const response = await fetchWithTimeout(source.url, {
             method: 'GET',
@@ -3055,12 +3045,11 @@
           
           const rawData = await response.json();
           
-          // 验证数据格式
           if (!rawData || typeof rawData !== 'object') {
             throw new Error('数据格式无效');
           }
           
-          console.log(`[v0.6.4] ${source.name} 数据加载成功:`, rawData);
+          console.log(`[v0.6.4] ${source.desc} 数据加载成功 ✓`);
           
           dataLoadState.hasError = false;
           dataLoadState.lastUpdate = new Date(rawData.lastUpdated);
@@ -3069,17 +3058,18 @@
           return convertGitHubDataToAppData(rawData);
           
         } catch (error) {
-          console.warn(`[v0.6.4] ${source.name} 数据源失败:`, error.message);
+          console.warn(`[v0.6.4] ${source.desc} 加载失败:`, error.message);
           continue;
         }
       }
       
-      // 所有数据源都失败
-      console.error('[v0.6.4] 所有数据源均加载失败，使用演示数据');
-      dataLoadState.hasError = true;
-      showDataLoadError('无法连接到数据源，已使用本地演示数据');
+      // 所有网络请求均失败，使用内嵌兜底数据
+      console.warn('[v0.6.4] 所有网络数据源均失败，使用内嵌兜底数据（可能非最新）');
+      dataLoadState.hasError = false;
+      dataLoadState.lastUpdate = new Date(EMBEDDED_DATA.lastUpdated);
+      dataLoadState.dataSource = 'embedded';
       
-      return null;
+      return convertGitHubDataToAppData(EMBEDDED_DATA);
     }
 
     /**
