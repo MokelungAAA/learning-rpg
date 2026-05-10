@@ -1,9 +1,9 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>学习RPG · 认知操作系统 v0.6.2</title>
+  <title>学习RPG · 认知操作系统 v0.6.3</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
@@ -1767,6 +1767,52 @@
       }
     }
     
+    /* ========== 复习中心页 ========== */
+    .review-curve-section {
+      margin-bottom: 0;
+    }
+
+    .review-section-toggle {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      padding: 12px 16px;
+      background: var(--glass-bg);
+      backdrop-filter: blur(12px) saturate(180%);
+      -webkit-backdrop-filter: blur(12px) saturate(180%);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--glass-shadow);
+      transition: all var(--duration-fast) var(--ease-smooth);
+      user-select: none;
+    }
+
+    .review-section-toggle:hover {
+      background: var(--glass-bg-hover);
+    }
+
+    .review-toggle-icon {
+      font-size: 12px;
+      color: var(--text-muted);
+      transition: transform var(--duration-normal) var(--ease-smooth);
+    }
+
+    .review-curve-section.expanded .review-toggle-icon {
+      transform: rotate(180deg);
+    }
+
+    .review-curve-body {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.4s var(--ease-smooth);
+      margin-top: 12px;
+    }
+
+    .review-curve-section.expanded .review-curve-body {
+      max-height: 500px;
+    }
+
     /* ========== 动画 ========== */
     @keyframes breathe-glow {
       0%, 100% { box-shadow: 0 0 8px rgba(255, 215, 0, 0.3), 0 0 16px rgba(255, 215, 0, 0.1); }
@@ -1867,7 +1913,7 @@
           <div class="brand-icon">📚</div>
           <div class="brand-text">
             <h1>学习RPG · 认知操作系统</h1>
-            <p>v0.6.2</p>
+            <p>v0.6.3</p>
           </div>
         </div>
       </header>
@@ -1913,6 +1959,12 @@
         <div class="subject-section">
           <div class="section-title">📊 学科等级</div>
           <div class="subject-grid" id="subjectGrid"></div>
+        </div>
+        
+        <!-- 成就展示区 -->
+        <div class="overview-achievements" id="overviewAchievements" style="margin-top: 20px;">
+          <div class="section-title">🏆 成就</div>
+          <div class="achievements" id="achievementsOverview"></div>
         </div>
       </div>
       
@@ -1962,37 +2014,46 @@
         </div>
       </div>
       
-      <!-- 遗忘曲线页 -->
-      <div class="page-content" id="page-forget">
-        <div class="section-title">📉 遗忘曲线分析</div>
-        
-        <div class="glass-card">
-          <div class="forget-chart-wrapper">
-            <div class="chart-tips">
-              <div class="chart-tip">
-                <span class="chart-tip-dot" style="background:#10b981"></span>
-                <span>复习最佳时机</span>
-              </div>
-              <div class="chart-tip">
-                <span class="chart-tip-dot" style="background:#3b82f6"></span>
-                <span>记忆保留曲线</span>
+      <!-- 复习中心页 -->
+      <div class="page-content" id="page-review">
+        <!-- 顶部：遗忘曲线图表（可折叠） -->
+        <div class="review-curve-section">
+          <div class="review-section-toggle" onclick="this.parentElement.classList.toggle('expanded')">
+            <span class="section-title" style="margin-bottom:0">📉 遗忘曲线</span>
+            <span class="review-toggle-icon">▼</span>
+          </div>
+          <div class="review-curve-body">
+            <div class="glass-card">
+              <div class="forget-chart-wrapper">
+                <div class="chart-tips">
+                  <div class="chart-tip">
+                    <span class="chart-tip-dot" style="background:#10b981"></span>
+                    <span>复习最佳时机</span>
+                  </div>
+                  <div class="chart-tip">
+                    <span class="chart-tip-dot" style="background:#3b82f6"></span>
+                    <span>记忆保留曲线</span>
+                  </div>
+                </div>
+                <div class="forget-chart" id="forgetChart"></div>
               </div>
             </div>
-            <div class="forget-chart" id="forgetChart"></div>
           </div>
-          
-          <div class="shadow-queue-section">
-            <div class="section-title" style="font-size: 13px; margin-top: 24px;">🌙 阴影复习队列</div>
-            <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 16px;">
-              这些知识点已降至"微凉"温度，在后台安静等待复习
-            </p>
-            <div id="shadowQueueList"></div>
-          </div>
-          
-          <div class="recommend-section">
-            <div class="section-title" style="font-size: 13px;">💡 复习建议</div>
-            <div id="recommendList"></div>
-          </div>
+        </div>
+        
+        <!-- 中部：阴影复习队列（直接可见，L2核心） -->
+        <div class="shadow-queue-section" style="margin-top: 20px;">
+          <div class="section-title">🌙 待复习知识点</div>
+          <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 16px;">
+            温度已降至"微凉"的知识点，等待复习唤醒
+          </p>
+          <div id="shadowQueueList"></div>
+        </div>
+        
+        <!-- 底部：智能推荐（直接可见，L2核心） -->
+        <div class="recommend-section" style="margin-top: 24px;">
+          <div class="section-title">💡 智能推荐</div>
+          <div id="recommendList"></div>
         </div>
       </div>
       
@@ -2031,16 +2092,36 @@
           <div class="log-container" id="logContainer">
             <div class="log-empty">暂无学习记录 ✨</div>
           </div>
-          
-          <div class="achievements" id="achievements"></div>
         </div>
       </div>
       
-      <!-- 设置页 -->
+      <!-- 更多页 -->
       <div class="page-content" id="page-settings">
-        <div class="section-title">⚙️ 设置</div>
+        <div class="section-title">⚙️ 更多</div>
         
         <div class="settings-list">
+          <div class="settings-item" onclick="openAbout()">
+            <div class="settings-info">
+              <span class="settings-icon">ℹ️</span>
+              <div>
+                <div class="settings-name">关于学习RPG</div>
+                <div class="settings-desc">版本信息、开发者、更新日志</div>
+              </div>
+            </div>
+            <span class="settings-arrow">›</span>
+          </div>
+          
+          <div class="settings-item disabled">
+            <div class="settings-info">
+              <span class="settings-icon">📊</span>
+              <div>
+                <div class="settings-name">数据管理</div>
+                <div class="settings-desc">导出数据、备份恢复</div>
+              </div>
+            </div>
+            <span class="settings-value">即将推出</span>
+          </div>
+          
           <div class="settings-item disabled">
             <div class="settings-info">
               <span class="settings-icon">📱</span>
@@ -2057,21 +2138,10 @@
               <span class="settings-icon">🎨</span>
               <div>
                 <div class="settings-name">主题模式</div>
-                <div class="settings-desc">当前为浅色模式</div>
+                <div class="settings-desc">浅色 / 深色</div>
               </div>
             </div>
             <span class="settings-value">浅色</span>
-          </div>
-          
-          <div class="settings-item" onclick="openAbout()">
-            <div class="settings-info">
-              <span class="settings-icon">ℹ️</span>
-              <div>
-                <div class="settings-name">关于</div>
-                <div class="settings-desc">学习RPG认知操作系统</div>
-              </div>
-            </div>
-            <span class="settings-arrow">›</span>
           </div>
         </div>
       </div>
@@ -2103,7 +2173,7 @@
         </div>
         <div class="about-system-name">学习RPG · 认知操作系统</div>
         <div class="about-version">
-          <span class="about-version-badge">v0.6.2</span>
+          <span class="about-version-badge">v0.6.3</span>
         </div>
         <div class="about-developer-info">
           <div class="about-developer-name">墨澜 & MIKU</div>
@@ -2148,8 +2218,23 @@
             <div class="changelog-version expanded" onclick="event.stopPropagation();this.classList.toggle('expanded')">
               <div class="changelog-version-header current">
                 <div class="changelog-version-left">
-                  <span>v0.6.2</span>
+                  <span>v0.6.3</span>
                   <span class="changelog-version-tag">当前</span>
+                </div>
+                <span class="changelog-toggle">▼</span>
+              </div>
+              <div class="changelog-items">
+                <div class="changelog-item">
+                  <span class="changelog-item-version">2026-05-10</span>
+                  信息架构重组：按L1-L4重要度层级重新组织页面；底部导航调整为"总览/技能树/复习/日志/更多"；新建复习中心页（阴影队列+推荐+遗忘曲线可折叠）；成就展示提升至概览页L1层级；设置页改为更多页收纳L4功能。
+                </div>
+              </div>
+            </div>
+            <div class="changelog-version" onclick="event.stopPropagation();this.classList.toggle('expanded')">
+              <div class="changelog-version-header">
+                <div class="changelog-version-left">
+                  <span>v0.6.2</span>
+                  <span class="changelog-version-tag">视觉</span>
                 </div>
                 <span class="changelog-toggle">▼</span>
               </div>
@@ -2258,7 +2343,7 @@
               </div>
               <div class="changelog-items">
                 <div class="changelog-item">
-                  <span class="changelog-item-version">2026-05-10</span>
+                  <span class="changelog-item-version">2026-05-09</span>
                   全面修复与功能补全：修复技能树 setOption 数据结构错误；修复 todayXp/combo/学科等级计算；修复日期筛选与遗忘曲线坐标。新增根名系统、成就检测、每日状态标签、数据更新时间。
                 </div>
               </div>
@@ -2273,7 +2358,7 @@
               </div>
               <div class="changelog-items">
                 <div class="changelog-item">
-                  <span class="changelog-item-version">2026-05-19</span>
+                  <span class="changelog-item-version">2026-05-09</span>
                   头像修复：移除失效外部链接，改用 CSS+emoji 方案渲染。更新日志全面补全。
                 </div>
               </div>
@@ -2288,7 +2373,7 @@
               </div>
               <div class="changelog-items">
                 <div class="changelog-item">
-                  <span class="changelog-item-version">2026-05-18</span>
+                  <span class="changelog-item-version">2026-05-08</span>
                   合并 v0.4.4（删除模板页面）和 v0.4.5（GitHub 数据读取），整合远程数据同步能力。
                 </div>
               </div>
@@ -2303,7 +2388,7 @@
               </div>
               <div class="changelog-items">
                 <div class="changelog-item">
-                  <span class="changelog-item-version">2026-05-17</span>
+                  <span class="changelog-item-version">2026-05-08</span>
                   新增 GitHub 远程数据读取，支持加载学习数据与错误回退。
                 </div>
               </div>
@@ -2318,11 +2403,11 @@
               </div>
               <div class="changelog-items">
                 <div class="changelog-item">
-                  <span class="changelog-item-version">2026-05-16</span>
+                  <span class="changelog-item-version">2026-05-07</span>
                   学科等级三维评分算法（B^0.3 × D^0.4 × E^0.3）；阴影队列 urgency 指标；推荐优先级乘法模型；全局参数 EMA 自校准。
                 </div>
                 <div class="changelog-item">
-                  <span class="changelog-item-version">2026-05-17</span>
+                  <span class="changelog-item-version">2026-05-07</span>
                   删除数据模板页面，恢复设置页。
                 </div>
               </div>
@@ -2337,11 +2422,11 @@
               </div>
               <div class="changelog-items">
                 <div class="changelog-item">
-                  <span class="changelog-item-version">2026-05-10</span>
+                  <span class="changelog-item-version">2026-05-06</span>
                   数据模板标准化：三种活动类型（刷题/考试/背诵）+ 统一 record 格式。
                 </div>
                 <div class="changelog-item">
-                  <span class="changelog-item-version">2026-05-15</span>
+                  <span class="changelog-item-version">2026-05-07</span>
                   温度模型重构：复习升温机制 + 动态半衰期三层因子模型 + 九大学科中文化。
                 </div>
               </div>
@@ -2517,23 +2602,23 @@
     <div class="nav-items">
       <button class="nav-item active" onclick="switchPage('overview')">
         <span class="nav-icon">🏠</span>
-        <span class="nav-label">概览</span>
+        <span class="nav-label">总览</span>
       </button>
       <button class="nav-item" onclick="switchPage('skills')">
         <span class="nav-icon">🌳</span>
         <span class="nav-label">技能树</span>
       </button>
-      <button class="nav-item" onclick="switchPage('forget')">
-        <span class="nav-icon">📉</span>
-        <span class="nav-label">遗忘曲线</span>
+      <button class="nav-item" onclick="switchPage('review')">
+        <span class="nav-icon">🔄</span>
+        <span class="nav-label">复习</span>
       </button>
       <button class="nav-item" onclick="switchPage('log')">
-        <span class="nav-icon">📜</span>
+        <span class="nav-icon">📊</span>
         <span class="nav-label">日志</span>
       </button>
       <button class="nav-item" onclick="switchPage('settings')">
         <span class="nav-icon">⚙️</span>
-        <span class="nav-label">设置</span>
+        <span class="nav-label">更多</span>
       </button>
     </div>
   </nav>
@@ -3130,7 +3215,7 @@
       if (page === 'skills' && skillTreeChart) {
         setTimeout(() => skillTreeChart.resize(), 100);
       }
-      if (page === 'forget' && forgetChart) {
+      if (page === 'review' && forgetChart) {
         setTimeout(() => forgetChart.resize(), 100);
       }
     }
@@ -3347,22 +3432,27 @@
           }).join('');
       }
       
-      // v0.6.1: 增强成就展示
-      const achContainer = document.getElementById('achievements');
+      // v0.6.1: 增强成就展示 - 已移至 renderAchievements() 独立函数
+    }
+    
+    // ========== 渲染成就（独立函数，供概览页共用） ==========
+    function renderAchievements() {
       const achievements = appData.profile.achievements || [];
-      if (achievements.length > 0) {
-        achContainer.innerHTML = `
-          <div style="font-size: 12px; color: var(--text-muted); width: 100%; margin-bottom: 8px;">已解锁成就</div>
-          ${achievements.map(a => {
+      
+      // 概览页成就
+      const overviewContainer = document.getElementById('achievementsOverview');
+      if (overviewContainer) {
+        if (achievements.length > 0) {
+          overviewContainer.innerHTML = achievements.map(a => {
             const def = ACHIEVEMENT_DEFS[a];
             if (def) {
               return `<span class="achievement-badge" style="background:linear-gradient(135deg, ${def.color}22, ${def.color}08);border:1px solid ${def.color}40;color:${def.color};cursor:help;" title="${def.desc}"><span>${def.icon}</span><span>${def.name}</span></span>`;
             }
             return `<span class="achievement-badge"><span>🏆</span><span>${a}</span></span>`;
-          }).join('')}
-        `;
-      } else {
-        achContainer.innerHTML = '';
+          }).join('');
+        } else {
+          overviewContainer.innerHTML = '<div style="font-size:13px;color:var(--text-muted);">继续学习以解锁成就 ✨</div>';
+        }
       }
     }
     
@@ -4328,6 +4418,7 @@
       renderLog();
       renderShadowQueue();
       renderRecommend();
+      renderAchievements();
       renderDailyState(dailyState);
       renderDataUpdateTime();
       
