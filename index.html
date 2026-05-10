@@ -1232,6 +1232,41 @@
     .exam-card-score.fail { color: #ef4444; }
     .exam-card-xp { font-size: 11px; color: var(--text-muted); }
     
+    /* ========== 学习日历热力图（v0.6.6） ========== */
+    .heatmap-container {
+      background: var(--glass-bg); backdrop-filter: blur(12px) saturate(180%);
+      -webkit-backdrop-filter: blur(12px) saturate(180%);
+      border: 1px solid var(--glass-border); border-radius: var(--radius-md);
+      padding: 16px 14px; box-shadow: var(--glass-shadow); overflow-x: auto;
+    }
+    .heatmap-table { border-collapse: collapse; }
+    .heatmap-table td {
+      width: 12px; height: 12px; border-radius: 3px; cursor: pointer;
+      transition: transform 0.15s, opacity 0.15s;
+    }
+    .heatmap-table td:hover { transform: scale(1.3); opacity: 0.8; }
+    .heatmap-table th {
+      font-size: 9px; font-weight: 500; color: var(--text-muted);
+      padding: 0 1px 4px; text-align: center;
+    }
+    .heatmap-label {
+      font-size: 9px; color: var(--text-muted); padding-right: 4px;
+      text-align: right; width: 20px;
+    }
+    .heatmap-legend {
+      display: flex; align-items: center; gap: 4px; margin-top: 10px;
+      justify-content: flex-end; font-size: 10px; color: var(--text-muted);
+    }
+    .heatmap-legend .hm-swatch {
+      width: 12px; height: 12px; border-radius: 2px;
+    }
+    .heatmap-tooltip {
+      position: fixed; padding: 6px 10px; background: #1a1a2e; color: #fff;
+      font-size: 12px; border-radius: 8px; pointer-events: none;
+      z-index: 9999; display: none; white-space: nowrap;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+    }
+
     /* ========== 设置页 ========== */
     .settings-list {
       display: flex;
@@ -1303,6 +1338,77 @@
       transform: translateX(4px);
     }
     
+    /* ========== 数据录入模态框（v0.7） ========== */
+    .data-entry-modal {
+      position: fixed; inset: 0; z-index: 1000; display: none;
+      align-items: flex-end; justify-content: center;
+    }
+    .data-entry-modal.active { display: flex; }
+    .data-entry-overlay {
+      position: absolute; inset: 0; background: rgba(0,0,0,0.35);
+    }
+    .data-entry-content {
+      position: relative; width: 100%; max-width: 480px;
+      background: #f8f9fc; border-radius: var(--radius-2xl) var(--radius-2xl) 0 0;
+      padding: 20px 24px 32px; max-height: 85vh; overflow-y: auto;
+      animation: slideUp 0.3s ease;
+    }
+    @keyframes slideUp {
+      from { transform: translateY(100%); }
+      to { transform: translateY(0); }
+    }
+    .data-entry-drag-handle {
+      width: 40px; height: 4px; background: #d1d5db; border-radius: 2px;
+      margin: 0 auto 16px;
+    }
+    .data-entry-tabs {
+      display: flex; gap: 4px; margin-bottom: 20px;
+      background: rgba(0,0,0,0.05); border-radius: 10px; padding: 3px;
+    }
+    .data-entry-tab {
+      flex: 1; padding: 8px 0; border: none; border-radius: 8px;
+      font-size: 13px; font-weight: 500; cursor: pointer;
+      background: transparent; color: var(--text-secondary); transition: all 0.2s;
+    }
+    .data-entry-tab.active {
+      background: #fff; color: var(--text-primary); box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    }
+    .data-entry-panel { display: none; }
+    .data-entry-panel.active { display: block; }
+    .data-entry-field { margin-bottom: 14px; }
+    .data-entry-field label {
+      display: block; font-size: 12px; font-weight: 600; color: var(--text-secondary);
+      margin-bottom: 4px;
+    }
+    .data-entry-field input, .data-entry-field select, .data-entry-field textarea {
+      width: 100%; padding: 10px 12px; border: 1px solid #e5e7eb; border-radius: 10px;
+      font-size: 14px; background: #fff; color: var(--text-primary); outline: none;
+      transition: border-color 0.2s;
+    }
+    .data-entry-field input:focus, .data-entry-field select:focus, .data-entry-field textarea:focus {
+      border-color: #6366f1; box-shadow: 0 0 0 3px rgba(99,102,241,0.1);
+    }
+    .data-entry-field textarea { resize: vertical; font-family: inherit; }
+    .data-entry-row { display: flex; gap: 10px; }
+    .data-entry-row .data-entry-field { flex: 1; }
+    .data-entry-submit {
+      width: 100%; padding: 12px; border: none; border-radius: 12px;
+      background: linear-gradient(135deg, #6366f1, #8b5cf6); color: #fff;
+      font-size: 15px; font-weight: 600; cursor: pointer; margin-top: 4px;
+      transition: transform 0.15s, box-shadow 0.15s;
+    }
+    .data-entry-submit:active { transform: scale(0.97); }
+    .data-entry-submit.secondary {
+      background: #e5e7eb; color: var(--text-secondary);
+    }
+    .data-entry-submit.secondary:active { transform: scale(0.97); }
+    .data-entry-info { background: #fff; border-radius: 12px; padding: 16px; }
+    .data-entry-info-row {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 8px 0;
+    }
+    .data-entry-info-row + .data-entry-info-row { border-top: 1px solid #f3f4f6; }
+
     /* ========== 关于页面模态框 ========== */
     .about-modal {
       display: none;
@@ -2000,6 +2106,12 @@
           <div class="section-title">📝 考试反思</div>
           <div class="exam-cards" id="examCards"></div>
         </div>
+        
+        <!-- 学习日历热力图（v0.6.6） -->
+        <div class="overview-heatmap" id="heatmapSection" style="margin-top: 24px;">
+          <div class="section-title">📅 学习热力图</div>
+          <div class="heatmap-container" id="heatmapContainer"></div>
+        </div>
       </div>
       
       <!-- 技能树页 -->
@@ -2138,6 +2250,17 @@
         <div class="section-title">⚙️ 更多</div>
         
         <div class="settings-list">
+          <div class="settings-item" onclick="openDataEntry()">
+            <div class="settings-info">
+              <span class="settings-icon">✏️</span>
+              <div>
+                <div class="settings-name">数据录入</div>
+                <div class="settings-desc">添加学习记录和考试分数，导出更新 data.json</div>
+              </div>
+            </div>
+            <span class="settings-arrow">›</span>
+          </div>
+          
           <div class="settings-item" onclick="resyncData()">
             <div class="settings-info">
               <span class="settings-icon">🔄</span>
@@ -2193,6 +2316,138 @@
             <span class="settings-value">浅色</span>
           </div>
         </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- 数据录入模态框 -->
+  <div class="data-entry-modal" id="dataEntryModal">
+    <div class="data-entry-overlay" onclick="closeDataEntry()"></div>
+    <div class="data-entry-content">
+      <div class="data-entry-drag-handle"></div>
+      
+      <div class="data-entry-tabs">
+        <button class="data-entry-tab active" onclick="switchDataTab('record')">📝 学习记录</button>
+        <button class="data-entry-tab" onclick="switchDataTab('exam')">📋 考试反思</button>
+        <button class="data-entry-tab" onclick="switchDataTab('export')">📤 导出</button>
+      </div>
+      
+      <!-- 学习记录表单 -->
+      <div class="data-entry-panel active" id="panel-record">
+        <div class="data-entry-field">
+          <label>学科</label>
+          <select id="de-subject">
+            <option value="数学">📐 数学</option>
+            <option value="语文">📜 语文</option>
+            <option value="英语">📖 英语</option>
+            <option value="物理">⚡ 物理</option>
+            <option value="化学">🧪 化学</option>
+            <option value="生物">🧬 生物</option>
+            <option value="历史">📜 历史</option>
+            <option value="地理">🌍 地理</option>
+            <option value="政治">🏛️ 政治</option>
+          </select>
+        </div>
+        <div class="data-entry-field">
+          <label>知识点名称</label>
+          <input type="text" id="de-knowledge" placeholder="如：三角函数·辅助角公式">
+        </div>
+        <div class="data-entry-field">
+          <label>活动类型</label>
+          <select id="de-type">
+            <option value="practice">刷题练习</option>
+            <option value="recitation">背诵</option>
+            <option value="online_course">网课</option>
+            <option value="study">自学/看书</option>
+          </select>
+        </div>
+        <div class="data-entry-row">
+          <div class="data-entry-field">
+            <label>时长(分钟)</label>
+            <input type="number" id="de-duration" value="30" min="1">
+          </div>
+          <div class="data-entry-field">
+            <label>总题数</label>
+            <input type="number" id="de-total" value="0" min="0">
+          </div>
+          <div class="data-entry-field">
+            <label>正确数</label>
+            <input type="number" id="de-correct" value="0" min="0">
+          </div>
+        </div>
+        <div class="data-entry-row">
+          <div class="data-entry-field" style="flex:1">
+            <label>正确率(%)</label>
+            <input type="number" id="de-accuracy" value="0" min="0" max="100">
+          </div>
+          <div class="data-entry-field" style="flex:1">
+            <label>获得XP</label>
+            <input type="number" id="de-xp" value="0" min="0">
+          </div>
+        </div>
+        <div class="data-entry-field">
+          <label>反思备注（可选）</label>
+          <textarea id="de-reflection" rows="2" placeholder="学到了什么、哪里薄弱…"></textarea>
+        </div>
+        <button class="data-entry-submit" onclick="submitLearningRecord()">✓ 添加记录</button>
+      </div>
+      
+      <!-- 考试反思表单 -->
+      <div class="data-entry-panel" id="panel-exam">
+        <div class="data-entry-field">
+          <label>学科</label>
+          <select id="de-exam-subject">
+            <option value="数学">📐 数学</option>
+            <option value="语文">📜 语文</option>
+            <option value="英语">📖 英语</option>
+            <option value="物理">⚡ 物理</option>
+            <option value="化学">🧪 化学</option>
+            <option value="生物">🧬 生物</option>
+            <option value="历史">📜 历史</option>
+            <option value="地理">🌍 地理</option>
+            <option value="政治">🏛️ 政治</option>
+          </select>
+        </div>
+        <div class="data-entry-field">
+          <label>考试名称</label>
+          <input type="text" id="de-exam-name" placeholder="如：月考、期中考试">
+        </div>
+        <div class="data-entry-row">
+          <div class="data-entry-field">
+            <label>总分</label>
+            <input type="number" id="de-exam-total" value="100" min="1">
+          </div>
+          <div class="data-entry-field">
+            <label>得分</label>
+            <input type="number" id="de-exam-score" value="0" min="0">
+          </div>
+        </div>
+        <div class="data-entry-field">
+          <label>获得XP</label>
+          <input type="number" id="de-exam-xp" value="0" min="0">
+        </div>
+        <div class="data-entry-field">
+          <label>反思备注（可选）</label>
+          <textarea id="de-exam-reflection" rows="2" placeholder="这次考试的得失总结…"></textarea>
+        </div>
+        <button class="data-entry-submit" onclick="submitExamRecord()">✓ 添加考试</button>
+      </div>
+      
+      <!-- 导出面板 -->
+      <div class="data-entry-panel" id="panel-export">
+        <div class="data-entry-info">
+          <div class="data-entry-info-row">
+            <span>当前记录总数</span>
+            <strong id="de-export-record-count">0</strong>
+          </div>
+          <div class="data-entry-info-row">
+            <span>总XP</span>
+            <strong id="de-export-xp">0</strong>
+          </div>
+        </div>
+        <p style="font-size:12px;color:var(--text-muted);margin:12px 0;">点击下载后，将 .json 文件上传到 GitHub 仓库替换 <code>data.json</code>，或发给微信助手让它更新。</p>
+        <button class="data-entry-submit" onclick="exportDataJson()">📥 下载 data.json</button>
+        <button class="data-entry-submit secondary" onclick="clearLocalData()" style="margin-top:8px;">🗑️ 清除本地缓存</button>
       </div>
     </div>
   </div>
@@ -3504,7 +3759,7 @@
       // 收集该学科所有节点的当前温度
       let nodeCount = 0;
       let totalTemp = 0;
-      let totalXp = 0;
+      let totalXp = subject.xp || 0;
       let daysWithoutReview = 0;
       let maxDaysWithoutReview = 0;
       
@@ -3512,7 +3767,6 @@
         subject.nodes.forEach(node => {
           const currentTemp = getCurrentTemp(node, now);
           totalTemp += currentTemp;
-          totalXp += node.totalXp || 0;
           nodeCount++;
           
           // 计算连续未复习天数
@@ -3526,73 +3780,75 @@
       // 一、广度分 B = min(100, (nodeCount / FULL_COUNT) * 100)
       const B = Math.min(100, (nodeCount / SUBJECT_LEVEL.BROADNESS_FULL_COUNT) * 100);
       
-      // 二、深度分 D = avgCurrentTemp（所有节点当前平均温度）
-      // 应用遗忘衰减阻尼：连续多日无复习时施加短期阻尼
+      // 二、深度分 D = avgCurrentTemp
       let D = nodeCount > 0 ? totalTemp / nodeCount : 0;
-      
-      // 遗忘衰减阻尼：超过7天无复习时，深度分开始衰减
-      // 阻尼系数：maxDaysWithoutReview > 7 时，每多一天衰减5%
       if (maxDaysWithoutReview > 7) {
         const dampingDays = maxDaysWithoutReview - 7;
         const dampingFactor = Math.max(0.5, 1 - dampingDays * 0.05);
         D = D * dampingFactor;
       }
       
-      // 三、经验分 E = 100 * log2(1 + totalXp / 1000) / log2(1 + MAX_XP / 1000)
+      // 三、经验分 E
       const xpRatio = Math.log2(1 + totalXp / 1000);
       const maxXpRatio = Math.log2(1 + SUBJECT_LEVEL.XP_MAX_FOR_LEVEL / 1000);
       const E = Math.min(100, (xpRatio / maxXpRatio) * 100);
       
-      // 四、综合分 S = (B^0.3) * (D^0.4) * (E^0.3)
-      // 任一分量为零则总分归零
+      // 四、综合分 S
+      // 有技能节点时用三维评分，无节点时用 XP 单维评分（考试数据场景）
       const { WEIGHT_B, WEIGHT_D, WEIGHT_E } = SUBJECT_LEVEL;
       let S = 0;
       
       if (B > 0 && D > 0 && E > 0) {
         S = Math.pow(B, WEIGHT_B) * Math.pow(D, WEIGHT_D) * Math.pow(E, WEIGHT_E);
+      } else if (E > 0) {
+        // 退化为 XP 单维评分（只有考试数据，无技能节点）
+        S = E * 0.6; // 单维时适当压低总分
       }
       
       // 五、线性映射到1-100学科等级
-      // S范围约为 0~100，使用分段映射
       let level = 1;
       let progress = 0;
+      let nextLevelXp = 0;
       
-      if (S >= 95) {
-        level = 100;
-        progress = (S - 95) * 20; // 95-100范围映射到0-100
-      } else if (S >= 85) {
-        level = 90;
-        progress = ((S - 85) / 10) * 100;
-      } else if (S >= 75) {
-        level = 80;
-        progress = ((S - 75) / 10) * 100;
-      } else if (S >= 65) {
-        level = 70;
-        progress = ((S - 65) / 10) * 100;
-      } else if (S >= 55) {
-        level = 60;
-        progress = ((S - 55) / 10) * 100;
-      } else if (S >= 45) {
-        level = 50;
-        progress = ((S - 45) / 10) * 100;
-      } else if (S >= 35) {
-        level = 40;
-        progress = ((S - 35) / 10) * 100;
-      } else if (S >= 20) {
-        level = 30;
-        progress = ((S - 20) / 15) * 100;
-      } else if (S >= 8) {
-        level = 20;
-        progress = ((S - 8) / 12) * 100;
-      } else if (S > 0) {
-        level = 10;
-        progress = (S / 8) * 100;
+      // 定义基于 XP 的等级阈值（当 B/D=0 时使用）
+      const XP_LEVELS = [
+        { l: 60, xp: 50000 }, { l: 50, xp: 30000 }, { l: 40, xp: 15000 },
+        { l: 30, xp: 8000 }, { l: 20, xp: 3000 }, { l: 10, xp: 500 }
+      ];
+      
+      if (nodeCount === 0 && totalXp > 0) {
+        // 无技能节点模式：基于 XP 直接计算等级
+        for (let i = 0; i < XP_LEVELS.length; i++) {
+          if (totalXp >= XP_LEVELS[i].xp) {
+            level = XP_LEVELS[i].l;
+            const next = XP_LEVELS[i - 1] || { l: 100, xp: 100000 };
+            const prevXp = XP_LEVELS[i].xp;
+            const nextXp = next.xp;
+            nextLevelXp = nextXp;
+            progress = Math.min(100, ((totalXp - prevXp) / (nextXp - prevXp)) * 100);
+            break;
+          }
+        }
+        if (level === 1) {
+          const nextXp = XP_LEVELS[XP_LEVELS.length - 1].xp;
+          nextLevelXp = nextXp;
+          progress = Math.min(100, (totalXp / nextXp) * 100);
+        }
       } else {
-        level = 1;
-        progress = S * 100; // 接近0的分数映射
+        // 有技能节点模式：基于三维评分
+        if (S >= 95) { level = 100; progress = (S - 95) * 20; }
+        else if (S >= 85) { level = 90; progress = ((S - 85) / 10) * 100; }
+        else if (S >= 75) { level = 80; progress = ((S - 75) / 10) * 100; }
+        else if (S >= 65) { level = 70; progress = ((S - 65) / 10) * 100; }
+        else if (S >= 55) { level = 60; progress = ((S - 55) / 10) * 100; }
+        else if (S >= 45) { level = 50; progress = ((S - 45) / 10) * 100; }
+        else if (S >= 35) { level = 40; progress = ((S - 35) / 10) * 100; }
+        else if (S >= 20) { level = 30; progress = ((S - 20) / 15) * 100; }
+        else if (S >= 8) { level = 20; progress = ((S - 8) / 12) * 100; }
+        else if (S > 0) { level = 10; progress = (S / 8) * 100; }
+        else { level = 1; progress = 0; }
       }
       
-      // 计算遗忘衰减阻尼提示
       const hasDamping = maxDaysWithoutReview > 7;
       const dampingIntensity = hasDamping ? Math.min(1, (maxDaysWithoutReview - 7) * 0.1) : 0;
       
@@ -3604,9 +3860,10 @@
         avgTemp: D,
         nodeCount,
         maxDaysWithoutReview,
-        B, D, E, // 分解得分
+        B, D, E,
         hasDamping,
-        dampingIntensity
+        dampingIntensity,
+        nextLevelXp
       };
     }
     
@@ -3634,6 +3891,7 @@
             <div class="subject-icon">${info?.icon || '📚'}</div>
             <div class="subject-name">${name}</div>
             <div class="subject-level" style="color: ${info?.color || '#666'}; ${levelStyle}">Lv${calc.level}</div>
+            <div class="subject-xp" style="font-size:10px;color:var(--text-muted);margin-top:2px;">${calc.xp} XP</div>
             <div class="subject-bar">
               <div class="subject-bar-fill" style="width: ${calc.progress}%; background: ${info?.color || '#666'}"></div>
             </div>
@@ -4658,6 +4916,110 @@
       }).join('');
     }
 
+    // ========== v0.6.6 学习日历热力图 ==========
+    function renderHeatmap() {
+      const container = document.getElementById('heatmapContainer');
+      if (!container) return;
+      
+      const now = new Date();
+      const DAYS = 169; // 约 24 周
+      const CELL = 12, GAP = 3; // px
+      
+      // 按天统计 XP
+      const dailyXp = {};
+      for (const r of appData.records) {
+        const d = new Date(r.timestamp);
+        const key = `${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}`;
+        dailyXp[key] = (dailyXp[key] || 0) + (r.xp || 0);
+      }
+      
+      // 生成日期数组
+      const cells = [];
+      const start = new Date(now);
+      start.setDate(start.getDate() - DAYS + 1);
+      for (let i = 0; i < DAYS; i++) {
+        const d = new Date(start);
+        d.setDate(d.getDate() + i);
+        const key = `${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}`;
+        cells.push({ date: d, xp: dailyXp[key] || 0 });
+      }
+      
+      // 确定颜色等级
+      const xps = cells.map(c => c.xp).filter(x => x > 0);
+      const maxXp = xps.length ? Math.max(...xps) : 1;
+      const colors = ['#ebedf0', '#9be9a8', '#40c463', '#30a14e', '#216e39'];
+      
+      function getColor(xp) {
+        if (xp === 0) return colors[0];
+        const ratio = xp / maxXp;
+        if (ratio <= 0.25) return colors[1];
+        if (ratio <= 0.5) return colors[2];
+        if (ratio <= 0.75) return colors[3];
+        return colors[4];
+      }
+      
+      // 按周排列（列=周，行=星期）
+      const cols = Math.ceil(DAYS / 7);
+      const grid = [];
+      for (let w = 0; w < cols; w++) {
+        for (let d = 0; d < 7; d++) {
+          const idx = w * 7 + d;
+          grid.push(cells[idx] || null);
+        }
+      }
+      
+      // 月份标签
+      const months = [];
+      for (let w = 0; w < cols; w++) {
+        const idx = w * 7;
+        const cell = cells[idx];
+        if (cell && (w === 0 || cell.date.getMonth() !== cells[idx - 1]?.date?.getMonth())) {
+          const mn = ['','1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'];
+          months.push({ col: w, label: mn[cell.date.getMonth() + 1] });
+        }
+      }
+      
+      const dayLabels = ['', '一', '', '三', '', '五', ''];
+      
+      let html = '<div style="position:relative"><div class="heatmap-tooltip" id="hmTooltip"></div><table class="heatmap-table"><tr><th style="width:20px"></th>';
+      for (const m of months) {
+        html += `<th colspan="${m.col + 1 > months.length ? 1 : 1}" style="text-align:left;padding-left:${m.col * (CELL + GAP)}px">${m.label}</th>`;
+      }
+      html += '</tr>';
+      
+      for (let d = 0; d < 7; d++) {
+        html += '<tr>';
+        html += `<td class="heatmap-label">${dayLabels[d]}</td>`;
+        for (let w = 0; w < cols; w++) {
+          const cell = grid[w * 7 + d];
+          if (!cell) { html += '<td></td>'; continue; }
+          const key = `${cell.date.getFullYear()}-${cell.date.getMonth()+1}-${cell.date.getDate()}`;
+          html += `<td style="background:${getColor(cell.xp)}" onmouseenter="showHmTip(event,'${key}',${cell.xp})" onmouseleave="hideHmTip()"></td>`;
+        }
+        html += '</tr>';
+      }
+      
+      html += '</table>';
+      html += '<div class="heatmap-legend"><span>少</span>';
+      for (const c of colors) html += `<span class="hm-swatch" style="background:${c}"></span>`;
+      html += '<span>多</span></div></div>';
+      
+      container.innerHTML = html;
+    }
+    
+    function showHmTip(e, dateStr, xp) {
+      const tip = document.getElementById('hmTooltip');
+      if (!tip) return;
+      tip.textContent = `${dateStr}  ·  ${xp} XP`;
+      tip.style.display = 'block';
+      tip.style.left = (e.clientX + 12) + 'px';
+      tip.style.top = (e.clientY - 10) + 'px';
+    }
+    function hideHmTip() {
+      const tip = document.getElementById('hmTooltip');
+      if (tip) tip.style.display = 'none';
+    }
+
     // ========== 渲染全部 ==========
     function renderAll() {
       console.log('[DEBUG] renderAll: appData =', appData, '| profile.xp =', appData?.profile?.xp);
@@ -4728,6 +5090,7 @@
       renderExamResults();
       renderDailyState(dailyState);
       renderDataUpdateTime();
+      renderHeatmap();
       
       // 设置页数据源显示
       const dataSourceEl = document.getElementById('settingsDataSource');
