@@ -3266,7 +3266,7 @@
       };
     });
     
-    let appData = JSON.parse(JSON.stringify(DEFAULT_DATA));
+    appData = JSON.parse(JSON.stringify(DEFAULT_DATA));
     let skillTreeChart = null;
     let forgetChart = null;
     
@@ -4848,6 +4848,9 @@
       initEvents();
       console.log('[v0.6.4] 系统初始化完成');
     }
+    
+    // ========== 启动系统 ==========
+    init().catch(e => console.error('[v0.6.4] 初始化失败:', e));
     </script>
 </body>
 </html>
