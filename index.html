@@ -1,9 +1,9 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>学习RPG · 认知操作系统 v0.4.7</title>
+  <title>学习RPG · 认知操作系统 v0.5.0</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
@@ -13,12 +13,14 @@
     :root {
       --bg-primary: #f8f9fc;
       --bg-white: #ffffff;
-      --glass-bg: rgba(255, 255, 255, 0.72);
-      --glass-bg-hover: rgba(255, 255, 255, 0.85);
-      --glass-border: rgba(255, 255, 255, 0.5);
-      --glass-border-subtle: rgba(200, 200, 220, 0.35);
-      --glass-shadow: 0 8px 32px rgba(100, 110, 140, 0.08);
-      --glass-blur: 24px;
+      --glass-bg: rgba(255, 255, 255, 0.55);
+      --glass-bg-hover: rgba(255, 255, 255, 0.7);
+      --glass-border: rgba(255, 255, 255, 0.45);
+      --glass-border-subtle: rgba(200, 200, 220, 0.25);
+      --glass-shadow: 0 8px 32px rgba(31, 38, 135, 0.07);
+      --glass-blur: 20px;
+      --glass-highlight: rgba(255, 255, 255, 0.6);
+      --glass-refraction: rgba(255, 255, 255, 0.15);
       --text-primary: #1a1a2e;
       --text-secondary: #4a5568;
       --text-muted: #718096;
@@ -33,9 +35,9 @@
       --physics: #1C71D8;
       --chemistry: #813D9C;
       --biology: #2EC27E;
-      --politics: #E01B24;
-      --history: #9141AC;
-      --geography: #1A5FB4;
+      --politics: #B8860B;
+      --history: #C77DBA;
+      --geography: #26A269;
       --temp-searing: #FF4500;
       --temp-hot: #FF8C00;
       --temp-warm: #FFD700;
@@ -54,16 +56,45 @@
     
     body {
       font-family: 'Inter', 'Noto Sans SC', -apple-system, BlinkMacSystemFont, sans-serif;
-      background: var(--bg-primary);
+      background: linear-gradient(160deg, #f0f2f8 0%, #e8ecf4 30%, #f5f3f8 60%, #eef1f8 100%);
+      background-attachment: fixed;
       color: var(--text-primary);
       min-height: 100vh;
       overflow-x: hidden;
     }
-    
+
+    body::before {
+      content: '';
+      position: fixed;
+      top: -20%;
+      right: -10%;
+      width: 500px;
+      height: 500px;
+      background: radial-gradient(circle, rgba(102, 126, 234, 0.08) 0%, transparent 70%);
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    body::after {
+      content: '';
+      position: fixed;
+      bottom: -15%;
+      left: -10%;
+      width: 600px;
+      height: 600px;
+      background: radial-gradient(circle, rgba(118, 75, 162, 0.06) 0%, transparent 70%);
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 0;
+    }
+
     .container {
       max-width: 1200px;
       margin: 0 auto;
       padding: 0 24px 100px;
+      position: relative;
+      z-index: 1;
     }
     
     /* ========== 启动页样式 ========== */
@@ -250,43 +281,49 @@
     .glass-card {
       position: relative;
       background: var(--glass-bg);
-      backdrop-filter: blur(var(--glass-blur)) saturate(180%);
-      -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(180%);
+      backdrop-filter: blur(var(--glass-blur)) saturate(200%);
+      -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(200%);
       border: 1px solid var(--glass-border);
       border-radius: 20px;
       padding: 24px;
-      box-shadow: var(--glass-shadow);
+      box-shadow:
+        var(--glass-shadow),
+        inset 0 1px 0 var(--glass-highlight),
+        inset 0 -1px 0 var(--glass-refraction);
       transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
       overflow: hidden;
     }
-    
+
     .glass-card::before {
       content: '';
       position: absolute;
       inset: 0;
       border-radius: inherit;
-      background: 
-        radial-gradient(ellipse at 25% 15%, rgba(255,255,255,0.6) 0%, transparent 50%),
-        radial-gradient(ellipse at 75% 0%, rgba(255,255,255,0.3) 0%, transparent 40%),
-        radial-gradient(ellipse at 50% 100%, rgba(100,110,140,0.03) 0%, transparent 50%);
+      background:
+        radial-gradient(ellipse at 20% 10%, rgba(255,255,255,0.7) 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 0%, rgba(255,255,255,0.35) 0%, transparent 35%),
+        radial-gradient(ellipse at 50% 100%, rgba(100,110,140,0.02) 0%, transparent 50%);
       pointer-events: none;
       z-index: 1;
     }
-    
+
     .glass-card::after {
       content: '';
       position: absolute;
       inset: 0;
       border-radius: inherit;
-      background: linear-gradient(135deg, rgba(255,255,255,0.4) 0%, rgba(255,255,255,0.1) 30%, transparent 60%);
-      box-shadow: inset 2px 2px 4px rgba(255,255,255,0.5), inset -1px -1px 2px rgba(100,110,140,0.05);
+      background: linear-gradient(135deg, rgba(255,255,255,0.5) 0%, rgba(255,255,255,0.15) 25%, transparent 55%);
+      box-shadow: inset 2px 2px 6px rgba(255,255,255,0.6), inset -1px -1px 3px rgba(100,110,140,0.04);
       pointer-events: none;
       z-index: 1;
     }
-    
+
     .glass-card:hover {
       background: var(--glass-bg-hover);
-      box-shadow: var(--glass-shadow), 0 0 24px rgba(100, 110, 140, 0.12);
+      box-shadow:
+        var(--glass-shadow),
+        0 0 30px rgba(100, 110, 140, 0.1),
+        inset 0 1px 0 var(--glass-highlight);
       transform: translateY(-2px);
     }
     
@@ -301,7 +338,9 @@
       bottom: 0;
       left: 0;
       right: 0;
-      background: var(--bg-white);
+      background: rgba(255, 255, 255, 0.75);
+      backdrop-filter: blur(20px) saturate(180%);
+      -webkit-backdrop-filter: blur(20px) saturate(180%);
       border-top: 1px solid rgba(200, 200, 220, 0.3);
       padding: 8px 0;
       padding-bottom: max(8px, env(safe-area-inset-bottom));
@@ -396,6 +435,8 @@
       text-align: center;
       padding: 16px;
       background: var(--glass-bg);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
       border: 1px solid var(--glass-border);
       border-radius: 16px;
     }
@@ -516,6 +557,8 @@
       padding: 16px 12px;
       text-align: center;
       background: var(--glass-bg);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
       border: 1px solid var(--glass-border);
       border-radius: 14px;
       cursor: pointer;
@@ -1072,6 +1115,8 @@
       position: absolute;
       inset: 0;
       background: rgba(0, 0, 0, 0.4);
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
     }
     
     .about-content {
@@ -1079,12 +1124,23 @@
       bottom: 0;
       left: 0;
       right: 0;
-      max-height: 85vh;
+      max-height: 88vh;
       background: var(--bg-primary);
       border-radius: 24px 24px 0 0;
-      padding: 24px;
+      padding: 0 24px 32px;
       overflow-y: auto;
-      animation: slideUp 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      animation: slideUp 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    .about-content::-webkit-scrollbar {
+      width: 4px;
+    }
+    .about-content::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    .about-content::-webkit-scrollbar-thumb {
+      background: rgba(200, 200, 220, 0.4);
+      border-radius: 2px;
     }
     
     @keyframes slideUp {
@@ -1092,124 +1148,161 @@
       to { transform: translateY(0); }
     }
     
+    /* 拖动指示条 */
+    .about-drag-handle {
+      display: flex;
+      justify-content: center;
+      padding: 12px 0 8px;
+      position: sticky;
+      top: 0;
+      background: var(--bg-primary);
+      z-index: 5;
+    }
+    .about-drag-handle::after {
+      content: '';
+      width: 36px;
+      height: 4px;
+      border-radius: 2px;
+      background: rgba(200, 200, 220, 0.5);
+    }
+    
     .about-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 24px;
+      margin-bottom: 20px;
+      padding-top: 4px;
     }
     
     .about-title {
-      font-size: 18px;
+      font-size: 17px;
       font-weight: 700;
       color: var(--text-primary);
+      letter-spacing: -0.3px;
     }
     
     .about-close {
-      width: 32px;
-      height: 32px;
+      width: 28px;
+      height: 28px;
       border-radius: 50%;
-      background: rgba(200, 200, 220, 0.3);
+      background: rgba(200, 200, 220, 0.2);
       border: none;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 18px;
+      font-size: 14px;
       cursor: pointer;
-      color: var(--text-secondary);
+      color: var(--text-muted);
       transition: all 0.2s;
     }
     
     .about-close:hover {
-      background: rgba(200, 200, 220, 0.5);
+      background: rgba(200, 200, 220, 0.4);
+      color: var(--text-secondary);
     }
     
+    /* 开发者卡片 */
     .about-developer {
-      background: linear-gradient(135deg, var(--accent-blue), #667eea);
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       border-radius: 16px;
-      padding: 24px;
+      padding: 24px 20px;
       color: #fff;
-      margin-bottom: 24px;
+      margin-bottom: 20px;
       text-align: center;
+      position: relative;
+      overflow: hidden;
     }
     
-    .about-avatar {
-      margin-bottom: 16px;
+    .about-developer::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse at 30% 20%, rgba(255,255,255,0.15) 0%, transparent 60%);
+      pointer-events: none;
     }
     
-    .about-avatar img {
-      width: 72px;
-      height: 72px;
-      border-radius: 50%;
-      border: 3px solid rgba(255, 255, 255, 0.3);
-      object-fit: cover;
-      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
-    }
-    
-    .avatar-miku {
-      width: 72px;
-      height: 72px;
-      border-radius: 50%;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+    .about-dev-avatars {
       display: flex;
-      align-items: center;
       justify-content: center;
-      font-size: 36px;
-      border: 3px solid rgba(255, 255, 255, 0.5);
-      box-shadow: 0 4px 16px rgba(102, 126, 234, 0.4);
-      animation: mikuPulse 2s ease-in-out infinite;
-    }
-    
-    @keyframes mikuPulse {
-      0%, 100% { transform: scale(1); }
-      50% { transform: scale(1.05); }
-    }
-    
-    .about-system-name {
-      font-size: 22px;
-      font-weight: 700;
-      margin-bottom: 8px;
-    }
-    
-    .about-version {
-      font-size: 14px;
-      opacity: 0.9;
+      gap: 24px;
       margin-bottom: 16px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .about-dev-avatar-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .about-dev-avatar {
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 3px solid rgba(255, 255, 255, 0.5);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+      transition: transform 0.3s ease;
+    }
+
+    .about-dev-avatar:hover {
+      transform: scale(1.08);
+    }
+
+    .about-dev-avatar-name {
+      font-size: 11px;
+      font-weight: 600;
+      opacity: 0.85;
+      letter-spacing: 0.5px;
+    }
+
+    .about-system-name {
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 6px;
+      position: relative;
+      z-index: 1;
     }
     
     .about-version-badge {
       display: inline-block;
-      padding: 4px 12px;
-      background: rgba(255, 255, 255, 0.2);
-      border-radius: 12px;
-      font-size: 13px;
+      padding: 3px 10px;
+      background: rgba(255, 255, 255, 0.18);
+      border-radius: 10px;
+      font-size: 12px;
       font-weight: 600;
+      letter-spacing: 0.3px;
     }
     
     .about-developer-info {
-      margin-top: 12px;
-      padding-top: 12px;
-      border-top: 1px solid rgba(255, 255, 255, 0.2);
+      margin-top: 14px;
+      padding-top: 14px;
+      border-top: 1px solid rgba(255, 255, 255, 0.15);
+      position: relative;
+      z-index: 1;
     }
     
     .about-developer-name {
-      font-size: 16px;
+      font-size: 15px;
       font-weight: 700;
-      margin-bottom: 4px;
+      margin-bottom: 2px;
     }
     
     .about-developer-desc {
-      font-size: 13px;
-      opacity: 0.85;
+      font-size: 12px;
+      opacity: 0.75;
     }
     
+    /* 更新日志 */
     .changelog-section {
-      margin-top: 8px;
+      margin-top: 4px;
     }
     
     .changelog-title {
       font-size: 15px;
-      font-weight: 600;
+      font-weight: 700;
       color: var(--text-primary);
       margin-bottom: 16px;
       display: flex;
@@ -1218,53 +1311,253 @@
     }
     
     .changelog-version {
-      margin-bottom: 20px;
+      margin-bottom: 4px;
+    }
+    
+    /* 一级折叠组（大版本 V0.x） */
+    .changelog-major {
+      margin-bottom: 6px;
+    }
+    
+    .changelog-major-header {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text-primary);
+      padding: 12px 16px;
+      background: rgba(200, 200, 220, 0.06);
+      border-radius: 12px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      transition: all 0.2s;
+      user-select: none;
+      border: 1px solid rgba(200, 200, 220, 0.12);
+    }
+    
+    .changelog-major-header:hover {
+      background: rgba(200, 200, 220, 0.12);
+    }
+    
+    .changelog-major-header.current {
+      background: rgba(16, 185, 129, 0.06);
+      border-color: rgba(16, 185, 129, 0.15);
+      color: var(--accent-green);
+    }
+    
+    .changelog-major-header.current:hover {
+      background: rgba(16, 185, 129, 0.12);
+    }
+    
+    .changelog-major-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .changelog-major-label {
+      font-size: 13px;
+      font-weight: 600;
+    }
+    
+    .changelog-major-tag {
+      font-size: 10px;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 6px;
+      background: rgba(59, 130, 246, 0.08);
+      color: var(--accent-blue);
+      letter-spacing: 0.3px;
+    }
+    
+    .changelog-major-header.current .changelog-major-tag {
+      background: rgba(16, 185, 129, 0.12);
+      color: var(--accent-green);
+    }
+    
+    .changelog-major-toggle {
+      font-size: 11px;
+      color: var(--text-muted);
+      transition: transform 0.25s;
+    }
+    
+    .changelog-major.expanded .changelog-major-toggle {
+      transform: rotate(180deg);
+    }
+    
+    .changelog-major-body {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.35s ease;
+      padding-left: 8px;
+    }
+    
+    .changelog-major.expanded .changelog-major-body {
+      max-height: 2000px;
     }
     
     .changelog-version-header {
-      font-size: 14px;
-      font-weight: 600;
-      color: var(--accent-blue);
-      margin-bottom: 10px;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text-secondary);
+      margin-bottom: 0;
+      padding: 10px 14px;
+      background: rgba(200, 200, 220, 0.08);
+      border-radius: 10px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      transition: all 0.2s;
+      user-select: none;
+    }
+    
+    .changelog-version-header:hover {
+      background: rgba(200, 200, 220, 0.14);
+    }
+    
+    .changelog-version-header.current {
+      background: rgba(16, 185, 129, 0.08);
+      color: var(--accent-green);
+    }
+    
+    .changelog-version-header.current:hover {
+      background: rgba(16, 185, 129, 0.14);
+    }
+    
+    .changelog-version-left {
       display: flex;
       align-items: center;
       gap: 8px;
     }
     
-    .changelog-version-header.current {
+    .changelog-version-tag {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 2px 7px;
+      border-radius: 5px;
+      background: rgba(59, 130, 246, 0.1);
+      color: var(--accent-blue);
+    }
+    
+    .changelog-version-header.current .changelog-version-tag {
+      background: rgba(16, 185, 129, 0.15);
       color: var(--accent-green);
     }
     
-    .changelog-current-tag {
-      padding: 2px 8px;
-      background: rgba(16, 185, 129, 0.15);
-      color: var(--accent-green);
-      border-radius: 6px;
-      font-size: 11px;
-      font-weight: 600;
+    .changelog-toggle {
+      font-size: 12px;
+      color: var(--text-muted);
+      transition: transform 0.2s;
+    }
+    
+    .changelog-version.expanded .changelog-toggle {
+      transform: rotate(180deg);
     }
     
     .changelog-items {
-      padding-left: 8px;
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease;
+    }
+    
+    .changelog-version.expanded .changelog-items {
+      max-height: 600px;
     }
     
     .changelog-item {
-      padding: 8px 0 8px 16px;
-      font-size: 13px;
+      padding: 10px 14px 10px 20px;
+      font-size: 12.5px;
       color: var(--text-secondary);
-      border-left: 2px solid var(--glass-border);
-      margin-bottom: 6px;
-      line-height: 1.5;
+      line-height: 1.65;
+      position: relative;
+    }
+    
+    .changelog-item::before {
+      content: '';
+      position: absolute;
+      left: 14px;
+      top: 0;
+      bottom: 0;
+      width: 1px;
+      background: rgba(200, 200, 220, 0.3);
+    }
+    
+    .changelog-item::after {
+      content: '';
+      position: absolute;
+      left: 11px;
+      top: 16px;
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: rgba(200, 200, 220, 0.5);
     }
     
     .changelog-item:last-child {
-      margin-bottom: 0;
+      padding-bottom: 14px;
     }
     
     .changelog-item-version {
       color: var(--text-primary);
-      font-weight: 500;
-      margin-right: 6px;
+      font-weight: 600;
+      font-size: 11.5px;
+      margin-right: 4px;
+    }
+    
+    .changelog-item + .changelog-item {
+      border-top: none;
+    }
+    
+    /* 统计信息行 */
+    .about-stats-row {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    
+    .about-stat-chip {
+      flex: 1;
+      text-align: center;
+      padding: 12px 8px;
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      border-radius: 12px;
+    }
+    
+    .about-stat-chip-value {
+      font-size: 20px;
+      font-weight: 800;
+      color: var(--text-primary);
+      line-height: 1.2;
+    }
+    
+    .about-stat-chip-label {
+      font-size: 10px;
+      color: var(--text-muted);
+      margin-top: 2px;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+    }
+    
+    /* 响应式 */
+    @media (max-width: 480px) {
+      .about-content {
+        padding: 0 16px 24px;
+        border-radius: 20px 20px 0 0;
+      }
+      .about-developer {
+        padding: 20px 16px;
+      }
+      .about-stats-row {
+        gap: 8px;
+      }
+      .about-stat-chip {
+        padding: 10px 6px;
+      }
+      .about-stat-chip-value {
+        font-size: 17px;
+      }
     }
     
     /* ========== 动画 ========== */
@@ -1356,7 +1649,7 @@
           <div class="brand-icon">📚</div>
           <div class="brand-text">
             <h1>学习RPG · 认知操作系统</h1>
-            <p>v0.4.7</p>
+            <p>v0.5.0</p>
           </div>
         </div>
       </header>
@@ -1571,174 +1864,354 @@
   <div class="about-modal" id="aboutModal">
     <div class="about-overlay" onclick="closeAbout()"></div>
     <div class="about-content">
+      <div class="about-drag-handle"></div>
+      
       <div class="about-header">
         <span class="about-title">关于</span>
         <button class="about-close" onclick="closeAbout()">✕</button>
       </div>
       
+      <!-- 开发者卡片 -->
       <div class="about-developer">
-        <div class="about-avatar">
-          <div class="avatar-miku">🎵</div>
+        <div class="about-dev-avatars">
+          <div class="about-dev-avatar-wrap">
+            <img class="about-dev-avatar" src="assets/molan.jpg" alt="墨澜" />
+            <span class="about-dev-avatar-name">墨澜</span>
+          </div>
+          <div class="about-dev-avatar-wrap">
+            <img class="about-dev-avatar" src="assets/miku.jpg" alt="MIKU" />
+            <span class="about-dev-avatar-name">MIKU</span>
+          </div>
         </div>
-        <div class="about-system-name">📚 学习RPG认知操作系统</div>
+        <div class="about-system-name">学习RPG · 认知操作系统</div>
         <div class="about-version">
-          <span class="about-version-badge">v0.4.7</span>
+          <span class="about-version-badge">v0.5.0</span>
         </div>
         <div class="about-developer-info">
-          <div class="about-developer-name">墨澜的Miku</div>
+          <div class="about-developer-name">墨澜 & MIKU</div>
           <div class="about-developer-desc">AI学习助手</div>
         </div>
       </div>
       
+      <!-- 统计概览 -->
+      <div class="about-stats-row" id="aboutStats">
+        <div class="about-stat-chip">
+          <div class="about-stat-chip-value" id="statVersions">28</div>
+          <div class="about-stat-chip-label">版本迭代</div>
+        </div>
+        <div class="about-stat-chip">
+          <div class="about-stat-chip-value" id="statDays">70</div>
+          <div class="about-stat-chip-label">开发天数</div>
+        </div>
+        <div class="about-stat-chip">
+          <div class="about-stat-chip-value" id="statSubjects">9</div>
+          <div class="about-stat-chip-label">覆盖学科</div>
+        </div>
+        <div class="about-stat-chip">
+          <div class="about-stat-chip-value" id="statAlgo">7</div>
+          <div class="about-stat-chip-label">核心算法</div>
+        </div>
+      </div>
+      
+      <!-- 更新日志 -->
       <div class="changelog-section">
-        <div class="changelog-title">📝 更新日志</div>
+        <div class="changelog-title">更新日志</div>
         
-        <div class="changelog-version">
-          <div class="changelog-version-header current">
-            v0.4.7（当前版本 - Bug修复）
-            <span class="changelog-current-tag">当前</span>
-          </div>
-          <div class="changelog-items">
-            <div class="changelog-item">
-              <span class="changelog-item-version">v0.4.7 (2026-05-19):</span> 头像修复：移除失效的coze短链接，改用CSS+emoji方案渲染Miku风格头像（渐变背景+音符emoji+脉冲动画，零外部依赖）；更新日志全面补全：为v0.3.x及更早版本的简略条目补充详细描述，涵盖玻璃效果升级、遗忘曲线优化、技能树视觉增强、学科分级算法、阴影队列实现、移动端/桌面端适配、数据持久化等功能的完整迭代记录。
+        <!-- ====== V0.5 — UI 升级 ====== -->
+        <div class="changelog-major expanded" onclick="this.classList.toggle('expanded')">
+          <div class="changelog-major-header current">
+            <div class="changelog-major-left">
+              <span class="changelog-major-label">V0.5</span>
+              <span class="changelog-major-tag">当前 · UI 升级</span>
             </div>
+            <span class="changelog-major-toggle">▼</span>
           </div>
-        </div>
-        
-        <div class="changelog-version">
-          <div class="changelog-version-header">v0.4.6（合并迭代）</div>
-          <div class="changelog-items">
-            <div class="changelog-item">
-              <span class="changelog-item-version">v0.4.6 (2026-05-18):</span> 合并v0.4.4（删除模板页面、恢复设置页面）和v0.4.5（GitHub数据读取功能）的改动；以v0.4.4为基础，整合GitHub远程数据同步能力。
-            </div>
-          </div>
-        </div>
-        
-        <div class="changelog-version">
-          <div class="changelog-version-header">v0.4.5（GitHub数据读取）</div>
-          <div class="changelog-items">
-            <div class="changelog-item">
-              <span class="changelog-item-version">v0.4.5 (2026-05-17):</span> 新增GitHub数据读取功能：支持从GitHub仓库加载学习数据；添加数据加载状态动画和数据错误处理机制。
+          <div class="changelog-major-body">
+            <div class="changelog-version expanded" onclick="event.stopPropagation();this.classList.toggle('expanded')">
+              <div class="changelog-version-header">
+                <div class="changelog-version-left">
+                  <span>v0.5.0</span>
+                  <span class="changelog-version-tag">玻璃材质</span>
+                </div>
+                <span class="changelog-toggle">▼</span>
+              </div>
+              <div class="changelog-items">
+                <div class="changelog-item">
+                  <span class="changelog-item-version">2026-05-10</span>
+                  玻璃材质视觉体系重构（backdrop-filter 毛玻璃 + 多层高光 + 折射边缘）；开发者头像系统；GitHub 数据加载重试机制；算法边界保护加固（温度/半衰期/XP）。
+                </div>
+              </div>
             </div>
           </div>
         </div>
         
-        <div class="changelog-version">
-          <div class="changelog-version-header">v0.4.4（模板删除）</div>
-          <div class="changelog-items">
-            <div class="changelog-item">
-              <span class="changelog-item-version">v0.4.4 (2026-05-17):</span> 删除"数据模板"页面（模板数据结构为AI内部使用，无需展示给用户）；恢复设置页面到底部导航栏。
+        <!-- ====== V0.4 — 算法研究 ====== -->
+        <div class="changelog-major" onclick="this.classList.toggle('expanded')">
+          <div class="changelog-major-header">
+            <div class="changelog-major-left">
+              <span class="changelog-major-label">V0.4</span>
+              <span class="changelog-major-tag">算法研究</span>
+            </div>
+            <span class="changelog-major-toggle">▼</span>
+          </div>
+          <div class="changelog-major-body">
+            <div class="changelog-version" onclick="event.stopPropagation();this.classList.toggle('expanded')">
+              <div class="changelog-version-header">
+                <div class="changelog-version-left">
+                  <span>v0.4.8</span>
+                  <span class="changelog-version-tag">修复</span>
+                </div>
+                <span class="changelog-toggle">▼</span>
+              </div>
+              <div class="changelog-items">
+                <div class="changelog-item">
+                  <span class="changelog-item-version">2026-05-10</span>
+                  全面修复与功能补全：修复技能树 setOption 数据结构错误；修复 todayXp/combo/学科等级计算；修复日期筛选与遗忘曲线坐标。新增根名系统、成就检测、每日状态标签、数据更新时间。
+                </div>
+              </div>
+            </div>
+            <div class="changelog-version" onclick="event.stopPropagation();this.classList.toggle('expanded')">
+              <div class="changelog-version-header">
+                <div class="changelog-version-left">
+                  <span>v0.4.7</span>
+                  <span class="changelog-version-tag">修复</span>
+                </div>
+                <span class="changelog-toggle">▼</span>
+              </div>
+              <div class="changelog-items">
+                <div class="changelog-item">
+                  <span class="changelog-item-version">2026-05-19</span>
+                  头像修复：移除失效外部链接，改用 CSS+emoji 方案渲染。更新日志全面补全。
+                </div>
+              </div>
+            </div>
+            <div class="changelog-version" onclick="event.stopPropagation();this.classList.toggle('expanded')">
+              <div class="changelog-version-header">
+                <div class="changelog-version-left">
+                  <span>v0.4.6</span>
+                  <span class="changelog-version-tag">合并</span>
+                </div>
+                <span class="changelog-toggle">▼</span>
+              </div>
+              <div class="changelog-items">
+                <div class="changelog-item">
+                  <span class="changelog-item-version">2026-05-18</span>
+                  合并 v0.4.4（删除模板页面）和 v0.4.5（GitHub 数据读取），整合远程数据同步能力。
+                </div>
+              </div>
+            </div>
+            <div class="changelog-version" onclick="event.stopPropagation();this.classList.toggle('expanded')">
+              <div class="changelog-version-header">
+                <div class="changelog-version-left">
+                  <span>v0.4.5</span>
+                  <span class="changelog-version-tag">功能</span>
+                </div>
+                <span class="changelog-toggle">▼</span>
+              </div>
+              <div class="changelog-items">
+                <div class="changelog-item">
+                  <span class="changelog-item-version">2026-05-17</span>
+                  新增 GitHub 远程数据读取，支持加载学习数据与错误回退。
+                </div>
+              </div>
+            </div>
+            <div class="changelog-version" onclick="event.stopPropagation();this.classList.toggle('expanded')">
+              <div class="changelog-version-header">
+                <div class="changelog-version-left">
+                  <span>v0.4.3 – v0.4.4</span>
+                  <span class="changelog-version-tag">算法</span>
+                </div>
+                <span class="changelog-toggle">▼</span>
+              </div>
+              <div class="changelog-items">
+                <div class="changelog-item">
+                  <span class="changelog-item-version">2026-05-16</span>
+                  学科等级三维评分算法（B^0.3 × D^0.4 × E^0.3）；阴影队列 urgency 指标；推荐优先级乘法模型；全局参数 EMA 自校准。
+                </div>
+                <div class="changelog-item">
+                  <span class="changelog-item-version">2026-05-17</span>
+                  删除数据模板页面，恢复设置页。
+                </div>
+              </div>
+            </div>
+            <div class="changelog-version" onclick="event.stopPropagation();this.classList.toggle('expanded')">
+              <div class="changelog-version-header">
+                <div class="changelog-version-left">
+                  <span>v0.4.1 – v0.4.2</span>
+                  <span class="changelog-version-tag">模型</span>
+                </div>
+                <span class="changelog-toggle">▼</span>
+              </div>
+              <div class="changelog-items">
+                <div class="changelog-item">
+                  <span class="changelog-item-version">2026-05-10</span>
+                  数据模板标准化：三种活动类型（刷题/考试/背诵）+ 统一 record 格式。
+                </div>
+                <div class="changelog-item">
+                  <span class="changelog-item-version">2026-05-15</span>
+                  温度模型重构：复习升温机制 + 动态半衰期三层因子模型 + 九大学科中文化。
+                </div>
+              </div>
             </div>
           </div>
         </div>
         
-        <div class="changelog-version">
-          <div class="changelog-version-header">v0.4.3（算法优化迭代）</div>
-          <div class="changelog-items">
-            <div class="changelog-item">
-              <span class="changelog-item-version">v0.4.3 (2026-05-16):</span> 学科等级算法重构：采用三维标准化权重设计（广度B×深度D^0.4×经验E^0.3几何加权）；统一温度数据源，废弃temperatureMap双源；等级进度由综合分小数部分平滑显示；遗忘衰减阻尼机制。阴影队列与推荐算法优化：新阴影队列指标urgency=(100-temp)×decayRatePerDay；推荐优先级乘法模型；背诵类特殊推荐（24h内partial/failed保持高权重）；复习频率自适应机制。全局参数自校准：全局基础半衰期指数移动平均更新；学科难度系数基于最近10次复习ratio自动调整；温度回升参数自校准。
+        <!-- ====== V0.3 — 视觉优化 ====== -->
+        <div class="changelog-major" onclick="this.classList.toggle('expanded')">
+          <div class="changelog-major-header">
+            <div class="changelog-major-left">
+              <span class="changelog-major-label">V0.3</span>
+              <span class="changelog-major-tag">视觉优化</span>
+            </div>
+            <span class="changelog-major-toggle">▼</span>
+          </div>
+          <div class="changelog-major-body">
+            <div class="changelog-version" onclick="event.stopPropagation();this.classList.toggle('expanded')">
+              <div class="changelog-version-header">
+                <div class="changelog-version-left">
+                  <span>v0.3.1 – v0.3.5</span>
+                  <span class="changelog-version-tag">界面</span>
+                </div>
+                <span class="changelog-toggle">▼</span>
+              </div>
+              <div class="changelog-items">
+                <div class="changelog-item">
+                  <span class="changelog-item-version">2026-04-28</span>
+                  关于页面模态框 + 开发者信息卡片。
+                </div>
+                <div class="changelog-item">
+                  <span class="changelog-item-version">2026-05-02</span>
+                  可折叠更新日志面板，按版本分组展示。
+                </div>
+                <div class="changelog-item">
+                  <span class="changelog-item-version">2026-05-04</span>
+                  技能树节点呼吸动画 + 温度色渐变（五级）。
+                </div>
+                <div class="changelog-item">
+                  <span class="changelog-item-version">2026-05-06</span>
+                  遗忘曲线 ECharts 重写，关键复习节点标记。
+                </div>
+                <div class="changelog-item">
+                  <span class="changelog-item-version">2026-05-08</span>
+                  玻璃效果全面升级：毛玻璃 + 卡片光晕 + 渐变边框。
+                </div>
+              </div>
             </div>
           </div>
         </div>
         
-        <div class="changelog-version">
-          <div class="changelog-version-header">v0.4.2（温度模型重构）</div>
-          <div class="changelog-items">
-            <div class="changelog-item">
-              <span class="changelog-item-version">v0.4.2 (2026-05-15):</span> 温度模型重构：复习后温度可上升（升温机制 boost=accuracy*0.4+10）；实现动态半衰期三层因子模型（全局基础4.0天×学科修正×个体修正）；九大学科中文名称（数学/物理/化学/生物/语文/英语/历史/地理/政治）；指数衰减温度计算 getCurrentTemp()。
+        <!-- ====== V0.2 — 架构搭建 ====== -->
+        <div class="changelog-major" onclick="this.classList.toggle('expanded')">
+          <div class="changelog-major-header">
+            <div class="changelog-major-left">
+              <span class="changelog-major-label">V0.2</span>
+              <span class="changelog-major-tag">架构搭建</span>
+            </div>
+            <span class="changelog-major-toggle">▼</span>
+          </div>
+          <div class="changelog-major-body">
+            <div class="changelog-version" onclick="event.stopPropagation();this.classList.toggle('expanded')">
+              <div class="changelog-version-header">
+                <div class="changelog-version-left">
+                  <span>v0.2.0 – v0.2.6</span>
+                  <span class="changelog-version-tag">功能</span>
+                </div>
+                <span class="changelog-toggle">▼</span>
+              </div>
+              <div class="changelog-items">
+                <div class="changelog-item">
+                  <span class="changelog-item-version">2026-04-05</span>
+                  数据持久化：LocalStorage 读写 + 自动保存。
+                </div>
+                <div class="changelog-item">
+                  <span class="changelog-item-version">2026-04-08</span>
+                  移动端适配：底部导航栏 + 安全区域。
+                </div>
+                <div class="changelog-item">
+                  <span class="changelog-item-version">2026-04-12</span>
+                  阴影复习队列：基于温度和时间的紧迫度排序。
+                </div>
+                <div class="changelog-item">
+                  <span class="changelog-item-version">2026-04-15</span>
+                  学科独立等级 + 进度条。
+                </div>
+                <div class="changelog-item">
+                  <span class="changelog-item-version">2026-04-18</span>
+                  纯展示版发布，移除所有输入表单。
+                </div>
+                <div class="changelog-item">
+                  <span class="changelog-item-version">2026-04-22</span>
+                  单页应用路由 + 五主页面切换。
+                </div>
+                <div class="changelog-item">
+                  <span class="changelog-item-version">2026-04-25</span>
+                  桌面端响应式适配。
+                </div>
+              </div>
             </div>
           </div>
         </div>
         
-        <div class="changelog-version">
-          <div class="changelog-version-header">v0.4.x（数据模板标准化）</div>
-          <div class="changelog-items">
-            <div class="changelog-item">
-              <span class="changelog-item-version">v0.4.1 (2026-05-10):</span> 数据模板标准化：实现统一记录数据结构，支持三种活动类型（practice刷题/exam考试/recitation背诵）；添加活动类型配色系统（蓝色练习/紫色考试/绿色背诵）；统一record格式包含timestamp/subject/knowledgePoints/durationMinutes/activityType及类型特定字段。
+        <!-- ====== V0.1 — 基础版本 ====== -->
+        <div class="changelog-major" onclick="this.classList.toggle('expanded')">
+          <div class="changelog-major-header">
+            <div class="changelog-major-left">
+              <span class="changelog-major-label">V0.1</span>
+              <span class="changelog-major-tag">基础版本</span>
             </div>
+            <span class="changelog-major-toggle">▼</span>
           </div>
-        </div>
-        
-        <div class="changelog-version">
-          <div class="changelog-version-header">v0.3.x（界面优化）</div>
-          <div class="changelog-items">
-            <div class="changelog-item">
-              <span class="changelog-item-version">v0.3.5 (2026-05-08):</span> 玻璃效果全面升级：优化毛玻璃背景透明度（0.72→0.72+饱和度180%）；增强卡片光晕效果（三层radial-gradient叠加高光）；实现渐变边框效果（inset box-shadow内阴影）；悬停状态添加transform上移和阴影扩散动画；玻璃卡片内容层级z-index隔离。
-            </div>
-            <div class="changelog-item">
-              <span class="changelog-item-version">v0.3.4 (2026-05-06):</span> 遗忘曲线页面全面优化：重写Ebbinghaus曲线图表为ECharts实现；添加60%/40%/20%关键复习节点标记（markPoint）；温度色块可视化区分记忆强度区域（visualMap）；悬停tooltip显示时间点和保留率；复习时间点自适应计算基于动态半衰期。
-            </div>
-            <div class="changelog-item">
-              <span class="changelog-item-version">v0.3.3 (2026-05-04):</span> 技能树节点视觉增强：添加节点呼吸动画（nodeBreath keyframes）；实现温度色渐变（灼热→温热→常温→微凉→冷却五级）；添加glowColor CSS变量驱动阴影；节点点击展开详情面板显示温度/半衰期/XP等数据。
-            </div>
-            <div class="changelog-item">
-              <span class="changelog-item-version">v0.3.2 (2026-05-02):</span> 详细更新日志+开发者信息：重构关于页面为模态框组件；添加开发者头像和简介展示；实现可折叠更新日志面板；按版本分组展示历史更新记录。
-            </div>
-            <div class="changelog-item">
-              <span class="changelog-item-version">v0.3.1 (2026-04-28):</span> 关于页面：新增关于页面展示系统信息和开发者信息；添加版本号徽章展示；实现开发者资料卡片（头像+名称+描述）。
-            </div>
-          </div>
-        </div>
-        
-        <div class="changelog-version">
-          <div class="changelog-version-header">v0.2.x（响应式适配）</div>
-          <div class="changelog-items">
-            <div class="changelog-item">
-              <span class="changelog-item-version">v0.2.6 (2026-04-25):</span> 桌面端适配：优化学科卡片网格布局（4列→响应式断点）；调整技能树容器高度适配桌面；增加侧边距和内容宽度；优化ECharts图表在桌面端显示效果。
-            </div>
-            <div class="changelog-item">
-              <span class="changelog-item-version">v0.2.5 (2026-04-22):</span> 页面跳转设计：实现单页应用路由切换（switchPage函数）；底部导航栏固定定位；五个主页面（概览/技能树/遗忘曲线/日志/设置）；页面切换淡入动画。
-            </div>
-            <div class="changelog-item">
-              <span class="changelog-item-version">v0.2.4 (2026-04-18):</span> 纯展示版：移除所有输入表单和交互功能；专注数据可视化展示；保留示例数据渲染能力；作为纯前端展示版本发布。
-            </div>
-            <div class="changelog-item">
-              <span class="changelog-item-version">v0.2.3 (2026-04-15):</span> 学科分等级：实现九大学科独立等级计算；添加学科等级进度条（进度百分比）；等级由学科XP和节点数综合决定；每学科独立技能树结构。
-            </div>
-            <div class="changelog-item">
-              <span class="changelog-item-version">v0.2.2 (2026-04-12):</span> 阴影复习队列：实现coldShadowQueue冷却队列；基于温度和时间计算复习紧迫度；优先级队列排序推荐复习项；添加紧急复习项特殊标记。
-            </div>
-            <div class="changelog-item">
-              <span class="changelog-item-version">v0.2.1 (2026-04-08):</span> 移动端适配：底部固定导航栏；安全区域适配（env safe-area-inset-bottom）；触摸友好的按钮尺寸（min-width 64px）；学科卡片网格自适应列数。
-            </div>
-            <div class="changelog-item">
-              <span class="changelog-item-version">v0.2.0 (2026-04-05):</span> 数据持久化：实现LocalStorage读写（saveData/loadData）；自动保存学习记录和进度；页面刷新后数据恢复；添加数据版本管理。
-            </div>
-          </div>
-        </div>
-        
-        <div class="changelog-version">
-          <div class="changelog-version-header">v0.1.x（基础版本）</div>
-          <div class="changelog-items">
-            <div class="changelog-item">
-              <span class="changelog-item-version">v0.1.9 (2026-04-01):</span> 学习记录管理：实现records数组存储复习历史；按学科/类型/日期筛选功能；记录详细元数据（时间/知识点/正确率/XP）。
-            </div>
-            <div class="changelog-item">
-              <span class="changelog-item-version">v0.1.8 (2026-03-28):</span> 启动页动画：实现渐变背景启动页；等级和称号展示动画；进度条加载动画；启动按钮点击进入主页。
-            </div>
-            <div class="changelog-item">
-              <span class="changelog-item-version">v0.1.7 (2026-03-25):</span> 经验值与等级系统：实现XP经验值获取逻辑；等级计算和进度显示；称号系统（初学者→熟练者→专家等）；升级动画反馈。
-            </div>
-            <div class="changelog-item">
-              <span class="changelog-item-version">v0.1.6 (2026-03-22):</span> 温度记忆模型：实现记忆温度概念（0-100%）；遗忘曲线衰减计算；复习后温度回升机制；温度可视化颜色编码。
-            </div>
-            <div class="changelog-item">
-              <span class="changelog-item-version">v0.1.5 (2026-03-18):</span> 技能树可视化：ECharts force图实现知识节点网络；节点可拖拽和缩放；点击查看节点详情；连接线显示知识关联。
-            </div>
-            <div class="changelog-item">
-              <span class="changelog-item-version">v0.1.4 (2026-03-15):</span> 半衰期算法：实现艾宾浩斯遗忘曲线数学模型；动态计算下次复习时间；个体化半衰期调整因子；复习提醒机制。
-            </div>
-            <div class="changelog-item">
-              <span class="changelog-item-version">v0.1.3 (2026-03-12):</span> 学科分类体系：九大学科分类（数理化生语英政史地）；各学科独立知识点管理；学科配色方案；学科切换交互。
-            </div>
-            <div class="changelog-item">
-              <span class="changelog-item-version">v0.1.2 (2026-03-08):</span> 基础UI设计：玻璃拟态卡片组件；渐变配色系统；响应式布局；现代字体排版。
-            </div>
-            <div class="changelog-item">
-              <span class="changelog-item-version">v0.1.1 (2026-03-05):</span> 项目初始化：创建HTML基础结构；引入ECharts图表库；定义全局样式变量；搭建项目骨架。
-            </div>
-            <div class="changelog-item">
-              <span class="changelog-item-version">v0.1.0 (2026-03-01):</span> 项目立项：学习RPG认知操作系统概念设计；基于艾宾浩斯遗忘曲线理论；游戏化学习追踪系统规划。
+          <div class="changelog-major-body">
+            <div class="changelog-version" onclick="event.stopPropagation();this.classList.toggle('expanded')">
+              <div class="changelog-version-header">
+                <div class="changelog-version-left">
+                  <span>v0.1.0 – v0.1.9</span>
+                  <span class="changelog-version-tag">里程碑</span>
+                </div>
+                <span class="changelog-toggle">▼</span>
+              </div>
+              <div class="changelog-items">
+                <div class="changelog-item">
+                  <span class="changelog-item-version">2026-05-26</span>
+                  项目立项：基于艾宾浩斯遗忘曲线的游戏化学习系统。
+                </div>
+                <div class="changelog-item">
+                  <span class="changelog-item-version">2026-05-27</span>
+                  基础骨架：HTML 结构 + ECharts + 全局样式变量。
+                </div>
+                <div class="changelog-item">
+                  <span class="changelog-item-version">2026-05-28</span>
+                  玻璃拟态卡片 + 渐变配色 + 响应式布局。
+                </div>
+                <div class="changelog-item">
+                  <span class="changelog-item-version">2026-05-29</span>
+                  九大学科分类 + 独立知识点管理。
+                </div>
+                <div class="changelog-item">
+                  <span class="changelog-item-version">2026-05-30</span>
+                  半衰期算法 + 动态复习时间计算。
+                </div>
+                <div class="changelog-item">
+                  <span class="changelog-item-version">2026-05-31</span>
+                  技能树 ECharts force 图可视化。
+                </div>
+                <div class="changelog-item">
+                  <span class="changelog-item-version">2026-06-01</span>
+                  温度记忆模型（0–100%）+ 颜色编码。
+                </div>
+                <div class="changelog-item">
+                  <span class="changelog-item-version">2026-06-02</span>
+                  XP 经验值 + 等级系统 + 称号体系。
+                </div>
+                <div class="changelog-item">
+                  <span class="changelog-item-version">2026-06-03</span>
+                  启动页动画 + 进度条加载。
+                </div>
+                <div class="changelog-item">
+                  <span class="changelog-item-version">2026-06-04</span>
+                  学习记录管理 + 筛选功能。
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -1775,7 +2248,7 @@
   <div id="toast" class="toast" style="display:none"></div>
   
   <script>
-    // ========== v0.4.7 算法迭代系统 ==========
+    // ========== v0.5.0 算法迭代系统 ==========
     
     // ========== 核心配置 ==========
     const CONFIG = {
@@ -1844,17 +2317,17 @@
       }
     };
     
-    // ========== 学科定义（九大学科） ==========
+    // ========== 学科定义（九大学科 + 根名） ==========
     const SUBJECTS = {
-      '数学': { icon: '📐', color: '#1A5FB4' },
-      '语文': { icon: '📜', color: '#E5A50A' },
-      '英语': { icon: '📖', color: '#26A269' },
-      '物理': { icon: '⚡', color: '#1C71D8' },
-      '化学': { icon: '🧪', color: '#813D9C' },
-      '生物': { icon: '🧬', color: '#2EC27E' },
-      '政治': { icon: '🏛️', color: '#E01B24' },
-      '历史': { icon: '📜', color: '#9141AC' },
-      '地理': { icon: '🌍', color: '#1A5FB4' }
+      '数学': { icon: '📐', color: '#1A5FB4', rootName: 'Logos', rootLang: '希腊语', rootMeaning: '理性、逻辑、比例' },
+      '语文': { icon: '📜', color: '#E5A50A', rootName: 'Mythos', rootLang: '希腊语', rootMeaning: '叙事、言语、故事' },
+      '英语': { icon: '📖', color: '#26A269', rootName: 'Lingua', rootLang: '拉丁语', rootMeaning: '舌头、语言' },
+      '物理': { icon: '⚡', color: '#1C71D8', rootName: 'Physis', rootLang: '希腊语', rootMeaning: '自然、本质' },
+      '化学': { icon: '🧪', color: '#813D9C', rootName: 'Khēmeia', rootLang: '希腊语', rootMeaning: '炼金术、化学' },
+      '生物': { icon: '🧬', color: '#2EC27E', rootName: 'Zōē', rootLang: '希腊语', rootMeaning: '生命' },
+      '政治': { icon: '🏛️', color: '#B8860B', rootName: 'Politeia', rootLang: '希腊语', rootMeaning: '城邦、政体' },
+      '历史': { icon: '📜', color: '#C77DBA', rootName: 'Historia', rootLang: '拉丁语', rootMeaning: '探究、历史' },
+      '地理': { icon: '🌍', color: '#26A269', rootName: 'Geōgraphia', rootLang: '希腊语', rootMeaning: '大地描述' }
     };
     
     // ========== 等级数据 ==========
@@ -1943,7 +2416,8 @@
       
       const elapsedDays = (now - node.lastStudy) / (24 * 3600 * 1000);
       const retention = Math.pow(CONFIG.TEMP.DECAY_BASE, -elapsedDays / node.halfLifeDays);
-      return Math.max(0, +(node.peakTemp * retention).toFixed(1));
+      const temp = +(node.peakTemp * retention).toFixed(1);
+      return Math.max(0, Math.min(100, temp));
     }
     
     /**
@@ -1954,7 +2428,8 @@
      */
     function calculateHalfLife(subject, itemModifier = 1.0) {
       const subjectModifier = CONFIG.SUBJECT_MODIFIERS[subject] || 1.0;
-      return CONFIG.GLOBAL_BASE_HALFLIFE * subjectModifier * itemModifier;
+      const halfLife = CONFIG.GLOBAL_BASE_HALFLIFE * subjectModifier * itemModifier;
+      return Math.max(0.5, Math.min(30, halfLife));
     }
     
     /**
@@ -1964,8 +2439,8 @@
      * @returns {number} 新的半衰期
      */
     function updateHalfLife(node, observedRetention) {
-      const predictedRetention = getCurrentTemp(node) / 100;
-      const ratio = observedRetention / (predictedRetention + 0.01);
+      const predictedRetention = Math.max(0.01, getCurrentTemp(node)) / 100;
+      const ratio = observedRetention / Math.max(0.01, predictedRetention);
       
       const { RATIO_THRESHOLD_HIGH, RATIO_THRESHOLD_LOW, EXTEND_FACTOR, SHRINK_FACTOR, FINE_TUNE_FACTOR } = CONFIG.HALFLIFE_UPDATE;
       
@@ -2076,7 +2551,7 @@
       try {
         // 添加时间戳参数避免缓存
         const url = `${GITHUB_CONFIG.DATA_URL}?t=${Date.now()}`;
-        console.log('[v0.4.7] 正在从GitHub加载数据...', url);
+        console.log('[v0.5.0] 正在从GitHub加载数据...', url);
         
         const response = await fetch(url, {
           method: 'GET',
@@ -2091,7 +2566,7 @@
         }
         
         const rawData = await response.json();
-        console.log('[v0.4.7] 数据加载成功:', rawData);
+        console.log('[v0.5.0] 数据加载成功:', rawData);
         
         dataLoadState.hasError = false;
         dataLoadState.lastUpdate = new Date(rawData.lastUpdated);
@@ -2100,7 +2575,7 @@
         return convertGitHubDataToAppData(rawData);
         
       } catch (error) {
-        console.error('[v0.4.7] 数据加载失败:', error);
+        console.error('[v0.5.0] 数据加载失败:', error);
         dataLoadState.hasError = true;
         
         // 显示错误提示
@@ -2164,6 +2639,12 @@
         };
       }
       
+      // v0.5.0: 使用算法计算学科等级（而非硬编码为1）
+      for (const subjectName of Object.keys(subjects)) {
+        const calc = calculateSubjectLevel(subjectName);
+        subjects[subjectName].level = calc.level;
+      }
+      
       // 计算全局等级
       profile.totalXp = totalXp;
       profile.xp = totalXp;
@@ -2202,7 +2683,7 @@
         profile,
         subjects,
         records,
-        version: 'v0.4.7',
+        version: 'v0.5.0',
         _githubData: githubData // 保留原始数据引用
       };
     }
@@ -2281,7 +2762,7 @@
      * 显示数据加载错误
      */
     function showDataLoadError(message) {
-      console.warn('[v0.4.7] 使用默认空数据，错误信息:', message);
+      console.warn('[v0.5.0] 使用默认空数据，错误信息:', message);
       // 可以添加一个toast提示，但不影响用户使用
     }
     
@@ -2520,11 +3001,12 @@
       grid.innerHTML = html;
     }
     
-    // ========== 渲染日志 (v0.4.1 增强) ==========
+    // ========== 渲染日志 (v0.4.1 增强 + v0.5.0 日期筛选) ==========
     function renderLog() {
       const container = document.getElementById('logContainer');
       const subjectFilter = document.getElementById('logFilterSubject').value;
       const typeFilter = document.getElementById('logFilterType').value;
+      const dateFilter = document.getElementById('logFilterDate').value;
       
       let filtered = appData.records;
       if (subjectFilter) {
@@ -2533,41 +3015,58 @@
       if (typeFilter) {
         filtered = filtered.filter(r => r.activityType === typeFilter);
       }
+      // v0.5.0: 实现日期筛选
+      filtered = filterByDate(filtered, dateFilter);
       
       if (filtered.length === 0) {
         container.innerHTML = '<div class="log-empty">暂无学习记录 ✨</div>';
-        return;
+      } else {
+        container.innerHTML = filtered
+          .slice()
+          .reverse()
+          .slice(0, 50)
+          .map(r => {
+            const score = getRecordScore(r);
+            const scoreText = r.activityType === 'recitation' 
+              ? (r.result === 'perfect' ? '完美' : r.result === 'partial' ? '部分' : '失败')
+              : `${score}%`;
+            
+            // 正确率颜色编码
+            let accuracyColor = 'rgba(59, 130, 246, 0.1)';
+            if (r.activityType !== 'recitation') {
+              if (score >= 80) accuracyColor = 'rgba(16, 185, 129, 0.15)';
+              else if (score >= 60) accuracyColor = 'rgba(245, 158, 11, 0.15)';
+              else accuracyColor = 'rgba(239, 68, 68, 0.15)';
+            }
+            
+            return `
+              <div class="log-entry">
+                <span class="log-activity-type ${r.activityType}"></span>
+                <span class="log-time">${new Date(r.timestamp).toLocaleString('zh-CN', {
+                  month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit'
+                })}</span>
+                <span class="log-subject" style="color: ${SUBJECTS[r.subject]?.color || '#666'}">${r.subject}</span>
+                <span class="log-knowledge">${r.knowledgePoints?.join(', ') || '未知'}</span>
+                <span class="log-accuracy" style="background:${accuracyColor}">${scoreText}</span>
+                <span class="log-xp">+${r.xp || 0}</span>
+              </div>
+            `;
+          }).join('');
       }
       
-      container.innerHTML = filtered
-        .slice()
-        .reverse()
-        .slice(0, 50)
-        .map(r => {
-          const score = getRecordScore(r);
-          const scoreText = r.activityType === 'recitation' 
-            ? (r.result === 'perfect' ? '完美' : r.result === 'partial' ? '部分' : '失败')
-            : `${score}%`;
-          
-          return `
-            <div class="log-entry">
-              <span class="log-activity-type ${r.activityType}"></span>
-              <span class="log-time">${new Date(r.timestamp).toLocaleString('zh-CN', {
-                month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit'
-              })}</span>
-              <span class="log-subject" style="color: ${SUBJECTS[r.subject]?.color || '#666'}">${r.subject}</span>
-              <span class="log-knowledge">${r.knowledgePoints?.join(', ') || '未知'}</span>
-              <span class="log-accuracy">${scoreText}</span>
-              <span class="log-xp">+${r.xp || 0}</span>
-            </div>
-          `;
-        }).join('');
-      
+      // v0.5.0: 增强成就展示
       const achContainer = document.getElementById('achievements');
-      if (appData.profile.achievements.length > 0) {
+      const achievements = appData.profile.achievements || [];
+      if (achievements.length > 0) {
         achContainer.innerHTML = `
           <div style="font-size: 12px; color: var(--text-muted); width: 100%; margin-bottom: 8px;">已解锁成就</div>
-          ${appData.profile.achievements.map(a => `<span class="achievement-badge"><span>🏆</span><span>${a}</span></span>`).join('')}
+          ${achievements.map(a => {
+            const def = ACHIEVEMENT_DEFS[a];
+            if (def) {
+              return `<span class="achievement-badge" style="background:linear-gradient(135deg, ${def.color}22, ${def.color}08);border:1px solid ${def.color}40;color:${def.color};cursor:help;" title="${def.desc}"><span>${def.icon}</span><span>${def.name}</span></span>`;
+            }
+            return `<span class="achievement-badge"><span>🏆</span><span>${a}</span></span>`;
+          }).join('')}
         `;
       } else {
         achContainer.innerHTML = '';
@@ -2901,19 +3400,37 @@
       const subjectNodes = {};
       
       for (const [subjectName, subject] of Object.entries(appData.subjects)) {
-        if (subject.nodes && subject.nodes.length > 0) {
-          const subjectInfo = SUBJECTS[subjectName];
-          subjectNodes[subjectName] = index;
-          nodes.push({
-            id: index,
-            name: subjectInfo?.name || subjectName,
-            symbolSize: 50,
-            itemStyle: { color: subjectInfo?.color || '#6B7280' },
-            category: categories.findIndex(c => c.name === subjectName) || 0,
-            isSubject: true
-          });
-          index++;
-          
+        const subjectInfo = SUBJECTS[subjectName];
+        const catIndex = categories.findIndex(c => c.name === subjectName);
+        subjectNodes[subjectName] = index;
+        
+        // 学科根节点 - 显示根名
+        const hasNodes = subject.nodes && subject.nodes.length > 0;
+        nodes.push({
+          id: index,
+          name: subjectInfo?.rootName || subjectName,
+          symbolSize: hasNodes ? 55 : 40,
+          itemStyle: { 
+            color: hasNodes ? (subjectInfo?.color || '#6B7280') : '#E5E7EB',
+            shadowBlur: hasNodes ? 15 : 5,
+            shadowColor: hasNodes ? (subjectInfo?.color || '#6B7280') : 'transparent'
+          },
+          category: catIndex >= 0 ? catIndex : 0,
+          isSubject: true,
+          subjectName: subjectName,
+          rootMeaning: subjectInfo?.rootMeaning || '',
+          rootLang: subjectInfo?.rootLang || '',
+          label: {
+            show: true,
+            fontSize: 13,
+            fontWeight: 'bold',
+            color: hasNodes ? '#1a1a2e' : '#9CA3AF',
+            formatter: subjectInfo?.rootName || subjectName
+          }
+        });
+        index++;
+        
+        if (hasNodes) {
           for (const node of subject.nodes) {
             const temp = getCurrentTemp(node);
             const isHot = temp >= 80;
@@ -2931,7 +3448,7 @@
                 borderWidth: isHot ? 2 : 1,
                 borderColor: isHot ? 'rgba(255,255,255,0.5)' : 'rgba(255,255,255,0.3)'
               },
-              category: categories.findIndex(c => c.name === subjectName) || 0,
+              category: catIndex >= 0 ? catIndex : 0,
               isSubject: false,
               subject: subjectName,
               temp: temp,
@@ -2949,7 +3466,8 @@
               lineStyle: { 
                 color: getTempColor(temp),
                 width: isHot ? 2 : (isWarm ? 1.5 : 1),
-                opacity: isCool ? 0.3 : 0.6
+                opacity: isCool ? 0.3 : 0.6,
+                curveness: 0.2
               }
             });
             index++;
@@ -2957,30 +3475,13 @@
         }
       }
       
-      if (nodes.length === 0) {
-        categories.forEach((cat, i) => {
-          nodes.push({
-            id: i,
-            name: cat.name,
-            symbolSize: 40,
-            itemStyle: { color: '#E5E7EB' },
-            category: i,
-            isSubject: true
-          });
-        });
-      }
-      
       return { nodes, links, categories };
     }
     
-    function initSkillTree() {
-      const container = document.getElementById('skillTreeContainer');
-      if (!container) return;
-      
-      skillTreeChart = echarts.init(container);
+    function getSkillTreeOption() {
       const data = buildSkillTreeData();
       
-      const option = {
+      return {
         backgroundColor: 'transparent',
         tooltip: {
           trigger: 'item',
@@ -2995,7 +3496,11 @@
             if (params.dataType === 'edge') return '';
             const node = params.data;
             if (node.isSubject) {
-              return `<div style="font-weight:600;font-size:14px">${node.name}</div><div style="color:#718096;margin-top:4px">点击查看详情</div>`;
+              const subName = node.subjectName || node.name;
+              const rootInfo = SUBJECTS[subName];
+              return `<div style="font-weight:700;font-size:15px">${rootInfo?.rootName || node.name}</div>
+                      <div style="color:#718096;margin-top:4px;font-size:12px">${subName} · ${rootInfo?.rootMeaning || ''}</div>
+                      <div style="color:#9CA3AF;margin-top:2px;font-size:11px">${rootInfo?.rootLang || ''}</div>`;
             }
             const tempLabel = node.temp >= 80 ? '🔥 灼热' : (node.temp >= 60 ? '☀️ 温热' : (node.temp >= 40 ? '🌡️ 常温' : (node.temp >= 20 ? '❄️ 微凉' : '💤 冷却')));
             return `<div style="font-weight:600;font-size:14px">${node.name}</div>
@@ -3020,13 +3525,14 @@
           data: data.nodes,
           categories: data.categories,
           links: data.links,
-          lineStyle: { opacity: 0.6, curveness: 0.1 },
+          lineStyle: { opacity: 0.6, curveness: 0.2 },
           label: {
             show: true,
             position: 'bottom',
             fontSize: 10,
             color: '#4a5568',
             formatter: function(params) {
+              if (params.data.isSubject) return ''; // 根节点用自己的label
               return params.data.name.length > 8 ? params.data.name.substring(0, 8) + '...' : params.data.name;
             }
           },
@@ -3048,6 +3554,14 @@
           }
         }]
       };
+    }
+    
+    function initSkillTree() {
+      const container = document.getElementById('skillTreeContainer');
+      if (!container) return;
+      
+      skillTreeChart = echarts.init(container);
+      const option = getSkillTreeOption();
       
       skillTreeChart.setOption(option);
       skillTreeChart.on('click', function(params) {
@@ -3127,9 +3641,9 @@
           borderColor: 'rgba(200,200,220,0.4)',
           formatter: function(params) {
             const p = params[0];
-            const hours = p.axisValue;
+            const hours = p.data[0];
             const label = hours < 24 ? `${hours}小时` : `${Math.round(hours/24)}天`;
-            return `学习后 ${label}<br/>记忆保留: <b style="color:#3b82f6">${p.value}%</b>`;
+            return `学习后 ${label}<br/>记忆保留: <b style="color:#3b82f6">${p.data[1]}%</b>`;
           }
         },
         grid: {
@@ -3140,10 +3654,18 @@
           containLabel: true
         },
         xAxis: {
-          type: 'category',
-          data: timePoints.map((t, i) => i % 3 === 0 ? (t < 24 ? `${t}h` : `${Math.round(t/24)}d`) : ''),
+          type: 'value',
+          name: '学习后时间',
+          nameTextStyle: { color: '#718096', fontSize: 11 },
           axisLine: { lineStyle: { color: '#E5E7EB' } },
-          axisLabel: { color: '#718096', fontSize: 10 }
+          axisLabel: { 
+            color: '#718096', 
+            fontSize: 10,
+            formatter: function(val) {
+              if (val === 0) return '0';
+              return val < 24 ? `${val}h` : `${Math.round(val/24)}d`;
+            }
+          }
         },
         yAxis: {
           type: 'value',
@@ -3166,7 +3688,7 @@
         series: [{
           type: 'line',
           smooth: true,
-          data: curveData.map(d => d.value),
+          data: timePoints.map((t, i) => [t, curveData[i].value]),
           areaStyle: {
             color: {
               type: 'linear',
@@ -3213,7 +3735,7 @@
             data: [
               { coord: [0, 100], itemStyle: { color: '#10b981' } }
             ].concat(reviewPoints.map(p => ({
-              coord: [getClosestIndex(p.hours), p.retention],
+              coord: [p.hours, p.retention],
               isReview: true,
               retention: p.retention,
               timeLabel: p.hours < 24 ? `${p.hours}h` : `${Math.round(p.hours/24)}d`
@@ -3260,8 +3782,216 @@
       }, 3000);
     }
     
+    // ========== v0.5.0 每日状态标签系统 ==========
+    const DAILY_STATES = {
+      adventure: { name: 'Bōken no Hi', jp: '冒険の日', meaning: '冒险日', icon: '🗺️', condition: '首次接触新知识点' },
+      normal: { name: 'Heijitsu', jp: '平日', meaning: '常规学习日', icon: '📖', condition: '默认状态' },
+      rest: { name: 'Kyūjitsu', jp: '休日', meaning: '休息日', icon: '☕', condition: '无学习记录' },
+      revenge: { name: 'Fukushū', jp: '復讐', meaning: '复仇战', icon: '⚔️', condition: '专注攻克错题' },
+      deep: { name: 'Tiefenlernen', jp: '深度学习', meaning: '深度日', icon: '🔬', condition: '单知识点专注超2小时' }
+    };
+    
+    function calculateDailyState() {
+      const now = new Date();
+      const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+      
+      // 获取今日记录
+      const todayRecords = appData.records.filter(r => r.timestamp >= todayStart);
+      
+      if (todayRecords.length === 0) return DAILY_STATES.rest;
+      
+      // 检查是否有新知识点（首次出现）
+      const allKnownPoints = new Set();
+      appData.records.forEach(r => {
+        if (r.timestamp < todayStart && r.knowledgePoints) {
+          r.knowledgePoints.forEach(p => allKnownPoints.add(p));
+        }
+      });
+      
+      const hasNewKnowledge = todayRecords.some(r => 
+        r.knowledgePoints?.some(p => !allKnownPoints.has(p))
+      );
+      if (hasNewKnowledge) return DAILY_STATES.adventure;
+      
+      // 检查是否深度学习（单知识点超2小时）
+      const knowledgeDurations = {};
+      todayRecords.forEach(r => {
+        if (r.knowledgePoints) {
+          r.knowledgePoints.forEach(p => {
+            knowledgeDurations[p] = (knowledgeDurations[p] || 0) + (r.durationMinutes || 0);
+          });
+        }
+      });
+      const isDeepLearning = Object.values(knowledgeDurations).some(d => d > 120);
+      if (isDeepLearning) return DAILY_STATES.deep;
+      
+      // 检查是否复仇战（正确率低于60%的记录占多数）
+      const lowAccuracyCount = todayRecords.filter(r => {
+        const score = getRecordScore(r);
+        return score < 60;
+      }).length;
+      if (lowAccuracyCount > todayRecords.length / 2 && todayRecords.length >= 3) {
+        return DAILY_STATES.revenge;
+      }
+      
+      return DAILY_STATES.normal;
+    }
+    
+    // ========== v0.5.0 成就检测系统 ==========
+    const ACHIEVEMENT_DEFS = {
+      'First Light': { name: 'First Light', icon: '✨', desc: '首次完成学习记录', color: '#FFD700' },
+      'Combo x7': { name: 'Combo x7', icon: '🔥', desc: '连续7天学习', color: '#3b82f6' },
+      'Limit Break': { name: 'Limit Break', icon: '💥', desc: '单日XP破个人纪录', color: '#8b5cf6' },
+      'Eureka': { name: 'Eureka', icon: '💡', desc: '错因分析后正确率显著提升', color: '#10b981' },
+      'Shadow Path': { name: 'Shadow Path', icon: '🌑', desc: '知识点进入阴影复习队列', color: '#6B7280' },
+      'Achilles Heel': { name: 'Achilles Heel', icon: '🎯', desc: '系统识别薄弱知识点', color: '#ef4444' },
+      'Phoenix Down': { name: 'Phoenix Down', icon: '🔥', desc: '薄弱点成功逆袭', color: '#f59e0b' },
+      'Overflow': { name: 'Overflow', icon: '🌊', desc: '溢出进度条触发', color: '#06b6d4' }
+    };
+    
+    function detectAchievements() {
+      const achievements = new Set(appData.profile.achievements || []);
+      const now = Date.now();
+      const todayStart = new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate()).getTime();
+      const todayRecords = appData.records.filter(r => r.timestamp >= todayStart);
+      
+      // First Light: 有学习记录
+      if (appData.records.length > 0) achievements.add('First Light');
+      
+      // Combo x7: 连续7天
+      if (appData.profile.combo >= 7) achievements.add('Combo x7');
+      
+      // Shadow Path: 有阴影队列项
+      const hasShadowItems = Object.values(appData.subjects).some(s => 
+        s.nodes?.some(n => getCurrentTemp(n, now) > 0 && getCurrentTemp(n, now) < CONFIG.SHADOW_QUEUE.TEMP_THRESHOLD_COLD)
+      );
+      if (hasShadowItems) achievements.add('Shadow Path');
+      
+      // Achilles Heel: 有温度<30%的节点
+      const hasWeakNodes = Object.values(appData.subjects).some(s => 
+        s.nodes?.some(n => getCurrentTemp(n, now) > 0 && getCurrentTemp(n, now) < 30)
+      );
+      if (hasWeakNodes) achievements.add('Achilles Heel');
+      
+      // Limit Break: 今日XP超过之前最高（简化判断：今日XP>500）
+      const todayXp = todayRecords.reduce((sum, r) => sum + (r.xp || 0), 0);
+      if (todayXp > 500) achievements.add('Limit Break');
+      
+      // Overflow: 总XP超过当前等级上限的90%
+      const currentLevelData = LEVELS.find(l => l.l === appData.profile.level);
+      const nextLevelData = LEVELS.find(l => l.l > appData.profile.level);
+      if (currentLevelData && nextLevelData) {
+        const progress = (appData.profile.totalXp - currentLevelData.r) / (nextLevelData.r - currentLevelData.r);
+        if (progress > 0.9) achievements.add('Overflow');
+      }
+      
+      // Eureka: 有正确率从低变高的记录（简化：最近一条正确率>80%且之前有<60%的记录）
+      if (todayRecords.length >= 2) {
+        const sortedByTime = [...todayRecords].sort((a, b) => a.timestamp - b.timestamp);
+        const hasLowBefore = sortedByTime.slice(0, -1).some(r => getRecordScore(r) < 60);
+        const latestHigh = getRecordScore(sortedByTime[sortedByTime.length - 1]) > 80;
+        if (hasLowBefore && latestHigh) achievements.add('Eureka');
+      }
+      
+      // Phoenix Down: 有节点温度从<30%回升到>60%
+      Object.values(appData.subjects).forEach(s => {
+        if (!s.nodes) return;
+        s.nodes.forEach(n => {
+          if (n.accuracyHistory.length >= 2) {
+            const latestAcc = n.accuracyHistory[n.accuracyHistory.length - 1];
+            if (latestAcc >= 60 && n.repetitions >= 2) {
+              // 检查之前是否薄弱
+              const prevAccs = n.accuracyHistory.slice(0, -1);
+              if (prevAccs.some(a => a < 50)) achievements.add('Phoenix Down');
+            }
+          }
+        });
+      });
+      
+      return Array.from(achievements);
+    }
+    
+    // ========== v0.5.0 计算今日XP ==========
+    function calculateTodayXp() {
+      const now = new Date();
+      const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+      return appData.records
+        .filter(r => r.timestamp >= todayStart)
+        .reduce((sum, r) => sum + (r.xp || 0), 0);
+    }
+    
+    // ========== v0.5.0 计算连续天数 ==========
+    function calculateCombo() {
+      if (appData.records.length === 0) return 0;
+      
+      const now = new Date();
+      let streak = 0;
+      let checkDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      
+      // 检查今天是否有记录
+      const todayStart = checkDate.getTime();
+      const hasToday = appData.records.some(r => r.timestamp >= todayStart);
+      
+      if (!hasToday) {
+        // 从昨天开始检查
+        checkDate.setDate(checkDate.getDate() - 1);
+      }
+      
+      while (true) {
+        const dayStart = new Date(checkDate.getFullYear(), checkDate.getMonth(), checkDate.getDate()).getTime();
+        const dayEnd = dayStart + 24 * 3600 * 1000;
+        const hasRecord = appData.records.some(r => r.timestamp >= dayStart && r.timestamp < dayEnd);
+        
+        if (hasRecord) {
+          streak++;
+          checkDate.setDate(checkDate.getDate() - 1);
+        } else {
+          break;
+        }
+        
+        if (streak > 365) break; // 安全上限
+      }
+      
+      return streak;
+    }
+    
+    // ========== v0.5.0 日期筛选实现 ==========
+    function filterByDate(records, dateFilter) {
+      if (!dateFilter) return records;
+      const now = new Date();
+      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+      
+      switch (dateFilter) {
+        case 'today':
+          return records.filter(r => r.timestamp >= today);
+        case 'week': {
+          const weekStart = today - (now.getDay() === 0 ? 6 : now.getDay() - 1) * 24 * 3600 * 1000;
+          return records.filter(r => r.timestamp >= weekStart);
+        }
+        case 'month': {
+          const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).getTime();
+          return records.filter(r => r.timestamp >= monthStart);
+        }
+        default:
+          return records;
+      }
+    }
+    
     // ========== 渲染全部 ==========
     function renderAll() {
+      // 更新成就
+      appData.profile.achievements = detectAchievements();
+      
+      // 计算连续天数
+      appData.profile.combo = calculateCombo();
+      
+      // 计算今日XP
+      const todayXp = calculateTodayXp();
+      
+      // 每日状态
+      const dailyState = calculateDailyState();
+      
+      // 启动页
       document.getElementById('launchLevel').textContent = `Lv${appData.profile.level}`;
       document.getElementById('launchRank').textContent = appData.profile.title;
       document.getElementById('launchRankJp').textContent = appData.profile.titleJp;
@@ -3273,12 +4003,15 @@
       document.getElementById('launchCurrentXp').textContent = appData.profile.totalXp;
       document.getElementById('launchNextXp').textContent = currentLevelEnd;
       
-      const progressPercent = Math.min(100, ((appData.profile.totalXp - currentLevelStart) / (currentLevelEnd - currentLevelStart)) * 100);
+      const progressPercent = currentLevelEnd > currentLevelStart 
+        ? Math.min(100, ((appData.profile.totalXp - currentLevelStart) / (currentLevelEnd - currentLevelStart)) * 100) 
+        : 0;
       setTimeout(() => {
         document.getElementById('launchProgressFill').style.width = `${progressPercent}%`;
       }, 300);
       
-      document.getElementById('todayXp').textContent = `+${appData.profile.xp}`;
+      // 概览页 - 修复todayXp显示
+      document.getElementById('todayXp').textContent = `+${todayXp}`;
       document.getElementById('streak').textContent = appData.profile.combo || 0;
       document.getElementById('totalXp').textContent = appData.profile.totalXp >= 1000 
         ? `${(appData.profile.totalXp / 1000).toFixed(1)}k` 
@@ -3296,9 +4029,50 @@
       renderLog();
       renderShadowQueue();
       renderRecommend();
+      renderDailyState(dailyState);
+      renderDataUpdateTime();
       
+      // 修复：使用 getSkillTreeOption 而非 buildSkillTreeData
       if (skillTreeChart) {
-        skillTreeChart.setOption(buildSkillTreeData());
+        skillTreeChart.setOption(getSkillTreeOption());
+      }
+    }
+    
+    // ========== v0.5.0 渲染每日状态 ==========
+    function renderDailyState(state) {
+      let el = document.getElementById('dailyStateDisplay');
+      if (!el) {
+        // 在header中创建状态显示
+        const header = document.querySelector('.header');
+        if (header) {
+          el = document.createElement('div');
+          el.id = 'dailyStateDisplay';
+          el.style.cssText = 'display:flex;align-items:center;gap:6px;padding:6px 14px;background:var(--glass-bg);border:1px solid var(--glass-border);border-radius:20px;font-size:12px;color:var(--text-secondary);';
+          header.appendChild(el);
+        }
+      }
+      if (el) {
+        el.innerHTML = `${state.icon} <span style="font-weight:600">${state.name}</span> <span style="color:var(--text-muted)">· ${state.meaning}</span>`;
+      }
+    }
+    
+    // ========== v0.5.0 渲染数据更新时间 ==========
+    function renderDataUpdateTime() {
+      let el = document.getElementById('dataUpdateTime');
+      if (!el) {
+        const container = document.querySelector('.header');
+        if (container) {
+          el = document.createElement('div');
+          el.id = 'dataUpdateTime';
+          el.style.cssText = 'font-size:11px;color:var(--text-muted);margin-top:2px;';
+          const brandText = container.querySelector('.brand-text');
+          if (brandText) brandText.appendChild(el);
+        }
+      }
+      if (el && dataLoadState.lastUpdate) {
+        el.textContent = `数据更新: ${dataLoadState.lastUpdate.toLocaleString('zh-CN', { month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit' })}`;
+      } else if (el) {
+        el.textContent = '数据更新: 演示模式';
       }
     }
     
@@ -3548,11 +4322,17 @@
       if (githubData) {
         // 使用GitHub数据
         appData = githubData;
-        console.log('[v0.4.7] 使用GitHub数据初始化完成');
+        console.log('[v0.5.0] 使用GitHub数据初始化完成');
       } else {
         // GitHub数据加载失败，使用demo数据作为演示
-        console.log('[v0.4.7] GitHub数据加载失败，使用演示数据');
+        console.log('[v0.5.0] GitHub数据加载失败，使用演示数据');
         loadDemoData();
+        // 添加重试按钮
+        const retryBtn = document.createElement('button');
+        retryBtn.textContent = '重新加载';
+        retryBtn.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);padding:12px 32px;background:var(--accent-blue);color:#fff;border:none;border-radius:12px;font-size:14px;cursor:pointer;z-index:10000;box-shadow:0 4px 20px rgba(59,130,246,0.3);';
+        retryBtn.onclick = function() { retryBtn.remove(); loadDataFromGitHub(); };
+        document.body.appendChild(retryBtn);
       }
       
       renderAll();
