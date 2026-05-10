@@ -1406,6 +1406,21 @@
     }
     .course-desc { font-size: 12px; color: var(--text-muted); margin-bottom: 8px; }
 
+    /* ========== 折叠面板（v0.6.13） ========== */
+    .fold-section { }
+    .fold-header {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 12px 16px; background: var(--glass-bg);
+      backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+      border: 1px solid var(--glass-border); border-radius: var(--radius-md);
+      cursor: pointer; font-size: 14px; font-weight: 600; color: var(--text-secondary);
+      box-shadow: var(--glass-shadow); user-select: none;
+    }
+    .fold-header:active { transform: scale(0.98); }
+    .fold-arrow { font-size: 12px; transition: transform 0.25s ease; color: var(--text-muted); }
+    .fold-section.open .fold-arrow { transform: rotate(180deg); }
+    .fold-body { padding-top: 4px; }
+
     /* ========== 学习报告（v0.6.11） ========== */
     .report-stats {
       display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 14px;
@@ -1490,10 +1505,6 @@
       transition: transform var(--duration-fast) var(--ease-smooth);
     }
     
-    .settings-item:hover .settings-arrow {
-      transform: translateX(4px);
-    }
-
     .settings-item:hover .settings-arrow {
       transform: translateX(4px);
     }
@@ -1637,11 +1648,6 @@
     .about-content::-webkit-scrollbar-thumb {
       background: rgba(200, 200, 220, 0.4);
       border-radius: 2px;
-    }
-    
-    @keyframes slideUp {
-      from { transform: translateY(100%); }
-      to { transform: translateY(0); }
     }
     
     /* 拖动指示条 */
@@ -2261,27 +2267,35 @@
           <div class="subject-grid" id="subjectGrid"></div>
         </div>
         
+        <!-- 折叠面板：更多数据 -->
+        <div class="fold-section" id="foldSection" style="margin-top: 20px;">
+          <div class="fold-header" onclick="toggleFold()">
+            <span>📊 更多数据</span>
+            <span class="fold-arrow" id="foldArrow">▼</span>
+          </div>
+          <div class="fold-body" id="foldBody" style="display:none;">
+        
         <!-- 成就展示区 -->
-        <div class="overview-achievements" id="overviewAchievements" style="margin-top: 20px;">
-          <div class="section-title">🏆 成就</div>
+        <div class="overview-achievements" id="overviewAchievements" style="margin-top: 14px;">
+          <div class="section-title" style="font-size:12px;margin-bottom:10px;">🏆 成就</div>
           <div class="achievements" id="achievementsOverview"></div>
         </div>
         
         <!-- 考试反思（v0.6.5） -->
-        <div class="overview-exams" id="examOverviewSection" style="margin-top: 20px; display: none;">
-          <div class="section-title">📝 考试反思</div>
+        <div class="overview-exams" id="examOverviewSection" style="margin-top: 14px; display: none;">
+          <div class="section-title" style="font-size:12px;margin-bottom:10px;">📝 考试反思</div>
           <div class="exam-cards" id="examCards"></div>
         </div>
         
         <!-- 学习日历热力图（v0.6.6） -->
-        <div class="overview-heatmap" id="heatmapSection" style="margin-top: 24px;">
-          <div class="section-title">📅 学习热力图</div>
+        <div class="overview-heatmap" id="heatmapSection" style="margin-top: 16px;">
+          <div class="section-title" style="font-size:12px;margin-bottom:10px;">📅 学习热力图</div>
           <div class="heatmap-container" id="heatmapContainer"></div>
         </div>
         
         <!-- 教材进度地图（v0.6.7） -->
-        <div class="overview-textbook" id="textbookSection" style="margin-top: 24px;">
-          <div class="section-title">📖 教材进度</div>
+        <div class="overview-textbook" id="textbookSection" style="margin-top: 16px;">
+          <div class="section-title" style="font-size:12px;margin-bottom:10px;">📖 教材进度</div>
           <div class="textbook-controls">
             <select id="tb-subject" class="tb-select" onchange="switchTextbook()"></select>
             <select id="tb-book" class="tb-select" onchange="switchTextbook()"></select>
@@ -2290,8 +2304,8 @@
         </div>
         
         <!-- 网课进度展示（v0.6.8） -->
-        <div class="overview-courses" id="coursesSection" style="margin-top: 24px;">
-          <div class="section-title">🎬 网课进度</div>
+        <div class="overview-courses" id="coursesSection" style="margin-top: 16px;">
+          <div class="section-title" style="font-size:12px;margin-bottom:10px;">🎬 网课进度</div>
           <div class="course-selector">
             <select id="course-subject" class="tb-select" onchange="switchCourse()"></select>
             <select id="course-select" class="tb-select" onchange="switchCourse()"></select>
@@ -2300,8 +2314,8 @@
         </div>
         
         <!-- 学习报告（v0.6.11） -->
-        <div class="overview-report" id="reportSection" style="margin-top: 24px;">
-          <div class="section-title">📊 学习报告</div>
+        <div class="overview-report" id="reportSection" style="margin-top: 16px;">
+          <div class="section-title" style="font-size:12px;margin-bottom:10px;">📊 学习报告</div>
           <div class="report-stats" id="reportStats"></div>
           <div class="report-chart-glass">
             <div class="report-chart-header">
@@ -2315,6 +2329,8 @@
             <div class="report-chart" id="reportChart"></div>
           </div>
         </div>
+        </div><!-- /fold-body -->
+        </div><!-- /fold-section -->
       </div>
       
       <!-- 技能树页 -->
@@ -4013,43 +4029,58 @@
       let progress = 0;
       let nextLevelXp = 0;
       
-      // 定义基于 XP 的等级阈值（当 B/D=0 时使用）
+      // XP 等级阈值（同时作为 3D 评分的上限约束）
+      // 防止单节点高温度把等级拉爆（如 38 XP 不该出 Lv10）
       const XP_LEVELS = [
-        { l: 60, xp: 50000 }, { l: 50, xp: 30000 }, { l: 40, xp: 15000 },
-        { l: 30, xp: 8000 }, { l: 20, xp: 3000 }, { l: 10, xp: 500 }
+        { l: 1, xp: 0 },
+        { l: 5, xp: 300 },
+        { l: 10, xp: 1000 },
+        { l: 20, xp: 5000 },
+        { l: 30, xp: 15000 },
+        { l: 40, xp: 30000 },
+        { l: 50, xp: 50000 },
+        { l: 60, xp: 80000 }
       ];
       
-      if (nodeCount === 0 && totalXp > 0) {
-        // 无技能节点模式：基于 XP 直接计算等级
-        for (let i = 0; i < XP_LEVELS.length; i++) {
-          if (totalXp >= XP_LEVELS[i].xp) {
-            level = XP_LEVELS[i].l;
-            const next = XP_LEVELS[i - 1] || { l: 100, xp: 100000 };
-            const prevXp = XP_LEVELS[i].xp;
-            const nextXp = next.xp;
-            nextLevelXp = nextXp;
-            progress = Math.min(100, ((totalXp - prevXp) / (nextXp - prevXp)) * 100);
-            break;
-          }
+      // 根据总 XP 计算等级上限（不能超过此值）
+      let xpLevel = 1;
+      let xpProgress = 0;
+      for (let i = XP_LEVELS.length - 1; i >= 0; i--) {
+        if (totalXp >= XP_LEVELS[i].xp) {
+          xpLevel = XP_LEVELS[i].l;
+          const next = XP_LEVELS[i + 1] || { l: 100, xp: 100000 };
+          xpProgress = Math.min(100, ((totalXp - XP_LEVELS[i].xp) / (next.xp - XP_LEVELS[i].xp)) * 100);
+          nextLevelXp = next.xp;
+          break;
         }
-        if (level === 1) {
-          const nextXp = XP_LEVELS[XP_LEVELS.length - 1].xp;
-          nextLevelXp = nextXp;
-          progress = Math.min(100, (totalXp / nextXp) * 100);
-        }
+      }
+      
+      if (nodeCount === 0) {
+        // 无技能节点：直接用 XP 等级
+        level = xpLevel;
+        progress = xpProgress;
       } else {
-        // 有技能节点模式：基于三维评分
-        if (S >= 95) { level = 100; progress = (S - 95) * 20; }
-        else if (S >= 85) { level = 90; progress = ((S - 85) / 10) * 100; }
-        else if (S >= 75) { level = 80; progress = ((S - 75) / 10) * 100; }
-        else if (S >= 65) { level = 70; progress = ((S - 65) / 10) * 100; }
-        else if (S >= 55) { level = 60; progress = ((S - 55) / 10) * 100; }
-        else if (S >= 45) { level = 50; progress = ((S - 45) / 10) * 100; }
-        else if (S >= 35) { level = 40; progress = ((S - 35) / 10) * 100; }
-        else if (S >= 20) { level = 30; progress = ((S - 20) / 15) * 100; }
-        else if (S >= 8) { level = 20; progress = ((S - 8) / 12) * 100; }
-        else if (S > 0) { level = 10; progress = (S / 8) * 100; }
-        else { level = 1; progress = 0; }
+        // 有技能节点：取 3D 等级和 XP 上限中较低的
+        let sLevel = 1, sProgress = 0;
+        if (S >= 95) { sLevel = 100; sProgress = (S - 95) * 20; }
+        else if (S >= 85) { sLevel = 90; sProgress = ((S - 85) / 10) * 100; }
+        else if (S >= 75) { sLevel = 80; sProgress = ((S - 75) / 10) * 100; }
+        else if (S >= 65) { sLevel = 70; sProgress = ((S - 65) / 10) * 100; }
+        else if (S >= 55) { sLevel = 60; sProgress = ((S - 55) / 10) * 100; }
+        else if (S >= 45) { sLevel = 50; sProgress = ((S - 45) / 10) * 100; }
+        else if (S >= 35) { sLevel = 40; sProgress = ((S - 35) / 10) * 100; }
+        else if (S >= 20) { sLevel = 30; sProgress = ((S - 20) / 15) * 100; }
+        else if (S >= 8) { sLevel = 20; sProgress = ((S - 8) / 12) * 100; }
+        else if (S > 0) { sLevel = 10; sProgress = (S / 8) * 100; }
+        
+        // 取较低等级，防止温度因子不合理拉高
+        if (sLevel <= xpLevel) {
+          level = sLevel;
+          progress = sProgress;
+        } else {
+          level = xpLevel;
+          progress = xpProgress;
+        }
       }
       
       const hasDamping = maxDaysWithoutReview > 7;
@@ -5443,6 +5474,136 @@
       if (tip) tip.style.display = 'none';
     }
 
+    // ========== 数据录入模态框控制（补全） ==========
+    function openDataEntry() { document.getElementById('dataEntryModal').classList.add('active'); }
+    function closeDataEntry() { document.getElementById('dataEntryModal').classList.remove('active'); }
+    function switchDataTab(tab) {
+      document.querySelectorAll('.data-entry-tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.data-entry-panel').forEach(p => p.classList.remove('active'));
+      document.querySelector(`.data-entry-tab[onclick*="'${tab}'"]`)?.classList.add('active');
+      document.getElementById(`panel-${tab}`)?.classList.add('active');
+    }
+    
+    function toggleFold() {
+      const section = document.getElementById('foldSection');
+      const body = document.getElementById('foldBody');
+      const arrow = document.getElementById('foldArrow');
+      if (!section || !body) return;
+      const open = body.style.display !== 'none';
+      body.style.display = open ? 'none' : 'block';
+      section.classList.toggle('open', !open);
+      arrow.textContent = open ? '▶' : '▼';
+      // 展开后刷新图表尺寸
+      if (!open) setTimeout(() => {
+        if (reportChart) reportChart.resize();
+      }, 200);
+    }
+    
+    /** 提交学习记录（存 localStorage，自动合并到 appData） */
+    function submitLearningRecord() {
+      const sub = document.getElementById('de-subject').value;
+      const kp = document.getElementById('de-knowledge').value.trim();
+      const type = document.getElementById('de-type').value;
+      const dur = parseInt(document.getElementById('de-duration').value) || 0;
+      const total = parseInt(document.getElementById('de-total').value) || 0;
+      const correct = parseInt(document.getElementById('de-correct').value) || 0;
+      const acc = parseInt(document.getElementById('de-accuracy').value) || 0;
+      const xp = parseInt(document.getElementById('de-xp').value) || 0;
+      const reflection = document.getElementById('de-reflection').value.trim();
+      
+      if (!kp) { showToast('请输入知识点名称', 'warning'); return; }
+      
+      const now = Date.now();
+      const record = {
+        recordID: 'rec-local-' + now,
+        timestamp: now,
+        subject: sub,
+        knowledgePoints: [kp],
+        durationMinutes: dur,
+        activityType: type,
+        totalQuestions: total,
+        correctCount: correct,
+        accuracy: acc,
+        xp: xp,
+        reflection: reflection || undefined
+      };
+      
+      // 保存到 localStorage
+      try {
+        const local = JSON.parse(localStorage.getItem('learning-rpg-local-records') || '[]');
+        local.push(record);
+        localStorage.setItem('learning-rpg-local-records', JSON.stringify(local));
+      } catch(e) {}
+      
+      // 合并到 appData 并刷新
+      appData.records.push(record);
+      if (!appData.subjects[sub]) appData.subjects[sub] = { name: sub, level: 1, xp: 0, nodes: [] };
+      appData.subjects[sub].xp = (appData.subjects[sub].xp || 0) + xp;
+      appData.profile.totalXp = (appData.profile.totalXp || 0) + xp;
+      
+      renderAll();
+      showToast(`已添加 ${sub} · ${kp} (+${xp} XP)`, 'success');
+      
+      // 清空表单（保留学科和类型）
+      document.getElementById('de-knowledge').value = '';
+      document.getElementById('de-duration').value = '30';
+      document.getElementById('de-total').value = '0';
+      document.getElementById('de-correct').value = '0';
+      document.getElementById('de-accuracy').value = '0';
+      document.getElementById('de-xp').value = '0';
+      document.getElementById('de-reflection').value = '';
+    }
+    
+    /** 提交考试记录 */
+    function submitExamRecord() {
+      const sub = document.getElementById('de-exam-subject').value;
+      const name = document.getElementById('de-exam-name').value.trim();
+      const total = parseInt(document.getElementById('de-exam-total').value) || 100;
+      const score = parseInt(document.getElementById('de-exam-score').value) || 0;
+      const xp = parseInt(document.getElementById('de-exam-xp').value) || 0;
+      const reflection = document.getElementById('de-exam-reflection').value.trim();
+      
+      if (!name) { showToast('请输入考试名称', 'warning'); return; }
+      
+      const now = Date.now();
+      const acc = total > 0 ? Math.round((score / total) * 100) : 0;
+      const record = {
+        recordID: 'rec-exam-' + now,
+        timestamp: now,
+        subject: sub,
+        knowledgePoints: [name],
+        durationMinutes: 0,
+        activityType: 'exam',
+        totalQuestions: 0,
+        correctCount: 0,
+        accuracy: acc,
+        xp: xp,
+        totalScore: total,
+        obtainedScore: score,
+        reflection: reflection || undefined
+      };
+      
+      try {
+        const local = JSON.parse(localStorage.getItem('learning-rpg-local-records') || '[]');
+        local.push(record);
+        localStorage.setItem('learning-rpg-local-records', JSON.stringify(local));
+      } catch(e) {}
+      
+      // 合并到 appData
+      appData.records.push(record);
+      if (!appData.subjects[sub]) appData.subjects[sub] = { name: sub, level: 1, xp: 0, nodes: [] };
+      appData.subjects[sub].xp = (appData.subjects[sub].xp || 0) + xp;
+      appData.profile.totalXp = (appData.profile.totalXp || 0) + xp;
+      
+      renderAll();
+      showToast(`已添加考试 ${name} (${score}/${total})`, 'success');
+      
+      document.getElementById('de-exam-name').value = '';
+      document.getElementById('de-exam-score').value = '0';
+      document.getElementById('de-exam-xp').value = '0';
+      document.getElementById('de-exam-reflection').value = '';
+    }
+
     // ========== v0.6.11 学习报告 + 数据导出 ==========
     let reportChart = null;
     
@@ -5581,7 +5742,7 @@
         const xpEl = document.getElementById('de-export-xp');
         if (countEl) countEl.textContent = '0';
         if (xpEl) xpEl.textContent = '0';
-        showToast('已清除本地缓存', 2000);
+        showToast('已清除本地缓存', 'success');
       } catch(e) {}
     }
 
