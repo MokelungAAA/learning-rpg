@@ -2655,6 +2655,8 @@
     // ========== v0.6.1 算法迭代系统 ==========
     
     // ========== 核心配置 ==========
+    let appData = null;  // 全局数据对象，必须在函数外声明
+
     const CONFIG = {
       // 动态半衰期配置
       GLOBAL_BASE_HALFLIFE: 4.0,  // 全局基础半衰期（天）
@@ -3063,63 +3065,28 @@
 
     /**
      * 将GitHub数据格式转换为appData格式
-     * @param {Object} githubData - GitHub原始数据
+     * @param {Object} rawData - GitHub原始数据
      * @returns {Object} appData格式数据
      */
-    function convertGitHubDataToAppData(githubData) {
+    function convertGitHubDataToAppData(rawData) {
       const now = Date.now();
-      const hour = 3600000;
-      const day = 24 * hour;
+      
+      // 计算总XP（直接从 rawData.subjects 读取，不依赖 appData）
+      let totalXp = 0;
+      for (const subjectData of Object.values(rawData.subjects || {})) {
+        totalXp += (subjectData.totalXp || 0);
+      }
       
       // 转换profile
       const profile = {
         level: 1,
-        xp: 0,
-        totalXp: 0,
+        xp: totalXp,
+        totalXp: totalXp,
         combo: 0,
         title: '初学者',
         titleJp: 'Shogakusha',
         achievements: []
       };
-      
-      // 计算总XP和各学科数据
-      let totalXp = 0;
-      const subjects = {};
-      
-      for (const [subjectName, subjectData] of Object.entries(githubData.subjects || {})) {
-        const totalSubjectXp = subjectData.totalXp || 0;
-        totalXp += totalSubjectXp;
-        
-        // 转换知识点节点
-        const nodes = (subjectData.nodes || []).map(node => ({
-          id: node.id || generateUUID(),
-          name: node.name,
-          subject: subjectName,
-          peakTemp: node.peakTemp || 85,
-          lastStudy: node.lastStudy || now,
-          halfLifeDays: node.halfLifeDays || calculateHalfLife(subjectName, 1.0),
-          repetitions: node.repetitions || 0,
-          accuracyHistory: node.accuracyHistory || [],
-          totalXp: node.totalXp || 0
-        }));
-        
-        subjects[subjectName] = {
-          name: subjectName,
-          level: 1,
-          xp: totalSubjectXp,
-          nodes: nodes
-        };
-      }
-      
-      // v0.6.1: 使用算法计算学科等级（而非硬编码为1）
-      for (const subjectName of Object.keys(subjects)) {
-        const calc = calculateSubjectLevel(subjectName);
-        subjects[subjectName].level = calc.level;
-      }
-      
-      // 计算全局等级
-      profile.totalXp = totalXp;
-      profile.xp = totalXp;
       
       // 根据总XP计算等级
       const levelInfo = calculateGlobalLevel(totalXp);
@@ -3127,8 +3094,41 @@
       profile.title = levelInfo.title;
       profile.titleJp = levelInfo.titleJp;
       
+      // 转换学科数据（不调用 calculateSubjectLevel，避免依赖 appData）
+      const subjects = {};
+      for (const [subjectName, subjectData] of Object.entries(rawData.subjects || {})) {
+        const totalSubjectXp = subjectData.totalXp || 0;
+        
+        const nodes = (subjectData.nodes || []).map(node => ({
+          id: node.id || generateUUID(),
+          name: node.name,
+          subject: subjectName,
+          peakTemp: node.peakTemp || 85,
+          lastStudy: node.lastStudy || now,
+          halfLifeDays: node.halfLifeDays || 4.0,
+          repetitions: node.repetitions || 0,
+          accuracyHistory: node.accuracyHistory || [],
+          totalXp: node.totalXp || 0
+        }));
+        
+        // 简单计算学科等级（基于XP，不依赖 appData）
+        let subLevel = 1;
+        const xp = totalSubjectXp;
+        if (xp >= 20000) subLevel = 5;
+        else if (xp >= 10000) subLevel = 4;
+        else if (xp >= 5000) subLevel = 3;
+        else if (xp >= 2000) subLevel = 2;
+        
+        subjects[subjectName] = {
+          name: subjectName,
+          level: subLevel,
+          xp: totalSubjectXp,
+          nodes: nodes
+        };
+      }
+      
       // 转换records/log
-      const records = (githubData.log || []).map(log => ({
+      const records = (rawData.log || []).map(log => ({
         recordID: log.id || generateUUID(),
         timestamp: new Date(log.timestamp).getTime(),
         subject: log.subject,
@@ -3142,21 +3142,22 @@
       }));
       
       // 更新CONFIG中的学科修正系数和基础半衰期
-      if (githubData.profile) {
-        if (githubData.profile.globalBaseHalfLife) {
-          CONFIG.GLOBAL_BASE_HALFLIFE = githubData.profile.globalBaseHalfLife;
+      if (rawData.profile) {
+        if (rawData.profile.globalBaseHalfLife) {
+          CONFIG.GLOBAL_BASE_HALFLIFE = rawData.profile.globalBaseHalfLife;
         }
-        if (githubData.profile.subjectModifiers) {
-          Object.assign(CONFIG.SUBJECT_MODIFIERS, githubData.profile.subjectModifiers);
+        if (rawData.profile.subjectModifiers) {
+          Object.assign(CONFIG.SUBJECT_MODIFIERS, rawData.profile.subjectModifiers);
         }
       }
+      
+      console.log(`[v0.6.4] 数据转换完成: 总XP=${totalXp}, 等级=Lv${profile.level}, 学科数=${Object.keys(subjects).length}`);
       
       return {
         profile,
         subjects,
         records,
-        version: 'v0.6.1',
-        _githubData: githubData // 保留原始数据引用
+        version: 'v0.6.4'
       };
     }
 
@@ -4460,6 +4461,7 @@
     
     // ========== 渲染全部 ==========
     function renderAll() {
+      console.log('[DEBUG] renderAll: appData =', appData, '| profile.xp =', appData?.profile?.xp);
       // 更新成就
       appData.profile.achievements = detectAchievements();
       
