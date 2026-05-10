@@ -1,6 +1,6 @@
 {
   "version": "1.0",
-  "lastUpdated": "2026-05-10T12:27:00+08:00",
+  "lastUpdated": "2026-05-10T21:33:25+08:00",
   "profile": {
     "learnerName": "墨澜",
     "globalBaseHalfLife": 4.0,
@@ -63,8 +63,21 @@
       "nodes": []
     },
     "历史": {
-      "totalXp": 0,
-      "nodes": []
+      "totalXp": 93,
+      "nodes": [
+        {
+          "id": "历史-填充图册",
+          "name": "中外历史纲要下·填充图册",
+          "peakTemp": 85,
+          "lastStudy": "2026-05-10T21:31:00+08:00",
+          "halfLifeDays": 4.0,
+          "repetitions": 1,
+          "accuracyHistory": [
+            0
+          ],
+          "totalXp": 93
+        }
+      ]
     },
     "地理": {
       "totalXp": 0,
@@ -86,6 +99,20 @@
       "accuracy": 75,
       "xp": 38,
       "_note": "activityType will be reflection in v2.0"
+    },
+    {
+      "id": "rec-003",
+      "timestamp": "2026-05-10T21:31:00+08:00",
+      "subject": "历史",
+      "knowledgePoints": [
+        "中外历史纲要下·填充图册"
+      ],
+      "durationMinutes": 62,
+      "activityType": "study",
+      "totalQuestions": 0,
+      "correctCount": 0,
+      "accuracy": 0,
+      "xp": 93
     }
   ]
 }
