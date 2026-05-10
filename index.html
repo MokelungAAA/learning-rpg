@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>学习RPG · 认知操作系统 v0.5.4</title>
+  <title>学习RPG · 认知操作系统 v0.6.1</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
@@ -1649,7 +1649,7 @@
           <div class="brand-icon">📚</div>
           <div class="brand-text">
             <h1>学习RPG · 认知操作系统</h1>
-            <p>v0.5.4</p>
+            <p>v0.6.1</p>
           </div>
         </div>
       </header>
@@ -1885,7 +1885,7 @@
         </div>
         <div class="about-system-name">学习RPG · 认知操作系统</div>
         <div class="about-version">
-          <span class="about-version-badge">v0.5.4</span>
+          <span class="about-version-badge">v0.6.1</span>
         </div>
         <div class="about-developer-info">
           <div class="about-developer-name">墨澜 & MIKU</div>
@@ -1917,7 +1917,7 @@
       <div class="changelog-section">
         <div class="changelog-title">更新日志</div>
         
-        <!-- ====== V0.5 — UI 升级 ====== -->
+        <!-- ====== V0.6 — UI 优化 ====== -->
         <div class="changelog-major expanded" onclick="this.classList.toggle('expanded')">
           <div class="changelog-major-header current">
             <div class="changelog-major-left">
@@ -1930,7 +1930,7 @@
             <div class="changelog-version expanded" onclick="event.stopPropagation();this.classList.toggle('expanded')">
               <div class="changelog-version-header">
                 <div class="changelog-version-left">
-                  <span>v0.5.4</span>
+                  <span>v0.6.1</span>
                   <span class="changelog-version-tag">当前</span>
                 </div>
                 <span class="changelog-toggle">▼</span>
@@ -1938,7 +1938,7 @@
               <div class="changelog-items">
                 <div class="changelog-item">
                   <span class="changelog-item-version">2026-05-10</span>
-                  版本号同步更新；代码稳定性检查；准备进入 V0.6 UI 重构阶段。
+                  功能完成情况全面检查；创建V0.6.2-V0.6.11版本规划（日历热力图/教材进度/网课同步/深色模式/移动端优化/数据导出/错题本/学习报告/PWA/性能优化）。
                 </div>
               </div>
             </div>
@@ -2308,7 +2308,7 @@
   <div id="toast" class="toast" style="display:none"></div>
   
   <script>
-    // ========== v0.5.4 算法迭代系统 ==========
+    // ========== v0.6.1 算法迭代系统 ==========
     
     // ========== 核心配置 ==========
     const CONFIG = {
@@ -2611,7 +2611,7 @@
       try {
         // 添加时间戳参数避免缓存
         const url = `${GITHUB_CONFIG.DATA_URL}?t=${Date.now()}`;
-        console.log('[v0.5.4] 正在从GitHub加载数据...', url);
+        console.log('[v0.6.1] 正在从GitHub加载数据...', url);
         
         const response = await fetch(url, {
           method: 'GET',
@@ -2626,7 +2626,7 @@
         }
         
         const rawData = await response.json();
-        console.log('[v0.5.4] 数据加载成功:', rawData);
+        console.log('[v0.6.1] 数据加载成功:', rawData);
         
         dataLoadState.hasError = false;
         dataLoadState.lastUpdate = new Date(rawData.lastUpdated);
@@ -2635,7 +2635,7 @@
         return convertGitHubDataToAppData(rawData);
         
       } catch (error) {
-        console.error('[v0.5.4] 数据加载失败:', error);
+        console.error('[v0.6.1] 数据加载失败:', error);
         dataLoadState.hasError = true;
         
         // 显示错误提示
@@ -2699,7 +2699,7 @@
         };
       }
       
-      // v0.5.4: 使用算法计算学科等级（而非硬编码为1）
+      // v0.6.1: 使用算法计算学科等级（而非硬编码为1）
       for (const subjectName of Object.keys(subjects)) {
         const calc = calculateSubjectLevel(subjectName);
         subjects[subjectName].level = calc.level;
@@ -2743,7 +2743,7 @@
         profile,
         subjects,
         records,
-        version: 'v0.5.4',
+        version: 'v0.6.1',
         _githubData: githubData // 保留原始数据引用
       };
     }
@@ -2822,7 +2822,7 @@
      * 显示数据加载错误
      */
     function showDataLoadError(message) {
-      console.warn('[v0.5.4] 使用默认空数据，错误信息:', message);
+      console.warn('[v0.6.1] 使用默认空数据，错误信息:', message);
       // 可以添加一个toast提示，但不影响用户使用
     }
     
@@ -3061,7 +3061,7 @@
       grid.innerHTML = html;
     }
     
-    // ========== 渲染日志 (v0.4.1 增强 + v0.5.4 日期筛选) ==========
+    // ========== 渲染日志 (v0.4.1 增强 + v0.6.1 日期筛选) ==========
     function renderLog() {
       const container = document.getElementById('logContainer');
       const subjectFilter = document.getElementById('logFilterSubject').value;
@@ -3075,7 +3075,7 @@
       if (typeFilter) {
         filtered = filtered.filter(r => r.activityType === typeFilter);
       }
-      // v0.5.4: 实现日期筛选
+      // v0.6.1: 实现日期筛选
       filtered = filterByDate(filtered, dateFilter);
       
       if (filtered.length === 0) {
@@ -3114,7 +3114,7 @@
           }).join('');
       }
       
-      // v0.5.4: 增强成就展示
+      // v0.6.1: 增强成就展示
       const achContainer = document.getElementById('achievements');
       const achievements = appData.profile.achievements || [];
       if (achievements.length > 0) {
@@ -3842,7 +3842,7 @@
       }, 3000);
     }
     
-    // ========== v0.5.4 每日状态标签系统 ==========
+    // ========== v0.6.1 每日状态标签系统 ==========
     const DAILY_STATES = {
       adventure: { name: 'Bōken no Hi', jp: '冒険の日', meaning: '冒险日', icon: '🗺️', condition: '首次接触新知识点' },
       normal: { name: 'Heijitsu', jp: '平日', meaning: '常规学习日', icon: '📖', condition: '默认状态' },
@@ -3897,7 +3897,7 @@
       return DAILY_STATES.normal;
     }
     
-    // ========== v0.5.4 成就检测系统 ==========
+    // ========== v0.6.1 成就检测系统 ==========
     const ACHIEVEMENT_DEFS = {
       'First Light': { name: 'First Light', icon: '✨', desc: '首次完成学习记录', color: '#FFD700' },
       'Combo x7': { name: 'Combo x7', icon: '🔥', desc: '连续7天学习', color: '#3b82f6' },
@@ -3971,7 +3971,7 @@
       return Array.from(achievements);
     }
     
-    // ========== v0.5.4 计算今日XP ==========
+    // ========== v0.6.1 计算今日XP ==========
     function calculateTodayXp() {
       const now = new Date();
       const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
@@ -3980,7 +3980,7 @@
         .reduce((sum, r) => sum + (r.xp || 0), 0);
     }
     
-    // ========== v0.5.4 计算连续天数 ==========
+    // ========== v0.6.1 计算连续天数 ==========
     function calculateCombo() {
       if (appData.records.length === 0) return 0;
       
@@ -4015,7 +4015,7 @@
       return streak;
     }
     
-    // ========== v0.5.4 日期筛选实现 ==========
+    // ========== v0.6.1 日期筛选实现 ==========
     function filterByDate(records, dateFilter) {
       if (!dateFilter) return records;
       const now = new Date();
@@ -4098,7 +4098,7 @@
       }
     }
     
-    // ========== v0.5.4 渲染每日状态 ==========
+    // ========== v0.6.1 渲染每日状态 ==========
     function renderDailyState(state) {
       let el = document.getElementById('dailyStateDisplay');
       if (!el) {
@@ -4116,7 +4116,7 @@
       }
     }
     
-    // ========== v0.5.4 渲染数据更新时间 ==========
+    // ========== v0.6.1 渲染数据更新时间 ==========
     function renderDataUpdateTime() {
       let el = document.getElementById('dataUpdateTime');
       if (!el) {
@@ -4382,10 +4382,10 @@
       if (githubData) {
         // 使用GitHub数据
         appData = githubData;
-        console.log('[v0.5.4] 使用GitHub数据初始化完成');
+        console.log('[v0.6.1] 使用GitHub数据初始化完成');
       } else {
         // GitHub数据加载失败，使用demo数据作为演示
-        console.log('[v0.5.4] GitHub数据加载失败，使用演示数据');
+        console.log('[v0.6.1] GitHub数据加载失败，使用演示数据');
         loadDemoData();
         // 添加重试按钮
         const retryBtn = document.createElement('button');
@@ -4401,4 +4401,7 @@
     </script>
 </body>
 </html>
+
+
+
 
