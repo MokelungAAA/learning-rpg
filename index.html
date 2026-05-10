@@ -1442,6 +1442,25 @@
     }
     .report-chart { width: 100%; height: 200px; }
 
+    /* ========== 本地记录列表（v0.7.1） ========== */
+    .local-records-list { max-height: 300px; overflow-y: auto; }
+    .local-record-item {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 10px 14px; background: #fff; border-radius: 10px; margin-bottom: 6px;
+      border: 1px solid #f3f4f6;
+    }
+    [data-theme="dark"] .local-record-item { background: #2a2f4a; border-color: rgba(255,255,255,0.06); }
+    .local-rec-info { flex: 1; min-width: 0; }
+    .local-rec-name { font-size: 13px; font-weight: 600; color: var(--text-primary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .local-rec-meta { font-size: 11px; color: var(--text-muted); margin-top: 1px; }
+    .local-rec-stats { display: flex; align-items: center; gap: 10px; font-size: 14px; }
+    .local-rec-del {
+      width: 24px; height: 24px; border: none; border-radius: 6px;
+      background: rgba(239,68,68,0.1); color: #ef4444; cursor: pointer;
+      font-size: 12px; display: flex; align-items: center; justify-content: center;
+    }
+    .local-rec-del:active { transform: scale(0.9); }
+
     /* ========== 设置页 ========== */
     .settings-list {
       display: flex;
@@ -2219,7 +2238,7 @@
           <div class="brand-icon">📚</div>
           <div class="brand-text">
             <h1>学习RPG · 认知操作系统</h1>
-            <p>v0.6.14</p>
+            <p>v0.7.2</p>
           </div>
         </div>
       </header>
@@ -2546,8 +2565,9 @@
       <div class="data-entry-drag-handle"></div>
       
       <div class="data-entry-tabs">
-        <button class="data-entry-tab active" onclick="switchDataTab('record')">📝 学习记录</button>
-        <button class="data-entry-tab" onclick="switchDataTab('exam')">📋 考试反思</button>
+        <button class="data-entry-tab active" onclick="switchDataTab('record')">📝 记录</button>
+        <button class="data-entry-tab" onclick="switchDataTab('exam')">📋 考试</button>
+        <button class="data-entry-tab" onclick="switchDataTab('local')">📦 本地</button>
         <button class="data-entry-tab" onclick="switchDataTab('export')">📤 导出</button>
       </div>
       
@@ -2652,6 +2672,17 @@
         <button class="data-entry-submit" onclick="submitExamRecord()">✓ 添加考试</button>
       </div>
       
+      <!-- 本地记录面板 -->
+      <div class="data-entry-panel" id="panel-local">
+        <div class="data-entry-info" style="margin-bottom:12px;">
+          <div class="data-entry-info-row">
+            <span>本地录入记录</span>
+            <strong id="localRecCount">0</strong>
+          </div>
+        </div>
+        <div class="local-records-list" id="localRecordsList"></div>
+      </div>
+      
       <!-- 导出面板 -->
       <div class="data-entry-panel" id="panel-export">
         <div class="data-entry-info">
@@ -2696,7 +2727,7 @@
         </div>
         <div class="about-system-name">学习RPG · 认知操作系统</div>
         <div class="about-version">
-          <span class="about-version-badge">v0.6.14</span>
+          <span class="about-version-badge">v0.7.2</span>
         </div>
         <div class="about-developer-info">
           <div class="about-developer-name">墨澜 & MIKU</div>
@@ -2745,15 +2776,15 @@
             <div class="changelog-version expanded" onclick="event.stopPropagation();this.classList.toggle('expanded')">
               <div class="changelog-version-header current">
                 <div class="changelog-version-left">
-                  <span>v0.7.1</span>
-                  <span class="changelog-version-tag">数据写入</span>
+                  <span>v0.7.2</span>
+                  <span class="changelog-version-tag">算法校准</span>
                 </div>
                 <span class="changelog-toggle">▼</span>
               </div>
               <div class="changelog-items">
                 <div class="changelog-item">
                   <span class="changelog-item-version">2026-05-10</span>
-                  开始写入真实学习数据。完善网页端数据录入表单（设置页→数据录入），支持添加学习记录和考试记录，数据持久化至localStorage，并可导出完整data.json。
+                  算法实调 v0.7.2：半衰期基础值从4.0调至3.0天（更适合高中生每日学习节奏）；学科修正系数根据实际记忆规律校准（语文/英语0.9、历史0.8、政治0.7需高频回顾）；温度参数调整（初始峰值80、正确率影响权重提升至0.5）；半衰期更新增强响应性（延长+20%、缩短-25%）；阴影队列预警阈值提前至50。本地录入记录合并管理：设置页→数据录入→"📦 本地"标签页，支持查看和删除本地录入记录。页面加载时自动合并localStorage录入数据。
                 </div>
               </div>
             </div>
@@ -3337,63 +3368,63 @@
     let appData = null;  // 全局数据对象，必须在函数外声明
 
     const CONFIG = {
-      // 动态半衰期配置
-      GLOBAL_BASE_HALFLIFE: 4.0,  // 全局基础半衰期（天）
+      // 动态半衰期配置（v0.7.2 校准）
+      GLOBAL_BASE_HALFLIFE: 3.0,  // 基础半衰期（天）— 高中生每日接触，3天更合理
       MIN_HALFLIFE: 0.5,           // 最小半衰期（天）
       MAX_HALFLIFE: 30,            // 最大半衰期（天）
       
-      // 学科修正系数（初始值，后续会动态调整）
+      // 学科修正系数（v0.7.2 根据高中学习规律校准）
       SUBJECT_MODIFIERS: {
-        '数学': 1.2,
-        '物理': 1.2,
-        '化学': 1.1,
-        '语文': 1.0,
-        '英语': 1.0,
-        '历史': 1.0,
-        '地理': 1.0,
-        '生物': 0.9,
-        '政治': 0.8
+        '数学': 1.3,   // 大量刷题练习，记忆更持久
+        '物理': 1.2,   // 逻辑推导为主，中等持久
+        '化学': 1.1,   // 理解+记忆混合
+        '语文': 0.9,   // 古诗文/字词需频繁回顾
+        '英语': 0.9,   // 单词/语法需要高频复习
+        '历史': 0.8,   // 史实细节易忘，需更频繁复习
+        '地理': 0.9,   // 图文结合，中等需求
+        '生物': 1.0,   // 理解性记忆
+        '政治': 0.7    // 时政/理论需高频回顾
       },
       
-      // 半衰期更新参数
+      // 半衰期更新参数（v0.7.2 增强响应性）
       HALFLIFE_UPDATE: {
-        RATIO_THRESHOLD_HIGH: 1.1,  // 超过此比率延长半衰期
-        RATIO_THRESHOLD_LOW: 0.9,   // 低于此比率缩短半衰期
-        EXTEND_FACTOR: 1.15,         // 延长因子
-        SHRINK_FACTOR: 0.8,          // 缩短因子
-        FINE_TUNE_FACTOR: 0.9,       // 微调基准
-        EMA_ALPHA: 0.3               // 指数移动平均alpha (v0.4.3新增)
+        RATIO_THRESHOLD_HIGH: 1.15,  // 超过此比率延长半衰期
+        RATIO_THRESHOLD_LOW: 0.85,   // 低于此比率缩短半衰期
+        EXTEND_FACTOR: 1.2,          // 延长因子（记忆好时+20%）
+        SHRINK_FACTOR: 0.75,         // 缩短因子（记忆差时-25%）
+        FINE_TUNE_FACTOR: 0.85,      // 微调基准
+        EMA_ALPHA: 0.3               // 指数移动平均alpha
       },
       
-      // 温度参数
+      // 温度参数（v0.7.2 校准）
       TEMP: {
-        INITIAL_PEAK: 85,           // 初始峰值温度
-        BOOST_MIN: 10,              // 最小升温
-        BOOST_MAX: 50,              // 最大升温
-        BOOST_FACTOR: 0.4,          // 正确率影响因子
+        INITIAL_PEAK: 80,           // 初始峰值温度（略降，更真实）
+        BOOST_MIN: 15,              // 最小升温
+        BOOST_MAX: 55,              // 最大升温
+        BOOST_FACTOR: 0.5,          // 正确率影响因子（提高权重）
         MAX_PEAK: 100,               // 最大峰值
-        DECAY_BASE: 2               // 衰减底数
+        DECAY_BASE: 2               // 衰减底数（艾宾浩斯底数2）
       },
       
-      // v0.4.3 新增：学科等级三维评分权重
+      // 学科等级三维评分权重
       SUBJECT_LEVEL: {
         BROADNESS_FULL_COUNT: 20,   // 广度满分节点数
-        XP_MAX_FOR_LEVEL: 50000,   // 经验分满分XP
+        XP_MAX_FOR_LEVEL: 50000,    // 经验分满分XP
         WEIGHT_B: 0.3,              // 广度权重
         WEIGHT_D: 0.4,              // 深度权重
         WEIGHT_E: 0.3               // 经验权重
       },
       
-      // v0.4.3 新增：阴影队列与推荐算法
+      // 阴影队列与推荐算法（v0.7.2 校准）
       SHADOW_QUEUE: {
-        TEMP_THRESHOLD_COLD: 40,   // 进入阴影队列的温度阈值
-        TEMP_THRESHOLD_URGENT: 20, // 紧急复习阈值
+        TEMP_THRESHOLD_COLD: 50,   // 进入阴影队列的温度阈值（从40→50，更早预警）
+        TEMP_THRESHOLD_URGENT: 25, // 紧急复习阈值
         URGENCY_MIN: 0.01,          // 最小紧迫度
         RECITATION_BOOST_HOURS: 24, // 背诵类推荐权重保持时间
         RECITATION_BOOST_FACTOR: 1.5 // 背诵类特殊权重倍数
       },
       
-      // v0.4.3 新增：复习频率自适应
+      // 复习频率自适应
       ADAPTIVE: {
         EMA_ALPHA: 0.2,             // 复习频率EMA平滑因子
         DANGER_THRESHOLD_DEFAULT: 0.5, // 默认危险阈值
@@ -5645,6 +5676,15 @@
       document.querySelectorAll('.data-entry-panel').forEach(p => p.classList.remove('active'));
       document.querySelector(`.data-entry-tab[onclick*="'${tab}'"]`)?.classList.add('active');
       document.getElementById(`panel-${tab}`)?.classList.add('active');
+      if (tab === 'local') {
+        const count = getLocalRecords().length;
+        document.getElementById('localRecCount').textContent = count;
+        renderLocalRecordsList();
+      }
+      if (tab === 'export') {
+        document.getElementById('de-export-record-count').textContent = appData.records.length;
+        document.getElementById('de-export-xp').textContent = appData.profile.totalXp || 0;
+      }
     }
     
     function toggleFold() {
@@ -5765,6 +5805,75 @@
       document.getElementById('de-exam-score').value = '0';
       document.getElementById('de-exam-xp').value = '0';
       document.getElementById('de-exam-reflection').value = '';
+    }
+
+    /** 将 localStorage 中的本地记录合并到 appData */
+    function mergeLocalRecords() {
+      try {
+        const raw = localStorage.getItem('learning-rpg-local-records');
+        if (!raw) return;
+        const localRecords = JSON.parse(raw);
+        if (!localRecords.length) return;
+        
+        // 去重：避免重复合并（按 recordID）
+        const existingIds = new Set(appData.records.map(r => r.recordID));
+        let added = 0;
+        for (const rec of localRecords) {
+          if (!existingIds.has(rec.recordID)) {
+            appData.records.push(rec);
+            existingIds.add(rec.recordID);
+            added++;
+          }
+        }
+        if (added) console.log(`[v0.7.1] 合并了 ${added} 条本地记录`);
+      } catch(e) {}
+    }
+    
+    /** 获取本地记录列表（用于管理面板显示） */
+    function getLocalRecords() {
+      try { return JSON.parse(localStorage.getItem('learning-rpg-local-records') || '[]'); }
+      catch(e) { return []; }
+    }
+    
+    /** 删除本地记录 */
+    function deleteLocalRecord(id) {
+      try {
+        let recs = JSON.parse(localStorage.getItem('learning-rpg-local-records') || '[]');
+        recs = recs.filter(r => r.recordID !== id);
+        localStorage.setItem('learning-rpg-local-records', JSON.stringify(recs));
+        mergeLocalRecords();
+        renderLocalRecordsList();
+        renderAll();
+        showToast('已删除记录', 'success');
+      } catch(e) {}
+    }
+    
+    /** 渲染本地记录列表 */
+    function renderLocalRecordsList() {
+      const el = document.getElementById('localRecordsList');
+      if (!el) return;
+      const recs = getLocalRecords();
+      if (!recs.length) {
+        el.innerHTML = '<div style="text-align:center;padding:20px;color:var(--text-muted);font-size:13px;">暂无本地录入记录 ✨</div>';
+        return;
+      }
+      el.innerHTML = recs.slice().reverse().map(r => {
+        const date = new Date(r.timestamp);
+        const dateStr = `${date.getMonth()+1}/${date.getDate()} ${date.getHours().toString().padStart(2,'0')}:${date.getMinutes().toString().padStart(2,'0')}`;
+        const typeLabel = { practice: '刷题', exam: '考试', recitation: '背诵', online_course: '网课', study: '自学' };
+        return `
+          <div class="local-record-item">
+            <div class="local-rec-info">
+              <div class="local-rec-name">${r.knowledgePoints?.[0] || '未命名'}</div>
+              <div class="local-rec-meta">${r.subject} · ${typeLabel[r.activityType] || r.activityType} · ${dateStr}</div>
+            </div>
+            <div class="local-rec-stats">
+              <span style="color:var(--accent-green);font-weight:600;">+${r.xp || 0}</span>
+              <button class="local-rec-del" onclick="deleteLocalRecord('${r.recordID}')">✕</button>
+            </div>
+          </div>
+        `;
+      }).join('');
     }
 
     // ========== v0.6.11 学习报告 + 数据导出 ==========
@@ -6443,6 +6552,7 @@
         console.log('[v0.6.5] 缓存命中，后台刷新...');
         appData = convertGitHubDataToAppData(cached);
         dataLoadState.dataSource = 'cache';
+        mergeLocalRecords();
         renderAll();
       }
       
@@ -6467,6 +6577,7 @@
             dataLoadState.dataSource = source.name;
             saveDataCache(rawData);
             appData = convertGitHubDataToAppData(rawData);
+            mergeLocalRecords();
             renderAll();
             console.log(`[v0.6.5] 后台加载完成 ✓ ${source.desc}`);
             return;
@@ -6483,6 +6594,7 @@
         console.warn('[v0.6.5] 使用内嵌兜底数据');
         appData = convertGitHubDataToAppData(FALLBACK_DATA);
         dataLoadState.dataSource = 'fallback';
+        mergeLocalRecords();
         renderAll();
         
         const retryBtn = document.createElement('button');
