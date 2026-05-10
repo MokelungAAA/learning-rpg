@@ -2996,27 +2996,14 @@
     // ========== GitHub数据加载核心函数（v0.6.4 最终版）==========
 
     /**
-     * 带超时的fetch封装
-     */
-    function fetchWithTimeout(url, options, timeoutMs = 15000) {
-      return Promise.race([
-        fetch(url, options),
-        new Promise((_, reject) =>
-          setTimeout(() => reject(new Error('请求超时（15秒）')), timeoutMs)
-        )
-      ]);
-    }
-
-    /**
-     * 从 data.json 加载数据（优先 fetch 网络数据，内嵌数据仅兜底）
-     * 数据源优先级：本地相对路径 → GitHub CDN → 内嵌兜底
+     * 从 data.json 加载数据（优先 fetch 网络数据）
+     * 数据源优先级：本地相对路径 → GitHub CDN
      * @returns {Promise<Object|null>}
      */
     async function loadDataFromGitHub() {
       dataLoadState.isLoading = true;
       showDataLoading(true);
       
-      // 优先尝试 fetch 网络数据（支持龙虾助手实时修改 data.json）
       const sources = [
         { name: 'local', url: `./data.json?t=${Date.now()}`, desc: '本地相对路径' },
         { name: 'github', url: `https://raw.githubusercontent.com/MokelungAAA/learning-rpg/main/data.json?t=${Date.now()}`, desc: 'GitHub CDN' }
@@ -3024,16 +3011,14 @@
       
       for (const source of sources) {
         try {
-          console.log(`[v0.6.4] 尝试从 ${source.desc} 加载数据...`, source.url);
+          console.log(`[v0.6.4] 尝试从 ${source.desc} 加载... URL: ${source.url}`);
           
-          const response = await fetchWithTimeout(source.url, {
+          const response = await fetch(source.url, {
             method: 'GET',
-            headers: {
-              'Accept': 'application/json',
-              'Cache-Control': 'no-cache, no-store, must-revalidate',
-              'Pragma': 'no-cache'
-            }
-          }, 15000);
+            headers: { 'Accept': 'application/json', 'Cache-Control': 'no-cache' }
+          });
+          
+          console.log(`[v0.6.4] ${source.desc} 响应状态:`, response.status, response.statusText);
           
           if (!response.ok) {
             throw new Error(`HTTP ${response.status}: ${response.statusText}`);
@@ -3045,7 +3030,9 @@
             throw new Error('数据格式无效');
           }
           
-          console.log(`[v0.6.4] ${source.desc} 数据加载成功 ✓`);
+          // 计算总XP用于日志
+          const totalXp = Object.values(rawData.subjects || {}).reduce((s, sub) => s + (sub.totalXp || 0), 0);
+          console.log(`[v0.6.4] ${source.desc} 加载成功 ✓ 总XP: ${totalXp}`, rawData);
           
           dataLoadState.hasError = false;
           dataLoadState.lastUpdate = new Date(rawData.lastUpdated);
@@ -3054,15 +3041,15 @@
           return convertGitHubDataToAppData(rawData);
           
         } catch (error) {
-          console.warn(`[v0.6.4] ${source.desc} 加载失败:`, error.message);
+          console.error(`[v0.6.4] ${source.desc} 失败:`, error.name, error.message);
           continue;
         }
       }
       
-      // 所有网络请求均失败，返回 null，由 init 函数使用 demoData 兜底
-      console.warn('[v0.6.4] 所有网络数据源均失败，将使用演示数据');
+      // 所有网络请求均失败
+      console.error('[v0.6.4] 所有数据源均失败，将使用演示数据（XP=0）');
       dataLoadState.hasError = true;
-      showDataLoadError('无法连接到数据源，已使用演示数据');
+      showDataLoadError('无法连接到数据源，已使用演示数据（XP=0）');
       return null;
     }
 
