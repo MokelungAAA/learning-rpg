@@ -2722,10 +2722,6 @@
       }
     };
     
-    // ========== v0.6.4 内嵌数据（file:// 本地打开时兜底使用）==========
-    // 当浏览器禁止 fetch file:// 时，使用此内嵌数据
-    const EMBEDDED_DATA = {"version":"1.0","lastUpdated":"2026-05-10T12:27:00+08:00","profile":{"learnerName":"墨澜","globalBaseHalfLife":4.0,"subjectModifiers":{"数学":1.2,"物理":1.2,"化学":1.1,"语文":1.0,"英语":1.0,"历史":1.0,"地理":1.0,"生物":0.9,"政治":0.8},"tempBoostGain":0.4,"tempBoostBase":10,"avgReviewsPerWeek":0},"subjects":{"数学":{"totalXp":0,"nodes":[]},"语文":{"totalXp":0,"nodes":[]},"英语":{"totalXp":38,"nodes":[{"id":"英语-001","name":"期中考试","peakTemp":75,"lastStudy":"2026-05-10T12:27:00+08:00","halfLifeDays":4.0,"repetitions":1,"accuracyHistory":[75],"totalXp":38}]},"物理":{"totalXp":0,"nodes":[]},"化学":{"totalXp":0,"nodes":[]},"生物":{"totalXp":0,"nodes":[]},"政治":{"totalXp":0,"nodes":[]},"历史":{"totalXp":0,"nodes":[]},"地理":{"totalXp":0,"nodes":[]}},"log":[{"id":"rec-002","timestamp":"2026-05-10T12:27:00+08:00","subject":"英语","knowledgePoints":["期中考试"],"durationMinutes":10,"activityType":"practice","totalQuestions":0,"correctCount":0,"accuracy":75,"xp":38}]};
-    
     // ========== 学科定义（九大学科 + 根名） ==========
     const SUBJECTS = {
       '数学': { icon: '📐', color: '#1A5FB4', rootName: 'Logos', rootLang: '希腊语', rootMeaning: '理性、逻辑、比例' },
@@ -3063,13 +3059,11 @@
         }
       }
       
-      // 所有网络请求均失败，使用内嵌兜底数据
-      console.warn('[v0.6.4] 所有网络数据源均失败，使用内嵌兜底数据（可能非最新）');
-      dataLoadState.hasError = false;
-      dataLoadState.lastUpdate = new Date(EMBEDDED_DATA.lastUpdated);
-      dataLoadState.dataSource = 'embedded';
-      
-      return convertGitHubDataToAppData(EMBEDDED_DATA);
+      // 所有网络请求均失败，返回 null，由 init 函数使用 demoData 兜底
+      console.warn('[v0.6.4] 所有网络数据源均失败，将使用演示数据');
+      dataLoadState.hasError = true;
+      showDataLoadError('无法连接到数据源，已使用演示数据');
+      return null;
     }
 
     /**
