@@ -66,8 +66,8 @@
       "totalXp": 93,
       "nodes": [
         {
-          "id": "历史-填充图册",
-          "name": "中外历史纲要下·填充图册",
+          "id": "历史-填充图册-1416",
+          "name": "中外历史纲要下·第14-16章·填充图册",
           "peakTemp": 85,
           "lastStudy": "2026-05-10T21:31:00+08:00",
           "halfLifeDays": 4.0,
@@ -105,7 +105,7 @@
       "timestamp": "2026-05-10T21:31:00+08:00",
       "subject": "历史",
       "knowledgePoints": [
-        "中外历史纲要下·填充图册"
+        "中外历史纲要下·第14-16章·填充图册"
       ],
       "durationMinutes": 62,
       "activityType": "study",
