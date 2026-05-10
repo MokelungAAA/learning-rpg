@@ -1,0 +1,16 @@
+{
+  "version": "2.0",
+  "lastUpdated": "2026-05-10T15:30:00+08:00",
+  "learnerName": "墨澜",
+  "records": [
+    {
+      "id": "rec-001",
+      "timestamp": "2026-05-10T14:30:00+08:00",
+      "subject": "数学",
+      "textbook": "必修第一册",
+      "chapter": 3,
+      "score": 75,
+      "duration": 30
+    }
+  ]
+}
