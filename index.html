@@ -1207,6 +1207,31 @@
       gap: 6px;
     }
     
+    /* ========== 考试反思卡片（v0.6.5） ========== */
+    .exam-cards {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .exam-card {
+      padding: 16px 18px;
+      background: var(--glass-bg-solid);
+      border: 1px solid var(--glass-border-subtle);
+      border-radius: var(--radius-md);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: var(--glass-shadow);
+    }
+    .exam-card-info { display: flex; flex-direction: column; gap: 2px; }
+    .exam-card-name { font-size: 14px; font-weight: 600; color: var(--text-primary); }
+    .exam-card-subject { font-size: 12px; color: var(--text-muted); }
+    .exam-card-stats { text-align: right; }
+    .exam-card-score { font-size: 20px; font-weight: 700; }
+    .exam-card-score.pass { color: #10b981; }
+    .exam-card-score.fail { color: #ef4444; }
+    .exam-card-xp { font-size: 11px; color: var(--text-muted); }
+    
     /* ========== 设置页 ========== */
     .settings-list {
       display: flex;
@@ -1968,6 +1993,12 @@
         <div class="overview-achievements" id="overviewAchievements" style="margin-top: 20px;">
           <div class="section-title">🏆 成就</div>
           <div class="achievements" id="achievementsOverview"></div>
+        </div>
+        
+        <!-- 考试反思（v0.6.5） -->
+        <div class="overview-exams" id="examOverviewSection" style="margin-top: 20px; display: none;">
+          <div class="section-title">📝 考试反思</div>
+          <div class="exam-cards" id="examCards"></div>
         </div>
       </div>
       
@@ -3039,20 +3070,33 @@
       }
     }
 
-    /** 写入 localStorage 缓存 */
-    function saveDataCache(rawData) {
-      try {
-        localStorage.setItem('learning-rpg-cache', JSON.stringify(rawData));
-        localStorage.setItem('learning-rpg-cache-meta', JSON.stringify({ cachedAt: Date.now() }));
-      } catch (e) { /* 存储满或禁用，静默失败 */ }
+    /** 获取可用的存储引擎（localStorage → sessionStorage → null） */
+    function getStore() {
+      try { localStorage.setItem('_test_', '1'); localStorage.removeItem('_test_'); return localStorage; }
+      catch(e) {
+        try { sessionStorage.setItem('_test_', '1'); sessionStorage.removeItem('_test_'); return sessionStorage; }
+        catch(e2) { return null; }
+      }
     }
 
-    /** 读取 localStorage 缓存 */
-    function loadDataCache() {
+    /** 写入缓存 */
+    function saveDataCache(rawData) {
+      const store = getStore();
+      if (!store) return;
       try {
-        const raw = localStorage.getItem('learning-rpg-cache');
+        store.setItem('learning-rpg-cache', JSON.stringify(rawData));
+        store.setItem('learning-rpg-cache-meta', JSON.stringify({ cachedAt: Date.now() }));
+      } catch (e) {}
+    }
+
+    /** 读取缓存 */
+    function loadDataCache() {
+      const store = getStore();
+      if (!store) return null;
+      try {
+        const raw = store.getItem('learning-rpg-cache');
         if (!raw) return null;
-        const meta = JSON.parse(localStorage.getItem('learning-rpg-cache-meta') || '{}');
+        const meta = JSON.parse(store.getItem('learning-rpg-cache-meta') || '{}');
         const ageHours = ((Date.now() - (meta.cachedAt || 0)) / 3600000).toFixed(1);
         console.log(`[v0.6.5] 缓存命中 (${ageHours}小时前)`);
         return JSON.parse(raw);
@@ -3158,40 +3202,7 @@
       profile.title = levelInfo.title;
       profile.titleJp = levelInfo.titleJp;
       
-      // 转换学科数据（不调用 calculateSubjectLevel，避免依赖 appData）
-      const subjects = {};
-      for (const [subjectName, subjectData] of Object.entries(rawData.subjects || {})) {
-        const totalSubjectXp = subjectData.totalXp || 0;
-        
-        const nodes = (subjectData.nodes || []).map(node => ({
-          id: node.id || generateUUID(),
-          name: node.name,
-          subject: subjectName,
-          peakTemp: node.peakTemp || 85,
-          lastStudy: node.lastStudy || now,
-          halfLifeDays: node.halfLifeDays || 4.0,
-          repetitions: node.repetitions || 0,
-          accuracyHistory: node.accuracyHistory || [],
-          totalXp: node.totalXp || 0
-        }));
-        
-        // 简单计算学科等级（基于XP，不依赖 appData）
-        let subLevel = 1;
-        const xp = totalSubjectXp;
-        if (xp >= 20000) subLevel = 5;
-        else if (xp >= 10000) subLevel = 4;
-        else if (xp >= 5000) subLevel = 3;
-        else if (xp >= 2000) subLevel = 2;
-        
-        subjects[subjectName] = {
-          name: subjectName,
-          level: subLevel,
-          xp: totalSubjectXp,
-          nodes: nodes
-        };
-      }
-      
-      // 转换records/log
+      // ========== 先转换所有学习记录 ==========
       const records = (rawData.log || []).map(log => ({
         recordID: log.id || generateUUID(),
         timestamp: new Date(log.timestamp).getTime(),
@@ -3205,6 +3216,79 @@
         xp: log.xp || 0
       }));
       
+      // ========== 构建知识点→活动类型映射（用于判断考试/练习/学习） ==========
+      const nodeActivityMap = {};
+      for (const rec of records) {
+        for (const kp of rec.knowledgePoints) {
+          if (!nodeActivityMap[kp]) nodeActivityMap[kp] = new Set();
+          nodeActivityMap[kp].add(rec.activityType);
+        }
+      }
+      
+      // 学习型活动（创建/强化技能树节点）
+      const LEARNING_TYPES = new Set(['recitation', 'online_course', 'study', 'practice']);
+      // 考试型活动（不进入技能树）
+      const EXAM_TYPES = new Set(['exam']);
+      
+      // ========== 转换学科数据（考试节点不列入技能树） ==========
+      const subjects = {};
+      const examResults = [];
+      
+      for (const [subjectName, subjectData] of Object.entries(rawData.subjects || {})) {
+        const totalSubjectXp = subjectData.totalXp || 0;
+        const skillNodes = [];
+        
+        for (const node of (subjectData.nodes || [])) {
+          const types = nodeActivityMap[node.name];
+          const hasLearningActivity = types && [...types].some(t => LEARNING_TYPES.has(t));
+          
+          // 只有包含学习型活动（背诵/网课/学习/刷题）的节点才进入技能树
+          if (hasLearningActivity) {
+            skillNodes.push({
+              id: node.id || generateUUID(),
+              name: node.name,
+              subject: subjectName,
+              peakTemp: node.peakTemp || 85,
+              lastStudy: node.lastStudy || now,
+              halfLifeDays: node.halfLifeDays || 4.0,
+              repetitions: node.repetitions || 0,
+              accuracyHistory: node.accuracyHistory || [],
+              totalXp: node.totalXp || 0
+            });
+          } else {
+            // 考试节点→存入考试反思
+            const relatedRecords = records.filter(r =>
+              r.knowledgePoints.includes(node.name)
+            );
+            examResults.push({
+              id: node.id || generateUUID(),
+              name: node.name,
+              subject: subjectName,
+              accuracy: node.accuracyHistory?.[node.accuracyHistory.length - 1] || 
+                       relatedRecords.reduce((max, r) => Math.max(max, r.accuracy || 0), 0),
+              totalXp: node.totalXp || relatedRecords.reduce((s, r) => s + (r.xp || 0), 0),
+              lastStudy: node.lastStudy || now,
+              records: relatedRecords
+            });
+          }
+        }
+        
+        // 简单计算学科等级（基于XP）
+        let subLevel = 1;
+        const xp = totalSubjectXp;
+        if (xp >= 20000) subLevel = 5;
+        else if (xp >= 10000) subLevel = 4;
+        else if (xp >= 5000) subLevel = 3;
+        else if (xp >= 2000) subLevel = 2;
+        
+        subjects[subjectName] = {
+          name: subjectName,
+          level: subLevel,
+          xp: totalSubjectXp,
+          nodes: skillNodes
+        };
+      }
+      
       // 更新CONFIG中的学科修正系数和基础半衰期
       if (rawData.profile) {
         if (rawData.profile.globalBaseHalfLife) {
@@ -3215,13 +3299,14 @@
         }
       }
       
-      console.log(`[v0.6.4] 数据转换完成: 总XP=${totalXp}, 等级=Lv${profile.level}, 学科数=${Object.keys(subjects).length}`);
+      console.log(`[v0.6.5] 数据转换完成: 总XP=${totalXp}, 技能节点=${Object.values(subjects).reduce((s,sub) => s+sub.nodes.length, 0)}, 考试=${examResults.length}`);
       
       return {
         profile,
         subjects,
         records,
-        version: 'v0.6.4'
+        examResults,
+        version: 'v0.6.5'
       };
     }
 
@@ -3316,7 +3401,8 @@
       },
       subjects: {},
       records: [],
-      version: 'v0.4.6'
+      examResults: [],
+      version: 'v0.6.5'
     };
     
     // 初始化九大学科
@@ -4543,6 +4629,35 @@
       }
     }
     
+    // ========== v0.6.5 考试反思渲染 ==========
+    function renderExamResults() {
+      const section = document.getElementById('examOverviewSection');
+      const container = document.getElementById('examCards');
+      if (!section || !container) return;
+      
+      const exams = appData.examResults || [];
+      if (exams.length === 0) { section.style.display = 'none'; return; }
+      
+      section.style.display = 'block';
+      container.innerHTML = exams.map(exam => {
+        const score = exam.accuracy || 0;
+        const passClass = score >= 60 ? 'pass' : 'fail';
+        const subjectColor = SUBJECTS[exam.subject]?.color || '#666';
+        return `
+          <div class="exam-card">
+            <div class="exam-card-info">
+              <div class="exam-card-name">${exam.name}</div>
+              <div class="exam-card-subject" style="color:${subjectColor}">${exam.subject}</div>
+            </div>
+            <div class="exam-card-stats">
+              <div class="exam-card-score ${passClass}">${score}%</div>
+              <div class="exam-card-xp">+${exam.totalXp} XP</div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
     // ========== 渲染全部 ==========
     function renderAll() {
       console.log('[DEBUG] renderAll: appData =', appData, '| profile.xp =', appData?.profile?.xp);
@@ -4610,6 +4725,7 @@
       renderShadowQueue();
       renderRecommend();
       renderAchievements();
+      renderExamResults();
       renderDailyState(dailyState);
       renderDataUpdateTime();
       
@@ -4904,29 +5020,81 @@
       });
     }
     
-    // ========== 初始化（v0.6.5 四层容错） ==========
+    // ========== 初始化（v0.6.5 快速启动 + 后台静默加载） ==========
     async function init() {
-      console.log('[v0.6.5] 系统初始化开始...');
+      console.log('[v0.6.5] 快速启动...');
       
-      appData = await loadAppData();
-      console.log(`[v0.6.5] 数据加载完成，来源: ${dataLoadState.dataSource}`);
+      // Phase 1: 首屏即时渲染（appData 已在页面加载时设为 DEFAULT_DATA）
+      initEvents();
+      renderAll();
+      console.log('[v0.6.5] 首屏渲染完成');
       
-      // 如果使用了兜底数据，显示重试按钮让用户可以主动恢复网络加载
-      if (dataLoadState.dataSource === 'fallback') {
+      // Phase 2: 后台静默加载数据
+      await backgroundDataLoad();
+    }
+    
+    /**
+     * 后台静默加载（完全不阻塞 UI）
+     * 顺序：缓存秒开 → 多源网络 → 内嵌兜底
+     * 加载成功自动刷新 renderAll()
+     */
+    async function backgroundDataLoad() {
+      // 1. 缓存秒开
+      const cached = loadDataCache();
+      if (cached) {
+        console.log('[v0.6.5] 缓存命中，后台刷新...');
+        appData = convertGitHubDataToAppData(cached);
+        dataLoadState.dataSource = 'cache';
+        renderAll();
+      }
+      
+      // 2. 静默网络拉取
+      if (!isFileProtocol()) {
+        const sources = [
+          { name: 'github', url: 'https://raw.githubusercontent.com/MokelungAAA/learning-rpg/main/data.json', desc: 'GitHub Raw' },
+          { name: 'jsdelivr', url: 'https://cdn.jsdelivr.net/gh/MokelungAAA/learning-rpg@main/data.json', desc: 'jsDelivr' },
+          { name: 'pages', url: 'https://mokelungaaa.github.io/learning-rpg/data.json', desc: 'GitHub Pages' },
+          { name: 'local', url: `./data.json?t=${Date.now()}`, desc: '本地' }
+        ];
+        
+        for (const source of sources) {
+          try {
+            const response = await fetchWithTimeout(source.url);
+            if (!response.ok) continue;
+            const rawData = await response.json();
+            if (!rawData || typeof rawData !== 'object') continue;
+            
+            dataLoadState.hasError = false;
+            dataLoadState.lastUpdate = new Date(rawData.lastUpdated);
+            dataLoadState.dataSource = source.name;
+            saveDataCache(rawData);
+            appData = convertGitHubDataToAppData(rawData);
+            renderAll();
+            console.log(`[v0.6.5] 后台加载完成 ✓ ${source.desc}`);
+            return;
+          } catch (e) { continue; }
+        }
+      }
+      
+      // 3. 无缓存 + 网络失败 → 内嵌兜底
+      if (!cached) {
+        console.warn('[v0.6.5] 使用内嵌兜底数据');
+        appData = convertGitHubDataToAppData(FALLBACK_DATA);
+        dataLoadState.dataSource = 'fallback';
+        renderAll();
+        
         const retryBtn = document.createElement('button');
         retryBtn.textContent = '🔄 重新加载数据';
         retryBtn.style.cssText = 'position:fixed;bottom:24px;right:24px;padding:12px 28px;background:linear-gradient(135deg,#3b82f6,#6366f1);color:#fff;border:none;border-radius:14px;font-size:14px;cursor:pointer;z-index:10000;box-shadow:0 8px 32px rgba(59,130,246,0.35);font-weight:600;';
         retryBtn.onclick = () => { retryBtn.remove(); init(); };
         document.body.appendChild(retryBtn);
+      } else {
+        console.log(`[v0.6.5] 后台加载完成 (数据源: ${dataLoadState.dataSource})`);
       }
-      
-      renderAll();
-      initEvents();
-      console.log(`[v0.6.5] 系统初始化完成 (数据源: ${dataLoadState.dataSource})`);
     }
     
     // ========== 启动系统 ==========
-    init().catch(e => console.error('[v0.6.4] 初始化失败:', e));
+    init().catch(e => console.error('[v0.6.5] 初始化失败:', e));
     </script>
 </body>
 </html>
