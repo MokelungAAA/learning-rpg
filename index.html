@@ -2453,7 +2453,7 @@
                   数据模板标准化：三种活动类型（刷题/考试/背诵）+ 统一 record 格式。
                 </div>
                 <div class="changelog-item">
-                  <span class="changelog-item-version">2026-05-07</span>
+                  <span class="changelog-item-version">2026-05-06</span>
                   温度模型重构：复习升温机制 + 动态半衰期三层因子模型 + 九大学科中文化。
                 </div>
               </div>
@@ -2577,43 +2577,43 @@
               </div>
               <div class="changelog-items">
                 <div class="changelog-item">
-                  <span class="changelog-item-version">2026-04-22</span>
+                  <span class="changelog-item-version">2026-05-06</span>
                   项目立项：基于艾宾浩斯遗忘曲线的游戏化学习系统。
                 </div>
                 <div class="changelog-item">
-                  <span class="changelog-item-version">2026-04-24</span>
+                  <span class="changelog-item-version">2026-05-06</span>
                   基础骨架：HTML 结构 + ECharts + 全局样式变量。
                 </div>
                 <div class="changelog-item">
-                  <span class="changelog-item-version">2026-04-26</span>
+                  <span class="changelog-item-version">2026-05-06</span>
                   玻璃拟态卡片 + 渐变配色 + 响应式布局。
                 </div>
                 <div class="changelog-item">
-                  <span class="changelog-item-version">2026-04-28</span>
+                  <span class="changelog-item-version">2026-05-06</span>
                   九大学科分类 + 独立知识点管理。
                 </div>
                 <div class="changelog-item">
-                  <span class="changelog-item-version">2026-04-30</span>
+                  <span class="changelog-item-version">2026-05-07</span>
                   半衰期算法 + 动态复习时间计算。
                 </div>
                 <div class="changelog-item">
-                  <span class="changelog-item-version">2026-05-02</span>
+                  <span class="changelog-item-version">2026-05-07</span>
                   技能树 ECharts force 图可视化。
                 </div>
                 <div class="changelog-item">
-                  <span class="changelog-item-version">2026-05-03</span>
+                  <span class="changelog-item-version">2026-05-07</span>
                   温度记忆模型（0–100%）+ 颜色编码。
                 </div>
                 <div class="changelog-item">
-                  <span class="changelog-item-version">2026-05-04</span>
+                  <span class="changelog-item-version">2026-05-08</span>
                   XP 经验值 + 等级系统 + 称号体系。
                 </div>
                 <div class="changelog-item">
-                  <span class="changelog-item-version">2026-05-05</span>
+                  <span class="changelog-item-version">2026-05-08</span>
                   启动页动画 + 进度条加载。
                 </div>
                 <div class="changelog-item">
-                  <span class="changelog-item-version">2026-05-05</span>
+                  <span class="changelog-item-version">2026-05-09</span>
                   学习记录管理 + 筛选功能。
                 </div>
               </div>
@@ -2694,6 +2694,10 @@
         MAX_PEAK: 100,               // 最大峰值
         DECAY_BASE: 2               // 衰减底数
       },
+      
+      // ========== v0.6.4 内嵌数据（file://本地打开时兜底使用）==========
+      // 当浏览器禁止 fetch file:// 时，使用此内嵌数据
+      window.EMBEDDED_DATA = {"version":"1.0","lastUpdated":"2026-05-10T12:27:00+08:00","profile":{"learnerName":"墨澜","globalBaseHalfLife":4.0,"subjectModifiers":{"数学":1.2,"物理":1.2,"化学":1.1,"语文":1.0,"英语":1.0,"历史":1.0,"地理":1.0,"生物":0.9,"政治":0.8},"tempBoostGain":0.4,"tempBoostBase":10,"avgReviewsPerWeek":0},"subjects":{"数学":{"totalXp":0,"nodes":[]},"语文":{"totalXp":0,"nodes":[]},"英语":{"totalXp":38,"nodes":[{"id":"英语-001","name":"期中考试","peakTemp":75,"lastStudy":"2026-05-10T12:27:00+08:00","halfLifeDays":4.0,"repetitions":1,"accuracyHistory":[75],"totalXp":38}]},"物理":{"totalXp":0,"nodes":[]},"化学":{"totalXp":0,"nodes":[]},"生物":{"totalXp":0,"nodes":[]},"政治":{"totalXp":0,"nodes":[]},"历史":{"totalXp":0,"nodes":[]},"地理":{"totalXp":0,"nodes":[]}},"log":[{"id":"rec-002","timestamp":"2026-05-10T12:27:00+08:00","subject":"英语","knowledgePoints":["期中考试"],"durationMinutes":10,"activityType":"practice","totalQuestions":0,"correctCount":0,"accuracy":75,"xp":38}]};
       
       // v0.4.3 新增：学科等级三维评分权重
       SUBJECT_LEVEL: {
@@ -2904,8 +2908,9 @@
         newHL = node.halfLifeDays * (FINE_TUNE_FACTOR + ratio * 0.2);
       }
       
-      // 限制范围
-      return Math.max(CONFIG.MIN_HALFLIFE, Math.min(CONFIG.MAX_HALFLIFE, +newHL.toFixed(2)));
+      // 限制范围，保留2位小数
+      const capped = Math.max(CONFIG.MIN_HALFLIFE, Math.min(CONFIG.MAX_HALFLIFE, newHL));
+      return Math.round(capped * 100) / 100;
     }
     
     /**
@@ -2988,7 +2993,7 @@
       dataSource: ''  // 记录数据来源：'github' | 'local' | 'demo'
     };
 
-    // ========== GitHub数据加载核心函数（v0.6.4 增强版）==========
+    // ========== GitHub数据加载核心函数（v0.6.4 修复版）==========
 
     /**
      * 带超时的fetch封装
@@ -3003,16 +3008,32 @@
     }
 
     /**
-     * 从GitHub加载数据（v0.6.4 增强：相对路径回退）
+     * 从GitHub加载数据（优先本地相对路径，失败则尝试GitHub CDN）
      * @returns {Promise<Object|null>} 加载的数据或null
      */
     async function loadDataFromGitHub() {
       dataLoadState.isLoading = true;
       showDataLoading(true);
       
+      // v0.6.4 修复：优先使用内嵌数据（解决 file:// 协议下 fetch 被阻止的问题）
+      // 数据源优先级：内嵌数据 → 本地相对路径 → GitHub CDN
+      const embeddedData = window.EMBEDDED_DATA;
+      if (embeddedData && typeof embeddedData === 'object') {
+        try {
+          console.log('[v0.6.4] 使用内嵌数据（本地兜底）');
+          dataLoadState.hasError = false;
+          dataLoadState.lastUpdate = new Date(embeddedData.lastUpdated);
+          dataLoadState.dataSource = 'embedded';
+          return convertGitHubDataToAppData(embeddedData);
+        } catch (e) {
+          console.warn('[v0.6.4] 内嵌数据解析失败:', e.message);
+        }
+      }
+      
+      // 内嵌数据不可用，尝试 fetch
       const sources = [
-        { name: 'github', url: `${GITHUB_CONFIG.DATA_URL}?t=${Date.now()}` },
-        { name: 'local', url: `${GITHUB_CONFIG.LOCAL_URL}?t=${Date.now()}` }
+        { name: 'local', url: `${GITHUB_CONFIG.LOCAL_URL}?t=${Date.now()}` },
+        { name: 'github', url: `${GITHUB_CONFIG.DATA_URL}?t=${Date.now()}` }
       ];
       
       for (const source of sources) {
@@ -3023,7 +3044,8 @@
             method: 'GET',
             headers: {
               'Accept': 'application/json',
-              'Cache-Control': 'no-cache'
+              'Cache-Control': 'no-cache, no-store, must-revalidate',
+              'Pragma': 'no-cache'
             }
           }, 15000);
           
@@ -3044,23 +3066,18 @@
           dataLoadState.lastUpdate = new Date(rawData.lastUpdated);
           dataLoadState.dataSource = source.name;
           
-          // 显示数据来源提示
-          if (source.name === 'local') {
-            console.log('[v0.6.4] 使用本地相对路径数据（GitHub Pages 同步模式）');
-          }
-          
           return convertGitHubDataToAppData(rawData);
           
         } catch (error) {
           console.warn(`[v0.6.4] ${source.name} 数据源失败:`, error.message);
-          continue; // 尝试下一个数据源
+          continue;
         }
       }
       
       // 所有数据源都失败
-      console.error('[v0.6.4] 所有数据源均加载失败');
+      console.error('[v0.6.4] 所有数据源均加载失败，使用演示数据');
       dataLoadState.hasError = true;
-      showDataLoadError('无法连接到数据源，请检查网络后重试');
+      showDataLoadError('无法连接到数据源，已使用本地演示数据');
       
       return null;
     }
