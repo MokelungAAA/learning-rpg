@@ -1267,6 +1267,44 @@
       box-shadow: 0 4px 16px rgba(0,0,0,0.3);
     }
 
+    /* ========== 教材进度地图（v0.6.7） ========== */
+    .textbook-controls {
+      display: flex; gap: 10px; margin-bottom: 14px;
+    }
+    .tb-select {
+      flex: 1; padding: 10px 12px; border: 1px solid var(--glass-border);
+      border-radius: 10px; font-size: 13px; font-weight: 500; cursor: pointer;
+      background: var(--glass-bg-solid); color: var(--text-primary);
+      backdrop-filter: blur(12px); outline: none;
+    }
+    .tb-select:focus { border-color: #6366f1; box-shadow: 0 0 0 3px rgba(99,102,241,0.1); }
+    .tb-chapter {
+      background: var(--glass-bg); border: 1px solid var(--glass-border-subtle);
+      border-radius: var(--radius-md); margin-bottom: 10px; overflow: hidden;
+      transition: all 0.2s;
+    }
+    .tb-chapter-header {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 12px 16px; cursor: pointer; user-select: none;
+    }
+    .tb-chapter-header:hover { background: var(--glass-bg-hover); }
+    .tb-chapter-name { font-size: 13px; font-weight: 600; color: var(--text-primary); }
+    .tb-chapter-stats { font-size: 11px; color: var(--text-muted); }
+    .tb-chapter-bar {
+      height: 3px; background: rgba(200,200,220,0.2); margin: 0 16px 8px;
+      border-radius: 2px; overflow: hidden;
+    }
+    .tb-chapter-fill { height: 100%; border-radius: 2px; transition: width 0.6s ease; }
+    .tb-kps {
+      padding: 0 16px 12px; display: none; gap: 6px; flex-wrap: wrap;
+    }
+    .tb-chapter.expanded .tb-kps { display: flex; }
+    .tb-kp {
+      padding: 4px 10px; border-radius: 6px; font-size: 11px; cursor: default;
+      transition: transform 0.15s;
+    }
+    .tb-kp:hover { transform: scale(1.05); }
+
     /* ========== 设置页 ========== */
     .settings-list {
       display: flex;
@@ -2111,6 +2149,16 @@
         <div class="overview-heatmap" id="heatmapSection" style="margin-top: 24px;">
           <div class="section-title">📅 学习热力图</div>
           <div class="heatmap-container" id="heatmapContainer"></div>
+        </div>
+        
+        <!-- 教材进度地图（v0.6.7） -->
+        <div class="overview-textbook" id="textbookSection" style="margin-top: 24px;">
+          <div class="section-title">📖 教材进度</div>
+          <div class="textbook-controls">
+            <select id="tb-subject" class="tb-select" onchange="switchTextbook()"></select>
+            <select id="tb-book" class="tb-select" onchange="switchTextbook()"></select>
+          </div>
+          <div class="textbook-progress" id="textbookProgress"></div>
         </div>
       </div>
       
@@ -4916,6 +4964,117 @@
       }).join('');
     }
 
+    // ========== v0.6.7 教材进度地图 ==========
+    let textbookData = null;
+    
+    async function loadTextbookData() {
+      try {
+        const resp = await fetch(`./data/textbooks/textbooks.json?t=${Date.now()}`, {
+          headers: { 'Accept': 'application/json', 'Cache-Control': 'no-cache' }
+        });
+        if (!resp.ok) return;
+        textbookData = await resp.json();
+        initTextbookControls();
+      } catch (e) {
+        console.warn('[v0.6.7] 教材数据加载失败:', e.message);
+      }
+    }
+    
+    function initTextbookControls() {
+      if (!textbookData) return;
+      const subSelect = document.getElementById('tb-subject');
+      if (!subSelect) return;
+      subSelect.innerHTML = Object.keys(textbookData.subjects).map(s =>
+        `<option value="${s}">${s}</option>`
+      ).join('');
+      switchTextbook();
+    }
+    
+    function switchTextbook() {
+      if (!textbookData) return;
+      const sub = document.getElementById('tb-subject').value;
+      const bookIdx = parseInt(document.getElementById('tb-book').value) || 0;
+      const subjectData = textbookData.subjects[sub];
+      if (!subjectData) return;
+      
+      const bookSelect = document.getElementById('tb-book');
+      bookSelect.innerHTML = subjectData.books.map((b, i) =>
+        `<option value="${i}" ${i === bookIdx ? 'selected' : ''}>${b.name}</option>`
+      ).join('');
+      
+      renderTextbookProgress(sub, subjectData.books[parseInt(bookSelect.value) || bookIdx]);
+    }
+    
+    function renderTextbookProgress(subjectName, book) {
+      const container = document.getElementById('textbookProgress');
+      if (!container || !book) return;
+      
+      // 收集该学科所有已学的知识点名称和最高正确率
+      const learnedKps = {};
+      for (const rec of appData.records) {
+        if (rec.subject !== subjectName) continue;
+        for (const kp of rec.knowledgePoints || []) {
+          if (!learnedKps[kp]) learnedKps[kp] = { count: 0, maxAcc: 0 };
+          learnedKps[kp].count++;
+          learnedKps[kp].maxAcc = Math.max(learnedKps[kp].maxAcc, rec.accuracy || 0);
+        }
+      }
+      
+      let totalKps = 0, learnedCount = 0;
+      
+      const chaptersHtml = book.chapters.map((ch, ci) => {
+        const chKps = ch.knowledgePoints || [];
+        const chLearned = chKps.filter(kp => {
+          // 检查知识点是否匹配（支持子串匹配，如"集合"匹配"集合的含义与表示"）
+          return Object.keys(learnedKps).some(learned => learned.includes(kp) || kp.includes(learned));
+        });
+        totalKps += chKps.length;
+        learnedCount += chLearned.length;
+        const pct = chKps.length > 0 ? Math.round((chLearned.length / chKps.length) * 100) : 0;
+        
+        const kpHtml = chKps.map(kp => {
+          const matched = Object.entries(learnedKps).find(([k]) => k.includes(kp) || kp.includes(k));
+          let color = '#ebedf0';
+          if (matched) {
+            const acc = matched[1].maxAcc;
+            color = acc >= 80 ? '#10b981' : acc >= 60 ? '#f59e0b' : '#ef4444';
+          }
+          return `<span class="tb-kp" style="background:${color};color:${matched ? '#fff' : '#999'}">${kp}</span>`;
+        }).join('');
+        
+        return `
+          <div class="tb-chapter" onclick="this.classList.toggle('expanded')">
+            <div class="tb-chapter-header">
+              <div class="tb-chapter-name">第${ch.number}章 ${ch.name}</div>
+              <div class="tb-chapter-stats">${chLearned.length}/${chKps.length}</div>
+            </div>
+            <div class="tb-chapter-bar">
+              <div class="tb-chapter-fill" style="width:${pct}%;background:${pct === 100 ? '#10b981' : pct > 0 ? '#6366f1' : '#e5e7eb'}"></div>
+            </div>
+            <div class="tb-kps">${kpHtml}</div>
+          </div>
+        `;
+      }).join('');
+      
+      const overallPct = totalKps > 0 ? Math.round((learnedCount / totalKps) * 100) : 0;
+      
+      container.innerHTML = `
+        <div class="glass-card" style="padding:14px 18px;margin-bottom:14px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <div>
+              <div style="font-size:14px;font-weight:600;">${book.name}</div>
+              <div style="font-size:11px;color:var(--text-muted);">${subjectName} · ${book.grade || ''}</div>
+            </div>
+            <div style="text-align:right;">
+              <div style="font-size:22px;font-weight:700;color:${overallPct === 100 ? '#10b981' : '#6366f1'}">${overallPct}%</div>
+              <div style="font-size:10px;color:var(--text-muted);">${learnedCount}/${totalKps} 知识点</div>
+            </div>
+          </div>
+        </div>
+        ${chaptersHtml}
+      `;
+    }
+
     // ========== v0.6.6 学习日历热力图 ==========
     function renderHeatmap() {
       const container = document.getElementById('heatmapContainer');
@@ -5091,6 +5250,7 @@
       renderDailyState(dailyState);
       renderDataUpdateTime();
       renderHeatmap();
+      if (textbookData) switchTextbook();
       
       // 设置页数据源显示
       const dataSourceEl = document.getElementById('settingsDataSource');
@@ -5438,6 +5598,9 @@
           } catch (e) { continue; }
         }
       }
+      
+      // 额外加载教材数据（独立于主数据，不影响进度）
+      loadTextbookData();
       
       // 3. 无缓存 + 网络失败 → 内嵌兜底
       if (!cached) {
