@@ -1,25 +1,116 @@
 {
-  "version": "2.0",
-  "lastUpdated": "2026-05-10T12:37:00+08:00",
-  "learnerName": "墨澜",
-  "records": [
+  "version": "1.0",
+  "lastUpdated": "2026-05-10T13:00:48+08:00",
+  "profile": {
+    "learnerName": "墨澜",
+    "globalBaseHalfLife": 4.0,
+    "subjectModifiers": {
+      "数学": 1.2,
+      "物理": 1.2,
+      "化学": 1.1,
+      "语文": 1.0,
+      "英语": 1.0,
+      "历史": 1.0,
+      "地理": 1.0,
+      "生物": 0.9,
+      "政治": 0.8
+    },
+    "tempBoostGain": 0.4,
+    "tempBoostBase": 10,
+    "avgReviewsPerWeek": 0
+  },
+  "subjects": {
+    "数学": {
+      "totalXp": 112,
+      "nodes": [
+        {
+          "id": "数学-001",
+          "name": "必修第一册第3章",
+          "peakTemp": 75,
+          "lastStudy": "2026-05-10T14:30:00+08:00",
+          "halfLifeDays": 4.0,
+          "repetitions": 1,
+          "accuracyHistory": [
+            75
+          ],
+          "totalXp": 112
+        }
+      ]
+    },
+    "语文": {
+      "totalXp": 0,
+      "nodes": []
+    },
+    "英语": {
+      "totalXp": 38,
+      "nodes": [
+        {
+          "id": "英语-001",
+          "name": "期中考试",
+          "peakTemp": 75,
+          "lastStudy": "2026-05-10T12:27:00+08:00",
+          "halfLifeDays": 4.0,
+          "repetitions": 1,
+          "accuracyHistory": [
+            75
+          ],
+          "totalXp": 38
+        }
+      ]
+    },
+    "物理": {
+      "totalXp": 0,
+      "nodes": []
+    },
+    "化学": {
+      "totalXp": 0,
+      "nodes": []
+    },
+    "生物": {
+      "totalXp": 0,
+      "nodes": []
+    },
+    "政治": {
+      "totalXp": 0,
+      "nodes": []
+    },
+    "历史": {
+      "totalXp": 0,
+      "nodes": []
+    },
+    "地理": {
+      "totalXp": 0,
+      "nodes": []
+    }
+  },
+  "log": [
     {
       "id": "rec-001",
       "timestamp": "2026-05-10T14:30:00+08:00",
       "subject": "数学",
-      "textbook": "必修第一册",
-      "chapter": 3,
-      "score": 75,
-      "duration": 30
+      "knowledgePoints": [
+        "必修第一册第3章"
+      ],
+      "durationMinutes": 30,
+      "activityType": "practice",
+      "totalQuestions": 0,
+      "correctCount": 0,
+      "accuracy": 75,
+      "xp": 112
     },
     {
       "id": "rec-002",
       "timestamp": "2026-05-10T12:27:00+08:00",
       "subject": "英语",
-      "textbook": "期中考试",
-      "chapter": 0,
-      "score": 75,
-      "duration": 10
+      "knowledgePoints": [
+        "期中考试"
+      ],
+      "durationMinutes": 10,
+      "activityType": "practice",
+      "totalQuestions": 0,
+      "correctCount": 0,
+      "accuracy": 75,
+      "xp": 38
     }
   ]
 }
