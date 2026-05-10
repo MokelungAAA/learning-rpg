@@ -1399,6 +1399,27 @@
     }
     .course-desc { font-size: 12px; color: var(--text-muted); margin-bottom: 8px; }
 
+    /* ========== 学习报告（v0.6.11） ========== */
+    .report-stats {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 14px;
+    }
+    .report-stat-card {
+      background: var(--glass-bg); backdrop-filter: blur(10px); border: 1px solid var(--glass-border);
+      border-radius: var(--radius-md); padding: 14px; text-align: center;
+      box-shadow: var(--glass-shadow);
+    }
+    .report-stat-value { font-size: 22px; font-weight: 700; color: var(--text-primary); }
+    .report-stat-label { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+    .report-chart-glass {
+      background: var(--glass-bg); backdrop-filter: blur(12px); border: 1px solid var(--glass-border);
+      border-radius: var(--radius-md); padding: 16px; box-shadow: var(--glass-shadow);
+    }
+    .report-chart-header {
+      display: flex; justify-content: space-between; align-items: center;
+      font-size: 13px; font-weight: 600; color: var(--text-secondary); margin-bottom: 10px;
+    }
+    .report-chart { width: 100%; height: 200px; }
+
     /* ========== 设置页 ========== */
     .settings-list {
       display: flex;
@@ -2269,6 +2290,23 @@
             <select id="course-select" class="tb-select" onchange="switchCourse()"></select>
           </div>
           <div class="course-detail" id="courseDetail"></div>
+        </div>
+        
+        <!-- 学习报告（v0.6.11） -->
+        <div class="overview-report" id="reportSection" style="margin-top: 24px;">
+          <div class="section-title">📊 学习报告</div>
+          <div class="report-stats" id="reportStats"></div>
+          <div class="report-chart-glass">
+            <div class="report-chart-header">
+              <span>近 30 天 XP 趋势</span>
+              <select id="report-range" class="tb-select" style="width:auto;padding:4px 10px;font-size:12px;" onchange="renderReport()">
+                <option value="7">7天</option>
+                <option value="30" selected>30天</option>
+                <option value="90">90天</option>
+              </select>
+            </div>
+            <div class="report-chart" id="reportChart"></div>
+          </div>
         </div>
       </div>
       
@@ -5398,6 +5436,148 @@
       if (tip) tip.style.display = 'none';
     }
 
+    // ========== v0.6.11 学习报告 + 数据导出 ==========
+    let reportChart = null;
+    
+    function renderReport() {
+      const statsEl = document.getElementById('reportStats');
+      const chartEl = document.getElementById('reportChart');
+      if (!statsEl || !chartEl) return;
+      
+      const days = parseInt(document.getElementById('report-range')?.value || 30);
+      const now = new Date();
+      const start = new Date(now); start.setDate(start.getDate() - days + 1);
+      start.setHours(0,0,0,0);
+      
+      // 按天统计
+      const dayBuckets = {};
+      const dayLabels = [];
+      const xpData = [];
+      let totalXpInRange = 0, studyDays = 0, totalMinutes = 0;
+      
+      for (let i = 0; i < days; i++) {
+        const d = new Date(start); d.setDate(d.getDate() + i);
+        const key = `${d.getMonth()+1}/${d.getDate()}`;
+        dayBuckets[key] = { xp: 0, minutes: 0, count: 0 };
+      }
+      
+      for (const rec of appData.records) {
+        const d = new Date(rec.timestamp);
+        if (d < start || d > now) continue;
+        const key = `${d.getMonth()+1}/${d.getDate()}`;
+        if (dayBuckets[key]) {
+          dayBuckets[key].xp += rec.xp || 0;
+          dayBuckets[key].minutes += rec.durationMinutes || 0;
+          dayBuckets[key].count++;
+        }
+      }
+      
+      for (let i = 0; i < days; i++) {
+        const d = new Date(start); d.setDate(d.getDate() + i);
+        const key = `${d.getMonth()+1}/${d.getDate()}`;
+        const b = dayBuckets[key] || { xp: 0, minutes: 0, count: 0 };
+        dayLabels.push(key);
+        xpData.push(b.xp);
+        totalXpInRange += b.xp;
+        totalMinutes += b.minutes;
+        if (b.count > 0) studyDays++;
+      }
+      
+      // 统计卡片
+      const avgXp = studyDays > 0 ? Math.round(totalXpInRange / studyDays) : 0;
+      statsEl.innerHTML = `
+        <div class="report-stat-card"><div class="report-stat-value">${totalXpInRange}</div><div class="report-stat-label">${days}天总XP</div></div>
+        <div class="report-stat-card"><div class="report-stat-value">${avgXp}</div><div class="report-stat-label">日均XP</div></div>
+        <div class="report-stat-card"><div class="report-stat-value">${studyDays}/${days}</div><div class="report-stat-label">学习天数</div></div>
+      `;
+      
+      // 趋势图
+      if (reportChart) reportChart.dispose();
+      reportChart = echarts.init(chartEl);
+      reportChart.setOption({
+        tooltip: { trigger: 'axis', formatter: p => `${p[0].axisValue}<br/>XP: ${p[0].value}` },
+        grid: { left: 30, right: 8, top: 8, bottom: 20 },
+        xAxis: { type: 'category', data: dayLabels, axisLabel: { fontSize: 9, color: '#a0aec0', interval: Math.max(1, Math.floor(days / 15)) } },
+        yAxis: { type: 'value', splitLine: { lineStyle: { color: 'rgba(200,200,220,0.15)' } }, axisLabel: { fontSize: 9 } },
+        series: [{
+          type: 'line', data: xpData, smooth: true, showSymbol: false,
+          lineStyle: { width: 2, color: '#6366f1' },
+          areaStyle: { color: { type: 'linear', x: 0, y: 0, x2: 0, y2: 1, colorStops: [{ offset: 0, color: 'rgba(99,102,241,0.3)' }, { offset: 1, color: 'rgba(99,102,241,0)' }] } }
+        }]
+      });
+      setTimeout(() => reportChart?.resize(), 100);
+    }
+    
+    /** 导出完整 data.json */
+    function exportDataJson() {
+      const subjects = {};
+      for (const [name, sub] of Object.entries(appData.subjects)) {
+        subjects[name] = { totalXp: sub.xp || 0, nodes: sub.nodes || [] };
+      }
+      
+      // 整合本地录入数据（localStorage）
+      let allRecords = [...(appData.records || [])];
+      try {
+        const localRecords = JSON.parse(localStorage.getItem('learning-rpg-local-records') || '[]');
+        if (localRecords.length) allRecords = [...localRecords, ...allRecords];
+      } catch(e) {}
+      
+      const out = {
+        version: '1.0',
+        lastUpdated: new Date().toISOString().replace('Z', '+08:00'),
+        profile: {
+          learnerName: '墨澜',
+          globalBaseHalfLife: CONFIG.GLOBAL_BASE_HALFLIFE || 4.0,
+          subjectModifiers: CONFIG.SUBJECT_MODIFIERS || {},
+          tempBoostGain: 0.4,
+          tempBoostBase: 10,
+          avgReviewsPerWeek: 0
+        },
+        subjects,
+        log: allRecords.map(r => ({
+          id: r.recordID,
+          timestamp: new Date(r.timestamp).toISOString().replace('Z', '+08:00'),
+          subject: r.subject,
+          knowledgePoints: r.knowledgePoints || [],
+          durationMinutes: r.durationMinutes || 0,
+          activityType: r.activityType || 'practice',
+          totalQuestions: r.totalQuestions || 0,
+          correctCount: r.correctCount || 0,
+          accuracy: r.accuracy || 0,
+          xp: r.xp || 0
+        }))
+      };
+      
+      const blob = new Blob([JSON.stringify(out, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `learning-rpg-data-${new Date().toISOString().slice(0,10)}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+      
+      // 更新导出面板统计
+      const countEl = document.getElementById('de-export-record-count');
+      const xpEl = document.getElementById('de-export-xp');
+      if (countEl) countEl.textContent = allRecords.length;
+      if (xpEl) xpEl.textContent = appData.profile.totalXp || 0;
+    }
+    
+    /** 清除本地缓存数据 */
+    function clearLocalData() {
+      try {
+        localStorage.removeItem('learning-rpg-cache');
+        localStorage.removeItem('learning-rpg-cache-meta');
+        localStorage.removeItem('learning-rpg-local-records');
+        localStorage.removeItem('learning-rpg-theme');
+        const countEl = document.getElementById('de-export-record-count');
+        const xpEl = document.getElementById('de-export-xp');
+        if (countEl) countEl.textContent = '0';
+        if (xpEl) xpEl.textContent = '0';
+        showToast('已清除本地缓存', 2000);
+      } catch(e) {}
+    }
+
     // ========== 渲染全部 ==========
     function renderAll() {
       console.log('[DEBUG] renderAll: appData =', appData, '| profile.xp =', appData?.profile?.xp);
@@ -5471,6 +5651,7 @@
       renderHeatmap();
       if (textbookData) switchTextbook();
       if (coursesData) switchCourse();
+      renderReport();
       
       // 设置页数据源显示
       const dataSourceEl = document.getElementById('settingsDataSource');
@@ -5760,6 +5941,7 @@
       window.addEventListener('resize', () => {
         if (skillTreeChart) skillTreeChart.resize();
         if (forgetChart) forgetChart.resize();
+        if (reportChart) setTimeout(() => reportChart.resize(), 50);
       });
     }
     
