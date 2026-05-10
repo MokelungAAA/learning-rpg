@@ -2696,7 +2696,7 @@
         </div>
         <div class="about-system-name">学习RPG · 认知操作系统</div>
         <div class="about-version">
-          <span class="about-version-badge">v0.6.4</span>
+          <span class="about-version-badge">v0.6.14</span>
         </div>
         <div class="about-developer-info">
           <div class="about-developer-name">墨澜 & MIKU</div>
@@ -2732,12 +2732,12 @@
       <div class="changelog-section">
         <div class="changelog-title">更新日志</div>
         
-        <!-- ====== V0.6 — 视觉重构 ====== -->
+        <!-- ====== V0.7 — 数据驱动优化 ====== -->
         <div class="changelog-major expanded" onclick="this.classList.toggle('expanded')">
           <div class="changelog-major-header current">
             <div class="changelog-major-left">
-              <span class="changelog-major-label">V0.6</span>
-              <span class="changelog-major-tag">当前 · 视觉重构</span>
+              <span class="changelog-major-label">V0.7</span>
+              <span class="changelog-major-tag">当前 · 数据驱动</span>
             </div>
             <span class="changelog-major-toggle">▼</span>
           </div>
@@ -2745,7 +2745,35 @@
             <div class="changelog-version expanded" onclick="event.stopPropagation();this.classList.toggle('expanded')">
               <div class="changelog-version-header current">
                 <div class="changelog-version-left">
-                  <span>v0.6.4</span>
+                  <span>v0.7.1</span>
+                  <span class="changelog-version-tag">数据写入</span>
+                </div>
+                <span class="changelog-toggle">▼</span>
+              </div>
+              <div class="changelog-items">
+                <div class="changelog-item">
+                  <span class="changelog-item-version">2026-05-10</span>
+                  开始写入真实学习数据。完善网页端数据录入表单（设置页→数据录入），支持添加学习记录和考试记录，数据持久化至localStorage，并可导出完整data.json。
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- ====== V0.6 — 视觉重构 ====== -->
+        <div class="changelog-major expanded" onclick="this.classList.toggle('expanded')">
+          <div class="changelog-major-header">
+            <div class="changelog-major-left">
+              <span class="changelog-major-label">V0.6</span>
+              <span class="changelog-major-tag">已完成</span>
+            </div>
+            <span class="changelog-major-toggle">▼</span>
+          </div>
+          <div class="changelog-major-body">
+            <div class="changelog-version expanded" onclick="event.stopPropagation();this.classList.toggle('expanded')">
+              <div class="changelog-version-header current">
+                <div class="changelog-version-left">
+                  <span>v0.6.14</span>
                   <span class="changelog-version-tag">当前</span>
                 </div>
                 <span class="changelog-toggle">▼</span>
@@ -2753,15 +2781,150 @@
               <div class="changelog-items">
                 <div class="changelog-item">
                   <span class="changelog-item-version">2026-05-10</span>
-                  数据功能修复：删除测试数据（保留真实学习记录）；GitHub数据拉取增加本地相对路径回退 + 15秒超时 + 自动重试；关于页面修复（立项日期显示 + 开发天数计算 + 更新日志日期规范化）；新增活动类型支持（阅读/网课/笔记等非刷题类学习可统计XP）；数据来源标识显示。
+                  v0.6 全面审查通过：所有功能已实现且无严重bug。等级算法修复（XP上限约束防止单节点高温度拉爆等级）；概览页UI重构（次要信息收进折叠面板，英雄区域+学科卡片始终可见）；数据录入5个缺失函数补全。版本标记为v0.6.14，准备进入v0.7。
                 </div>
               </div>
             </div>
             <div class="changelog-version" onclick="event.stopPropagation();this.classList.toggle('expanded')">
               <div class="changelog-version-header">
                 <div class="changelog-version-left">
-                  <span>v0.6.3</span>
-                  <span class="changelog-version-tag">架构</span>
+                  <span>v0.6.13</span>
+                  <span class="changelog-version-tag">优化</span>
+                </div>
+                <span class="changelog-toggle">▼</span>
+              </div>
+              <div class="changelog-items">
+                <div class="changelog-item">
+                  <span class="changelog-item-version">2026-05-10</span>
+                  Bug修复 + UI精简：等级算法增加XP上限约束（38XP不会再跳到高等级）；概览页改成折叠面板（「更多数据」可折叠）；修复数据录入5个函数未定义bug；修复showToast参数类型错误；清理重复CSS和@keyframes。
+                </div>
+              </div>
+            </div>
+            <div class="changelog-version" onclick="event.stopPropagation();this.classList.toggle('expanded')">
+              <div class="changelog-version-header">
+                <div class="changelog-version-left">
+                  <span>v0.6.12</span>
+                  <span class="changelog-version-tag">PWA</span>
+                </div>
+                <span class="changelog-toggle">▼</span>
+              </div>
+              <div class="changelog-items">
+                <div class="changelog-item">
+                  <span class="changelog-item-version">2026-05-10</span>
+                  PWA离线支持：Service Worker缓存策略（安装预缓存+运行时缓存优先）；manifest.json配置（standalone全屏模式）；icon.svg应用图标；桌面快捷方式支持。手机浏览器可"添加到主屏幕"。
+                </div>
+              </div>
+            </div>
+            <div class="changelog-version" onclick="event.stopPropagation();this.classList.toggle('expanded')">
+              <div class="changelog-version-header">
+                <div class="changelog-version-left">
+                  <span>v0.6.11</span>
+                  <span class="changelog-version-tag">报告</span>
+                </div>
+                <span class="changelog-toggle">▼</span>
+              </div>
+              <div class="changelog-items">
+                <div class="changelog-item">
+                  <span class="changelog-item-version">2026-05-10</span>
+                  学习报告 + 数据导出：概览页新增学习报告（总XP/日均/学习天数统计卡片）；ECharts XP趋势曲线图（支持7/30/90天切换）；导出完整data.json（含profile+subjects+log，自动命名日期戳）；清除本地缓存功能。
+                </div>
+              </div>
+            </div>
+            <div class="changelog-version" onclick="event.stopPropagation();this.classList.toggle('expanded')">
+              <div class="changelog-version-header">
+                <div class="changelog-version-left">
+                  <span>v0.6.10</span>
+                  <span class="changelog-version-tag">手势</span>
+                </div>
+                <span class="changelog-toggle">▼</span>
+              </div>
+              <div class="changelog-items">
+                <div class="changelog-item">
+                  <span class="changelog-item-version">2026-05-10</span>
+                  移动端手势优化：横向滑动切换导航页面（右滑上一页/左滑下一页，30px阈值防误触）；概览页下拉刷新数据（指示条+释放触发）；触摸反馈增强（按钮/卡片按下缩放）。
+                </div>
+              </div>
+            </div>
+            <div class="changelog-version" onclick="event.stopPropagation();this.classList.toggle('expanded')">
+              <div class="changelog-version-header">
+                <div class="changelog-version-left">
+                  <span>v0.6.9</span>
+                  <span class="changelog-version-tag">深色</span>
+                </div>
+                <span class="changelog-toggle">▼</span>
+              </div>
+              <div class="changelog-items">
+                <div class="changelog-item">
+                  <span class="changelog-item-version">2026-05-10</span>
+                  深色模式：Win11风格深色主题（暗蓝黑渐变+暗色毛玻璃）；设置页点击切换；自动跟随系统 prefers-color-scheme；偏好保存至localStorage；平滑过渡动画（背景/文字/边框0.4s渐入）。
+                </div>
+              </div>
+            </div>
+            <div class="changelog-version" onclick="event.stopPropagation();this.classList.toggle('expanded')">
+              <div class="changelog-version-header">
+                <div class="changelog-version-left">
+                  <span>v0.6.8</span>
+                  <span class="changelog-version-tag">网课</span>
+                </div>
+                <span class="changelog-toggle">▼</span>
+              </div>
+              <div class="changelog-items">
+                <div class="changelog-item">
+                  <span class="changelog-item-version">2026-05-10</span>
+                  网课进度展示：学科/课程选择器（同步课+备考课）；课程详情卡片（讲师、进度%、B站跳转按钮粉色风格）；章节列表+视频集数+学习进度条；通过知识点匹配自动判断章节完成度。
+                </div>
+              </div>
+            </div>
+            <div class="changelog-version" onclick="event.stopPropagation();this.classList.toggle('expanded')">
+              <div class="changelog-version-header">
+                <div class="changelog-version-left">
+                  <span>v0.6.7</span>
+                  <span class="changelog-version-tag">教材</span>
+                </div>
+                <span class="changelog-toggle">▼</span>
+              </div>
+              <div class="changelog-items">
+                <div class="changelog-item">
+                  <span class="changelog-item-version">2026-05-10</span>
+                  教材进度地图：学科/教材选择器（9科48本教材数据）；整体进度%+已学/总知识点数；章节展开列表+知识点掌握度颜色标签（绿≥80%/橙≥60%/红<60%/灰未学）；数据从textbooks.json后台加载。
+                </div>
+              </div>
+            </div>
+            <div class="changelog-version" onclick="event.stopPropagation();this.classList.toggle('expanded')">
+              <div class="changelog-version-header">
+                <div class="changelog-version-left">
+                  <span>v0.6.6</span>
+                  <span class="changelog-version-tag">热力</span>
+                </div>
+                <span class="changelog-toggle">▼</span>
+              </div>
+              <div class="changelog-items">
+                <div class="changelog-item">
+                  <span class="changelog-item-version">2026-05-10</span>
+                  学习日历热力图：GitHub风格日历（169天5阶绿色编码）；每日学习XP着色+月份标签+星期标注；鼠标悬停显示具体日期和XP数；深色模式兼容。
+                </div>
+              </div>
+            </div>
+            <div class="changelog-version" onclick="event.stopPropagation();this.classList.toggle('expanded')">
+              <div class="changelog-version-header">
+                <div class="changelog-version-left">
+                  <span>v0.6.5</span>
+                  <span class="changelog-version-tag">考试</span>
+                </div>
+                <span class="changelog-toggle">▼</span>
+              </div>
+              <div class="changelog-items">
+                <div class="changelog-item">
+                  <span class="changelog-item-version">2026-05-10</span>
+                  快速启动+后台静默加载+考试反思模块：首屏即时渲染（无加载遮罩）；后台四层容错（缓存/GitHub/jsDelivr/本地/兜底）；考试节点不进入技能树，独立考试反思卡片展示（得分%+XP）。
+                </div>
+              </div>
+            </div>
+            <div class="changelog-version" onclick="event.stopPropagation();this.classList.toggle('expanded')">
+              <div class="changelog-version-header">
+                <div class="changelog-version-left">
+                  <span>v0.6.4</span>
+                  <span class="changelog-version-tag">数据</span>
                 </div>
                 <span class="changelog-toggle">▼</span>
               </div>
