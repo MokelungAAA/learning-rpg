@@ -2695,10 +2695,6 @@
         DECAY_BASE: 2               // 衰减底数
       },
       
-      // ========== v0.6.4 内嵌数据（file://本地打开时兜底使用）==========
-      // 当浏览器禁止 fetch file:// 时，使用此内嵌数据
-      window.EMBEDDED_DATA = {"version":"1.0","lastUpdated":"2026-05-10T12:27:00+08:00","profile":{"learnerName":"墨澜","globalBaseHalfLife":4.0,"subjectModifiers":{"数学":1.2,"物理":1.2,"化学":1.1,"语文":1.0,"英语":1.0,"历史":1.0,"地理":1.0,"生物":0.9,"政治":0.8},"tempBoostGain":0.4,"tempBoostBase":10,"avgReviewsPerWeek":0},"subjects":{"数学":{"totalXp":0,"nodes":[]},"语文":{"totalXp":0,"nodes":[]},"英语":{"totalXp":38,"nodes":[{"id":"英语-001","name":"期中考试","peakTemp":75,"lastStudy":"2026-05-10T12:27:00+08:00","halfLifeDays":4.0,"repetitions":1,"accuracyHistory":[75],"totalXp":38}]},"物理":{"totalXp":0,"nodes":[]},"化学":{"totalXp":0,"nodes":[]},"生物":{"totalXp":0,"nodes":[]},"政治":{"totalXp":0,"nodes":[]},"历史":{"totalXp":0,"nodes":[]},"地理":{"totalXp":0,"nodes":[]}},"log":[{"id":"rec-002","timestamp":"2026-05-10T12:27:00+08:00","subject":"英语","knowledgePoints":["期中考试"],"durationMinutes":10,"activityType":"practice","totalQuestions":0,"correctCount":0,"accuracy":75,"xp":38}]};
-      
       // v0.4.3 新增：学科等级三维评分权重
       SUBJECT_LEVEL: {
         BROADNESS_FULL_COUNT: 20,   // 广度满分节点数
@@ -2725,6 +2721,10 @@
         REVIEW_INTERVAL_IDEAL_DAYS: 1.5 // 理想复习间隔（天）
       }
     };
+    
+    // ========== v0.6.4 内嵌数据（file:// 本地打开时兜底使用）==========
+    // 当浏览器禁止 fetch file:// 时，使用此内嵌数据
+    const EMBEDDED_DATA = {"version":"1.0","lastUpdated":"2026-05-10T12:27:00+08:00","profile":{"learnerName":"墨澜","globalBaseHalfLife":4.0,"subjectModifiers":{"数学":1.2,"物理":1.2,"化学":1.1,"语文":1.0,"英语":1.0,"历史":1.0,"地理":1.0,"生物":0.9,"政治":0.8},"tempBoostGain":0.4,"tempBoostBase":10,"avgReviewsPerWeek":0},"subjects":{"数学":{"totalXp":0,"nodes":[]},"语文":{"totalXp":0,"nodes":[]},"英语":{"totalXp":38,"nodes":[{"id":"英语-001","name":"期中考试","peakTemp":75,"lastStudy":"2026-05-10T12:27:00+08:00","halfLifeDays":4.0,"repetitions":1,"accuracyHistory":[75],"totalXp":38}]},"物理":{"totalXp":0,"nodes":[]},"化学":{"totalXp":0,"nodes":[]},"生物":{"totalXp":0,"nodes":[]},"政治":{"totalXp":0,"nodes":[]},"历史":{"totalXp":0,"nodes":[]},"地理":{"totalXp":0,"nodes":[]}},"log":[{"id":"rec-002","timestamp":"2026-05-10T12:27:00+08:00","subject":"英语","knowledgePoints":["期中考试"],"durationMinutes":10,"activityType":"practice","totalQuestions":0,"correctCount":0,"accuracy":75,"xp":38}]};
     
     // ========== 学科定义（九大学科 + 根名） ==========
     const SUBJECTS = {
@@ -3017,7 +3017,7 @@
       
       // v0.6.4 修复：优先使用内嵌数据（解决 file:// 协议下 fetch 被阻止的问题）
       // 数据源优先级：内嵌数据 → 本地相对路径 → GitHub CDN
-      const embeddedData = window.EMBEDDED_DATA;
+      const embeddedData = EMBEDDED_DATA;
       if (embeddedData && typeof embeddedData === 'object') {
         try {
           console.log('[v0.6.4] 使用内嵌数据（本地兜底）');
