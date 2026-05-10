@@ -1,6 +1,6 @@
 {
   "version": "2.0",
-  "lastUpdated": "2026-05-10T15:30:00+08:00",
+  "lastUpdated": "2026-05-10T12:37:00+08:00",
   "learnerName": "墨澜",
   "records": [
     {
@@ -11,6 +11,15 @@
       "chapter": 3,
       "score": 75,
       "duration": 30
+    },
+    {
+      "id": "rec-002",
+      "timestamp": "2026-05-10T12:27:00+08:00",
+      "subject": "英语",
+      "textbook": "期中考试",
+      "chapter": 0,
+      "score": 75,
+      "duration": 10
     }
   ]
 }
