@@ -41,7 +41,8 @@
           "accuracyHistory": [
             75
           ],
-          "totalXp": 38
+          "totalXp": 38,
+          "_note": "activityType will be reflection in v2.0"
         }
       ]
     },
@@ -83,7 +84,8 @@
       "totalQuestions": 0,
       "correctCount": 0,
       "accuracy": 75,
-      "xp": 38
+      "xp": 38,
+      "_note": "activityType will be reflection in v2.0"
     }
   ]
 }
