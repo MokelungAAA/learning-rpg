@@ -1305,6 +1305,40 @@
     }
     .tb-kp:hover { transform: scale(1.05); }
 
+    /* ========== 网课进度展示（v0.6.8） ========== */
+    .course-selector { display: flex; gap: 10px; margin-bottom: 14px; }
+    .course-card {
+      background: var(--glass-bg); border: 1px solid var(--glass-border-subtle);
+      border-radius: var(--radius-md); padding: 16px; margin-bottom: 10px;
+      box-shadow: var(--glass-shadow);
+    }
+    .course-header {
+      display: flex; justify-content: space-between; align-items: flex-start;
+      margin-bottom: 10px;
+    }
+    .course-title { font-size: 15px; font-weight: 600; color: var(--text-primary); }
+    .course-teacher { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+    .course-link {
+      padding: 6px 14px; background: #fb7299; color: #fff; border: none;
+      border-radius: 8px; font-size: 12px; cursor: pointer; text-decoration: none;
+      display: inline-flex; align-items: center; gap: 4px;
+    }
+    .course-link:hover { opacity: 0.9; }
+    .course-chapter {
+      display: flex; align-items: center; gap: 10px; padding: 8px 0;
+      border-bottom: 1px solid rgba(0,0,0,0.04);
+    }
+    .course-chapter:last-child { border-bottom: none; }
+    .course-chapter-name { flex: 1; font-size: 13px; color: var(--text-primary); }
+    .course-chapter-videos { font-size: 11px; color: var(--text-muted); width: 60px; text-align: right; }
+    .course-chapter-bar {
+      width: 80px; height: 4px; background: #e5e7eb; border-radius: 2px; overflow: hidden;
+    }
+    .course-chapter-fill {
+      height: 100%; border-radius: 2px; transition: width 0.5s ease;
+    }
+    .course-desc { font-size: 12px; color: var(--text-muted); margin-bottom: 8px; }
+
     /* ========== 设置页 ========== */
     .settings-list {
       display: flex;
@@ -2159,6 +2193,16 @@
             <select id="tb-book" class="tb-select" onchange="switchTextbook()"></select>
           </div>
           <div class="textbook-progress" id="textbookProgress"></div>
+        </div>
+        
+        <!-- 网课进度展示（v0.6.8） -->
+        <div class="overview-courses" id="coursesSection" style="margin-top: 24px;">
+          <div class="section-title">🎬 网课进度</div>
+          <div class="course-selector">
+            <select id="course-subject" class="tb-select" onchange="switchCourse()"></select>
+            <select id="course-select" class="tb-select" onchange="switchCourse()"></select>
+          </div>
+          <div class="course-detail" id="courseDetail"></div>
         </div>
       </div>
       
@@ -5075,6 +5119,115 @@
       `;
     }
 
+    // ========== v0.6.8 网课进度展示 ==========
+    let coursesData = null;
+
+    async function loadCoursesData() {
+      try {
+        const resp = await fetch(`./data/courses/courses.json?t=${Date.now()}`, {
+          headers: { 'Accept': 'application/json', 'Cache-Control': 'no-cache' }
+        });
+        if (!resp.ok) return;
+        coursesData = await resp.json();
+        initCourseControls();
+      } catch (e) {
+        console.warn('[v0.6.8] 网课数据加载失败:', e.message);
+      }
+    }
+
+    function initCourseControls() {
+      if (!coursesData) return;
+      const subSel = document.getElementById('course-subject');
+      if (!subSel) return;
+      subSel.innerHTML = Object.keys(coursesData.courses).map(s =>
+        `<option value="${s}">${s}</option>`
+      ).join('');
+      switchCourse();
+    }
+
+    function switchCourse() {
+      if (!coursesData) return;
+      const sub = document.getElementById('course-subject').value;
+      const idx = parseInt(document.getElementById('course-select').value) || 0;
+      const subjectCourses = coursesData.courses[sub];
+      if (!subjectCourses) return;
+
+      // 合并 syncCourses 和 examPrepCourses
+      const allCourses = [
+        ...(subjectCourses.syncCourses || []).map(c => ({ ...c, type: 'sync' })),
+        ...(subjectCourses.examPrepCourses || []).map(c => ({ ...c, type: 'prep' }))
+      ];
+
+      const sel = document.getElementById('course-select');
+      sel.innerHTML = allCourses.map((c, i) =>
+        `<option value="${i}" ${i === idx ? 'selected' : ''}>${c.name}</option>`
+      ).join('');
+
+      renderCourseDetail(allCourses[parseInt(sel.value) || idx] || allCourses[0]);
+    }
+
+    function renderCourseDetail(course) {
+      const container = document.getElementById('courseDetail');
+      if (!container || !course) return;
+
+      // 判断章节学习进度：通过记录匹配章节关键词
+      const chapterProgress = {};
+      for (const rec of appData.records) {
+        if (rec.subject !== document.getElementById('course-subject').value) continue;
+        for (const kp of rec.knowledgePoints || []) {
+          // 匹配该课程所有章节
+          for (const ch of (course.chapters || [])) {
+            if (kp.includes(ch.name) || ch.name.includes(kp)) {
+              if (!chapterProgress[ch.number]) chapterProgress[ch.number] = { studied: 0, maxAcc: 0 };
+              chapterProgress[ch.number].studied++;
+              chapterProgress[ch.number].maxAcc = Math.max(chapterProgress[ch.number].maxAcc, rec.accuracy || 0);
+            }
+          }
+        }
+      }
+
+      const totalVideos = (course.chapters || []).reduce((s, c) => s + (c.videos || 0), 0);
+      const studiedChs = Object.keys(chapterProgress).length;
+      const totalChs = (course.chapters || []).length;
+      const progressPct = totalChs > 0 ? Math.round((studiedChs / totalChs) * 100) : 0;
+
+      const chHtml = (course.chapters || []).map(ch => {
+        const prog = chapterProgress[ch.number];
+        const pct = prog ? Math.min(100, Math.round((prog.studied / 3) * 100)) : 0;
+        const color = prog ? (prog.maxAcc >= 80 ? '#10b981' : prog.maxAcc >= 60 ? '#f59e0b' : '#ef4444') : '#e5e7eb';
+        return `
+          <div class="course-chapter">
+            <span class="course-chapter-name">第${ch.number}章 ${ch.name}</span>
+            <span class="course-chapter-videos">${ch.videos}集</span>
+            <div class="course-chapter-bar">
+              <div class="course-chapter-fill" style="width:${pct}%;background:${color}"></div>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      const plat = coursesData.platform || '哔哩哔哩';
+      container.innerHTML = `
+        <div class="glass-card" style="padding:14px 18px;margin-bottom:14px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <div>
+              <div style="font-size:16px;font-weight:600;">${course.name}</div>
+              <div style="font-size:12px;color:var(--text-muted);">讲师：${course.teacher || '未知'} · ${course.type === 'sync' ? '同步课' : '备考课'}</div>
+            </div>
+            <div style="text-align:right;">
+              <div style="font-size:22px;font-weight:700;color:${progressPct === 100 ? '#10b981' : '#6366f1'}">${progressPct}%</div>
+              <div style="font-size:10px;color:var(--text-muted);">${studiedChs}/${totalChs} 章</div>
+            </div>
+          </div>
+          ${course.description ? `<div class="course-desc">${course.description}</div>` : ''}
+          <a class="course-link" href="${course.url}" target="_blank" rel="noopener">▶ ${plat} 观看</a>
+        </div>
+        <div class="course-card">
+          ${course.chapters ? chHtml : '<div style="font-size:13px;color:var(--text-muted);padding:8px 0;">备考课程 · 无章节细分</div>'}
+        </div>
+      `;
+    }
+
     // ========== v0.6.6 学习日历热力图 ==========
     function renderHeatmap() {
       const container = document.getElementById('heatmapContainer');
@@ -5251,6 +5404,7 @@
       renderDataUpdateTime();
       renderHeatmap();
       if (textbookData) switchTextbook();
+      if (coursesData) switchCourse();
       
       // 设置页数据源显示
       const dataSourceEl = document.getElementById('settingsDataSource');
@@ -5599,8 +5753,9 @@
         }
       }
       
-      // 额外加载教材数据（独立于主数据，不影响进度）
+      // 额外加载教材和网课数据（独立于主数据，不影响进度）
       loadTextbookData();
+      loadCoursesData();
       
       // 3. 无缓存 + 网络失败 → 内嵌兜底
       if (!cached) {
