@@ -32,8 +32,8 @@
       "totalXp": 38,
       "nodes": [
         {
-          "id": "英语-001",
-          "name": "期中考试",
+          "id": "英语-期中考试反思",
+          "name": "期中考试反思",
           "peakTemp": 75,
           "lastStudy": "2026-05-10T12:27:00+08:00",
           "halfLifeDays": 4.0,
@@ -76,7 +76,7 @@
       "timestamp": "2026-05-10T12:27:00+08:00",
       "subject": "英语",
       "knowledgePoints": [
-        "期中考试"
+        "期中考试反思"
       ],
       "durationMinutes": 10,
       "activityType": "practice",
