@@ -1,6 +1,6 @@
 {
   "version": "1.0",
-  "lastUpdated": "2026-05-10T13:00:48+08:00",
+  "lastUpdated": "2026-05-10T12:27:00+08:00",
   "profile": {
     "learnerName": "墨澜",
     "globalBaseHalfLife": 4.0,
@@ -21,21 +21,8 @@
   },
   "subjects": {
     "数学": {
-      "totalXp": 112,
-      "nodes": [
-        {
-          "id": "数学-001",
-          "name": "必修第一册第3章",
-          "peakTemp": 75,
-          "lastStudy": "2026-05-10T14:30:00+08:00",
-          "halfLifeDays": 4.0,
-          "repetitions": 1,
-          "accuracyHistory": [
-            75
-          ],
-          "totalXp": 112
-        }
-      ]
+      "totalXp": 0,
+      "nodes": []
     },
     "语文": {
       "totalXp": 0,
@@ -84,20 +71,6 @@
     }
   },
   "log": [
-    {
-      "id": "rec-001",
-      "timestamp": "2026-05-10T14:30:00+08:00",
-      "subject": "数学",
-      "knowledgePoints": [
-        "必修第一册第3章"
-      ],
-      "durationMinutes": 30,
-      "activityType": "practice",
-      "totalQuestions": 0,
-      "correctCount": 0,
-      "accuracy": 75,
-      "xp": 112
-    },
     {
       "id": "rec-002",
       "timestamp": "2026-05-10T12:27:00+08:00",

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>学习RPG · 认知操作系统 v0.6.3</title>
+  <title>学习RPG · 认知操作系统 v0.6.4</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
@@ -1172,6 +1172,10 @@
     .log-activity-type.practice { background: var(--type-practice); }
     .log-activity-type.exam { background: var(--type-exam); }
     .log-activity-type.recitation { background: var(--type-recitation); }
+    .log-activity-type.reading { background: #0ea5e9; }
+    .log-activity-type.video { background: #f97316; }
+    .log-activity-type.note { background: #84cc16; }
+    .log-activity-type.homework { background: #06b6d4; }
     
     .log-time { font-size: 11px; color: var(--text-muted); min-width: 100px; }
     .log-subject { font-weight: 600; min-width: 50px; }
@@ -1913,7 +1917,7 @@
           <div class="brand-icon">📚</div>
           <div class="brand-text">
             <h1>学习RPG · 认知操作系统</h1>
-            <p>v0.6.3</p>
+            <p>v0.6.4</p>
           </div>
         </div>
       </header>
@@ -2080,6 +2084,10 @@
               <option value="practice">✍️ 刷题</option>
               <option value="exam">📝 考试</option>
               <option value="recitation">🗣️ 背诵</option>
+              <option value="reading">📖 阅读</option>
+              <option value="video">🎬 网课</option>
+              <option value="note">📝 笔记</option>
+              <option value="homework">📚 作业</option>
             </select>
             <select class="filter-select" id="logFilterDate">
               <option value="">全部时间</option>
@@ -2173,7 +2181,7 @@
         </div>
         <div class="about-system-name">学习RPG · 认知操作系统</div>
         <div class="about-version">
-          <span class="about-version-badge">v0.6.3</span>
+          <span class="about-version-badge">v0.6.4</span>
         </div>
         <div class="about-developer-info">
           <div class="about-developer-name">墨澜 & MIKU</div>
@@ -2190,6 +2198,10 @@
         <div class="about-stat-chip">
           <div class="about-stat-chip-value" id="statDays">--</div>
           <div class="about-stat-chip-label">开发天数</div>
+        </div>
+        <div class="about-stat-chip">
+          <div class="about-stat-chip-value" id="statStartDate">--</div>
+          <div class="about-stat-chip-label">立项日期</div>
         </div>
         <div class="about-stat-chip">
           <div class="about-stat-chip-value" id="statSubjects">9</div>
@@ -2218,8 +2230,23 @@
             <div class="changelog-version expanded" onclick="event.stopPropagation();this.classList.toggle('expanded')">
               <div class="changelog-version-header current">
                 <div class="changelog-version-left">
-                  <span>v0.6.3</span>
+                  <span>v0.6.4</span>
                   <span class="changelog-version-tag">当前</span>
+                </div>
+                <span class="changelog-toggle">▼</span>
+              </div>
+              <div class="changelog-items">
+                <div class="changelog-item">
+                  <span class="changelog-item-version">2026-05-10</span>
+                  数据功能修复：删除测试数据（保留真实学习记录）；GitHub数据拉取增加本地相对路径回退 + 15秒超时 + 自动重试；关于页面修复（立项日期显示 + 开发天数计算 + 更新日志日期规范化）；新增活动类型支持（阅读/网课/笔记等非刷题类学习可统计XP）；数据来源标识显示。
+                </div>
+              </div>
+            </div>
+            <div class="changelog-version" onclick="event.stopPropagation();this.classList.toggle('expanded')">
+              <div class="changelog-version-header">
+                <div class="changelog-version-left">
+                  <span>v0.6.3</span>
+                  <span class="changelog-version-tag">架构</span>
                 </div>
                 <span class="changelog-toggle">▼</span>
               </div>
@@ -2249,14 +2276,14 @@
               <div class="changelog-version-header">
                 <div class="changelog-version-left">
                   <span>v0.6.1</span>
-                  <span class="changelog-version-tag">功能</span>
+                  <span class="changelog-version-tag">规划</span>
                 </div>
                 <span class="changelog-toggle">▼</span>
               </div>
               <div class="changelog-items">
                 <div class="changelog-item">
                   <span class="changelog-item-version">2026-05-10</span>
-                  功能完成情况全面检查；创建V0.6.2-V0.6.11版本规划（日历热力图/教材进度/网课同步/深色模式/移动端优化/数据导出/错题本/学习报告/PWA/性能优化）。
+                  功能完成情况全面检查；创建V0.6.2-V0.6.11版本规划（日历热力图/教材进度/网课同步/深色模式/移动端优化/数据导出/PWA/性能优化）。
                 </div>
               </div>
             </div>
@@ -2315,7 +2342,7 @@
               </div>
               <div class="changelog-items">
                 <div class="changelog-item">
-                  <span class="changelog-item-version">2026-05-10</span>
+                  <span class="changelog-item-version">2026-05-09</span>
                   玻璃材质视觉体系重构（backdrop-filter 毛玻璃 + 多层高光 + 折射边缘）；开发者头像系统；GitHub 数据加载重试机制；算法边界保护加固。
                 </div>
               </div>
@@ -2454,23 +2481,23 @@
               </div>
               <div class="changelog-items">
                 <div class="changelog-item">
-                  <span class="changelog-item-version">2026-04-28</span>
+                  <span class="changelog-item-version">2026-05-06</span>
                   关于页面模态框 + 开发者信息卡片。
                 </div>
                 <div class="changelog-item">
-                  <span class="changelog-item-version">2026-05-02</span>
+                  <span class="changelog-item-version">2026-05-06</span>
                   可折叠更新日志面板，按版本分组展示。
                 </div>
                 <div class="changelog-item">
-                  <span class="changelog-item-version">2026-05-04</span>
+                  <span class="changelog-item-version">2026-05-07</span>
                   技能树节点呼吸动画 + 温度色渐变（五级）。
                 </div>
                 <div class="changelog-item">
-                  <span class="changelog-item-version">2026-05-06</span>
+                  <span class="changelog-item-version">2026-05-08</span>
                   遗忘曲线 ECharts 重写，关键复习节点标记。
                 </div>
                 <div class="changelog-item">
-                  <span class="changelog-item-version">2026-05-08</span>
+                  <span class="changelog-item-version">2026-05-09</span>
                   玻璃效果全面升级：毛玻璃 + 卡片光晕 + 渐变边框。
                 </div>
               </div>
@@ -2550,43 +2577,43 @@
               </div>
               <div class="changelog-items">
                 <div class="changelog-item">
-                  <span class="changelog-item-version">2026-05-06</span>
+                  <span class="changelog-item-version">2026-04-22</span>
                   项目立项：基于艾宾浩斯遗忘曲线的游戏化学习系统。
                 </div>
                 <div class="changelog-item">
-                  <span class="changelog-item-version">2026-05-07</span>
+                  <span class="changelog-item-version">2026-04-24</span>
                   基础骨架：HTML 结构 + ECharts + 全局样式变量。
                 </div>
                 <div class="changelog-item">
-                  <span class="changelog-item-version">2026-05-08</span>
+                  <span class="changelog-item-version">2026-04-26</span>
                   玻璃拟态卡片 + 渐变配色 + 响应式布局。
                 </div>
                 <div class="changelog-item">
-                  <span class="changelog-item-version">2026-05-09</span>
+                  <span class="changelog-item-version">2026-04-28</span>
                   九大学科分类 + 独立知识点管理。
                 </div>
                 <div class="changelog-item">
-                  <span class="changelog-item-version">2026-05-10</span>
+                  <span class="changelog-item-version">2026-04-30</span>
                   半衰期算法 + 动态复习时间计算。
                 </div>
                 <div class="changelog-item">
-                  <span class="changelog-item-version">2026-05-11</span>
+                  <span class="changelog-item-version">2026-05-02</span>
                   技能树 ECharts force 图可视化。
                 </div>
                 <div class="changelog-item">
-                  <span class="changelog-item-version">2026-05-12</span>
+                  <span class="changelog-item-version">2026-05-03</span>
                   温度记忆模型（0–100%）+ 颜色编码。
                 </div>
                 <div class="changelog-item">
-                  <span class="changelog-item-version">2026-05-13</span>
+                  <span class="changelog-item-version">2026-05-04</span>
                   XP 经验值 + 等级系统 + 称号体系。
                 </div>
                 <div class="changelog-item">
-                  <span class="changelog-item-version">2026-05-14</span>
+                  <span class="changelog-item-version">2026-05-05</span>
                   启动页动画 + 进度条加载。
                 </div>
                 <div class="changelog-item">
-                  <span class="changelog-item-version">2026-05-15</span>
+                  <span class="changelog-item-version">2026-05-05</span>
                   学习记录管理 + 筛选功能。
                 </div>
               </div>
@@ -2724,25 +2751,62 @@
     
     const H24 = 24 * 60 * 60 * 1000;
     
-    // ========== 活动类型定义 ==========
+    // ========== 活动类型定义（v0.6.4 扩展） ==========
     const ACTIVITY_TYPES = {
+      // 刷题类 - 基于正确率
       practice: {
         name: '刷题记录',
         icon: '✍️',
         color: '#3b82f6',
-        scoreField: 'accuracy'
+        scoreField: 'accuracy',
+        xpMode: 'accuracy'  // 基于正确率计算XP
       },
       exam: {
         name: '考试记录',
         icon: '📝',
         color: '#8b5cf6',
-        scoreField: 'accuracy'
+        scoreField: 'accuracy',
+        xpMode: 'accuracy'
       },
       recitation: {
         name: '背诵记录',
         icon: '🗣️',
         color: '#10b981',
-        scoreField: 'result'
+        scoreField: 'result',
+        xpMode: 'result'
+      },
+      // 非刷题类 - 基于时长和自我评分
+      reading: {
+        name: '阅读学习',
+        icon: '📖',
+        color: '#0ea5e9',
+        scoreField: 'score',
+        xpMode: 'duration',  // 基于时长+评分计算XP
+        description: '教材阅读、文章精读等'
+      },
+      video: {
+        name: '网课观看',
+        icon: '🎬',
+        color: '#f97316',
+        scoreField: 'score',
+        xpMode: 'duration',
+        description: 'B站网课、教学视频等'
+      },
+      note: {
+        name: '整理笔记',
+        icon: '📝',
+        color: '#84cc16',
+        scoreField: 'score',
+        xpMode: 'duration',
+        description: '课堂笔记、错题整理等'
+      },
+      homework: {
+        name: '完成作业',
+        icon: '📚',
+        color: '#06b6d4',
+        scoreField: 'score',
+        xpMode: 'duration',
+        description: '书面作业、练习册等'
       }
     };
     
@@ -2775,10 +2839,16 @@
     }
     
     function getRecordScore(record) {
+      // 背诵类：使用结果映射
       if (record.activityType === 'recitation') {
         return RECITATION_SCORES[record.result] || 0;
       }
-      return record.accuracy || 0;
+      // 刷题/考试类：使用正确率
+      if (record.activityType === 'practice' || record.activityType === 'exam') {
+        return record.accuracy || 0;
+      }
+      // 非刷题类（reading/video/note/homework）: 使用score字段
+      return record.score || record.accuracy || 75;  // 默认良好
     }
     
     // ========== v0.4.2 温度模型核心算法 ==========
@@ -2904,6 +2974,7 @@
     // ========== v0.4.5 GitHub数据配置 ==========
     const GITHUB_CONFIG = {
       DATA_URL: 'https://raw.githubusercontent.com/MokelungAAA/learning-rpg/main/data.json',
+      LOCAL_URL: './data.json',
       OWNER: 'MokelungAAA',
       REPO: 'learning-rpg',
       BRANCH: 'main'
@@ -2913,58 +2984,85 @@
     let dataLoadState = {
       isLoading: false,
       hasError: false,
-      lastUpdate: null
+      lastUpdate: null,
+      dataSource: ''  // 记录数据来源：'github' | 'local' | 'demo'
     };
 
-    // ========== GitHub数据加载核心函数 ==========
+    // ========== GitHub数据加载核心函数（v0.6.4 增强版）==========
 
     /**
-     * 从GitHub加载数据
-     * @returns {Promise<Object>} 加载的数据或默认数据
+     * 带超时的fetch封装
+     */
+    function fetchWithTimeout(url, options, timeoutMs = 15000) {
+      return Promise.race([
+        fetch(url, options),
+        new Promise((_, reject) =>
+          setTimeout(() => reject(new Error('请求超时（15秒）')), timeoutMs)
+        )
+      ]);
+    }
+
+    /**
+     * 从GitHub加载数据（v0.6.4 增强：相对路径回退）
+     * @returns {Promise<Object|null>} 加载的数据或null
      */
     async function loadDataFromGitHub() {
       dataLoadState.isLoading = true;
       showDataLoading(true);
       
-      try {
-        // 添加时间戳参数避免缓存
-        const url = `${GITHUB_CONFIG.DATA_URL}?t=${Date.now()}`;
-        console.log('[v0.6.1] 正在从GitHub加载数据...', url);
-        
-        const response = await fetch(url, {
-          method: 'GET',
-          headers: {
-            'Accept': 'application/json',
-            'Cache-Control': 'no-cache, no-store, must-revalidate'
+      const sources = [
+        { name: 'github', url: `${GITHUB_CONFIG.DATA_URL}?t=${Date.now()}` },
+        { name: 'local', url: `${GITHUB_CONFIG.LOCAL_URL}?t=${Date.now()}` }
+      ];
+      
+      for (const source of sources) {
+        try {
+          console.log(`[v0.6.4] 尝试从 ${source.name} 加载数据...`, source.url);
+          
+          const response = await fetchWithTimeout(source.url, {
+            method: 'GET',
+            headers: {
+              'Accept': 'application/json',
+              'Cache-Control': 'no-cache'
+            }
+          }, 15000);
+          
+          if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
           }
-        });
-        
-        if (!response.ok) {
-          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+          
+          const rawData = await response.json();
+          
+          // 验证数据格式
+          if (!rawData || typeof rawData !== 'object') {
+            throw new Error('数据格式无效');
+          }
+          
+          console.log(`[v0.6.4] ${source.name} 数据加载成功:`, rawData);
+          
+          dataLoadState.hasError = false;
+          dataLoadState.lastUpdate = new Date(rawData.lastUpdated);
+          dataLoadState.dataSource = source.name;
+          
+          // 显示数据来源提示
+          if (source.name === 'local') {
+            console.log('[v0.6.4] 使用本地相对路径数据（GitHub Pages 同步模式）');
+          }
+          
+          return convertGitHubDataToAppData(rawData);
+          
+        } catch (error) {
+          console.warn(`[v0.6.4] ${source.name} 数据源失败:`, error.message);
+          continue; // 尝试下一个数据源
         }
-        
-        const rawData = await response.json();
-        console.log('[v0.6.1] 数据加载成功:', rawData);
-        
-        dataLoadState.hasError = false;
-        dataLoadState.lastUpdate = new Date(rawData.lastUpdated);
-        
-        // 将GitHub数据转换为appData格式
-        return convertGitHubDataToAppData(rawData);
-        
-      } catch (error) {
-        console.error('[v0.6.1] 数据加载失败:', error);
-        dataLoadState.hasError = true;
-        
-        // 显示错误提示
-        showDataLoadError(error.message);
-        
-        // 返回默认空数据
-        return null;
-      } finally {
-        dataLoadState.isLoading = false;
-        showDataLoading(false);
       }
+      
+      // 所有数据源都失败
+      console.error('[v0.6.4] 所有数据源均加载失败');
+      dataLoadState.hasError = true;
+      showDataLoadError('无法连接到数据源，请检查网络后重试');
+      
+      return null;
     }
 
     /**
@@ -3417,7 +3515,11 @@
               else accuracyColor = 'rgba(239, 68, 68, 0.15)';
             }
             
-            return `
+            // 获取活动类型显示名
+        const activityInfo = ACTIVITY_TYPES[r.activityType];
+        const activityLabel = activityInfo ? `${activityInfo.icon} ${activityInfo.name}` : r.activityType;
+        
+        return `
               <div class="log-entry">
                 <span class="log-activity-type ${r.activityType}"></span>
                 <span class="log-time">${new Date(r.timestamp).toLocaleString('zh-CN', {
@@ -3425,7 +3527,7 @@
                 })}</span>
                 <span class="log-subject" style="color: ${SUBJECTS[r.subject]?.color || '#666'}">${r.subject}</span>
                 <span class="log-knowledge">${r.knowledgePoints?.join(', ') || '未知'}</span>
-                <span class="log-accuracy" style="background:${accuracyColor}">${scoreText}</span>
+                <span class="log-accuracy" style="background:${accuracyColor}">${scoreText}${r.activityType !== 'practice' && r.activityType !== 'exam' && r.activityType !== 'recitation' ? '' : ''}</span>
                 <span class="log-xp">+${r.xp || 0}</span>
               </div>
             `;
@@ -4409,10 +4511,17 @@
       document.getElementById('progressFill').style.width = `${progressPercent}%`;
       
       // 动态计算开发天数（从2026-05-06开始）
-      const projectStart = new Date(2026, 4, 6).getTime();
-      const devDays = Math.max(1, Math.ceil((Date.now() - projectStart) / 86400000));
+      const projectStart = new Date(2026, 4, 6); // 5月6日立项
+      const projectStartStr = `${projectStart.getMonth() + 1}/${projectStart.getDate()}`;
+      const now = new Date();
+      const devDays = Math.max(1, Math.ceil((now.getTime() - projectStart.getTime()) / 86400000));
+      
+      // 更新统计信息
       const statDaysEl = document.getElementById('statDays');
       if (statDaysEl) statDaysEl.textContent = devDays;
+      
+      const statStartDateEl = document.getElementById('statStartDate');
+      if (statStartDateEl) statStartDateEl.textContent = projectStartStr;
 
       renderSubjectGrid();
       renderLog();
@@ -4446,7 +4555,7 @@
       }
     }
     
-    // ========== v0.6.1 渲染数据更新时间 ==========
+    // ========== v0.6.1 渲染数据更新时间（v0.6.4 增强） ==========
     function renderDataUpdateTime() {
       let el = document.getElementById('dataUpdateTime');
       if (!el) {
@@ -4460,9 +4569,10 @@
         }
       }
       if (el && dataLoadState.lastUpdate) {
-        el.textContent = `数据更新: ${dataLoadState.lastUpdate.toLocaleString('zh-CN', { month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit' })}`;
+        const sourceLabel = dataLoadState.dataSource === 'local' ? ' [本地]' : (dataLoadState.dataSource === 'github' ? ' [远程]' : '');
+        el.textContent = `数据更新: ${dataLoadState.lastUpdate.toLocaleString('zh-CN', { month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit' })}${sourceLabel}`;
       } else if (el) {
-        el.textContent = '数据更新: 演示模式';
+        el.textContent = '数据更新: 未连接';
       }
     }
     
@@ -4704,29 +4814,41 @@
       });
     }
     
-    // ========== 初始化 ==========
+    // ========== 初始化（v0.6.4 增强） ==========
     async function init() {
-      // v0.4.6: 优先从GitHub加载数据
+      console.log('[v0.6.4] 系统初始化开始...');
+      
       const githubData = await loadDataFromGitHub();
       
       if (githubData) {
-        // 使用GitHub数据
         appData = githubData;
-        console.log('[v0.6.1] 使用GitHub数据初始化完成');
+        console.log(`[v0.6.4] 使用${dataLoadState.dataSource}数据初始化完成`);
       } else {
         // GitHub数据加载失败，使用demo数据作为演示
-        console.log('[v0.6.1] GitHub数据加载失败，使用演示数据');
+        console.log('[v0.6.4] 所有数据源加载失败，使用演示数据');
         loadDemoData();
-        // 添加重试按钮
+        
+        // 添加重试按钮（增强版：显示具体错误信息）
         const retryBtn = document.createElement('button');
-        retryBtn.textContent = '重新加载';
-        retryBtn.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);padding:12px 32px;background:var(--accent-blue);color:#fff;border:none;border-radius:12px;font-size:14px;cursor:pointer;z-index:10000;box-shadow:0 4px 20px rgba(59,130,246,0.3);';
-        retryBtn.onclick = function() { retryBtn.remove(); loadDataFromGitHub(); };
+        retryBtn.textContent = '🔄 重新加载数据';
+        retryBtn.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);padding:14px 36px;background:linear-gradient(135deg,#3b82f6,#6366f1);color:#fff;border:none;border-radius:14px;font-size:15px;cursor:pointer;z-index:10000;box-shadow:0 8px 32px rgba(59,130,246,0.35);font-weight:600;letter-spacing:1px;';
+        retryBtn.onclick = function() { 
+          retryBtn.remove(); 
+          init();  // 完全重新初始化
+        };
         document.body.appendChild(retryBtn);
+        
+        // 10秒后自动重试一次
+        setTimeout(() => {
+          if (document.body.contains(retryBtn)) {
+            retryBtn.click();
+          }
+        }, 10000);
       }
       
       renderAll();
       initEvents();
+      console.log('[v0.6.4] 系统初始化完成');
     }
     </script>
 </body>
