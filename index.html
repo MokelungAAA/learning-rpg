@@ -101,6 +101,46 @@
       --type-recitation: #10b981;
     }
     
+    /* ========== 深色模式（v0.6.9） ========== */
+    [data-theme="dark"] {
+      --glass-bg: rgba(30, 35, 50, 0.65);
+      --glass-bg-hover: rgba(40, 45, 65, 0.75);
+      --glass-bg-solid: rgba(35, 40, 60, 0.85);
+      --glass-border: rgba(255, 255, 255, 0.12);
+      --glass-border-subtle: rgba(255, 255, 255, 0.06);
+      --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+      --glass-shadow-lg: 0 16px 48px rgba(0, 0, 0, 0.4);
+      --glass-highlight-top: rgba(255, 255, 255, 0.08);
+      --glass-highlight-edge: rgba(255, 255, 255, 0.05);
+      --glass-refraction: rgba(255, 255, 255, 0.04);
+      --text-primary: #e8eaf0;
+      --text-secondary: #b0b8c8;
+      --text-tertiary: #8890a0;
+      --text-muted: #6b7280;
+      --bg-primary: #1a1d2e;
+      --bg-white: #222840;
+    }
+    [data-theme="dark"] body { background: #141824; }
+    [data-theme="dark"] .launch-page {
+      background: linear-gradient(135deg, #1a1d2e 0%, #222840 40%, #2a2f4a 100%);
+    }
+    [data-theme="dark"] .data-entry-content { background: #1e2235; }
+    [data-theme="dark"] .data-entry-field input,
+    [data-theme="dark"] .data-entry-field select,
+    [data-theme="dark"] .data-entry-field textarea,
+    [data-theme="dark"] .tb-select { background: #2a2f4a; border-color: rgba(255,255,255,0.1); color: #e8eaf0; }
+    [data-theme="dark"] .data-entry-info { background: #2a2f4a; }
+    [data-theme="dark"] .data-entry-tab.active { background: #2a2f4a; }
+    [data-theme="dark"] .data-entry-submit.secondary { background: #2a2f4a; color: #b0b8c8; }
+    [data-theme="dark"] .course-card { background: var(--glass-bg); }
+    [data-theme="dark"] .heatmap-table td { opacity: 0.85; }
+    
+    /* 主题切换过渡动画 */
+    .theme-transitioning,
+    .theme-transitioning * {
+      transition: background-color 0.4s ease, color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease !important;
+    }
+    
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', 'Helvetica Neue', sans-serif;
       background: #f0f2f8;
@@ -2397,7 +2437,7 @@
             <span class="settings-value">已启用</span>
           </div>
           
-          <div class="settings-item disabled">
+          <div class="settings-item" onclick="toggleTheme()">
             <div class="settings-info">
               <span class="settings-icon">🎨</span>
               <div>
@@ -2405,7 +2445,7 @@
                 <div class="settings-desc">浅色 / 深色</div>
               </div>
             </div>
-            <span class="settings-value">浅色</span>
+            <span class="settings-value" id="themeLabel">浅色</span>
           </div>
         </div>
       </div>
@@ -5697,9 +5737,40 @@
       });
     }
     
+    // ========== v0.6.9 深色模式 ==========
+    function getPreferredTheme() {
+      const saved = localStorage.getItem('learning-rpg-theme');
+      if (saved === 'dark' || saved === 'light') return saved;
+      return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    }
+    
+    function applyTheme(theme, animate = false) {
+      if (animate) document.documentElement.classList.add('theme-transitioning');
+      document.documentElement.setAttribute('data-theme', theme);
+      try { localStorage.setItem('learning-rpg-theme', theme); } catch(e) {}
+      const label = document.getElementById('themeLabel');
+      if (label) label.textContent = theme === 'dark' ? '深色' : '浅色';
+      if (animate) setTimeout(() => document.documentElement.classList.remove('theme-transitioning'), 500);
+    }
+    
+    function toggleTheme() {
+      const current = document.documentElement.getAttribute('data-theme') || 'light';
+      applyTheme(current === 'dark' ? 'light' : 'dark', true);
+    }
+    
+    // 监听系统主题变化
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+      if (!localStorage.getItem('learning-rpg-theme')) {
+        applyTheme(e.matches ? 'dark' : 'light');
+      }
+    });
+    
     // ========== 初始化（v0.6.5 快速启动 + 后台静默加载） ==========
     async function init() {
       console.log('[v0.6.5] 快速启动...');
+      
+      // 应用主题偏好
+      applyTheme(getPreferredTheme());
       
       // Phase 1: 首屏即时渲染（appData 已在页面加载时设为 DEFAULT_DATA）
       initEvents();
