@@ -3,7 +3,14 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>学习RPG · 认知操作系统 v0.6.4</title>
+  <title>学习RPG · 认知操作系统</title>
+  <meta name="theme-color" content="#667eea">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="学习RPG">
+  <link rel="manifest" href="./manifest.json">
+  <link rel="icon" href="./icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="./icon.svg">
   <!-- Google Fonts 已移除：改用系统字体，彻底消除字体加载抖动 -->
   <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
   <style>
@@ -6082,6 +6089,13 @@
       
       // 应用主题偏好
       applyTheme(getPreferredTheme());
+      
+      // 注册 Service Worker（PWA 离线支持）
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('./service-worker.js').catch(e => {
+          console.warn('[v0.6.12] SW注册失败:', e.message);
+        });
+      }
       
       // Phase 1: 首屏即时渲染（appData 已在页面加载时设为 DEFAULT_DATA）
       initEvents();
