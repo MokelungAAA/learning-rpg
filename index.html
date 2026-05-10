@@ -2107,6 +2107,17 @@
         <div class="section-title">⚙️ 更多</div>
         
         <div class="settings-list">
+          <div class="settings-item" onclick="resyncData()">
+            <div class="settings-info">
+              <span class="settings-icon">🔄</span>
+              <div>
+                <div class="settings-name">重新同步数据</div>
+                <div class="settings-desc">从网络重新拉取 data.json（当前: <span id="settingsDataSource">-</span>）</div>
+              </div>
+            </div>
+            <span class="settings-arrow" id="resyncArrow">›</span>
+          </div>
+          
           <div class="settings-item" onclick="openAbout()">
             <div class="settings-info">
               <span class="settings-icon">ℹ️</span>
@@ -3006,7 +3017,7 @@
       isLoading: false,
       hasError: false,
       lastUpdate: null,
-      dataSource: ''  // 'cache' | 'github' | 'local' | 'fallback' | 'demo'
+      dataSource: ''  // 'cache' | 'github' | 'jsdelivr' | 'pages' | 'local' | 'fallback' | 'demo'
     };
 
     /** 带超时的 fetch（默认5秒） */
@@ -3072,10 +3083,12 @@
         return convertGitHubDataToAppData(cached);
       }
       
-      // === 第二层：网络请求（跳过多源）===
+      // === 第二层：网络请求（三源并发尝试）===
       if (!isFileProtocol()) {
         const sources = [
           { name: 'github', url: 'https://raw.githubusercontent.com/MokelungAAA/learning-rpg/main/data.json', desc: 'GitHub Raw CDN' },
+          { name: 'jsdelivr', url: 'https://cdn.jsdelivr.net/gh/MokelungAAA/learning-rpg@main/data.json', desc: 'jsDelivr CDN' },
+          { name: 'pages', url: 'https://mokelungaaa.github.io/learning-rpg/data.json', desc: 'GitHub Pages 直链' },
           { name: 'local', url: `./data.json?t=${Date.now()}`, desc: '本地相对路径' }
         ];
         
@@ -3331,7 +3344,27 @@
       document.getElementById('aboutModal').classList.remove('active');
       document.body.style.overflow = '';
     }
-    
+
+    // ========== 重新同步数据 ==========
+    async function resyncData() {
+      const arrow = document.getElementById('resyncArrow');
+      const currentText = arrow.textContent;
+      arrow.textContent = '↻ 同步中...';
+      
+      // 清除缓存，强制从网络加载
+      try { localStorage.removeItem('learning-rpg-cache'); localStorage.removeItem('learning-rpg-cache-meta'); } catch(e) {}
+      
+      appData = await loadAppData();
+      console.log(`[v0.6.5] 重新同步完成，来源: ${dataLoadState.dataSource}`);
+      
+      renderAll();
+      
+      // 显示结果
+      const sourceLabels = { 'github': 'GitHub Raw', 'jsdelivr': 'jsDelivr', 'pages': 'GitHub Pages', 'local': '本地', 'cache': '缓存', 'fallback': '兜底' };
+      arrow.textContent = `✓ ${sourceLabels[dataLoadState.dataSource] || dataLoadState.dataSource}`;
+      setTimeout(() => { arrow.textContent = currentText; }, 3000);
+    }
+
     // ========== 启动页进入主页面 ==========
     function enterMain() {
       const launchPage = document.getElementById('launchPage');
@@ -4579,6 +4612,14 @@
       renderAchievements();
       renderDailyState(dailyState);
       renderDataUpdateTime();
+      
+      // 设置页数据源显示
+      const dataSourceEl = document.getElementById('settingsDataSource');
+      if (dataSourceEl) {
+        const labels = { 'cache': '缓存', 'github': 'GitHub Raw', 'jsdelivr': 'jsDelivr', 'pages': 'GitHub Pages', 'local': '本地', 'fallback': '兜底' };
+        dataSourceEl.textContent = labels[dataLoadState.dataSource] || dataLoadState.dataSource;
+        dataSourceEl.style.color = dataLoadState.dataSource === 'fallback' ? '#ef4444' : '#10b981';
+      }
       
       // 修复：使用 getSkillTreeOption 而非 buildSkillTreeData
       if (skillTreeChart) {
