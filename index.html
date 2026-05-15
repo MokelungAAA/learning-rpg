@@ -2243,7 +2243,7 @@
           <div class="brand-icon">📚</div>
           <div class="brand-text">
             <h1>学习RPG · 认知操作系统</h1>
-            <p>v0.7.4</p>
+            <p>v0.7.5</p>
           </div>
         </div>
       </header>
@@ -2737,7 +2737,7 @@
         </div>
         <div class="about-system-name">学习RPG · 认知操作系统</div>
         <div class="about-version">
-          <span class="about-version-badge">v0.7.4</span>
+          <span class="about-version-badge">v0.7.5</span>
         </div>
         <div class="about-developer-info">
           <div class="about-developer-name">墨澜 & MIKU</div>
@@ -2786,8 +2786,8 @@
             <div class="changelog-version expanded" onclick="event.stopPropagation();this.classList.toggle('expanded')">
               <div class="changelog-version-header current">
                 <div class="changelog-version-left">
-                  <span>v0.7.4</span>
-                  <span class="changelog-version-tag">可视化实调</span>
+                  <span>v0.7.5</span>
+                  <span class="changelog-version-tag">技能树增强</span>
                 </div>
                 <span class="changelog-toggle">▼</span>
               </div>
@@ -2796,7 +2796,8 @@
                   <span class="changelog-item-version">2026-05-10</span>
                   算法实调 v0.7.2：半衰期基础值从4.0调至3.0天（更适合高中生每日学习节奏）；学科修正系数根据实际记忆规律校准（语文/英语0.9、历史0.8、政治0.7需高频回顾）；温度参数调整（初始峰值80、正确率影响权重提升至0.5）；半衰期更新增强响应性（延长+20%、缩短-25%）；阴影队列预警阈值提前至50。本地录入记录合并管理。<br/>
                   v0.7.3 推荐系统校准：urgency公式优化（考虑半衰期已过比例）；priority公式改进（基于半衰期比例+遗忘加速因子）；自适应参数增强（危险阈值精细分级、推荐数量动态范围扩大）。<br/>
-                  v0.7.4 概览页视觉实调：动画数字增长（EaseOutCubic缓动）；英雄区每日状态徽章（冒険の日/復讐/深度学习等）；学科卡片增强（进度百分比+节点数标注）；总XP大于0时绿色高亮。
+                  v0.7.4 概览页视觉实调：动画数字增长（EaseOutCubic缓动）；英雄区每日状态徽章（冒険の日/復讐/深度学习等）；学科卡片增强（进度百分比+节点数标注）；总XP大于0时绿色高亮。<br/>
+                  v0.7.5 技能树可视化增强：科目图例（可点击筛选/反选学科）；节点大小基于复习次数×XP动态缩放；根节点根据学科XP带光晕；力导向布局优化（斥力300、边距[80,180]、摩擦力0.1减少抖动）；悬停高亮邻接点+连线变粗。
                 </div>
               </div>
             </div>
@@ -4770,16 +4771,20 @@
         const catIndex = categories.findIndex(c => c.name === subjectName);
         subjectNodes[subjectName] = index;
         
-        // 学科根节点 - 显示根名
+        // 学科根节点 - 显示根名（v0.7.5: 根节点带光晕）
         const hasNodes = subject.nodes && subject.nodes.length > 0;
+        const subXp = subject.xp || 0;
+        const glowIntensity = Math.min(20, 5 + subXp * 0.3);
         nodes.push({
           id: index,
           name: subjectInfo?.rootName || subjectName,
-          symbolSize: hasNodes ? 55 : 40,
+          symbolSize: hasNodes ? Math.max(40, 45 + subXp * 0.05) : 35,
           itemStyle: { 
             color: hasNodes ? (subjectInfo?.color || '#6B7280') : '#E5E7EB',
-            shadowBlur: hasNodes ? 15 : 5,
-            shadowColor: hasNodes ? (subjectInfo?.color || '#6B7280') : 'transparent'
+            shadowBlur: hasNodes ? glowIntensity : 5,
+            shadowColor: hasNodes ? (subjectInfo?.color || '#6B7280') : 'transparent',
+            borderWidth: hasNodes ? 2 : 0,
+            borderColor: hasNodes ? 'rgba(255,255,255,0.4)' : 'transparent'
           },
           category: catIndex >= 0 ? catIndex : 0,
           isSubject: true,
@@ -4803,16 +4808,21 @@
             const isWarm = temp >= 60 && temp < 80;
             const isCool = temp < 40;
             
+            // v0.7.5: 节点大小基于复习次数和 XP
+            const repScale = Math.min(2, 1 + node.repetitions * 0.15);
+            const xpScale = Math.min(1.5, 1 + (node.totalXp || 0) / 500);
+            const sizeBase = 24 + temp * 0.35;
+            
             nodes.push({
               id: index,
               name: node.name,
-              symbolSize: 28 + temp * 0.45,
+              symbolSize: sizeBase * repScale * xpScale,
               itemStyle: { 
                 color: getTempColor(temp),
                 shadowBlur: isHot ? 25 : (isWarm ? 15 : (isCool ? 5 : 10)),
                 shadowColor: getTempColor(temp),
                 borderWidth: isHot ? 2 : 1,
-                borderColor: isHot ? 'rgba(255,255,255,0.5)' : 'rgba(255,255,255,0.3)'
+                borderColor: isHot ? 'rgba(255,255,255,0.6)' : 'rgba(255,255,255,0.2)'
               },
               category: catIndex >= 0 ? catIndex : 0,
               isSubject: false,
@@ -4875,9 +4885,19 @@
                     <div style="color:#718096">半衰期: ${node.halfLifeDays?.toFixed(1) || 4.0}天 | 累计XP: ${node.totalXp}</div>`;
           }
         },
-        legend: { show: false },
+        legend: {
+          show: true,
+          type: 'scroll',
+          orient: 'vertical',
+          right: 10,
+          top: 10,
+          textStyle: { fontSize: 11, color: '#4a5568' },
+          pageTextStyle: { color: '#4a5568' },
+          inactiveColor: '#d1d5db',
+          selector: [{ type: 'all', title: '全选' }, { type: 'inverse', title: '反选' }]
+        },
         animation: true,
-        animationDuration: 1200,
+        animationDuration: 800,
         animationEasing: 'cubicOut',
         series: [{
           type: 'graph',
@@ -4885,38 +4905,40 @@
           symbol: 'circle',
           roam: true,
           draggable: true,
-          focusNodeAdjacency: true,
-          edgeSymbol: ['circle', 'arrow'],
-          edgeSymbolSize: [4, 8],
+          focusNodeAdjacency: 'allEdges',
+          edgeSymbol: ['none', 'arrow'],
+          edgeSymbolSize: [0, 6],
           data: data.nodes,
           categories: data.categories,
           links: data.links,
-          lineStyle: { opacity: 0.6, curveness: 0.2 },
+          lineStyle: { opacity: 0.3, curveness: 0.3, width: 1.5 },
           label: {
             show: true,
             position: 'bottom',
             fontSize: 10,
             color: '#4a5568',
             formatter: function(params) {
-              if (params.data.isSubject) return ''; // 根节点用自己的label
-              return params.data.name.length > 8 ? params.data.name.substring(0, 8) + '...' : params.data.name;
+              if (params.data.isSubject) return '';
+              return params.data.name.length > 6 ? params.data.name.substring(0, 6) + '..' : params.data.name;
             }
           },
           emphasis: {
             focus: 'adjacency',
-            lineStyle: { width: 3, color: '#3b82f6', opacity: 0.8 },
+            lineStyle: { width: 3, color: '#6366f1', opacity: 0.9 },
             itemStyle: { 
               borderWidth: 3, 
-              borderColor: 'rgba(59, 130, 246, 0.8)',
-              shadowBlur: 30,
-              shadowColor: 'rgba(59, 130, 246, 0.6)'
+              borderColor: 'rgba(99, 102, 241, 0.8)',
+              shadowBlur: 25,
+              shadowColor: getComputedStyle(document.documentElement).getPropertyValue('--text-primary').trim() === '#e8eaf0' 
+                ? 'rgba(99, 102, 241, 0.8)' : 'rgba(99, 102, 241, 0.5)'
             }
           },
           force: {
-            repulsion: 200,
-            gravity: 0.1,
-            edgeLength: 100,
-            layoutAnimation: true
+            repulsion: 300,
+            gravity: 0.08,
+            edgeLength: [80, 180],
+            layoutAnimation: true,
+            friction: 0.1
           }
         }]
       };
