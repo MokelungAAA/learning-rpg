@@ -2798,7 +2798,7 @@
         </div>
         <div class="about-system-name">学习RPG · 认知操作系统</div>
         <div class="about-version">
-          <span class="about-version-badge">v0.8.2</span>
+          <span class="about-version-badge">v0.8.3</span>
         </div>
         <div class="about-developer-info">
           <div class="about-developer-name">墨澜 & MIKU</div>
@@ -2847,8 +2847,22 @@
             <div class="changelog-version expanded" onclick="event.stopPropagation();this.classList.toggle('expanded')">
               <div class="changelog-version-header current">
                 <div class="changelog-version-left">
-                  <span>v0.8.2</span>
+                  <span>v0.8.3</span>
                   <span class="changelog-version-tag">当前</span>
+                </div>
+                <span class="changelog-toggle">▼</span>
+              </div>
+              <div class="changelog-items">
+                <div class="changelog-item">
+                  <span class="changelog-item-version">2026-05-16</span>
+                  XP引擎2.0：进步动量（线性回归+tanh压缩）；学科难度动态计算；全局边际递减；每日软上限；考试进步奖励；活动类型权重。
+                </div>
+              </div>
+            </div>
+            <div class="changelog-version" onclick="event.stopPropagation();this.classList.toggle('expanded')">
+              <div class="changelog-version-header">
+                <div class="changelog-version-left">
+                  <span>v0.8.2</span>
                 </div>
                 <span class="changelog-toggle">▼</span>
               </div>
@@ -4003,6 +4017,162 @@
       saveUserProfile();
       console.log('[v0.8.2] 用户画像已更新');
     }
+
+    // ========== v0.8.3 XP引擎2.0 ==========
+    /**
+     * 计算进步动量：最近10条记录的准确率线性回归斜率，经tanh压缩到[-0.3, 0.3]
+     */
+    function calculateMomentum(records) {
+      if (!records || records.length < 3) return 0;
+      const recent = records.slice(-10);
+      const n = recent.length;
+      let sumX = 0, sumY = 0, sumXY = 0, sumX2 = 0;
+      for (let i = 0; i < n; i++) {
+        sumX += i;
+        sumY += recent[i].accuracy || recent[i].score || 0;
+        sumXY += i * (recent[i].accuracy || recent[i].score || 0);
+        sumX2 += i * i;
+      }
+      const slope = (n * sumXY - sumX * sumY) / Math.max(1, n * sumX2 - sumX * sumX);
+      return Math.tanh(slope * 0.05) * 0.3; // 压缩到[-0.3, 0.3]
+    }
+
+    /**
+     * 学科难度 = sqrt(1 / subjectModifiers[subject])
+     */
+    function getSubjectDifficulty(subjectKey) {
+      const mod = userProfile?.subjectModifiers?.[subjectKey] || 1.0;
+      return Math.sqrt(1 / Math.max(0.5, mod));
+    }
+
+    /**
+     * 当日XP超过dailyXPLimit后，超出部分乘以softness折扣
+     */
+    function applyDailySoftCap(rawXP, todayTotalXP) {
+      const limit = userProfile?.dailyXPLimit || 500;
+      const softness = userProfile?.dailyXPLimitSoftness || 0.5;
+      if (todayTotalXP >= limit) {
+        const excess = todayTotalXP + rawXP - limit;
+        const capped = Math.max(0, limit - todayTotalXP);
+        return capped + excess * softness;
+      }
+      return rawXP;
+    }
+
+    /**
+     * 全局边际递减 decay = 1 / (1 + totalXP * decayRateForXP)
+     */
+    function getGlobalDecay() {
+      const totalXP = userProfile?.totalXP || 0;
+      const rate = userProfile?.decayRateForXP || 0.00005;
+      return 1 / (1 + totalXP * rate);
+    }
+
+    /**
+     * 获取学科key（中文名→词根）
+     */
+    function getSubjectKey(subjectName) {
+      const map = {
+        '数学': 'logos', '语文': 'mythos', '英语': 'lingua',
+        '物理': 'physis', '化学': 'khemeia', '生物': 'zoe',
+        '政治': 'politeia', '历史': 'historia', '地理': 'geographia'
+      };
+      return map[subjectName] || 'logos';
+    }
+
+    /**
+     * 获取今日已获XP
+     */
+    function getTodayTotalXP() {
+      const today = new Date().toDateString();
+      return (appData.records || []).reduce((sum, r) => {
+        if (new Date(r.timestamp).toDateString() === today) {
+          return sum + (r.xp || 0);
+        }
+        return sum;
+      }, 0);
+    }
+
+    /**
+     * 获取上次同科目考试分数
+     */
+    function getPreviousExamScore(subject) {
+      const exams = (appData.records || []).filter(r => r.subject === subject && r.activityType === 'exam');
+      if (exams.length < 2) return null;
+      return exams[exams.length - 2].accuracy || exams[exams.length - 2].obtainedScore || 0;
+    }
+
+    /**
+     * XP引擎2.0 - 完整XP计算函数
+     */
+    function calculateXP2(record) {
+      const profile = userProfile || {};
+
+      // 基础产出
+      const xpBasePerMin = profile.xpBasePerMinute || 2.0;
+      const duration = Math.min(record.durationMinutes || record.duration || 0, profile.maxEffectiveDuration || 90);
+      const rawBase = xpBasePerMin * duration;
+
+      // 效率评估
+      const score = record.accuracy || record.score || 0;
+      const efficiency = score / 100;
+
+      // 学科难度
+      const subjectKey = getSubjectKey(record.subject);
+      const difficulty = getSubjectDifficulty(subjectKey);
+
+      // 进步动量
+      const momentum = calculateMomentum(appData.records);
+
+      // 活动权重
+      const activityType = record.activityType || 'practice';
+      const activityWeight = profile.activityWeights?.[activityType] || 1.0;
+
+      // 特长加成（V0.9预留）
+      const talentMultiplier = 1.0;
+
+      // 质量乘数
+      const qual = efficiency * difficulty * (1 + momentum) * activityWeight * talentMultiplier;
+
+      // 全局边际递减
+      const decay = getGlobalDecay();
+
+      // 考试特殊处理
+      let examBonus = 1.0;
+      if (activityType === 'exam') {
+        examBonus = profile.examWeightBase || 1.5;
+        // 进步奖励：如果比上次同科目考试分数高
+        const prevExam = getPreviousExamScore(record.subject);
+        if (prevExam !== null && score > prevExam) {
+          const improvement = score - prevExam;
+          examBonus *= (1 + improvement / 100 * (profile.progressBonusMultiplier || 2.0));
+        }
+      }
+
+      // 原始XP
+      const rawXP = rawBase * qual * decay * examBonus;
+
+      // 每日软上限
+      const todayXP = getTodayTotalXP();
+      const finalXP = applyDailySoftCap(rawXP, todayXP);
+
+      return Math.max(1, Math.round(finalXP));
+    }
+
+    /**
+     * XP计算入口：优先使用XP引擎2.0，fallback到旧公式
+     */
+    function calculateXP(record) {
+      // 如果userProfile已加载，使用XP引擎2.0
+      if (userProfile && userProfile.totalXP !== undefined) {
+        return calculateXP2(record);
+      }
+      // fallback：旧公式 round(score * duration / 20)
+      const score = record.accuracy || record.score || 0;
+      const duration = record.durationMinutes || record.duration || 0;
+      return Math.max(1, Math.round(score * duration / 20));
+    }
+
     /** 数据加载状态 */
     let dataLoadState = {
       isLoading: false,
@@ -6078,12 +6248,21 @@
       const total = parseInt(document.getElementById('de-total').value) || 0;
       const correct = parseInt(document.getElementById('de-correct').value) || 0;
       const acc = parseInt(document.getElementById('de-accuracy').value) || 0;
-      const xp = parseInt(document.getElementById('de-xp').value) || 0;
       const reflection = document.getElementById('de-reflection').value.trim();
       
       if (!kp) { showToast('请输入知识点名称', 'warning'); return; }
       
       const now = Date.now();
+      const tempRecord = {
+        subject: sub,
+        durationMinutes: dur,
+        activityType: type,
+        accuracy: acc,
+        score: acc
+      };
+      // 使用XP引擎2.0计算XP（自动fallback到旧公式）
+      const xp = calculateXP(tempRecord);
+      
       const record = {
         recordID: 'rec-local-' + now,
         timestamp: now,
@@ -6130,13 +6309,25 @@
       const name = document.getElementById('de-exam-name').value.trim();
       const total = parseInt(document.getElementById('de-exam-total').value) || 100;
       const score = parseInt(document.getElementById('de-exam-score').value) || 0;
-      const xp = parseInt(document.getElementById('de-exam-xp').value) || 0;
       const reflection = document.getElementById('de-exam-reflection').value.trim();
       
       if (!name) { showToast('请输入考试名称', 'warning'); return; }
       
       const now = Date.now();
       const acc = total > 0 ? Math.round((score / total) * 100) : 0;
+      
+      // 使用XP引擎2.0计算XP（自动fallback到旧公式）
+      const tempRecord = {
+        subject: sub,
+        durationMinutes: 0,
+        activityType: 'exam',
+        accuracy: acc,
+        score: acc,
+        obtainedScore: score,
+        totalScore: total
+      };
+      const xp = calculateXP(tempRecord);
+      
       const record = {
         recordID: 'rec-exam-' + now,
         timestamp: now,
