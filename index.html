@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
@@ -2798,7 +2798,7 @@
         </div>
         <div class="about-system-name">学习RPG · 认知操作系统</div>
         <div class="about-version">
-          <span class="about-version-badge">v0.7.10</span>
+          <span class="about-version-badge">v0.8.2</span>
         </div>
         <div class="about-developer-info">
           <div class="about-developer-name">墨澜 & MIKU</div>
@@ -2809,7 +2809,7 @@
       <!-- 统计概览 -->
       <div class="about-stats-row" id="aboutStats">
         <div class="about-stat-chip">
-          <div class="about-stat-chip-value" id="statVersions">28</div>
+          <div class="about-stat-chip-value" id="statVersions">30</div>
           <div class="about-stat-chip-label">版本迭代</div>
         </div>
         <div class="about-stat-chip">
@@ -2847,15 +2847,15 @@
             <div class="changelog-version expanded" onclick="event.stopPropagation();this.classList.toggle('expanded')">
               <div class="changelog-version-header current">
                 <div class="changelog-version-left">
-                  <span>v0.8.1</span>
-                  <span class="changelog-version-tag">规划中</span>
+                  <span>v0.8.2</span>
+                  <span class="changelog-version-tag">当前</span>
                 </div>
                 <span class="changelog-toggle">▼</span>
               </div>
               <div class="changelog-items">
                 <div class="changelog-item">
-                  <span class="changelog-item-version">2026-05-15</span>
-                  V0.8 功能扩展阶段。方向：网页端反向写入 data.json、数据可视化增强、学习建议系统、多设备同步等。
+                  <span class="changelog-item-version">2026-05-16</span>
+                  创建user_profile.json用户画像文件；实现多源容错加载；冷启动默认值；localStorage持久化。
                 </div>
               </div>
             </div>
@@ -3847,6 +3847,162 @@
       }
     };
 
+    };
+
+    // ========== v0.8.2 用户画像数据 ==========
+    /** 用户画像数据源（多源容错） */
+    const USER_PROFILE_SOURCES = [
+      { name: 'github', url: 'https://raw.githubusercontent.com/MokelungAAA/learning-rpg/main/data/user_profile.json', desc: 'GitHub Raw CDN' },
+      { name: 'jsdelivr', url: 'https://cdn.jsdelivr.net/gh/MokelungAAA/learning-rpg@main/data/user_profile.json', desc: 'jsDelivr CDN' },
+      { name: 'local', url: './data/user_profile.json', desc: '本地相对路径' }
+    ];
+
+    /** 用户画像默认值（冷启动） */
+    const DEFAULT_USER_PROFILE = {
+      version: '1.0.0',
+      lastUpdated: new Date().toISOString(),
+      firstTimestamp: null,
+      totalXP: 0,
+      totalStudyMinutes: 0,
+      globalBaseHalfLife: 3.0,
+      subjectModifiers: {
+        logos: 1.0, mythos: 1.0, lingua: 1.0, physis: 1.0, khemeia: 1.0,
+        zoe: 1.0, politeia: 1.0, historia: 1.0, geographia: 1.0
+      },
+      subjectAbility: {
+        logos: 50, mythos: 50, lingua: 50, physis: 50, khemeia: 50,
+        zoe: 50, politeia: 50, historia: 50, geographia: 50
+      },
+      skillTalents: {},
+      tempBoostGain: 0.5,
+      tempBoostBase: 10,
+      halfLifeIncreaseRatio: 1.2,
+      halfLifeDecreaseRatio: 0.75,
+      avgReviewsPerWeek: 7,
+      xpBasePerMinute: 2.0,
+      activityWeights: {
+        practice: 1.2, exam: 1.5, lecture: 0.8, review: 1.0,
+        recitation: 1.1, reflection: 0.7, other: 0.5
+      },
+      efficiencySensitivity: 0.6,
+      decayRateForXP: 0.00005,
+      dailyXPLimit: 500,
+      dailyXPLimitSoftness: 0.5,
+      examWeightBase: 1.5,
+      progressBonusMultiplier: 2.0,
+      optimalDurationMin: 30,
+      maxEffectiveDuration: 90,
+      baseReviewRatio: 0.20
+    };
+
+    /** 全局用户画像数据 */
+    let userProfile = JSON.parse(JSON.stringify(DEFAULT_USER_PROFILE));
+
+    /** 用户画像加载状态 */
+    let userProfileLoadState = {
+      isLoading: false,
+      hasError: false,
+      dataSource: ''  // 'cache' | 'github' | 'jsdelivr' | 'local' | 'default'
+    };
+
+    /**
+     * 加载用户画像（v0.8.2）
+     * 三层容错：localStorage缓存 → 网络多源 → 默认值
+     * @returns {Promise<Object>} 用户画像数据
+     */
+    async function loadUserProfile() {
+      userProfileLoadState.isLoading = true;
+      
+      // === 第一层：localStorage 缓存 ===
+      const store = getStore();
+      if (store) {
+        try {
+          const cached = store.getItem('learning-rpg-user-profile');
+          if (cached) {
+            const parsed = JSON.parse(cached);
+            userProfile = { ...DEFAULT_USER_PROFILE, ...parsed };
+            userProfileLoadState.dataSource = 'cache';
+            console.log('[v0.8.2] 用户画像缓存命中');
+            userProfileLoadState.isLoading = false;
+            return userProfile;
+          }
+        } catch (e) { console.warn('[v0.8.2] 用户画像缓存解析失败:', e); }
+      }
+      
+      // === 第二层：网络请求（多源容错）===
+      if (!isFileProtocol()) {
+        for (const source of USER_PROFILE_SOURCES) {
+          try {
+            console.log([v0.8.2] 尝试从  加载用户画像...);
+            const response = await fetchWithTimeout(source.url);
+            if (!response.ok) throw new Error(HTTP \);
+            const data = await response.json();
+            if (!data || typeof data !== 'object') throw new Error('无效数据格式');
+            
+            userProfile = { ...DEFAULT_USER_PROFILE, ...data };
+            userProfileLoadState.dataSource = source.name;
+            userProfileLoadState.hasError = false;
+            saveUserProfile();
+            console.log([v0.8.2] 用户画像加载成功 ✓ 来源: );
+            userProfileLoadState.isLoading = false;
+            return userProfile;
+          } catch (e) {
+            console.warn([v0.8.2]  失败: );
+            continue;
+          }
+        }
+      }
+      
+      // === 第三层：使用默认值（冷启动）===
+      console.log('[v0.8.2] 使用默认用户画像（冷启动）');
+      userProfileLoadState.dataSource = 'default';
+      userProfileLoadState.hasError = false;
+      userProfileLoadState.isLoading = false;
+      return userProfile;
+    }
+
+    /**
+     * 保存用户画像到 localStorage（v0.8.2）
+     */
+    function saveUserProfile() {
+      const store = getStore();
+      if (!store) return;
+      try {
+        userProfile.lastUpdated = new Date().toISOString();
+        store.setItem('learning-rpg-user-profile', JSON.stringify(userProfile));
+        console.log('[v0.8.2] 用户画像已保存');
+      } catch (e) {
+        console.warn('[v0.8.2] 用户画像保存失败:', e);
+      }
+    }
+
+    /**
+     * 更新用户画像参数（v0.8.2）
+     * @param {Object} updates - 要更新的字段
+     */
+    function updateUserProfile(updates) {
+      if (!updates || typeof updates !== 'object') return;
+      
+      // 合并更新
+      for (const key in updates) {
+        if (key in userProfile) {
+          if (typeof updates[key] === 'object' && !Array.isArray(updates[key])) {
+            userProfile[key] = { ...userProfile[key], ...updates[key] };
+          } else {
+            userProfile[key] = updates[key];
+          }
+        }
+      }
+      
+      // 更新首次时间戳（如果尚未设置）
+      if (!userProfile.firstTimestamp) {
+        userProfile.firstTimestamp = Date.now();
+      }
+      
+      // 保存到 localStorage
+      saveUserProfile();
+      console.log('[v0.8.2] 用户画像已更新');
+    }
     /** 数据加载状态 */
     let dataLoadState = {
       isLoading: false,
@@ -6856,7 +7012,10 @@
       renderAll();
       console.log('[v0.6.5] 首屏渲染完成');
       
-      // Phase 2: 后台静默加载数据
+      // Phase 2: 加载用户画像
+      await loadUserProfile();
+
+      // Phase 3: 后台静默加载数据
       await backgroundDataLoad();
     }
     
@@ -6932,6 +7091,12 @@
     </script>
 </body>
 </html>
+
+
+
+
+
+
 
 
 
