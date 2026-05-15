@@ -546,11 +546,15 @@
     /* ========== 页面内容 ========== */
     .page-content {
       display: none;
-      animation: fadeInUp 0.3s ease;
+      opacity: 0;
+      transform: translateY(10px);
+      transition: opacity 0.3s ease, transform 0.3s ease;
     }
     
     .page-content.active {
       display: block;
+      opacity: 1;
+      transform: translateY(0);
     }
     
     @keyframes fadeInUp {
@@ -2213,6 +2217,7 @@
     
     .toast.success { background: rgba(16, 185, 129, 0.9); border-color: rgba(255,255,255,0.2); }
     .toast.info { background: rgba(59, 130, 246, 0.9); border-color: rgba(255,255,255,0.2); }
+    .toast.warning { background: rgba(245, 158, 11, 0.9); border-color: rgba(255,255,255,0.2); }
     
     @keyframes toastIn {
       from { transform: translateX(-50%) translateY(-20px); opacity: 0; }
@@ -2285,7 +2290,7 @@
           <div class="brand-icon">📚</div>
           <div class="brand-text">
             <h1>学习RPG · 认知操作系统</h1>
-            <p>v0.7.7</p>
+            <p>v0.7.8</p>
           </div>
         </div>
       </header>
@@ -2793,7 +2798,7 @@
         </div>
         <div class="about-system-name">学习RPG · 认知操作系统</div>
         <div class="about-version">
-          <span class="about-version-badge">v0.7.7</span>
+          <span class="about-version-badge">v0.7.8</span>
         </div>
         <div class="about-developer-info">
           <div class="about-developer-name">墨澜 & MIKU</div>
@@ -5211,19 +5216,17 @@
     }
     
     // ========== Toast提示 ==========
-    function showToast(msg, type = 'info') {
+    function showToast(msg, type = 'success') {
       const t = document.getElementById('toast');
+      if (!t) return;
+      clearTimeout(t._timer);
       t.innerHTML = msg;
-      t.className = `toast ${type}`;
+      t.className = 'toast show ' + type;
       t.style.display = 'block';
-      
-      setTimeout(() => {
-        t.style.animation = 'toastIn 0.3s reverse';
-        setTimeout(() => {
-          t.style.display = 'none';
-          t.style.animation = '';
-        }, 300);
-      }, 3000);
+      t._timer = setTimeout(() => {
+        t.classList.remove('show');
+        setTimeout(() => { t.style.display = 'none'; }, 300);
+      }, 2500);
     }
     
     // ========== v0.6.1 每日状态标签系统 ==========
