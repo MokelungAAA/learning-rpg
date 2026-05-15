@@ -140,7 +140,9 @@
     [data-theme="dark"] .data-entry-tab.active { background: #2a2f4a; }
     [data-theme="dark"] .data-entry-submit.secondary { background: #2a2f4a; color: #b0b8c8; }
     [data-theme="dark"] .course-card { background: var(--glass-bg); }
-    [data-theme="dark"] .heatmap-table td { opacity: 0.85; }
+    [data-theme="dark"] .heatmap-table td { opacity: 0.9; }
+    [data-theme="dark"] .hm-stats { color: #d1d5db; }
+    [data-theme="dark"] .hm-stats strong { color: #a78bfa; }
     
     /* 主题切换过渡动画 */
     .theme-transitioning,
@@ -1318,6 +1320,11 @@
       z-index: 9999; display: none; white-space: nowrap;
       box-shadow: 0 4px 16px rgba(0,0,0,0.3);
     }
+    .hm-stats {
+      display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 12px;
+      font-size: 12px; color: var(--text-muted);
+    }
+    .hm-stats strong { color: #7c3aed; font-weight: 700; }
     
     /* ========== 下拉刷新指示器（v0.6.10） ========== */
     .pull-indicator {
@@ -2243,7 +2250,7 @@
           <div class="brand-icon">📚</div>
           <div class="brand-text">
             <h1>学习RPG · 认知操作系统</h1>
-            <p>v0.7.5</p>
+            <p>v0.7.6</p>
           </div>
         </div>
       </header>
@@ -2737,7 +2744,7 @@
         </div>
         <div class="about-system-name">学习RPG · 认知操作系统</div>
         <div class="about-version">
-          <span class="about-version-badge">v0.7.5</span>
+          <span class="about-version-badge">v0.7.6</span>
         </div>
         <div class="about-developer-info">
           <div class="about-developer-name">墨澜 & MIKU</div>
@@ -5620,8 +5627,10 @@
       if (!container) return;
       
       const now = new Date();
-      const DAYS = 169; // 约 24 周
-      const CELL = 12, GAP = 3; // px
+      const DAYS = 169;
+      const isMobile = window.innerWidth < 480;
+      const CELL = isMobile ? 10 : 12;
+      const GAP = isMobile ? 2 : 3;
       
       // 按天统计 XP
       const dailyXp = {};
@@ -5642,10 +5651,16 @@
         cells.push({ date: d, xp: dailyXp[key] || 0 });
       }
       
-      // 确定颜色等级
+      // 统计摘要
+      const totalXp = cells.reduce((s, c) => s + c.xp, 0);
+      const studyDays = cells.filter(c => c.xp > 0).length;
+      const avgXp = studyDays > 0 ? Math.round(totalXp / studyDays) : 0;
+      const maxDay = cells.reduce((best, c) => c.xp > (best?.xp || 0) ? c : best, null);
+      
+      // 颜色等级 - v0.7.6 紫色系（与品牌色一致）
       const xps = cells.map(c => c.xp).filter(x => x > 0);
       const maxXp = xps.length ? Math.max(...xps) : 1;
-      const colors = ['#ebedf0', '#9be9a8', '#40c463', '#30a14e', '#216e39'];
+      const colors = ['#ebedf0', '#c4b5fd', '#a78bfa', '#7c3aed', '#5b21b6'];
       
       function getColor(xp) {
         if (xp === 0) return colors[0];
@@ -5656,7 +5671,7 @@
         return colors[4];
       }
       
-      // 按周排列（列=周，行=星期）
+      // 按周排列
       const cols = Math.ceil(DAYS / 7);
       const grid = [];
       for (let w = 0; w < cols; w++) {
@@ -5679,20 +5694,40 @@
       
       const dayLabels = ['', '一', '', '三', '', '五', ''];
       
-      let html = '<div style="position:relative"><div class="heatmap-tooltip" id="hmTooltip"></div><table class="heatmap-table"><tr><th style="width:20px"></th>';
+      // v0.7.6: 统计小条
+      let html = `
+        <div class="hm-stats">
+          <span><strong>${totalXp}</strong> XP</span>
+          <span><strong>${studyDays}</strong> 天学习</span>
+          <span><strong>${avgXp}</strong> 日均XP</span>
+          ${maxDay ? `<span>最佳 <strong>${maxDay.xp}</strong> XP</span>` : ''}
+        </div>
+      `;
+      
+      if (studyDays === 0) {
+        html += '<div style="text-align:center;padding:20px;color:var(--text-muted);font-size:13px;">暂无学习记录，添加数据后热力图将自动显示 ✨</div>';
+        container.innerHTML = html;
+        return;
+      }
+      
+      html += '<div style="position:relative"><div class="heatmap-tooltip" id="hmTooltip"></div><table class="heatmap-table"><tr><th style="width:20px"></th>';
       for (const m of months) {
-        html += `<th colspan="${m.col + 1 > months.length ? 1 : 1}" style="text-align:left;padding-left:${m.col * (CELL + GAP)}px">${m.label}</th>`;
+        html += `<th style="text-align:left;padding-left:${m.col * (CELL + GAP)}px;font-size:${isMobile?7:9}px">${m.label}</th>`;
       }
       html += '</tr>';
       
       for (let d = 0; d < 7; d++) {
         html += '<tr>';
-        html += `<td class="heatmap-label">${dayLabels[d]}</td>`;
+        html += `<td class="heatmap-label" style="font-size:${isMobile?7:9}px">${dayLabels[d]}</td>`;
         for (let w = 0; w < cols; w++) {
           const cell = grid[w * 7 + d];
           if (!cell) { html += '<td></td>'; continue; }
           const key = `${cell.date.getFullYear()}-${cell.date.getMonth()+1}-${cell.date.getDate()}`;
-          html += `<td style="background:${getColor(cell.xp)}" onmouseenter="showHmTip(event,'${key}',${cell.xp})" onmouseleave="hideHmTip()"></td>`;
+          const isToday = cell.date.toDateString() === now.toDateString();
+          html += `<td style="background:${getColor(cell.xp)};${isToday?'outline:2px solid #6366f1;outline-offset:-1px;':''}" 
+                       onclick="showHmTip(null,'${key}',${cell.xp},true)" 
+                       onmouseenter="showHmTip(event,'${key}',${cell.xp})" 
+                       onmouseleave="hideHmTip()"></td>`;
         }
         html += '</tr>';
       }
@@ -5705,11 +5740,23 @@
       container.innerHTML = html;
     }
     
-    function showHmTip(e, dateStr, xp) {
+    function showHmTip(e, dateStr, xp, isClick = false) {
       const tip = document.getElementById('hmTooltip');
       if (!tip) return;
       tip.textContent = `${dateStr}  ·  ${xp} XP`;
       tip.style.display = 'block';
+      if (isClick) {
+        tip.style.left = '50%'; tip.style.top = '50%';
+        tip.style.transform = 'translate(-50%,-50%)';
+        tip.style.position = 'fixed';
+        tip.style.background = '#1a1a2e';
+        tip.style.padding = '10px 18px';
+        tip.style.borderRadius = '10px';
+        setTimeout(hideHmTip, 1500);
+        return;
+      }
+      tip.style.transform = '';
+      tip.style.position = 'fixed';
       tip.style.left = (e.clientX + 12) + 'px';
       tip.style.top = (e.clientY - 10) + 'px';
     }
