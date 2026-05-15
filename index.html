@@ -2290,7 +2290,7 @@
           <div class="brand-icon">📚</div>
           <div class="brand-text">
             <h1>学习RPG · 认知操作系统</h1>
-            <p>v0.7.9</p>
+            <p>v0.7.10</p>
           </div>
         </div>
       </header>
@@ -2798,7 +2798,7 @@
         </div>
         <div class="about-system-name">学习RPG · 认知操作系统</div>
         <div class="about-version">
-          <span class="about-version-badge">v0.7.9</span>
+          <span class="about-version-badge">v0.7.10</span>
         </div>
         <div class="about-developer-info">
           <div class="about-developer-name">墨澜 & MIKU</div>
@@ -2834,18 +2834,61 @@
       <div class="changelog-section">
         <div class="changelog-title">更新日志</div>
         
-        <!-- ====== V0.7 — 数据驱动优化 ====== -->
+        <!-- ====== V0.8 — 功能扩展 ====== -->
         <div class="changelog-major expanded" onclick="this.classList.toggle('expanded')">
           <div class="changelog-major-header current">
             <div class="changelog-major-left">
-              <span class="changelog-major-label">V0.7</span>
-              <span class="changelog-major-tag">当前 · 数据驱动</span>
+              <span class="changelog-major-label">V0.8</span>
+              <span class="changelog-major-tag">当前 · 功能扩展</span>
             </div>
             <span class="changelog-major-toggle">▼</span>
           </div>
           <div class="changelog-major-body">
             <div class="changelog-version expanded" onclick="event.stopPropagation();this.classList.toggle('expanded')">
               <div class="changelog-version-header current">
+                <div class="changelog-version-left">
+                  <span>v0.8.1</span>
+                  <span class="changelog-version-tag">规划中</span>
+                </div>
+                <span class="changelog-toggle">▼</span>
+              </div>
+              <div class="changelog-items">
+                <div class="changelog-item">
+                  <span class="changelog-item-version">2026-05-15</span>
+                  V0.8 功能扩展阶段。方向：网页端反向写入 data.json、数据可视化增强、学习建议系统、多设备同步等。
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- ====== V0.7 — 数据驱动优化 ====== -->
+        <div class="changelog-major expanded" onclick="this.classList.toggle('expanded')">
+          <div class="changelog-major-header">
+            <div class="changelog-major-left">
+              <span class="changelog-major-label">V0.7</span>
+              <span class="changelog-major-tag">已完成</span>
+            </div>
+            <span class="changelog-major-toggle">▼</span>
+          </div>
+          <div class="changelog-major-body">
+            <div class="changelog-version expanded" onclick="event.stopPropagation();this.classList.toggle('expanded')">
+              <div class="changelog-version-header">
+                <div class="changelog-version-left">
+                  <span>v0.7.10</span>
+                  <span class="changelog-version-tag">完结</span>
+                </div>
+                <span class="changelog-toggle">▼</span>
+              </div>
+              <div class="changelog-items">
+                <div class="changelog-item">
+                  <span class="changelog-item-version">2026-05-15</span>
+                  v0.7 十个子版本全部完成。v0.7.6 热力图增强（紫色系配色+统计摘要+移动适配+点击交互）；v0.7.7 数据分析增强（学习时长统计+学科时间分配+薄弱点识别）；v0.7.8 UX打磨（页面切换过渡动画+Toast增强+warning支持）；v0.7.9 算法2.0迭代（复习次数因子+正确率趋势+间隔效应奖励+掌握度评分）。版本标记为v0.7.10，进入v0.8。
+                </div>
+              </div>
+            </div>
+            <div class="changelog-version expanded" onclick="event.stopPropagation();this.classList.toggle('expanded')">
+              <div class="changelog-version-header">
                 <div class="changelog-version-left">
                   <span>v0.7.5</span>
                   <span class="changelog-version-tag">技能树增强</span>
@@ -2855,10 +2898,10 @@
               <div class="changelog-items">
                 <div class="changelog-item">
                   <span class="changelog-item-version">2026-05-10</span>
-                  算法实调 v0.7.2：半衰期基础值从4.0调至3.0天（更适合高中生每日学习节奏）；学科修正系数根据实际记忆规律校准（语文/英语0.9、历史0.8、政治0.7需高频回顾）；温度参数调整（初始峰值80、正确率影响权重提升至0.5）；半衰期更新增强响应性（延长+20%、缩短-25%）；阴影队列预警阈值提前至50。本地录入记录合并管理。<br/>
-                  v0.7.3 推荐系统校准：urgency公式优化（考虑半衰期已过比例）；priority公式改进（基于半衰期比例+遗忘加速因子）；自适应参数增强（危险阈值精细分级、推荐数量动态范围扩大）。<br/>
-                  v0.7.4 概览页视觉实调：动画数字增长（EaseOutCubic缓动）；英雄区每日状态徽章（冒険の日/復讐/深度学习等）；学科卡片增强（进度百分比+节点数标注）；总XP大于0时绿色高亮。<br/>
-                  v0.7.5 技能树可视化增强：科目图例（可点击筛选/反选学科）；节点大小基于复习次数×XP动态缩放；根节点根据学科XP带光晕；力导向布局优化（斥力300、边距[80,180]、摩擦力0.1减少抖动）；悬停高亮邻接点+连线变粗。
+                  算法实调 v0.7.2：半衰期基础值从4.0调至3.0天；学科修正系数根据实际记忆规律校准；温度参数调整；半衰期更新增强响应性；阴影队列预警阈值提前至50。本地录入记录合并管理。<br/>
+                  v0.7.3 推荐系统校准：urgency公式优化；priority公式改进；自适应参数增强。<br/>
+                  v0.7.4 概览页视觉实调：动画数字增长；英雄区每日状态徽章；学科卡片增强。<br/>
+                  v0.7.5 技能树可视化增强：科目图例；节点动态大小；力导向布局优化。
                 </div>
               </div>
             </div>
