@@ -4431,11 +4431,12 @@
         for (const node of subject.nodes) {
           const temp = getCurrentTemp(node, now);
           const hoursSinceStudy = (now - node.lastStudy) / (1000 * 60 * 60);
+          const daysSinceStudy = hoursSinceStudy / 24;
           
-          // decayRatePerDay = currentTemp * ln(2) / halfLifeDays
-          const decayRatePerDay = temp * Math.LN2 / node.halfLifeDays;
-          // urgency = (100 - currentTemp) * decayRatePerDay
-          const urgency = Math.max(CONFIG.SHADOW_QUEUE.URGENCY_MIN, (100 - temp) * decayRatePerDay);
+          // v0.7.3 改进：urgency 考虑半衰期已过比例
+          const halfLifeRatio = daysSinceStudy / node.halfLifeDays; // >1 = 超过半衰期
+          const urgency = Math.max(CONFIG.SHADOW_QUEUE.URGENCY_MIN, 
+            (100 - temp) * halfLifeRatio * 0.5 + daysSinceStudy * 0.5);
           
           if (temp > 0 && temp < tempThreshold) {
             shadowItems.push({
@@ -4444,7 +4445,7 @@
               temp,
               hours: Math.round(hoursSinceStudy),
               urgency: urgency,
-              decayRate: decayRatePerDay,
+              halfLifeRatio: halfLifeRatio,
               halfLifeDays: node.halfLifeDays,
               nodeId: node.id
             });
@@ -4463,7 +4464,8 @@
       container.innerHTML = shadowItems.slice(0, recommendMax).map(item => {
         const subjectColor = SUBJECTS[item.subject]?.color || '#6B7280';
         const isColdGlow = item.temp < 30;
-        const isUrgent = item.temp < CONFIG.SHADOW_QUEUE.TEMP_THRESHOLD_URGENT;
+        const isUrgent = item.halfLifeRatio > 1; // 超过半衰期即为紧急
+        const overHalfLife = item.halfLifeRatio > 1;
         
         return `
           <div class="shadow-card ${isColdGlow ? 'cold-glow' : ''} ${isUrgent ? 'urgent-border' : ''}" 
@@ -4484,7 +4486,7 @@
             <div class="shadow-temp-bar">
               <div class="shadow-temp-fill" style="width: ${item.temp}%; background: ${getTempColor(item.temp)}"></div>
             </div>
-            <div class="shadow-reason">紧迫度指数 ${item.urgency.toFixed(2)}，建议 ${item.decayRate < 0.5 ? '近期' : '尽快'}复习巩固</div>
+            <div class="shadow-reason">已过半衰期 ${item.halfLifeRatio.toFixed(1)} 倍 · ${item.urgency > 5 ? '⚠️ 需立即复习' : item.urgency > 2 ? '建议复习' : '近期复习'}</div>
           </div>
         `;
       }).join('');
@@ -4509,11 +4511,17 @@
       const avgReviewInterval = adaptiveState.reviewFrequencyEMA;
       const { REVIEW_INTERVAL_IDEAL_DAYS, DANGER_THRESHOLD_DEFAULT, RECOMMEND_MAX_DEFAULT } = CONFIG.ADAPTIVE;
       
-      // 危险阈值：实际复习间隔/理想复习间隔
-      const dangerThreshold = Math.min(1, avgReviewInterval / REVIEW_INTERVAL_IDEAL_DAYS);
+      // v0.7.3 改进：更精细的危险阈值计算
+      const ratio = avgReviewInterval / REVIEW_INTERVAL_IDEAL_DAYS;
+      let dangerThreshold = Math.min(1, ratio);
       
-      // 推荐数量上限：根据危险程度调整
-      const recommendMax = Math.max(3, Math.round(RECOMMEND_MAX_DEFAULT * (1 + (1 - dangerThreshold) * 0.5)));
+      // 如果平均间隔超过理想间隔的2倍，强化预警
+      if (ratio > 2) dangerThreshold = Math.max(0.3, 1 - ratio * 0.15);
+      
+      // 推荐数量：危险越高推荐越多
+      const recommendMax = Math.min(8, Math.max(3, 
+        Math.round(RECOMMEND_MAX_DEFAULT * (1 + (1 - dangerThreshold) * 1.2))
+      ));
       
       return { dangerThreshold, recommendMax };
     }
@@ -4634,10 +4642,14 @@
           const hoursSinceStudy = (now - node.lastStudy) / (1000 * 60 * 60);
           const elapsedDays = hoursSinceStudy / 24;
           
-          // 基础条件：温度低于60%或超过24小时未复习
-          if (temp < 60 || elapsedDays > 1) {
-            // priority = (100 - currentTemp) * log2(elapsedHours + 1)
-            const priority = (100 - temp) * Math.log2(hoursSinceStudy + 1);
+          // v0.7.3 改进：考虑半衰期比例，更准确反映遗忘程度
+          const halfLifeRatio = elapsedDays / node.halfLifeDays;
+          
+          // 基础条件：温度低于60%或超过半衰期的50%
+          if (temp < 60 || halfLifeRatio > 0.5) {
+            // priority = (100 - temp) * (halfLifeRatio + 1)
+            // 超过半衰期时 priority 翻倍，反映遗忘加速
+            const priority = (100 - temp) * (halfLifeRatio + 1) * 1.5;
             
             // 查找该节点最近一次背诵记录
             let recType = 'normal';
