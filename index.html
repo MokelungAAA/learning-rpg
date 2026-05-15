@@ -546,11 +546,15 @@
     /* ========== 页面内容 ========== */
     .page-content {
       display: none;
-      animation: fadeInUp 0.3s ease;
+      opacity: 0;
+      transform: translateY(10px);
+      transition: opacity 0.3s ease, transform 0.3s ease;
     }
     
     .page-content.active {
       display: block;
+      opacity: 1;
+      transform: translateY(0);
     }
     
     @keyframes fadeInUp {
@@ -1454,6 +1458,41 @@
     }
     .report-chart { width: 100%; height: 200px; }
 
+    /* ========== 数据分析增强（v0.7.7） ========== */
+    .analysis-stats {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 10px;
+    }
+    .analysis-stat-card {
+      background: var(--glass-bg); border: 1px solid var(--glass-border);
+      border-radius: var(--radius-md); padding: 12px; text-align: center;
+      box-shadow: var(--glass-shadow);
+    }
+    .analysis-stat-value { font-size: 20px; font-weight: 700; color: var(--text-primary); }
+    .analysis-stat-label { font-size: 10px; color: var(--text-muted); margin-top: 2px; }
+    .analysis-chart-glass {
+      background: var(--glass-bg); backdrop-filter: blur(12px);
+      border: 1px solid var(--glass-border); border-radius: var(--radius-md);
+      padding: 14px; box-shadow: var(--glass-shadow);
+    }
+    .analysis-subject-time { display: flex; flex-direction: column; gap: 8px; }
+    .ast-row { display: flex; align-items: center; gap: 8px; font-size: 12px; }
+    .ast-bar-wrap { flex: 1; height: 16px; background: rgba(200,200,220,0.2); border-radius: 8px; overflow: hidden; }
+    .ast-bar { height: 100%; border-radius: 8px; transition: width 0.6s ease; min-width: 2px; }
+    .ast-label { width: 40px; font-weight: 600; color: var(--text-primary); }
+    .ast-value { width: 50px; text-align: right; color: var(--text-muted); font-size: 11px; }
+    .wp-item {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 10px 12px; background: var(--glass-bg-solid); border-radius: 10px; margin-bottom: 6px;
+      border: 1px solid rgba(239,68,68,0.15);
+    }
+    .wp-name { font-size: 13px; font-weight: 600; color: var(--text-primary); }
+    .wp-subject { font-size: 11px; color: var(--text-muted); }
+    .wp-badge {
+      padding: 3px 10px; border-radius: 6px; font-size: 11px; font-weight: 600;
+    }
+    .wp-badge.danger { background: rgba(239,68,68,0.12); color: #ef4444; }
+    .wp-badge.warn { background: rgba(245,158,11,0.12); color: #f59e0b; }
+
     /* ========== 本地记录列表（v0.7.1） ========== */
     .local-records-list { max-height: 300px; overflow-y: auto; }
     .local-record-item {
@@ -2178,6 +2217,7 @@
     
     .toast.success { background: rgba(16, 185, 129, 0.9); border-color: rgba(255,255,255,0.2); }
     .toast.info { background: rgba(59, 130, 246, 0.9); border-color: rgba(255,255,255,0.2); }
+    .toast.warning { background: rgba(245, 158, 11, 0.9); border-color: rgba(255,255,255,0.2); }
     
     @keyframes toastIn {
       from { transform: translateX(-50%) translateY(-20px); opacity: 0; }
@@ -2250,7 +2290,7 @@
           <div class="brand-icon">📚</div>
           <div class="brand-text">
             <h1>学习RPG · 认知操作系统</h1>
-            <p>v0.7.6</p>
+            <p>v0.7.9</p>
           </div>
         </div>
       </header>
@@ -2363,6 +2403,20 @@
               </select>
             </div>
             <div class="report-chart" id="reportChart"></div>
+          </div>
+        </div>
+        
+        <!-- 数据分析增强（v0.7.7） -->
+        <div class="overview-analysis" id="analysisSection" style="margin-top: 16px;">
+          <div class="section-title" style="font-size:12px;margin-bottom:10px;">📈 数据分析</div>
+          <div class="analysis-stats" id="analysisStats"></div>
+          <div class="analysis-chart-glass" style="margin-top:10px;">
+            <div style="font-size:12px;font-weight:600;color:var(--text-secondary);margin-bottom:8px;">⏱ 学科时长分布</div>
+            <div class="analysis-subject-time" id="subjectTimeChart"></div>
+          </div>
+          <div class="analysis-chart-glass" style="margin-top:10px;">
+            <div style="font-size:12px;font-weight:600;color:var(--text-secondary);margin-bottom:8px;">💪 薄弱点识别</div>
+            <div class="analysis-weakpoints" id="weakPointsList"></div>
           </div>
         </div>
         </div><!-- /fold-body -->
@@ -2744,7 +2798,7 @@
         </div>
         <div class="about-system-name">学习RPG · 认知操作系统</div>
         <div class="about-version">
-          <span class="about-version-badge">v0.7.6</span>
+          <span class="about-version-badge">v0.7.9</span>
         </div>
         <div class="about-developer-info">
           <div class="about-developer-name">墨澜 & MIKU</div>
@@ -3605,17 +3659,16 @@
      * @param {number} itemModifier - 个体修正系数
      * @returns {number} 综合半衰期（天）
      */
-    function calculateHalfLife(subject, itemModifier = 1.0) {
+    function calculateHalfLife(subject, itemModifier = 1.0, repetitions = 0) {
       const subjectModifier = CONFIG.SUBJECT_MODIFIERS[subject] || 1.0;
-      const halfLife = CONFIG.GLOBAL_BASE_HALFLIFE * subjectModifier * itemModifier;
+      // v2.0: 复习次数因子 — 每复习5次，半衰期增加10%（上限2倍）
+      const repFactor = Math.min(2, 1 + Math.floor(repetitions / 5) * 0.1);
+      const halfLife = CONFIG.GLOBAL_BASE_HALFLIFE * subjectModifier * itemModifier * repFactor;
       return Math.max(0.5, Math.min(30, halfLife));
     }
     
     /**
-     * 更新动态半衰期
-     * @param {Object} node - 知识点节点
-     * @param {number} observedRetention - 观察到的记忆保留率
-     * @returns {number} 新的半衰期
+     * v2.0 更新半衰期（带正确率趋势分析）
      */
     function updateHalfLife(node, observedRetention) {
       const predictedRetention = Math.max(0.01, getCurrentTemp(node)) / 100;
@@ -3623,48 +3676,68 @@
       
       const { RATIO_THRESHOLD_HIGH, RATIO_THRESHOLD_LOW, EXTEND_FACTOR, SHRINK_FACTOR, FINE_TUNE_FACTOR } = CONFIG.HALFLIFE_UPDATE;
       
-      let newHL;
-      if (ratio > RATIO_THRESHOLD_HIGH) {
-        // 记忆比预期好 → 延长半衰期
-        newHL = node.halfLifeDays * EXTEND_FACTOR;
-      } else if (ratio < RATIO_THRESHOLD_LOW) {
-        // 记忆比预期差 → 缩短半衰期
-        newHL = node.halfLifeDays * SHRINK_FACTOR;
-      } else {
-        // 微调
-        newHL = node.halfLifeDays * (FINE_TUNE_FACTOR + ratio * 0.2);
+      // v2.0: 正确率趋势修正 — 持续上升则额外奖励
+      let trendBoost = 1.0;
+      const hist = node.accuracyHistory || [];
+      if (hist.length >= 3) {
+        const recent = hist.slice(-3);
+        const trend = recent[2] - recent[0]; // 最近 vs 最旧
+        if (trend > 10) trendBoost = 1.1;     // 明显进步 +10%
+        else if (trend < -10) trendBoost = 0.9; // 退步 -10%
       }
       
-      // 限制范围，保留2位小数
+      let newHL;
+      if (ratio > RATIO_THRESHOLD_HIGH) {
+        newHL = node.halfLifeDays * EXTEND_FACTOR * trendBoost;
+      } else if (ratio < RATIO_THRESHOLD_LOW) {
+        newHL = node.halfLifeDays * SHRINK_FACTOR * trendBoost;
+      } else {
+        newHL = node.halfLifeDays * (FINE_TUNE_FACTOR + ratio * 0.2) * trendBoost;
+      }
+      
       const capped = Math.max(CONFIG.MIN_HALFLIFE, Math.min(CONFIG.MAX_HALFLIFE, newHL));
       return Math.round(capped * 100) / 100;
     }
     
     /**
-     * 复习升温逻辑
-     * @param {Object} node - 知识点节点
-     * @param {number} accuracy - 正确率(0-100)
+     * v2.0 复习升温（含间隔效应奖励）
      */
     function applyStudyBoost(node, accuracy) {
       const currentTemp = getCurrentTemp(node);
       
-      // 计算升温幅度
+      // v2.0: 间隔效应 — 恰好在半衰期附近复习，升温更高
+      const elapsedDays = (Date.now() - node.lastStudy) / (24 * 3600 * 1000);
+      const intervalRatio = elapsedDays / node.halfLifeDays;
+      let intervalBonus = 1.0;
+      if (intervalRatio > 0.8 && intervalRatio < 1.5) intervalBonus = 1.3; // 最佳复习窗口 +30%
+      else if (intervalRatio > 0.5) intervalBonus = 1.15;                   // 合理窗口 +15%
+      
       const boost = Math.min(
-        CONFIG.TEMP.BOOST_MAX,
-        Math.max(CONFIG.TEMP.BOOST_MIN, accuracy * CONFIG.TEMP.BOOST_FACTOR + 10)
+        CONFIG.TEMP.BOOST_MAX * intervalBonus,
+        Math.max(CONFIG.TEMP.BOOST_MIN, accuracy * CONFIG.TEMP.BOOST_FACTOR + 10) * intervalBonus
       );
       
-      // 更新峰值温度
       node.peakTemp = Math.min(CONFIG.TEMP.MAX_PEAK, +(currentTemp + boost).toFixed(1));
       node.lastStudy = Date.now();
       node.repetitions++;
-      
-      // 更新历史正确率
       node.accuracyHistory.push(accuracy);
       
-      // 更新动态半衰期
       const observedRetention = accuracy / 100;
       node.halfLifeDays = updateHalfLife(node, observedRetention);
+    }
+    
+    /**
+     * v2.0 掌握度评分（0-100）
+     * 综合考虑：当前温度、复习次数、正确率趋势、半衰期稳定性
+     */
+    function calculateMastery(node) {
+      if (!node || node.repetitions === 0) return 0;
+      const temp = getCurrentTemp(node);
+      const hist = node.accuracyHistory || [];
+      const avgAcc = hist.length ? Math.round(hist.reduce((a, b) => a + b, 0) / hist.length) : 0;
+      const repScore = Math.min(100, node.repetitions * 15); // 复习次数满分6-7次
+      const hlStability = Math.min(100, (node.halfLifeDays / CONFIG.GLOBAL_BASE_HALFLIFE) * 50);
+      return Math.round((temp * 0.3 + avgAcc * 0.3 + repScore * 0.25 + hlStability * 0.15));
     }
     
     /**
@@ -3674,7 +3747,7 @@
      * @returns {Object} 新节点
      */
     function createKnowledgeNode(name, subject) {
-      const halfLifeDays = calculateHalfLife(subject, 1.0);
+      const halfLifeDays = calculateHalfLife(subject, 1.0, 0);
       return {
         id: generateUUID(),
         name: name,
@@ -5162,19 +5235,17 @@
     }
     
     // ========== Toast提示 ==========
-    function showToast(msg, type = 'info') {
+    function showToast(msg, type = 'success') {
       const t = document.getElementById('toast');
+      if (!t) return;
+      clearTimeout(t._timer);
       t.innerHTML = msg;
-      t.className = `toast ${type}`;
+      t.className = 'toast show ' + type;
       t.style.display = 'block';
-      
-      setTimeout(() => {
-        t.style.animation = 'toastIn 0.3s reverse';
-        setTimeout(() => {
-          t.style.display = 'none';
-          t.style.animation = '';
-        }, 300);
-      }, 3000);
+      t._timer = setTimeout(() => {
+        t.classList.remove('show');
+        setTimeout(() => { t.style.display = 'none'; }, 300);
+      }, 2500);
     }
     
     // ========== v0.6.1 每日状态标签系统 ==========
@@ -6135,6 +6206,85 @@
       } catch(e) {}
     }
 
+    // ========== v0.7.7 数据分析增强 ==========
+    function renderAnalysis() {
+      const statsEl = document.getElementById('analysisStats');
+      const timeEl = document.getElementById('subjectTimeChart');
+      const wpEl = document.getElementById('weakPointsList');
+      if (!statsEl || !timeEl || !wpEl) return;
+      
+      const records = appData.records || [];
+      const now = Date.now();
+      const monthAgo = now - 30 * 24 * 3600 * 1000;
+      const recentRecords = records.filter(r => r.timestamp >= monthAgo);
+      
+      // 总时长
+      const totalMin = records.reduce((s, r) => s + (r.durationMinutes || 0), 0);
+      const recentMin = recentRecords.reduce((s, r) => s + (r.durationMinutes || 0), 0);
+      const totalSessions = records.length;
+      
+      statsEl.innerHTML = `
+        <div class="analysis-stat-card"><div class="analysis-stat-value">${Math.round(totalMin / 60)}h</div><div class="analysis-stat-label">总学习时长</div></div>
+        <div class="analysis-stat-card"><div class="analysis-stat-value">${Math.round(recentMin / 60)}h</div><div class="analysis-stat-label">近30天</div></div>
+        <div class="analysis-stat-card"><div class="analysis-stat-value">${totalSessions}</div><div class="analysis-stat-label">学习次数</div></div>
+      `;
+      
+      // 学科时长分布
+      const subTime = {};
+      for (const r of records) {
+        const s = r.subject || '未知';
+        if (!subTime[s]) subTime[s] = 0;
+        subTime[s] += r.durationMinutes || 0;
+      }
+      const sorted = Object.entries(subTime).sort((a, b) => b[1] - a[1]);
+      const maxTime = sorted.length ? sorted[0][1] : 1;
+      const subColors = SUBJECTS || {};
+      
+      timeEl.innerHTML = sorted.length ? sorted.map(([name, min]) => {
+        const color = subColors[name]?.color || '#6366f1';
+        const pct = Math.round((min / maxTime) * 100);
+        return `
+          <div class="ast-row">
+            <span class="ast-label" style="color:${color}">${name}</span>
+            <div class="ast-bar-wrap"><div class="ast-bar" style="width:${pct}%;background:${color}"></div></div>
+            <span class="ast-value">${Math.round(min / 60)}h ${min % 60}m</span>
+          </div>
+        `;
+      }).join('') : '<div style="text-align:center;padding:12px;color:var(--text-muted);font-size:13px;">暂无学习时长数据</div>';
+      
+      // 薄弱点识别：正确率低于60%的节点
+      const weakPoints = [];
+      for (const [sub, subject] of Object.entries(appData.subjects)) {
+        if (!subject.nodes) continue;
+        for (const node of subject.nodes) {
+          if (node.accuracyHistory && node.accuracyHistory.length > 0) {
+            const avg = node.accuracyHistory.reduce((a, b) => a + b, 0) / node.accuracyHistory.length;
+            if (avg < 70 && node.totalXp > 0) {
+              weakPoints.push({ name: node.name, subject: sub, accuracy: Math.round(avg), xp: node.totalXp });
+            }
+          }
+        }
+      }
+      // 也检查examResults
+      for (const exam of (appData.examResults || [])) {
+        if (exam.accuracy < 60) {
+          weakPoints.push({ name: exam.name, subject: exam.subject, accuracy: exam.accuracy, xp: exam.totalXp, isExam: true });
+        }
+      }
+      weakPoints.sort((a, b) => a.accuracy - b.accuracy);
+      
+      wpEl.innerHTML = weakPoints.length ? weakPoints.slice(0, 6).map(w => {
+        const label = w.isExam ? '考试' : '知识点';
+        const badge = w.accuracy < 50 ? 'danger' : 'warn';
+        return `
+          <div class="wp-item">
+            <div><div class="wp-name">${w.name}</div><div class="wp-subject">${w.subject} · ${label}</div></div>
+            <div><span class="wp-badge ${badge}">${w.accuracy}%</span></div>
+          </div>
+        `;
+      }).join('') : '<div style="text-align:center;padding:16px;color:var(--text-muted);font-size:13px;">暂无薄弱点，继续保持 ✨</div>';
+    }
+
     // ========== 渲染全部 ==========
     function renderAll() {
       console.log('[DEBUG] renderAll: appData =', appData, '| profile.xp =', appData?.profile?.xp);
@@ -6218,6 +6368,7 @@
       if (textbookData) switchTextbook();
       if (coursesData) switchCourse();
       renderReport();
+      renderAnalysis();
       
       // 设置页数据源显示
       const dataSourceEl = document.getElementById('settingsDataSource');
@@ -6298,7 +6449,7 @@
         // 计算个体修正系数（基于记忆表现）
         const avgAcc = accuracies.reduce((a, b) => a + b, 0) / accuracies.length;
         const itemMod = avgAcc >= 85 ? 1.15 : (avgAcc >= 70 ? 1.0 : (avgAcc >= 55 ? 0.85 : 0.7));
-        node.halfLifeDays = calculateHalfLife(subject, itemMod);
+        node.halfLifeDays = calculateHalfLife(subject, itemMod, node.repetitions);
         
         return node;
       };
