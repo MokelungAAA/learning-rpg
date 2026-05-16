@@ -8538,20 +8538,30 @@
       console.warn('[v0.8.5] 成就数据全部加载源失败');
     }
 
-    // ========== v0.6.7 教材进度地图 ==========
+    // ========== v0.6.7 教材进度地图（v1.3.1 多源增强） ==========
     let textbookData = null;
+    const TEXTBOOK_SOURCES = [
+      `./data/textbooks/textbooks.json?t=${Date.now()}`,
+      'https://raw.githubusercontent.com/MokelungAAA/learning-rpg/main/data/textbooks/textbooks.json',
+      'https://cdn.jsdelivr.net/gh/MokelungAAA/learning-rpg@main/data/textbooks/textbooks.json',
+      'https://mokelungaaa.github.io/learning-rpg/data/textbooks/textbooks.json'
+    ];
     
     async function loadTextbookData() {
-      try {
-        const resp = await fetch(`./data/textbooks/textbooks.json?t=${Date.now()}`, {
-          headers: { 'Accept': 'application/json', 'Cache-Control': 'no-cache' }
-        });
-        if (!resp.ok) return;
-        textbookData = await resp.json();
-        initTextbookControls();
-      } catch (e) {
-        console.warn('[v0.6.7] 教材数据加载失败:', e.message);
+      for (const url of TEXTBOOK_SOURCES) {
+        try {
+          const resp = await fetchWithTimeout(url);
+          if (!resp.ok) continue;
+          textbookData = await resp.json();
+          initTextbookControls();
+          console.log('[v1.3.1] 教材数据加载成功:', url.slice(0,60));
+          return;
+        } catch (e) {
+          console.warn('[v1.3.1] 教材数据加载失败:', url.slice(0,50), e.message);
+          continue;
+        }
       }
+      console.warn('[v1.3.1] 教材数据全部加载源失败');
     }
     
     function initTextbookControls() {
@@ -8649,20 +8659,30 @@
       `;
     }
 
-    // ========== v0.6.8 网课进度展示 ==========
+    // ========== v0.6.8 网课进度展示（v1.3.1 多源增强） ==========
     let coursesData = null;
+    const COURSES_SOURCES = [
+      `./data/courses/courses.json?t=${Date.now()}`,
+      'https://raw.githubusercontent.com/MokelungAAA/learning-rpg/main/data/courses/courses.json',
+      'https://cdn.jsdelivr.net/gh/MokelungAAA/learning-rpg@main/data/courses/courses.json',
+      'https://mokelungaaa.github.io/learning-rpg/data/courses/courses.json'
+    ];
 
     async function loadCoursesData() {
-      try {
-        const resp = await fetch(`./data/courses/courses.json?t=${Date.now()}`, {
-          headers: { 'Accept': 'application/json', 'Cache-Control': 'no-cache' }
-        });
-        if (!resp.ok) return;
-        coursesData = await resp.json();
-        initCourseControls();
-      } catch (e) {
-        console.warn('[v0.6.8] 网课数据加载失败:', e.message);
+      for (const url of COURSES_SOURCES) {
+        try {
+          const resp = await fetchWithTimeout(url);
+          if (!resp.ok) continue;
+          coursesData = await resp.json();
+          initCourseControls();
+          console.log('[v1.3.1] 网课数据加载成功:', url.slice(0,60));
+          return;
+        } catch (e) {
+          console.warn('[v1.3.1] 网课数据加载失败:', url.slice(0,50), e.message);
+          continue;
+        }
       }
+      console.warn('[v1.3.1] 网课数据全部加载源失败');
     }
 
     function initCourseControls() {
