@@ -3892,26 +3892,26 @@
             </div>
             <span class="settings-arrow">›</span>
           </div>
-          <div class="settings-item disabled">
+          <div class="settings-item" onclick="openGitHubConfig()">
             <div class="settings-info">
-              <span class="settings-icon">📊</span>
+              <span class="settings-icon">🔑</span>
               <div>
-                <div class="settings-name">数据管理</div>
-                <div class="settings-desc">导出数据、备份恢复</div>
+                <div class="settings-name">GitHub配置</div>
+                <div class="settings-desc" id="githubTokenStatus">未配置Token · 点此设置</div>
               </div>
             </div>
-            <span class="settings-value">即将推出</span>
+            <span class="settings-arrow">›</span>
           </div>
           
-          <div class="settings-item disabled">
+          <div class="settings-item" onclick="syncToGitHub()">
             <div class="settings-info">
-              <span class="settings-icon">📱</span>
+              <span class="settings-icon">📤</span>
               <div>
-                <div class="settings-name">数据同步</div>
-                <div class="settings-desc">通过微信AI自动处理</div>
+                <div class="settings-name">同步到GitHub</div>
+                <div class="settings-desc">将本地数据推送到GitHub仓库</div>
               </div>
             </div>
-            <span class="settings-value">已启用</span>
+            <span class="settings-arrow" id="syncStatus">›</span>
           </div>
           
           <div class="settings-item" onclick="toggleTheme()">
@@ -10073,6 +10073,123 @@
       const current = document.documentElement.getAttribute('data-theme') || 'light';
       applyTheme(current === 'dark' ? 'light' : 'dark', true);
     }
+    
+    // ========== v1.4.0 GitHub 反向写入 ==========
+    const GITHUB_CONFIG_KEY = 'learning-rpg-github-config';
+    
+    function getGitHubConfig() {
+      try { return JSON.parse(localStorage.getItem(GITHUB_CONFIG_KEY)) || {}; } catch(e) { return {}; }
+    }
+    
+    function setGitHubConfig(config) {
+      localStorage.setItem(GITHUB_CONFIG_KEY, JSON.stringify(config));
+    }
+    
+    function openGitHubConfig() {
+      const config = getGitHubConfig();
+      const token = prompt('请输入 GitHub 个人访问 Token：\n（需要 repo 权限，用来推送 data.json 到仓库）', config.token || '');
+      if (token === null) return;
+      if (token.trim()) {
+        config.token = token.trim();
+        config.repo = 'MokelungAAA/learning-rpg';
+        config.branch = 'main';
+        setGitHubConfig(config);
+        updateGitHubStatus();
+        showToast('✅ GitHub Token 已保存', 'success');
+      } else {
+        showToast('⚠️ Token 不能为空', 'warning');
+      }
+    }
+    
+    function updateGitHubStatus() {
+      const el = document.getElementById('githubTokenStatus');
+      if (!el) return;
+      const config = getGitHubConfig();
+      el.textContent = config.token ? '✅ Token 已配置 · 点此修改' : '❌ 未配置 · 点此设置';
+    }
+    
+    async function syncToGitHub() {
+      const config = getGitHubConfig();
+      if (!config.token) {
+        showToast('⚠️ 请先在 "数据管理 > GitHub配置" 中设置Token', 'warning');
+        openGitHubConfig();
+        return;
+      }
+      
+      const arrow = document.getElementById('syncStatus');
+      if (arrow) arrow.textContent = '⏳ 同步中...';
+      
+      try {
+        await commitToGitHub(config);
+        showToast('✅ 已成功推送到 GitHub！', 'success');
+        if (arrow) arrow.textContent = '✓ 同步成功';
+        setTimeout(() => { if (arrow) arrow.textContent = '›'; }, 3000);
+      } catch (e) {
+        showToast('❌ 推送失败: ' + e.message, 'warning');
+        if (arrow) arrow.textContent = '✕ 失败';
+        setTimeout(() => { if (arrow) arrow.textContent = '›'; }, 3000);
+      }
+    }
+    
+    async function commitToGitHub(config) {
+      // 构建要推送的 data.json 内容
+      const records = appData.records.map(r => ({
+        id: r.recordID,
+        timestamp: new Date(r.timestamp).toISOString(),
+        subject: r.subject,
+        textbook: r.knowledgePoints && r.knowledgePoints[0] ? r.knowledgePoints[0] : '',
+        chapter: 0,
+        score: r.accuracy || 0,
+        duration: r.durationMinutes || 0
+      }));
+      
+      const payload = {
+        version: '2.0',
+        lastUpdated: new Date().toISOString(),
+        learnerName: '墨澜',
+        records: records
+      };
+      
+      const content = btoa(unescape(encodeURIComponent(JSON.stringify(payload, null, 2))));
+      
+      // Step 1: 获取当前文件的 SHA（GitHub API 要求）
+      const getUrl = `https://api.github.com/repos/${config.repo}/contents/data/data.json?ref=${config.branch}`;
+      let sha = '';
+      try {
+        const getResp = await fetch(getUrl, {
+          headers: { 'Authorization': 'token ' + config.token, 'Accept': 'application/vnd.github.v3+json' }
+        });
+        if (getResp.ok) {
+          const fileInfo = await getResp.json();
+          sha = fileInfo.sha;
+        }
+      } catch(e) { /* 文件不存在，新建 */ }
+      
+      // Step 2: PUT 推送新内容
+      const putUrl = `https://api.github.com/repos/${config.repo}/contents/data/data.json`;
+      const putResp = await fetch(putUrl, {
+        method: 'PUT',
+        headers: {
+          'Authorization': 'token ' + config.token,
+          'Accept': 'application/vnd.github.v3+json',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          message: '学习RPG v1.4.0: 网页端数据同步',
+          content: content,
+          sha: sha || undefined,
+          branch: config.branch
+        })
+      });
+      
+      if (!putResp.ok) {
+        const errData = await putResp.json().catch(() => ({}));
+        throw new Error(errData.message || `HTTP ${putResp.status}`);
+      }
+    }
+    
+    // 初始化时更新 Token 状态
+    updateGitHubStatus();
     
     // 监听系统主题变化
     window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
