@@ -480,18 +480,25 @@
       z-index: 2;
     }
 
-    /* ========== 底部导航 v2.0（body 直接子级，零父元素依赖） ========== */
+    /* ========== 底部导航 v2.1（常驻显示，仅在启动页隐藏） ========== */
     #bottomNav {
       position: fixed;
       bottom: 0; left: 0; right: 0;
-      display: flex;  /* 默认显示，由 .hidden class 隐藏 */
+      display: flex;
       z-index: 10001;
-      background: #ffffff;
-      border-top: 2px solid #6366f1;
-      box-shadow: 0 -4px 20px rgba(99, 102, 241, 0.3);
+      background: rgba(255, 255, 255, 0.88);
+      backdrop-filter: blur(20px) saturate(180%);
+      -webkit-backdrop-filter: blur(20px) saturate(180%);
+      border-top: 1px solid rgba(99, 102, 241, 0.2);
+      box-shadow: 0 -2px 16px rgba(99, 102, 241, 0.12);
       padding-bottom: env(safe-area-inset-bottom, 0);
       -webkit-user-select: none;
       user-select: none;
+      transition: transform 0.3s ease;
+    }
+    #bottomNav.hidden {
+      transform: translateY(100%);
+      pointer-events: none;
     }
     #bottomNav .nav-inner {
       display: flex;
@@ -553,15 +560,121 @@
       color: #3b82f6;
       font-weight: 600;
     }
-    #bottomNav.hidden { display: none !important; }
     /* 深色模式 */
-    [data-theme="dark"] #bottomNav { background: #1e2235; border-top-color: #818cf8; }
+    [data-theme="dark"] #bottomNav { background: rgba(30, 34, 53, 0.88); border-top-color: rgba(129, 140, 248, 0.3); }
     [data-theme="dark"] #bottomNav .nav-icon { color: #8890a0; }
     [data-theme="dark"] #bottomNav .nav-label { color: #6b7280; }
     [data-theme="dark"] #bottomNav .nav-btn.active { background: rgba(129, 140, 248, 0.15); }
     [data-theme="dark"] #bottomNav .nav-btn.active .nav-icon { color: #818cf8; }
     [data-theme="dark"] #bottomNav .nav-btn.active .nav-label { color: #818cf8; }
     [data-theme="dark"] #bottomNav .nav-btn.active::after { background: #818cf8; }
+
+    /* ========== 番茄钟 FAB 浮动按钮 ========== */
+    #pomodoroFab {
+      position: fixed;
+      right: 20px;
+      bottom: calc(80px + env(safe-area-inset-bottom, 16px));
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #ef4444, #f97316);
+      color: #fff;
+      border: none;
+      font-size: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      box-shadow: 0 4px 16px rgba(239, 68, 68, 0.4);
+      cursor: pointer;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      -webkit-user-select: none;
+      user-select: none;
+    }
+    #pomodoroFab:hover { transform: scale(1.1); box-shadow: 0 6px 24px rgba(239, 68, 68, 0.5); }
+    #pomodoroFab:active { transform: scale(0.95); }
+    #pomodoroFab.running {
+      animation: fabPulse 2s ease infinite;
+    }
+    @keyframes fabPulse {
+      0%, 100% { box-shadow: 0 4px 16px rgba(239, 68, 68, 0.4); }
+      50% { box-shadow: 0 4px 24px rgba(239, 68, 68, 0.7), 0 0 0 8px rgba(239, 68, 68, 0.15); }
+    }
+    #pomodoroFab .fab-timer {
+      position: absolute;
+      top: -8px;
+      right: -8px;
+      background: #1e1e2e;
+      color: #fff;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 10px;
+      min-width: 28px;
+      text-align: center;
+      display: none;
+    }
+    #pomodoroFab.running .fab-timer { display: block; }
+    [data-theme="dark"] #pomodoroFab { background: linear-gradient(135deg, #dc2626, #ea580c); box-shadow: 0 4px 16px rgba(239, 68, 68, 0.3); }
+
+    /* ========== 设置页分组 ========== */
+    .settings-group {
+      margin-bottom: 16px;
+    }
+    .settings-group-title {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      padding: 8px 16px 4px;
+    }
+
+    /* ========== 折叠面板（通用） ========== */
+    .collapsible-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      padding: 12px 16px;
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border-subtle);
+      border-radius: var(--radius-md);
+      margin-bottom: 2px;
+      transition: all 0.2s ease;
+      -webkit-user-select: none;
+      user-select: none;
+    }
+    .collapsible-header:hover { background: var(--glass-bg-hover); }
+    .collapsible-header:active { transform: scale(0.99); }
+    .collapsible-header .collapsible-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+    .collapsible-header .collapsible-icon {
+      font-size: 16px;
+      color: var(--text-muted);
+      transition: transform 0.3s ease;
+    }
+    .collapsible-header.expanded .collapsible-icon {
+      transform: rotate(180deg);
+    }
+    .collapsible-body {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.35s ease;
+    }
+    .collapsible-body.expanded {
+      max-height: 2000px;
+    }
+    [data-theme="dark"] .collapsible-header {
+      background: rgba(255,255,255,0.04);
+      border-color: rgba(255,255,255,0.06);
+    }
 
     /* ========== 页面内容 ========== */
     .page-content {
@@ -3836,85 +3949,69 @@
       <div class="page-content" id="page-settings">
         <div class="section-title">⚙️ 更多</div>
         
-        <div class="settings-list">
+        <!-- L2: 快捷功能 -->
+        <div class="settings-group">
+          <div class="settings-group-title">快捷功能</div>
           <div class="settings-item" onclick="openDataEntry()">
             <div class="settings-info">
               <span class="settings-icon">✏️</span>
               <div>
                 <div class="settings-name">数据录入</div>
-                <div class="settings-desc">添加学习记录和考试分数，导出更新 data.json</div>
+                <div class="settings-desc">添加学习记录和考试分数</div>
               </div>
             </div>
             <span class="settings-arrow">›</span>
           </div>
-          
-          <div class="settings-item" onclick="resyncData()">
-            <div class="settings-info">
-              <span class="settings-icon">🔄</span>
-              <div>
-                <div class="settings-name">重新同步数据</div>
-                <div class="settings-desc">从网络重新拉取 data.json（当前: <span id="settingsDataSource">-</span>）</div>
-              </div>
-            </div>
-            <span class="settings-arrow" id="resyncArrow">›</span>
-          </div>
-          
-          <div class="settings-item" onclick="openAbout()">
-            <div class="settings-info">
-              <span class="settings-icon">ℹ️</span>
-              <div>
-                <div class="settings-name">关于学习RPG</div>
-                <div class="settings-desc">版本信息、开发者、更新日志</div>
-              </div>
-            </div>
-            <span class="settings-arrow">›</span>
-          </div>
-          
-
-          <div class="settings-item" onclick="openPomodoro()">
-            <div class="settings-info">
-              <span class="settings-icon">🍅</span>
-              <div>
-                <div class="settings-name">番茄专注</div>
-                <div class="settings-desc">专注计时、休息管理、专注分析</div>
-              </div>
-            </div>
-            <span class="settings-arrow">›</span>
-          </div>
-
-
           <div class="settings-item" onclick="openReading()">
             <div class="settings-info">
               <span class="settings-icon">📖</span>
               <div>
                 <div class="settings-name">阅读记录</div>
-                <div class="settings-desc">记录阅读、管理书架、阅读统计</div>
+                <div class="settings-desc">记录阅读、管理书架</div>
               </div>
             </div>
             <span class="settings-arrow">›</span>
+          </div>
+        </div>
+
+        <!-- L3: 数据管理 -->
+        <div class="settings-group">
+          <div class="settings-group-title">数据管理</div>
+          <div class="settings-item" onclick="resyncData()">
+            <div class="settings-info">
+              <span class="settings-icon">🔄</span>
+              <div>
+                <div class="settings-name">重新同步</div>
+                <div class="settings-desc">从网络拉取最新数据（当前: <span id="settingsDataSource">-</span>）</div>
+              </div>
+            </div>
+            <span class="settings-arrow" id="resyncArrow">›</span>
           </div>
           <div class="settings-item" onclick="openGitHubConfig()">
             <div class="settings-info">
               <span class="settings-icon">🔑</span>
               <div>
                 <div class="settings-name">GitHub配置</div>
-                <div class="settings-desc" id="githubTokenStatus">未配置Token · 点此设置</div>
+                <div class="settings-desc" id="githubTokenStatus">未配置Token</div>
               </div>
             </div>
             <span class="settings-arrow">›</span>
           </div>
-          
           <div class="settings-item" onclick="syncToGitHub()">
             <div class="settings-info">
               <span class="settings-icon">📤</span>
               <div>
                 <div class="settings-name">同步到GitHub</div>
-                <div class="settings-desc">将本地数据推送到GitHub仓库</div>
+                <div class="settings-desc">推送本地数据到远程仓库</div>
               </div>
             </div>
             <span class="settings-arrow" id="syncStatus">›</span>
           </div>
-          
+        </div>
+
+        <!-- L4: 系统 -->
+        <div class="settings-group">
+          <div class="settings-group-title">系统</div>
           <div class="settings-item" onclick="toggleTheme()">
             <div class="settings-info">
               <span class="settings-icon">🎨</span>
@@ -3924,6 +4021,16 @@
               </div>
             </div>
             <span class="settings-value" id="themeLabel">浅色</span>
+          </div>
+          <div class="settings-item" onclick="openAbout()">
+            <div class="settings-info">
+              <span class="settings-icon">ℹ️</span>
+              <div>
+                <div class="settings-name">关于</div>
+                <div class="settings-desc">版本信息、更新日志</div>
+              </div>
+            </div>
+            <span class="settings-arrow">›</span>
           </div>
         </div>
       </div>
@@ -5426,7 +5533,7 @@
     </div>
   </div>
   
-  <!-- 底部导航 v2.0（body 直接子级，class控制显隐） -->
+  <!-- 底部导航 v2.1（常驻显示，启动页时 transform 隐藏） -->
   <nav id="bottomNav" class="hidden">
     <div class="nav-inner">
       <button class="nav-btn active" data-page="overview">
@@ -5451,6 +5558,12 @@
       </button>
     </div>
   </nav>
+
+  <!-- 番茄钟常驻FAB -->
+  <button id="pomodoroFab" onclick="openPomodoro()" title="番茄专注">
+    🍅
+    <span class="fab-timer" id="fabTimer">25:00</span>
+  </button>
 
   <div id="toast" class="toast" style="display:none"></div>
   
@@ -8389,7 +8502,7 @@
       const newAchievements = [];
       const records = appData.records;
       const totalDays = new Set(records.map(r => new Date(r.timestamp).toDateString())).size;
-      const totalMinutes = records.reduce((s, r) => s + (r.duration || 0), 0);
+      const totalMinutes = records.reduce((s, r) => s + (r.durationMinutes || r.duration || 0), 0);
       const subjects = new Set(records.map(r => r.subject));
 
       achievementsData.achievements.forEach(ach => {
@@ -8444,6 +8557,7 @@
     
     // ========== v0.6.1 计算今日XP ==========
     function calculateTodayXp() {
+      if (!appData.records || !Array.isArray(appData.records)) return 0;
       const now = new Date();
       const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
       return appData.records
@@ -8453,7 +8567,7 @@
     
     // ========== v0.6.1 计算连续天数 ==========
     function calculateCombo() {
-      if (appData.records.length === 0) return 0;
+      if (!appData.records || !appData.records.length) return 0;
       
       const now = new Date();
       let streak = 0;
