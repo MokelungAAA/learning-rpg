@@ -3757,6 +3757,12 @@
           <div id="shadowQueueList"></div>
         </div>
         
+        <!-- 温度概览 -->
+        <div class="temp-overview-section" style="margin-top: 20px;">
+          <div class="section-title">🌡️ 知识点温度概览</div>
+          <div id="tempOverviewList" style="display: flex; flex-wrap: wrap; gap: 8px;"></div>
+        </div>
+        
         <!-- 底部：智能推荐（直接可见，L2核心） -->
         <div class="recommend-section" style="margin-top: 24px;">
           <div class="section-title">💡 智能推荐</div>
@@ -5070,16 +5076,16 @@
           <div class="pomodoro-interrupt-title">记录中断原因</div>
           <div class="pomodoro-interrupt-types">
             <button class="pomodoro-interrupt-btn" onclick="recordInterrupt('external')">
-              <span>\U0001f6ab</span> 外部干扰
+              <span>🚫</span> 外部干扰
             </button>
             <button class="pomodoro-interrupt-btn" onclick="recordInterrupt('distracted')">
-              <span>\U0001f9e0</span> 走神
+              <span>🧠</span> 走神
             </button>
             <button class="pomodoro-interrupt-btn" onclick="recordInterrupt('phone')">
-              <span>\U0001f4f1</span> 手机
+              <span>📱</span> 手机
             </button>
             <button class="pomodoro-interrupt-btn" onclick="recordInterrupt('persisted')">
-              <span>\U0001f4aa</span> 坚持住了
+              <span>💪</span> 坚持住了
             </button>
           </div>
           <input class="pomodoro-interrupt-note" id="pomodoroInterruptNote" placeholder="备注（可选）">
@@ -5629,10 +5635,12 @@
      */
     function getCurrentTemp(node, now = Date.now()) {
       if (!node || !node.lastStudy) return 0;
-      
       const elapsedDays = (now - node.lastStudy) / (24 * 3600 * 1000);
-      const retention = Math.pow(CONFIG.TEMP.DECAY_BASE, -elapsedDays / node.halfLifeDays);
+      if (elapsedDays < 0) return node.peakTemp || 0;
+      const halfLife = (node.halfLifeDays && node.halfLifeDays > 0) ? node.halfLifeDays : 0.5;
+      const retention = Math.pow(CONFIG.TEMP.DECAY_BASE, -elapsedDays / halfLife);
       const temp = +(node.peakTemp * retention).toFixed(1);
+      if (isNaN(temp) || !isFinite(temp)) return 0;
       return Math.max(0, Math.min(100, temp));
     }
     
@@ -6374,10 +6382,10 @@
       // === 第二层：网络请求（三源并发尝试）===
       if (!isFileProtocol()) {
         const sources = [
-          { name: 'github', url: 'https://raw.githubusercontent.com/MokelungAAA/learning-rpg/main/data.json', desc: 'GitHub Raw CDN' },
-          { name: 'jsdelivr', url: 'https://cdn.jsdelivr.net/gh/MokelungAAA/learning-rpg@main/data.json', desc: 'jsDelivr CDN' },
-          { name: 'pages', url: 'https://mokelungaaa.github.io/learning-rpg/data.json', desc: 'GitHub Pages 直链' },
-          { name: 'local', url: `./data.json?t=${Date.now()}`, desc: '本地相对路径' }
+          { name: 'github', url: 'https://raw.githubusercontent.com/MokelungAAA/learning-rpg/main/data/data.json', desc: 'GitHub Raw CDN' },
+          { name: 'jsdelivr', url: 'https://cdn.jsdelivr.net/gh/MokelungAAA/learning-rpg@main/data/data.json', desc: 'jsDelivr CDN' },
+          { name: 'pages', url: 'https://mokelungaaa.github.io/learning-rpg/data/data.json', desc: 'GitHub Pages 直链' },
+          { name: 'local', url: `./data/data.json?t=${Date.now()}`, desc: '本地相对路径' }
         ];
         
         for (const source of sources) {
@@ -7103,6 +7111,36 @@
           </div>
         `;
       }).join('');
+    }
+
+    function renderTempOverview() {
+      const container = document.getElementById('tempOverviewList');
+      if (!container) return;
+      const now = Date.now();
+      const tempBuckets = { hot: [], warm: [], mild: [], cool: [], cold: [], frozen: [] };
+      
+      for (const [subjectName, subject] of Object.entries(appData.subjects)) {
+        if (!subject.nodes) continue;
+        for (const node of subject.nodes) {
+          const temp = getCurrentTemp(node, now);
+          const color = SUBJECTS[subjectName]?.color || '#666';
+          const label = getTempLabel(temp);
+          const bucket = temp >= 80 ? 'hot' : temp >= 60 ? 'warm' : temp >= 40 ? 'mild' : temp >= 20 ? 'cool' : temp > 0 ? 'cold' : 'frozen';
+          tempBuckets[bucket].push({ subject: subjectName, name: node.name, temp, color, label });
+        }
+      }
+      
+      let html = '';
+      for (const [key, items] of Object.entries(tempBuckets)) {
+        if (items.length === 0) continue;
+        const labels = { hot: '炙热', warm: '温热', mild: '温暖', cool: '正常', cold: '微凉', frozen: '冻结' };
+        const colors = { hot: '#FF4500', warm: '#FF8C00', mild: '#FFD700', cool: '#62A0EA', cold: '#1A5FB4', frozen: '#6B7280' };
+        html += `<div style="display:flex;align-items:center;gap:6px;background:${colors[key]}15;padding:4px 10px;border-radius:20px;font-size:12px;">
+          <span style="color:${colors[key]};font-weight:600;">${labels[key]}</span>
+          <span style="color:var(--text-muted)">${items.length}个</span>
+        </div>`;
+      }
+      container.innerHTML = html || '<span style="color:var(--text-muted);font-size:13px;">暂无知识点数据</span>';
     }
     
     // ========== v0.4.3 全局参数自校准系统 ==========
@@ -9520,6 +9558,7 @@
       renderSubjectGrid();
       renderLog();
       renderShadowQueue();
+      renderTempOverview();
       renderRecommend();
       renderAchievements();
       renderExamResults();
@@ -10318,7 +10357,7 @@
 
       // Update page title
       if (pomodoroState.isRunning || pomodoroState.isPaused) {
-        const phaseIcon = pomodoroState.phase === 'focus' ? '\U0001f345' : '\u2615';
+        const phaseIcon = pomodoroState.phase === 'focus' ? '\u{1f345}' : '\u2615';
         document.title = String(mins).padStart(2, '0') + ':' + String(secs).padStart(2, '0') + ' ' + phaseIcon + ' ' + phaseLabels[pomodoroState.phase];
       } else {
         document.title = '学习RPG \u00b7 认知操作系统';
@@ -10641,7 +10680,7 @@
       const mins = Math.floor(awaySeconds / 60);
       const el = document.createElement('div');
       el.className = 'pomodoro-welcome-back';
-      el.innerHTML = '\U0001f345 欢迎回来！你离开了 ' + mins + ' 分钟';
+      el.innerHTML = '\u{1f345} 欢迎回来！你离开了 ' + mins + ' 分钟';
       document.body.appendChild(el);
       setTimeout(() => {
         el.style.opacity = '0';
@@ -10684,7 +10723,7 @@
       // Show achievement toasts
       achievements.forEach((a, i) => {
         setTimeout(() => {
-          showToast('\U0001f3c6 成就解锁: ' + a.name + ' - ' + a.desc);
+          showToast('\u{1f3c6} 成就解锁: ' + a.name + ' - ' + a.desc);
         }, i * 1500);
       });
     }
@@ -11393,10 +11432,10 @@
       // 2. 静默网络拉取
       if (!isFileProtocol()) {
         const sources = [
-          { name: 'github', url: 'https://raw.githubusercontent.com/MokelungAAA/learning-rpg/main/data.json', desc: 'GitHub Raw' },
-          { name: 'jsdelivr', url: 'https://cdn.jsdelivr.net/gh/MokelungAAA/learning-rpg@main/data.json', desc: 'jsDelivr' },
-          { name: 'pages', url: 'https://mokelungaaa.github.io/learning-rpg/data.json', desc: 'GitHub Pages' },
-          { name: 'local', url: `./data.json?t=${Date.now()}`, desc: '本地' }
+          { name: 'github', url: 'https://raw.githubusercontent.com/MokelungAAA/learning-rpg/main/data/data.json', desc: 'GitHub Raw' },
+          { name: 'jsdelivr', url: 'https://cdn.jsdelivr.net/gh/MokelungAAA/learning-rpg@main/data/data.json', desc: 'jsDelivr' },
+          { name: 'pages', url: 'https://mokelungaaa.github.io/learning-rpg/data/data.json', desc: 'GitHub Pages' },
+          { name: 'local', url: `./data/data.json?t=${Date.now()}`, desc: '本地' }
         ];
         
         for (const source of sources) {
