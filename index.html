@@ -5477,6 +5477,32 @@
       '地理': { icon: '🌍', color: '#26A269', rootName: 'Geōgraphia', rootLang: '希腊语', rootMeaning: '大地描述' }
     };
     
+    // ========== 数据版本管理 ==========
+    const DATA_VERSION = 'v0.8.4';
+    
+    function migrateAppData(data) {
+      if (!data || !data.version) return data;
+      const v = data.version;
+      if (v === DATA_VERSION) return data;
+      if (v < 'v0.8.4') {
+        if (!data.records && data.studyLog) {
+          data.records = data.studyLog;
+          delete data.studyLog;
+        }
+        if (!data.profile) {
+          data.profile = { level: 1, xp: 0, totalXp: 0, combo: 0, title: '初学者', titleJp: 'Shogakusha', achievements: [] };
+        }
+        if (!data.subjects) {
+          data.subjects = {};
+          Object.keys(SUBJECTS).forEach(name => {
+            data.subjects[name] = { name: name, level: 1, xp: 0, nodes: [] };
+          });
+        }
+      }
+      data.version = DATA_VERSION;
+      return data;
+    }
+    
     // ========== 等级数据 ==========
     const LEVELS = [
       { l: 1, t: '初学者', j: 'Shogakusha', r: 0, s: 0 },
@@ -6573,7 +6599,7 @@
       subjects: {},
       records: [],
       examResults: [],
-      version: 'v0.6.5'
+      version: DATA_VERSION
     };
     
     // 初始化九大学科
@@ -10459,10 +10485,11 @@
 
     function saveAppData() {
       if (!appData) return;
+      appData.version = DATA_VERSION;
       try {
         localStorage.setItem('learning-rpg-appdata', JSON.stringify(appData));
       } catch (e) {
-        console.warn('[v0.8.2] 保存appData失败:', e.message);
+        console.warn('[v0.8.4] 保存appData失败:', e.message);
       }
     }
 
@@ -11223,8 +11250,8 @@
         if (saved) {
           const parsed = JSON.parse(saved);
           if (parsed && parsed.records) {
-            appData = parsed;
-            console.log('[v0.8.3] 从localStorage恢复appData');
+            appData = migrateAppData(parsed);
+            console.log('[v0.8.4] 从localStorage恢复appData, 版本:' + appData.version);
           }
         }
       } catch (e) {}
