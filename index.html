@@ -139,6 +139,9 @@
     [data-theme="dark"] .data-entry-info { background: #2a2f4a; }
     [data-theme="dark"] .data-entry-tab.active { background: #2a2f4a; }
     [data-theme="dark"] .data-entry-submit.secondary { background: #2a2f4a; color: #b0b8c8; }
+    [data-theme="dark"] .bottom-nav { background: rgba(30, 35, 50, 0.92); backdrop-filter: blur(var(--glass-blur-heavy)) saturate(200%); -webkit-backdrop-filter: blur(var(--glass-blur-heavy)) saturate(200%); border-top-color: #818cf8; }
+    [data-theme="dark"] .nav-item.active { background: rgba(129, 140, 248, 0.15); }
+    [data-theme="dark"] .nav-item.active .nav-label { color: #818cf8; }
     [data-theme="dark"] .course-card { background: var(--glass-bg); }
     [data-theme="dark"] .heatmap-table td { opacity: 0.9; }
     [data-theme="dark"] .hm-stats { color: #d1d5db; }
@@ -3532,7 +3535,7 @@
           <div class="brand-icon">📚</div>
           <div class="brand-text">
             <h1>学习RPG · 认知操作系统</h1>
-            <p>v1.2.0</p>
+            <p>v1.2.1</p>
           </div>
         </div>
       </header>
@@ -4082,7 +4085,7 @@
         </div>
         <div class="about-system-name">学习RPG · 认知操作系统</div>
         <div class="about-version">
-          <span class="about-version-badge">v1.2.0</span>
+          <span class="about-version-badge">v1.2.1</span>
         </div>
         <div class="about-developer-info">
           <div class="about-developer-name">墨澜 & MIKU</div>
@@ -4093,7 +4096,7 @@
       <!-- 统计概览 -->
       <div class="about-stats-row" id="aboutStats">
         <div class="about-stat-chip">
-          <div class="about-stat-chip-value" id="statVersions">34</div>
+          <div class="about-stat-chip-value" id="statVersions">35</div>
           <div class="about-stat-chip-label">版本迭代</div>
         </div>
         <div class="about-stat-chip">
@@ -4134,8 +4137,23 @@
             <div class="changelog-version expanded" onclick="event.stopPropagation();this.classList.toggle('expanded')">
               <div class="changelog-version-header current">
                 <div class="changelog-version-left">
-                  <span>v1.2.0</span>
+                  <span>v1.2.1</span>
                   <span class="changelog-version-tag">当前</span>
+                </div>
+                <span class="changelog-toggle">▼</span>
+              </div>
+              <div class="changelog-items">
+                <div class="changelog-item">
+                  <span class="changelog-item-version">2026-05-16</span>
+                  V1.2.1: 修复底部导航栏无法显示Bug（移入主页面容器）；深色模式底部导航适配；版本号更新。
+                </div>
+              </div>
+            </div>
+            <div class="changelog-version expanded" onclick="event.stopPropagation();this.classList.toggle('expanded')">
+              <div class="changelog-version-header">
+                <div class="changelog-version-left">
+                  <span>v1.2.0</span>
+                  <span class="changelog-version-tag">v1.2.0</span>
                 </div>
                 <span class="changelog-toggle">▼</span>
               </div>
@@ -5370,34 +5388,33 @@
         <div class="reading-recent-title">最近阅读</div>
         <div id="readingRecentList"></div>
       </div>
+      <!-- 底部导航 -->
+      <nav class="bottom-nav" id="bottomNav">
+        <div class="nav-items">
+          <button class="nav-item active" onclick="switchPage('overview')">
+            <span class="nav-icon">🏠</span>
+            <span class="nav-label">总览</span>
+          </button>
+          <button class="nav-item" onclick="switchPage('skills')">
+            <span class="nav-icon">🌳</span>
+            <span class="nav-label">技能树</span>
+          </button>
+          <button class="nav-item" onclick="switchPage('review')">
+            <span class="nav-icon">🔄</span>
+            <span class="nav-label">复习</span>
+          </button>
+          <button class="nav-item" onclick="switchPage('log')">
+            <span class="nav-icon">📊</span>
+            <span class="nav-label">日志</span>
+          </button>
+          <button class="nav-item" onclick="switchPage('settings')">
+            <span class="nav-icon">⚙️</span>
+            <span class="nav-label">更多</span>
+          </button>
+        </div>
+      </nav>
     </div>
   </div>
-
-  <!-- 底部导航 -->
-  <nav class="bottom-nav" id="bottomNav">
-    <div class="nav-items">
-      <button class="nav-item active" onclick="switchPage('overview')">
-        <span class="nav-icon">🏠</span>
-        <span class="nav-label">总览</span>
-      </button>
-      <button class="nav-item" onclick="switchPage('skills')">
-        <span class="nav-icon">🌳</span>
-        <span class="nav-label">技能树</span>
-      </button>
-      <button class="nav-item" onclick="switchPage('review')">
-        <span class="nav-icon">🔄</span>
-        <span class="nav-label">复习</span>
-      </button>
-      <button class="nav-item" onclick="switchPage('log')">
-        <span class="nav-icon">📊</span>
-        <span class="nav-label">日志</span>
-      </button>
-      <button class="nav-item" onclick="switchPage('settings')">
-        <span class="nav-icon">⚙️</span>
-        <span class="nav-label">更多</span>
-      </button>
-    </div>
-  </nav>
   
   <div id="toast" class="toast" style="display:none"></div>
   
