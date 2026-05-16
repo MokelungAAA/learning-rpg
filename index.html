@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
@@ -464,18 +464,15 @@
       bottom: 0;
       left: 0;
       right: 0;
-      background: rgba(255, 255, 255, 0.65);
+      background: rgba(255, 255, 255, 0.95);
       backdrop-filter: blur(var(--glass-blur-heavy)) saturate(200%);
       -webkit-backdrop-filter: blur(var(--glass-blur-heavy)) saturate(200%);
-      border-top: 1px solid rgba(255, 255, 255, 0.4);
-      padding: 6px 0;
-      padding-bottom: max(6px, env(safe-area-inset-bottom));
-      z-index: 100;
-      box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.06);
-      display: block !important;
-      visibility: visible !important;
-      opacity: 1 !important;
-      transform: translateY(0) !important;
+      border-top: 2px solid #6366f1;
+      padding: 8px 0;
+      padding-bottom: max(8px, env(safe-area-inset-bottom));
+      z-index: 10001;
+      box-shadow: 0 -4px 20px rgba(99, 102, 241, 0.3);
+      min-height: 60px;
     }
     
     .nav-items {
@@ -5816,10 +5813,11 @@
     };
 
     // ========== v0.8.2 用户画像数据 ==========
-    /** 用户画像数据源（多源容错） */
+    /** 用户画像数据源（多源容错 + CORS代理） */
     const USER_PROFILE_SOURCES = [
-      { name: 'github', url: 'https://raw.githubusercontent.com/MokelungAAA/learning-rpg/main/data/user_profile.json', desc: 'GitHub Raw CDN' },
+      { name: 'github', url: 'https://raw.githubusercontent.com/MokelungAAA/learning-rpg/main/data/user_profile.json', desc: 'GitHub Raw' },
       { name: 'jsdelivr', url: 'https://cdn.jsdelivr.net/gh/MokelungAAA/learning-rpg@main/data/user_profile.json', desc: 'jsDelivr CDN' },
+      { name: 'corsproxy', url: 'https://corsproxy.io/?https://raw.githubusercontent.com/MokelungAAA/learning-rpg/main/data/user_profile.json', desc: 'CORS代理' },
       { name: 'local', url: './data/user_profile.json', desc: '本地相对路径' }
     ];
 
@@ -6029,6 +6027,7 @@
     const SKILL_TREE_SOURCES = [
       'https://raw.githubusercontent.com/MokelungAAA/learning-rpg/main/data/skill-tree.json',
       'https://cdn.jsdelivr.net/gh/MokelungAAA/learning-rpg@main/data/skill-tree.json',
+      'https://corsproxy.io/?https://raw.githubusercontent.com/MokelungAAA/learning-rpg/main/data/skill-tree.json',
       './data/skill-tree.json'
     ];
 
@@ -6402,6 +6401,7 @@
         dataLoadState.hasError = false;
         dataLoadState.dataSource = 'cache';
         const staleData = convertGitHubDataToAppData(cached.data);
+        showDataLoading(false);
         if (!isFileProtocol()) {
           backgroundDataLoad().then(() => {
             console.log('[v0.8.5] 后台静默更新完成');
@@ -6410,12 +6410,13 @@
         return staleData;
       }
       
-      // === 第二层：网络请求（三源并发尝试）===
+      // === 第二层：网络请求（多源并发尝试 + CORS代理）===
       if (!isFileProtocol()) {
         const sources = [
-          { name: 'github', url: 'https://raw.githubusercontent.com/MokelungAAA/learning-rpg/main/data/data.json', desc: 'GitHub Raw CDN' },
+          { name: 'github', url: 'https://raw.githubusercontent.com/MokelungAAA/learning-rpg/main/data/data.json', desc: 'GitHub Raw' },
           { name: 'jsdelivr', url: 'https://cdn.jsdelivr.net/gh/MokelungAAA/learning-rpg@main/data/data.json', desc: 'jsDelivr CDN' },
-          { name: 'pages', url: 'https://mokelungaaa.github.io/learning-rpg/data/data.json', desc: 'GitHub Pages 直链' },
+          { name: 'corsproxy', url: 'https://corsproxy.io/?https://raw.githubusercontent.com/MokelungAAA/learning-rpg/main/data/data.json', desc: 'CORS代理' },
+          { name: 'pages', url: 'https://mokelungaaa.github.io/learning-rpg/data/data.json', desc: 'GitHub Pages' },
           { name: 'local', url: `./data/data.json?t=${Date.now()}`, desc: '本地相对路径' }
         ];
         
@@ -8401,6 +8402,7 @@
     const ACHIEVEMENTS_SOURCES = [
       'https://raw.githubusercontent.com/MokelungAAA/learning-rpg/main/data/achievements-data.json',
       'https://cdn.jsdelivr.net/gh/MokelungAAA/learning-rpg@main/data/achievements-data.json',
+      'https://corsproxy.io/?https://raw.githubusercontent.com/MokelungAAA/learning-rpg/main/data/achievements-data.json',
       './data/achievements-data.json'
     ];
 
@@ -11238,4 +11240,302 @@
         }
       });
 
-      const isDark = document.d
+      const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+      const textColor = isDark ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.6)';
+
+      readingMonthlyChart = echarts.init(container);
+      readingMonthlyChart.setOption({
+        grid: { top: 20, right: 16, bottom: 30, left: 45 },
+        xAxis: {
+          type: 'category',
+          data: months.map(m => m.label),
+          axisLabel: { color: textColor, fontSize: 11 },
+          axisLine: { lineStyle: { color: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.08)' } }
+        },
+        yAxis: {
+          type: 'value',
+          axisLabel: { color: textColor, fontSize: 11 },
+          splitLine: { lineStyle: { color: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)' } }
+        },
+        series: [{
+          type: 'bar',
+          data: months.map(m => pagesByMonth[m.key]),
+          barWidth: '50%',
+          itemStyle: {
+            borderRadius: [6, 6, 0, 0],
+            color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+              { offset: 0, color: '#667eea' },
+              { offset: 1, color: '#764ba2' }
+            ])
+          }
+        }],
+        tooltip: {
+          trigger: 'axis',
+          formatter: '{b}<br/>阅读 {c} 页'
+        }
+      });
+    }
+
+    function renderReadingCategoryChart() {
+      const container = document.getElementById('readingCategoryChart');
+      if (!container || typeof echarts === 'undefined') return;
+
+      if (readingCategoryChart) { try { readingCategoryChart.dispose(); } catch(e){} }
+
+      const catCount = {};
+      readingRecords.forEach(r => {
+        if (r.category) {
+          catCount[r.category] = (catCount[r.category] || 0) + (r.pagesRead || 0);
+        }
+      });
+
+      const data = Object.entries(catCount).map(([name, value]) => ({ name, value })).sort((a, b) => b.value - a.value);
+
+      if (data.length === 0) {
+        container.innerHTML = '<div class="reading-empty" style="padding:20px;">暂无数据</div>';
+        return;
+      }
+
+      const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+
+      readingCategoryChart = echarts.init(container);
+      readingCategoryChart.setOption({
+        tooltip: {
+          trigger: 'item',
+          formatter: '{b}: {c}页 ({d}%)'
+        },
+        series: [{
+          type: 'pie',
+          radius: ['40%', '70%'],
+          center: ['50%', '50%'],
+          avoidLabelOverlap: true,
+          itemStyle: {
+            borderRadius: 6,
+            borderColor: isDark ? 'rgba(30,30,40,0.82)' : 'rgba(255,255,255,0.78)',
+            borderWidth: 2
+          },
+          label: {
+            color: isDark ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.6)',
+            fontSize: 11
+          },
+          data: data
+        }],
+        color: ['#667eea','#764ba2','#f093fb','#4facfe','#43e97b','#fa709a','#fee140','#a18cd1','#fbc2eb','#84fab0','#8fd3f4','#d4fc79']
+      });
+    }
+
+    function renderRecentReadings() {
+      const container = document.getElementById('readingRecentList');
+      const recent = readingRecords.slice(0, 10);
+
+      if (recent.length === 0) {
+        container.innerHTML = '<div class="reading-empty"><div class="reading-empty-icon">📝</div>还没有阅读记录</div>';
+        return;
+      }
+
+      container.innerHTML = recent.map(r => {
+        const stars = r.rating > 0 ? '★'.repeat(r.rating) : '';
+        return '<div class="reading-recent-item">' +
+          '<div class="reading-recent-info">' +
+            '<div class="reading-recent-book">' + escapeHtml(r.bookTitle) + (stars ? ' <span style="color:#f0a030;font-size:12px;">' + stars + '</span>' : '') + '</div>' +
+            '<div class="reading-recent-detail">' + escapeHtml(r.author || '') + (r.category ? ' · ' + escapeHtml(r.category) : '') + '</div>' +
+          '</div>' +
+          '<div class="reading-recent-right">' +
+            '<div class="reading-recent-pages">+' + r.pagesRead + '页</div>' +
+            '<div class="reading-recent-date">' + escapeHtml(r.date || '') + '</div>' +
+          '</div>' +
+        '</div>';
+      }).join('');
+    }
+
+    // ---- Reading achievements ----
+    function checkReadingAchievements() {
+      const achievements = [];
+
+      // First reading
+      if (readingRecords.length === 1) {
+        achievements.push({ id: 'reading_first', icon: '📖', name: '初次阅读', desc: '记录第一条阅读' });
+      }
+
+      // 10 different books
+      const uniqueBooks = new Set(readingRecords.map(r => r.bookTitle));
+      if (uniqueBooks.size >= 10) {
+        achievements.push({ id: 'reading_bookworm', icon: '📚', name: '书虫', desc: '阅读10本不同的书' });
+      }
+
+      // Total pages milestones
+      const totalPages = readingRecords.reduce((s, r) => s + (r.pagesRead || 0), 0);
+      if (totalPages >= 100) {
+        achievements.push({ id: 'reading_100', icon: '📖', name: '百页斩', desc: '累计阅读100页' });
+      }
+      if (totalPages >= 1000) {
+        achievements.push({ id: 'reading_1000', icon: '📖', name: '千页大师', desc: '累计阅读1000页' });
+      }
+      if (totalPages >= 5000) {
+        achievements.push({ id: 'reading_5000', icon: '📖', name: '阅读达人', desc: '累计阅读5000页' });
+      }
+
+      // Rate 10+ books
+      const ratedBooks = new Set(readingRecords.filter(r => r.rating > 0).map(r => r.bookTitle));
+      if (ratedBooks.size >= 10) {
+        achievements.push({ id: 'reading_critic', icon: '⭐', name: '严格评论家', desc: '为10本书评分' });
+      }
+
+      // Monthly reader: 10+ different days in a month
+      const currentMonth = new Date().toISOString().substring(0, 7);
+      const daysThisMonth = new Set(readingRecords.filter(r => r.date && r.date.startsWith(currentMonth)).map(r => r.date));
+      if (daysThisMonth.size >= 10) {
+        achievements.push({ id: 'reading_monthly', icon: '📅', name: '月度读者', desc: '一个月内阅读10天以上' });
+      }
+
+      // 5+ categories
+      const categories = new Set(readingRecords.map(r => r.category).filter(Boolean));
+      if (categories.size >= 5) {
+        achievements.push({ id: 'reading_diverse', icon: '🏆', name: '博览群书', desc: '阅读5个以上分类的书籍' });
+      }
+
+      // Show achievement toasts
+      achievements.forEach((a, i) => {
+        setTimeout(() => {
+          showToast(a.icon + ' 成就解锁: ' + a.name + ' - ' + a.desc);
+        }, i * 1500);
+      });
+    }
+
+    // Handle resize for reading charts
+    window.addEventListener('resize', function() {
+      if (readingMonthlyChart) { try { readingMonthlyChart.resize(); } catch(e){} }
+      if (readingCategoryChart) { try { readingCategoryChart.resize(); } catch(e){} }
+    });
+
+    // ========== 初始化（v0.6.5 快速启动 + 后台静默加载） ==========
+    async function init() {
+      console.log('[v0.6.5] 快速启动...');
+      
+      // 应用主题偏好
+      applyTheme(getPreferredTheme());
+      
+      // 注册 Service Worker（PWA 离线支持）
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('./service-worker.js').catch(e => {
+          console.warn('[v0.6.12] SW注册失败:', e.message);
+        });
+      }
+      
+      // Phase 1: 首屏即时渲染（appData 已在页面加载时设为 DEFAULT_DATA）
+      // 尝试从localStorage恢复已保存的appData
+      try {
+        const saved = localStorage.getItem('learning-rpg-appdata');
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (parsed && parsed.records) {
+            appData = migrateAppData(parsed);
+            console.log('[v0.8.4] 从localStorage恢复appData, 版本:' + appData.version);
+          }
+        }
+      } catch (e) {}
+      initEvents();
+      initGestures();
+      initCommandPalette();
+      renderAll();
+      console.log('[v0.6.5] 首屏渲染完成');
+      
+      // Phase 2.1: 加载用户画像
+      try { await loadUserProfile(); } catch (e) { console.warn('[v0.9.2] 用户画像加载失败:', e); }
+
+      // Phase 2.2: 加载技能树
+      try { await loadSkillTree(); } catch (e) { console.warn('[v0.9.2] 技能树加载失败:', e); }
+
+      // Phase 2.3: 加载成就数据
+      try { await loadAchievementsData(); } catch (e) { console.warn('[v0.9.2] 成就数据加载失败:', e); }
+
+      // Phase 3: 后台静默加载数据
+      try { await backgroundDataLoad(); } catch (e) { console.warn('[v0.9.2] 后台数据加载失败:', e); }
+    }
+    
+    /**
+     * 后台静默加载（完全不阻塞 UI）
+     * 顺序：缓存秒开 → 多源网络 → 内嵌兜底
+     * 加载成功自动刷新 renderAll()
+     */
+    async function backgroundDataLoad() {
+      // 1. 缓存秒开
+      const cached = loadDataCache();
+      if (cached) {
+        console.log('[v0.8.5] 缓存命中，后台刷新...');
+        updateLoadingStatus('加载缓存数据...');
+        appData = convertGitHubDataToAppData(cached.data);
+        dataLoadState.dataSource = 'cache';
+        mergeLocalRecords();
+        renderAll();
+      }
+      
+      // 2. 静默网络拉取（多源容错，按成功率排序）
+      const sources = [
+        { name: 'local', url: `./data/data.json?t=${Date.now()}`, desc: '本地' },
+        { name: 'pages', url: 'https://mokelungaaa.github.io/learning-rpg/data/data.json', desc: 'GitHub Pages' },
+        { name: 'github', url: 'https://raw.githubusercontent.com/MokelungAAA/learning-rpg/main/data/data.json', desc: 'GitHub Raw' },
+        { name: 'jsdelivr', url: 'https://cdn.jsdelivr.net/gh/MokelungAAA/learning-rpg@main/data/data.json', desc: 'jsDelivr' },
+        { name: 'corsproxy', url: 'https://corsproxy.io/?https://raw.githubusercontent.com/MokelungAAA/learning-rpg/main/data/data.json', desc: 'CORS代理' }
+      ];
+      
+      for (const source of sources) {
+        try {
+          updateLoadingStatus('正在从 ' + source.desc + ' 同步...');
+          const response = await fetchWithTimeout(source.url);
+          if (!response.ok) continue;
+          const rawData = await response.json();
+          if (!rawData || typeof rawData !== 'object') continue;
+          
+          dataLoadState.hasError = false;
+          dataLoadState.lastUpdate = new Date(rawData.lastUpdated);
+          dataLoadState.dataSource = source.name;
+          saveDataCache(rawData);
+          appData = convertGitHubDataToAppData(rawData);
+          mergeLocalRecords();
+          renderAll();
+          console.log(`[v0.6.5] 后台加载完成 ✓ ${source.desc}`);
+          return;
+        } catch (e) {
+          console.log(`[v0.9.3] ${source.desc} 不可用: ${e.message}`);
+          continue;
+        }
+      }
+      
+      // 额外加载教材和网课数据（独立于主数据，不影响进度）
+      loadTextbookData();
+      loadCoursesData();
+      
+      // 3. 无缓存 + 网络失败 → 内嵌兜底
+      if (!cached) {
+        console.warn('[v0.6.5] 使用内嵌兜底数据');
+        appData = convertGitHubDataToAppData(FALLBACK_DATA);
+        dataLoadState.dataSource = 'fallback';
+        mergeLocalRecords();
+        renderAll();
+        
+        const retryBtn = document.createElement('button');
+        retryBtn.textContent = '🔄 重新加载数据';
+        retryBtn.style.cssText = 'position:fixed;bottom:24px;right:24px;padding:12px 28px;background:linear-gradient(135deg,#3b82f6,#6366f1);color:#fff;border:none;border-radius:14px;font-size:14px;cursor:pointer;z-index:10000;box-shadow:0 8px 32px rgba(59,130,246,0.35);font-weight:600;';
+        retryBtn.onclick = () => { retryBtn.remove(); init(); };
+        document.body.appendChild(retryBtn);
+      } else {
+        console.log(`[v0.6.5] 后台加载完成 (数据源: ${dataLoadState.dataSource})`);
+      }
+    }
+    
+    // ========== 启动系统 ==========
+    init().catch(e => console.error('[v0.6.5] 初始化失败:', e));
+    </script>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
