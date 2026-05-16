@@ -10376,17 +10376,19 @@
     function savePomodoroSession(session) {
       let data = loadPomodoroSessions();
       data.sessions.push(session);
-      // Update statistics
+      data.version = '1.1.0';
       data.statistics.totalSessions++;
       data.statistics.totalFocusMinutes += Math.round(session.actualDuration / 60);
-      data.statistics.totalBreakMinutes += 0; // breaks not tracked separately here
-      // Average score
+      data.statistics.totalBreakMinutes += 0;
       const allScores = data.sessions.map(s => s.score);
       data.statistics.averageFocusScore = Math.round(allScores.reduce((a,b) => a+b, 0) / allScores.length);
-      // Streak calculation
       data.statistics = calculatePomodoroStreak(data.statistics, data.sessions);
       data.lastUpdated = new Date().toISOString();
-      localStorage.setItem('pomodoro_sessions', JSON.stringify(data));
+      try {
+        localStorage.setItem('pomodoro_sessions', JSON.stringify(data));
+      } catch (e) {
+        console.warn('[v0.8.5] 保存番茄钟数据失败:', e.message);
+      }
     }
 
     function loadPomodoroSessions() {
@@ -10742,7 +10744,11 @@
 
     function saveReadingRecords(records) {
       readingRecords = records || readingRecords;
-      localStorage.setItem('reading_records', JSON.stringify(readingRecords));
+      try {
+        localStorage.setItem('reading_records', JSON.stringify(readingRecords));
+      } catch (e) {
+        console.warn('[v0.8.5] 保存阅读记录失败:', e.message);
+      }
     }
 
     function loadBookshelf() {
@@ -10754,7 +10760,11 @@
 
     function saveBookshelf(books) {
       bookshelf = books || bookshelf;
-      localStorage.setItem('bookshelf', JSON.stringify(bookshelf));
+      try {
+        localStorage.setItem('bookshelf', JSON.stringify(bookshelf));
+      } catch (e) {
+        console.warn('[v0.8.5] 保存书架数据失败:', e.message);
+      }
     }
 
     // ---- Star rating ----
