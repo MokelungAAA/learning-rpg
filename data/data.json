@@ -1,6 +1,6 @@
 {
   "version": "2.0",
-  "lastUpdated": "2026-05-16T19:56:00+08:00",
+  "lastUpdated": "2026-05-16T20:24:00+08:00",
   "learnerName": "墨澜",
   "records": [
     {
@@ -10,7 +10,8 @@
       "textbook": "期中考试反思",
       "chapter": 0,
       "score": 75,
-      "duration": 10
+      "duration": 10,
+      "xp": 38
     },
     {
       "id": "rec-003",
@@ -19,7 +20,8 @@
       "textbook": "中外历史纲要下·第14-16章·填充图册",
       "chapter": 0,
       "score": 0,
-      "duration": 62
+      "duration": 62,
+      "xp": 93
     }
   ]
 }

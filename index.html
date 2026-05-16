@@ -480,11 +480,11 @@
       z-index: 2;
     }
 
-    /* ========== 底部导航 v2.0（全新重写，简单可靠） ========== */
+    /* ========== 底部导航 v2.0（body 直接子级，零父元素依赖） ========== */
     #bottomNav {
       position: fixed;
       bottom: 0; left: 0; right: 0;
-      display: none;  /* 由 JS 控制显示 */
+      display: flex;  /* 默认显示，由 .hidden class 隐藏 */
       z-index: 10001;
       background: #ffffff;
       border-top: 2px solid #6366f1;
@@ -553,6 +553,7 @@
       color: #3b82f6;
       font-weight: 600;
     }
+    #bottomNav.hidden { display: none; }
     /* 深色模式 */
     [data-theme="dark"] #bottomNav { background: #1e2235; border-top-color: #818cf8; }
     [data-theme="dark"] #bottomNav .nav-icon { color: #8890a0; }
@@ -561,6 +562,7 @@
     [data-theme="dark"] #bottomNav .nav-btn.active .nav-icon { color: #818cf8; }
     [data-theme="dark"] #bottomNav .nav-btn.active .nav-label { color: #818cf8; }
     [data-theme="dark"] #bottomNav .nav-btn.active::after { background: #818cf8; }
+    #bottomNav.hidden { display: none !important; }
 
     /* ========== 页面内容 ========== */
     .page-content {
@@ -4065,10 +4067,16 @@
             <span>总XP</span>
             <strong id="de-export-xp">0</strong>
           </div>
+          <div class="data-entry-info-row">
+            <span>缓存占用</span>
+            <strong id="de-cache-size">--</strong>
+          </div>
         </div>
-        <p style="font-size:12px;color:var(--text-muted);margin:12px 0;">点击下载后，将 .json 文件上传到 GitHub 仓库替换 <code>data.json</code>，或发给微信助手让它更新。</p>
+        <p style="font-size:12px;color:var(--text-muted);margin:12px 0;">下载 JSON 后上传到 GitHub 替换 <code>data/data.json</code>，或点"同步到GitHub"直接推送。</p>
         <button class="data-entry-submit" onclick="exportDataJson()">📥 下载 data.json</button>
+        <button class="data-entry-submit secondary" onclick="importDataJson()" style="margin-top:8px;">📂 导入 data.json</button>
         <button class="data-entry-submit secondary" onclick="clearLocalData()" style="margin-top:8px;">🗑️ 清除本地缓存</button>
+        <input type="file" id="importFileInput" accept=".json" style="display:none" onchange="handleImportFile(event)">
       </div>
     </div>
   </div>
@@ -5419,8 +5427,8 @@
     </div>
   </div>
   
-  <!-- 底部导航 v2.0（全新重写 - body 直接子级） -->
-  <nav id="bottomNav" style="display:none">
+  <!-- 底部导航 v2.0（body 直接子级，class控制显隐） -->
+  <nav id="bottomNav" class="hidden">
     <div class="nav-inner">
       <button class="nav-btn active" data-page="overview">
         <span class="nav-icon">🏠</span>
@@ -5475,15 +5483,20 @@
     });
     
     // ========== v2.0 底部导航点击事件委托 ==========
-    document.addEventListener('DOMContentLoaded', function() {
-      document.getElementById('bottomNav')?.addEventListener('click', function(e) {
-        const btn = e.target.closest('.nav-btn');
-        if (btn) {
-          const page = btn.getAttribute('data-page');
-          if (page) switchPage(page);
-        }
-      });
-    });
+    // 注意：脚本在 body 末尾执行，DOM 已就绪，无需等 DOMContentLoaded
+    (function initBottomNav() {
+      const nav = document.getElementById('bottomNav');
+      if (nav) {
+        nav.addEventListener('click', function(e) {
+          const btn = e.target.closest('.nav-btn');
+          if (btn) {
+            const page = btn.getAttribute('data-page');
+            if (page) switchPage(page);
+          }
+        });
+        console.log('[v2.0] 底部导航事件已绑定');
+      }
+    })();
     
     // ========== v0.6.1 算法迭代系统 ==========
     
@@ -6558,11 +6571,15 @@
       
       if (isV2) {
         // ===== v2.0 格式：从 records 数组推导一切 =====
+        // 先初始化全部9学科为0 XP（确保无记录的学科也能显示）
+        const ALL_SUBJECTS = ['数学','语文','英语','物理','化学','生物','政治','历史','地理'];
+        ALL_SUBJECTS.forEach(s => { xpBySubject[s] = 0; });
+        
         for (const rec of rawData.records) {
           const dur = rec.duration || 0;
           const scr = rec.score || 0;
-          // 用 v2.0 简易 XP 公式计算
-          const xp = Math.round(scr * dur / 20);
+          // 优先使用原始 XP，否则用公式计算
+          const xp = rec.xp != null ? rec.xp : Math.round(scr * dur / 20);
           
           records.push({
             recordID: rec.id || generateUUID(),
@@ -6640,10 +6657,10 @@
         achievements: []
       };
       
-      // ========== 构建subjects（从 records 统计各个学科） ==========
+      // ========== 构建subjects（全部9学科，无记录也显示） ==========
       const subjects = {};
-      const subjectsSet = new Set(records.map(r => r.subject));
-      for (const subName of subjectsSet) {
+      const ALL_SUBJECTS = ['数学','语文','英语','物理','化学','生物','政治','历史','地理'];
+      for (const subName of ALL_SUBJECTS) {
         const subRecords = records.filter(r => r.subject === subName);
         const subXp = xpBySubject[subName] || 0;
         let subLevel = 1;
@@ -6881,8 +6898,8 @@
         overlay.style.display = 'none';
         overlay.style.opacity = '0';
       }
-      // 显示底部导航（iOS safe display:flex 需要显式设置）
-      if (bottomNav) bottomNav.style.display = 'flex';
+      // 显示底部导航（移除hidden class即可显示）
+      if (bottomNav) bottomNav.classList.remove('hidden');
       launchPage.classList.add('hidden');
       setTimeout(() => {
         mainPage.classList.add('visible');
@@ -8947,6 +8964,10 @@
       document.querySelectorAll('.data-entry-panel').forEach(p => p.classList.remove('active'));
       document.querySelector(`.data-entry-tab[onclick*="'${tab}'"]`)?.classList.add('active');
       document.getElementById(`panel-${tab}`)?.classList.add('active');
+      if (tab === 'export') {
+        updateExportStats();
+        updateCacheSize();
+      }
       if (tab === 'local') {
         const count = getLocalRecords().length;
         document.getElementById('localRecCount').textContent = count;
@@ -9333,14 +9354,65 @@
         localStorage.removeItem('learning-rpg-cache-meta');
         localStorage.removeItem('learning-rpg-local-records');
         localStorage.removeItem('learning-rpg-theme');
+        localStorage.removeItem('learning-rpg-app-data');
         const countEl = document.getElementById('de-export-record-count');
         const xpEl = document.getElementById('de-export-xp');
         if (countEl) countEl.textContent = '0';
         if (xpEl) xpEl.textContent = '0';
-        showToast('已清除本地缓存', 'success');
+        updateCacheSize();
+        showToast('已清除本地缓存，请刷新页面重新加载', 'success');
       } catch(e) {}
     }
-
+    
+    /** 计算缓存占用大小 */
+    function updateCacheSize() {
+      const el = document.getElementById('de-cache-size');
+      if (!el) return;
+      try {
+        let total = 0;
+        for (let i = 0; i < localStorage.length; i++) {
+          const key = localStorage.key(i);
+          if (key && key.startsWith('learning-rpg-')) {
+            total += (localStorage.getItem(key) || '').length * 2; // UTF-16
+          }
+        }
+        el.textContent = total > 1024 ? `${(total/1024).toFixed(1)}KB` : `${total}B`;
+      } catch(e) { el.textContent = '--'; }
+    }
+    
+    /** 导入 data.json */
+    function importDataJson() {
+      document.getElementById('importFileInput').click();
+    }
+    
+    function handleImportFile(event) {
+      const file = event.target.files?.[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const data = JSON.parse(e.target.result);
+          if (data.records && Array.isArray(data.records) && data.records.length > 0) {
+            appData = convertGitHubDataToAppData(data);
+            saveLocalData();
+            renderAll();
+            showToast(`✅ 已导入 ${data.records.length} 条记录`, 'success');
+          } else if (data.log || data.subjects) {
+            appData = convertGitHubDataToAppData(data);
+            saveLocalData();
+            renderAll();
+            showToast('✅ 已导入旧格式数据', 'success');
+          } else {
+            showToast('⚠️ 无法识别的数据格式', 'warning');
+          }
+        } catch(err) {
+          showToast('❌ 文件解析失败: ' + err.message, 'warning');
+        }
+      };
+      reader.readAsText(file);
+      event.target.value = '';
+    }
+    
     // ========== v0.7.7 数据分析增强 ==========
     function renderAnalysis() {
       const statsEl = document.getElementById('analysisStats');
