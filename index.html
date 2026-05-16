@@ -6558,10 +6558,9 @@
     /**
      * 显示数据加载状态
      */
-    function showDataLoading(isLoading) {
+    function showDataLoading(isLoading, statusText) {
       let loadingEl = document.getElementById('dataLoadingOverlay');
       if (!loadingEl) {
-        // 创建加载覆盖层
         loadingEl = document.createElement('div');
         loadingEl.id = 'dataLoadingOverlay';
         loadingEl.style.cssText = `
@@ -6585,32 +6584,50 @@
         loadingEl.innerHTML = `
           <div style="font-size: 48px; margin-bottom: 20px; animation: float 2s ease-in-out infinite;">📚</div>
           <div style="font-size: 18px; font-weight: 600; color: var(--text-primary); margin-bottom: 8px;">加载学习数据...</div>
-          <div style="font-size: 13px; color: var(--text-muted);">正在从GitHub同步</div>
+          <div id="loadingStatus" style="font-size: 13px; color: var(--text-muted); margin-bottom: 16px;">${statusText || '正在从GitHub同步'}</div>
+          <div style="width: 200px; height: 4px; background: #e5e7eb; border-radius: 2px; overflow: hidden;">
+            <div id="loadingBar" style="width: 30%; height: 100%; background: linear-gradient(90deg, #6366f1, #a78bfa); border-radius: 2px; animation: loadingProgress 2s ease-in-out infinite;"></div>
+          </div>
           <style>
             @keyframes float {
               0%, 100% { transform: translateY(0); }
               50% { transform: translateY(-10px); }
             }
-          
-
-  </style>
+            @keyframes loadingProgress {
+              0% { width: 10%; }
+              50% { width: 60%; }
+              100% { width: 90%; }
+            }
+          </style>
         `;
         loadingEl.style.display = 'flex';
         loadingEl.style.opacity = '1';
       } else {
-        loadingEl.style.opacity = '0';
+        const bar = document.getElementById('loadingBar');
+        if (bar) bar.style.width = '100%';
         setTimeout(() => {
-          loadingEl.style.display = 'none';
-        }, 300);
+          loadingEl.style.opacity = '0';
+          setTimeout(() => {
+            loadingEl.style.display = 'none';
+          }, 300);
+        }, 200);
       }
+    }
+
+    /**
+     * 更新加载状态文本
+     */
+    function updateLoadingStatus(text) {
+      const status = document.getElementById('loadingStatus');
+      if (status) status.textContent = text;
     }
 
     /**
      * 显示数据加载错误
      */
     function showDataLoadError(message) {
-      console.warn('[v0.6.1] 使用默认空数据，错误信息:', message);
-      // 可以添加一个toast提示，但不影响用户使用
+      console.warn('[v0.8.5] 数据加载错误:', message);
+      showToast('数据加载失败: ' + message, 'warning');
     }
     
     // ========== 默认数据 (v0.4.6) ==========
@@ -11311,8 +11328,9 @@
       // 1. 缓存秒开
       const cached = loadDataCache();
       if (cached) {
-        console.log('[v0.6.5] 缓存命中，后台刷新...');
-        appData = convertGitHubDataToAppData(cached);
+        console.log('[v0.8.5] 缓存命中，后台刷新...');
+        updateLoadingStatus('加载缓存数据...');
+        appData = convertGitHubDataToAppData(cached.data);
         dataLoadState.dataSource = 'cache';
         mergeLocalRecords();
         renderAll();
@@ -11329,6 +11347,7 @@
         
         for (const source of sources) {
           try {
+            updateLoadingStatus('正在从 ' + source.desc + ' 同步...');
             const response = await fetchWithTimeout(source.url);
             if (!response.ok) continue;
             const rawData = await response.json();
