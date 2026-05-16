@@ -1,0 +1,293 @@
+{
+  "version": "1.0",
+  "lastUpdated": "2026-05-10",
+  "platform": "哔哩哔哩",
+  "courses": {
+    "数学": {
+      "syncCourses": [
+        {
+          "id": "math-xiangjiao-bixiu1",
+          "name": "湘教版必修第一册同步课",
+          "teacher": "一数",
+          "url": "https://space.bilibili.com/14229967",
+          "chapters": [
+            {"number": 1, "name": "集合与逻辑", "videos": 12, "duration": "约8小时"},
+            {"number": 2, "name": "一元二次函数、方程和不等式", "videos": 15, "duration": "约10小时"},
+            {"number": 3, "name": "函数的概念与性质", "videos": 18, "duration": "约12小时"},
+            {"number": 4, "name": "幂函数、指数函数和对数函数", "videos": 20, "duration": "约14小时"},
+            {"number": 5, "name": "三角函数", "videos": 22, "duration": "约16小时"}
+          ]
+        },
+        {
+          "id": "math-xiangjiao-bixiu2",
+          "name": "湘教版必修第二册同步课",
+          "teacher": "一数",
+          "url": "https://space.bilibili.com/14229967",
+          "chapters": [
+            {"number": 1, "name": "平面向量及其应用", "videos": 18, "duration": "约12小时"},
+            {"number": 2, "name": "三角恒等变换", "videos": 12, "duration": "约8小时"},
+            {"number": 3, "name": "复数", "videos": 10, "duration": "约6小时"},
+            {"number": 4, "name": "立体几何初步", "videos": 20, "duration": "约14小时"},
+            {"number": 5, "name": "概率", "videos": 12, "duration": "约8小时"},
+            {"number": 6, "name": "数学建模", "videos": 8, "duration": "约5小时"}
+          ]
+        }
+      ],
+      "examPrepCourses": [
+        {
+          "id": "math-yishu-gaoyi",
+          "name": "高一数学全套",
+          "teacher": "一数",
+          "url": "https://space.bilibili.com/14229967",
+          "description": "高一数学知识点全覆盖"
+        }
+      ]
+    },
+    "英语": {
+      "syncCourses": [
+        {
+          "id": "english-renjiao-bixiu1",
+          "name": "人教版必修第一册同步课",
+          "teacher": "FREE高考英语",
+          "url": "https://space.bilibili.com/390116162",
+          "chapters": [
+            {"number": 1, "name": "Teenage Life", "videos": 8, "duration": "约5小时"},
+            {"number": 2, "name": "Travelling Around", "videos": 8, "duration": "约5小时"},
+            {"number": 3, "name": "Sports and Fitness", "videos": 8, "duration": "约5小时"},
+            {"number": 4, "name": "Natural Disasters", "videos": 8, "duration": "约5小时"},
+            {"number": 5, "name": "Languages Around the World", "videos": 8, "duration": "约5小时"}
+          ]
+        },
+        {
+          "id": "english-renjiao-bixiu2",
+          "name": "人教版必修第二册同步课",
+          "teacher": "FREE高考英语",
+          "url": "https://space.bilibili.com/390116162",
+          "chapters": [
+            {"number": 1, "name": "Cultural Heritage", "videos": 8, "duration": "约5小时"},
+            {"number": 2, "name": "Wildlife Protection", "videos": 8, "duration": "约5小时"},
+            {"number": 3, "name": "The Internet", "videos": 8, "duration": "约5小时"},
+            {"number": 4, "name": "History and Traditions", "videos": 8, "duration": "约5小时"},
+            {"number": 5, "name": "Music", "videos": 8, "duration": "约5小时"}
+          ]
+        },
+        {
+          "id": "english-renjiao-bixiu3",
+          "name": "人教版必修第三册同步课",
+          "teacher": "FREE高考英语",
+          "url": "https://space.bilibili.com/390116162",
+          "chapters": [
+            {"number": 1, "name": "Festivals and Celebrations", "videos": 8, "duration": "约5小时"},
+            {"number": 2, "name": "Morals and Virtues", "videos": 8, "duration": "约5小时"},
+            {"number": 3, "name": "Diverse Cultures", "videos": 8, "duration": "约5小时"},
+            {"number": 4, "name": "Space Exploration", "videos": 8, "duration": "约5小时"},
+            {"number": 5, "name": "The Value of Money", "videos": 8, "duration": "约5小时"}
+          ]
+        }
+      ],
+      "examPrepCourses": [
+        {
+          "id": "free-vocabulary",
+          "name": "FREE高考英语·词汇班",
+          "teacher": "陶然",
+          "url": "https://space.bilibili.com/390116162",
+          "description": "核心词汇+基础词汇+拓展词汇，共3120词",
+          "videos": 50,
+          "duration": "约30小时"
+        },
+        {
+          "id": "free-zero",
+          "name": "FREE高考英语·零基础班",
+          "teacher": "陶然",
+          "url": "https://space.bilibili.com/390116162",
+          "description": "从语法基础到解题技巧，适合基础薄弱者",
+          "videos": 40,
+          "duration": "约25小时"
+        },
+        {
+          "id": "free-reading",
+          "name": "FREE高考英语·阅读理解精讲",
+          "teacher": "陶然",
+          "url": "https://space.bilibili.com/390116162",
+          "description": "阅读理解100篇精讲",
+          "videos": 100,
+          "duration": "约50小时"
+        },
+        {
+          "id": "free-seven",
+          "name": "FREE高考英语·七选五精讲",
+          "teacher": "陶然",
+          "url": "https://space.bilibili.com/390116162",
+          "description": "七选五专项训练",
+          "videos": 50,
+          "duration": "约25小时"
+        },
+        {
+          "id": "free-cloze",
+          "name": "FREE高考英语·完形填空精讲",
+          "teacher": "陶然",
+          "url": "https://space.bilibili.com/390116162",
+          "description": "完形填空技巧与真题",
+          "videos": 50,
+          "duration": "约25小时"
+        },
+        {
+          "id": "free-writing",
+          "name": "FREE高考英语·应用文写作",
+          "teacher": "陶然",
+          "url": "https://space.bilibili.com/390116162",
+          "description": "应用文写作128题精讲",
+          "videos": 60,
+          "duration": "约35小时"
+        },
+        {
+          "id": "free-continuation",
+          "name": "FREE高考英语·读后续写",
+          "teacher": "陶然",
+          "url": "https://space.bilibili.com/390116162",
+          "description": "读后续写专项训练",
+          "videos": 40,
+          "duration": "约25小时"
+        },
+        {
+          "id": "free-zhenti",
+          "name": "FREE高考英语·真题讲解班",
+          "teacher": "陶然",
+          "url": "https://space.bilibili.com/390116162",
+          "description": "历年高考英语真题逐题讲解",
+          "videos": 100,
+          "duration": "约60小时"
+        }
+      ]
+    },
+    "语文": {
+      "examPrepCourses": [
+        {
+          "id": "chinese-shiyou",
+          "name": "学过石油的语文老师·全套课程",
+          "teacher": "学过石油的语文老师",
+          "url": "https://space.bilibili.com/39737405",
+          "description": "高考语文全套系统课程，包含文言文、现代文阅读、作文等",
+          "series": [
+            {"name": "文言文阅读", "videos": 30, "duration": "约20小时"},
+            {"name": "现代文阅读", "videos": 40, "duration": "约25小时"},
+            {"name": "古诗词鉴赏", "videos": 25, "duration": "约15小时"},
+            {"name": "作文专项", "videos": 35, "duration": "约22小时"},
+            {"name": "语言文字运用", "videos": 20, "duration": "约12小时"}
+          ]
+        }
+      ]
+    },
+    "物理": {
+      "examPrepCourses": [
+        {
+          "id": "physics-huangfuren",
+          "name": "黄夫人·高中物理全套",
+          "teacher": "HuangFuRen",
+          "url": "https://space.bilibili.com/23617069",
+          "description": "高中物理VIP付费课程，高一高二高三全覆盖",
+          "series": [
+            {"name": "高一物理·力学", "videos": 50, "duration": "约35小时"},
+            {"name": "高二物理·电磁学", "videos": 60, "duration": "约40小时"},
+            {"name": "高三物理·一轮复习", "videos": 80, "duration": "约55小时"},
+            {"name": "高三物理·二轮复习", "videos": 40, "duration": "约28小时"}
+          ]
+        },
+        {
+          "id": "physics-huang-zero",
+          "name": "黄夫人·零基础救星班",
+          "teacher": "HuangFuRen",
+          "url": "https://space.bilibili.com/23617069",
+          "description": "从受力分析到动量守恒，适合基础薄弱者",
+          "videos": 40,
+          "duration": "约28小时"
+        }
+      ]
+    },
+    "化学": {
+      "syncCourses": [
+        {
+          "id": "chemistry-renjiao-bixiu1",
+          "name": "人教版必修第一册同步课",
+          "teacher": "一化儿",
+          "url": "https://space.bilibili.com/1525150528",
+          "chapters": [
+            {"number": 1, "name": "物质及其变化", "videos": 12, "duration": "约8小时"},
+            {"number": 2, "name": "海水中的重要元素——钠和氯", "videos": 15, "duration": "约10小时"},
+            {"number": 3, "name": "铁 金属材料", "videos": 12, "duration": "约8小时"},
+            {"number": 4, "name": "物质结构 元素周期律", "videos": 18, "duration": "约12小时"}
+          ]
+        },
+        {
+          "id": "chemistry-renjiao-bixiu2",
+          "name": "人教版必修第二册同步课",
+          "teacher": "一化儿",
+          "url": "https://space.bilibili.com/1525150528",
+          "chapters": [
+            {"number": 5, "name": "化工生产中的重要非金属元素", "videos": 15, "duration": "约10小时"},
+            {"number": 6, "name": "化学反应与能量", "videos": 18, "duration": "约12小时"},
+            {"number": 7, "name": "有机化合物", "videos": 20, "duration": "约14小时"},
+            {"number": 8, "name": "化学与可持续发展", "videos": 10, "duration": "约6小时"}
+          ]
+        }
+      ],
+      "examPrepCourses": [
+        {
+          "id": "chemistry-yihua",
+          "name": "一化儿·高中化学全套",
+          "teacher": "一化儿",
+          "url": "https://space.bilibili.com/1525150528",
+          "description": "高中化学知识点全覆盖"
+        }
+      ]
+    },
+    "生物": {
+      "syncCourses": [
+        {
+          "id": "biology-renjiao-bixiu1",
+          "name": "人教版必修第一册同步课",
+          "teacher": "一生儿",
+          "url": "https://space.bilibili.com/1522691022",
+          "chapters": [
+            {"number": 1, "name": "走进细胞", "videos": 6, "duration": "约4小时"},
+            {"number": 2, "name": "组成细胞的分子", "videos": 12, "duration": "约8小时"},
+            {"number": 3, "name": "细胞的基本结构", "videos": 10, "duration": "约7小时"},
+            {"number": 4, "name": "细胞的物质输入和输出", "videos": 8, "duration": "约5小时"},
+            {"number": 5, "name": "细胞的能量供应和利用", "videos": 15, "duration": "约10小时"},
+            {"number": 6, "name": "细胞的生命历程", "videos": 10, "duration": "约7小时"}
+          ]
+        },
+        {
+          "id": "biology-renjiao-bixiu2",
+          "name": "人教版必修第二册同步课",
+          "teacher": "一生儿",
+          "url": "https://space.bilibili.com/1522691022",
+          "chapters": [
+            {"number": 1, "name": "遗传的基本规律", "videos": 15, "duration": "约10小时"},
+            {"number": 2, "name": "基因和染色体的关系", "videos": 12, "duration": "约8小时"},
+            {"number": 3, "name": "基因的本质", "videos": 15, "duration": "约10小时"},
+            {"number": 4, "name": "生物的变异", "videos": 12, "duration": "约8小时"},
+            {"number": 5, "name": "生物的进化", "videos": 10, "duration": "约7小时"}
+          ]
+        }
+      ],
+      "examPrepCourses": [
+        {
+          "id": "biology-yisheng",
+          "name": "一生儿·高中生物全套",
+          "teacher": "一生儿",
+          "url": "https://space.bilibili.com/1522691022",
+          "description": "高中生物知识点全覆盖"
+        }
+      ]
+    }
+  },
+  "mapping": {
+    "description": "网课章节与教材章节的对应关系",
+    "rules": [
+      "同步课程章节与教材章节一一对应",
+      "备考课程按知识点标签关联到教材",
+      "FREE高考英语各系列按题型关联到必修教材"
+    ]
+  }
+}

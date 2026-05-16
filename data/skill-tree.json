@@ -1,0 +1,303 @@
+﻿{
+  "version": "1.0.0",
+  "lastUpdated": "2026-05-16",
+  "subjects": {
+    "logos": {
+      "name": "数学",
+      "skills": {
+        "logos-func": {
+          "name": "函数与导数",
+          "description": "函数性质分析、导数应用、不等式",
+          "examWeight": 0.30,
+          "knowledgePoints": ["函数的定义域与值域", "函数的单调性", "函数的奇偶性", "函数的周期性", "基本初等函数", "导数的概念与几何意义", "导数的运算", "导数与切线", "导数与单调性", "导数与极值", "导数与最值", "不等式证明"]
+        },
+        "logos-geo": {
+          "name": "几何与代数",
+          "description": "坐标系、向量、立体几何",
+          "examWeight": 0.28,
+          "knowledgePoints": ["空间几何体", "空间点线面关系", "空间向量", "向量法求夹角", "立体几何证明", "直线与圆", "椭圆", "双曲线", "抛物线", "圆锥曲线综合"]
+        },
+        "logos-prob": {
+          "name": "概率与统计",
+          "description": "数据处理、概率模型",
+          "examWeight": 0.17,
+          "knowledgePoints": ["随机抽样", "用样本估计总体", "古典概型", "几何概型", "条件概率", "独立事件", "二项分布", "正态分布", "分布列与期望", "方差", "回归分析", "独立性检验"]
+        },
+        "logos-seq": {
+          "name": "数列与数学归纳法",
+          "description": "等差等比、递推、数学归纳法",
+          "examWeight": 0.12,
+          "knowledgePoints": ["等差数列", "等比数列", "数列通项公式", "数列求和", "递推数列", "数学归纳法", "数列与不等式"]
+        },
+        "logos-model": {
+          "name": "数学建模与创新",
+          "description": "新情境应用、跨学科综合",
+          "examWeight": 0.13,
+          "knowledgePoints": ["新定义题型", "实际情境建模", "跨学科综合", "创新综合题", "开放探究题"]
+        }
+      }
+    },
+    "mythos": {
+      "name": "语文",
+      "skills": {
+        "mythos-modern": {
+          "name": "现代文阅读",
+          "description": "论述类、文学类、实用类文本理解与分析",
+          "examWeight": 0.23,
+          "knowledgePoints": ["论证结构分析", "论证方法识别", "论据作用分析", "词句含义理解", "文脉梳理", "主题概括", "手法赏析", "情感分析", "观点评价"]
+        },
+        "mythos-classical": {
+          "name": "古诗文阅读",
+          "description": "文言文断句翻译+古代诗歌鉴赏",
+          "examWeight": 0.23,
+          "knowledgePoints": ["断句技巧", "文化常识", "实词推断", "虚词用法", "特殊句式", "翻译方法", "意象分析", "意境把握", "情感主旨", "表达技巧"]
+        },
+        "mythos-language": {
+          "name": "语言文字运用",
+          "description": "病句修改、语段连贯、语言表达",
+          "examWeight": 0.14,
+          "knowledgePoints": ["病句辨析", "病句修改", "句子补写", "排序衔接", "图文转换", "修辞效果分析", "语体转换", "语言得体"]
+        },
+        "mythos-writing": {
+          "name": "写作",
+          "description": "议论文与记叙文写作能力",
+          "examWeight": 0.40,
+          "knowledgePoints": ["审题立意", "标题拟定", "开头结尾", "论据选择", "论证方法", "结构布局", "语言表达", "思辨力", "素材积累"]
+        },
+        "mythos-dictation": {
+          "name": "名篇名句默写",
+          "description": "课标篇目的情境默写",
+          "examWeight": 0.04,
+          "knowledgePoints": ["理解性默写", "易错字辨析", "情境填空", "名句积累"]
+        }
+      }
+    },
+    "lingua": {
+      "name": "英语",
+      "skills": {
+        "lingua-listening": {
+          "name": "听力理解",
+          "description": "听力材料理解、信息提取",
+          "examWeight": 0.20,
+          "knowledgePoints": ["短对话理解", "长对话理解", "独白理解", "听力填空", "听力笔记"]
+        },
+        "lingua-reading": {
+          "name": "阅读理解",
+          "description": "各类文本阅读、信息提取、推理判断",
+          "examWeight": 0.30,
+          "knowledgePoints": ["主旨大意", "细节理解", "推理判断", "词义猜测", "作者态度", "篇章结构", "七选五", "完形填空"]
+        },
+        "lingua-language": {
+          "name": "语言知识运用",
+          "description": "语法、词汇、句型",
+          "examWeight": 0.15,
+          "knowledgePoints": ["时态语态", "从句", "非谓语动词", "情态动词", "虚拟语气", "词汇辨析", "短语搭配", "语法填空"]
+        },
+        "lingua-writing": {
+          "name": "写作",
+          "description": "应用文、读后续写、概要写作",
+          "examWeight": 0.30,
+          "knowledgePoints": ["应用文格式", "书信写作", "通知写作", "读后续写", "概要写作", "高级句型", "衔接词使用", "书写规范"]
+        },
+        "lingua-translation": {
+          "name": "翻译",
+          "description": "中英互译、长难句理解",
+          "examWeight": 0.05,
+          "knowledgePoints": ["长难句分析", "中英思维转换", "翻译技巧", "文化差异处理"]
+        }
+      }
+    },
+    "physis": {
+      "name": "物理",
+      "skills": {
+        "physis-mechanics": {
+          "name": "力学",
+          "description": "运动学、牛顿定律、能量动量",
+          "examWeight": 0.35,
+          "knowledgePoints": ["匀变速直线运动", "运动的合成与分解", "牛顿运动定律", "曲线运动", "万有引力", "功和功率", "动能定理", "机械能守恒", "动量定理", "动量守恒", "碰撞", "振动和波"]
+        },
+        "physis-em": {
+          "name": "电磁学",
+          "description": "电场、磁场、电磁感应",
+          "examWeight": 0.35,
+          "knowledgePoints": ["库仑定律", "电场强度", "电势", "电容器", "欧姆定律", "闭合电路", "安培力", "洛伦兹力", "带电粒子运动", "电磁感应", "交变电流", "变压器"]
+        },
+        "physis-thermo": {
+          "name": "热学与光学",
+          "description": "分子动理论、气体、光学",
+          "examWeight": 0.15,
+          "knowledgePoints": ["分子动理论", "内能", "热力学第一定律", "理想气体状态方程", "光的反射折射", "光的干涉衍射", "光电效应"]
+        },
+        "physis-modern": {
+          "name": "近代物理",
+          "description": "原子结构、核物理",
+          "examWeight": 0.10,
+          "knowledgePoints": ["原子结构", "玻尔模型", "天然放射现象", "核反应", "质能方程", "波粒二象性"]
+        },
+        "physis-experiment": {
+          "name": "物理实验",
+          "description": "实验设计与数据分析",
+          "examWeight": 0.05,
+          "knowledgePoints": ["基本仪器使用", "实验设计", "数据处理", "误差分析", "创新实验"]
+        }
+      }
+    },
+    "khemeia": {
+      "name": "化学",
+      "skills": {
+        "khemeia-inorganic": {
+          "name": "无机化学",
+          "description": "元素化合物、反应原理",
+          "examWeight": 0.25,
+          "knowledgePoints": ["钠及其化合物", "铝及其化合物", "铁及其化合物", "铜及其化合物", "卤素", "硫及其化合物", "氮及其化合物", "硅及其化合物", "元素周期律"]
+        },
+        "khemeia-reaction": {
+          "name": "化学反应原理",
+          "description": "速率、平衡、电化学、溶液",
+          "examWeight": 0.30,
+          "knowledgePoints": ["化学反应速率", "化学平衡", "平衡常数", "勒夏特列原理", "弱电解质电离", "水的电离", "盐类水解", "沉淀溶解平衡", "原电池", "电解池", "金属腐蚀与防护"]
+        },
+        "khemeia-structure": {
+          "name": "物质结构与性质",
+          "description": "原子结构、分子结构、晶体",
+          "examWeight": 0.20,
+          "knowledgePoints": ["原子结构", "核外电子排布", "元素周期表", "共价键", "分子构型", "分子间作用力", "晶体类型", "晶胞计算"]
+        },
+        "khemeia-organic": {
+          "name": "有机化学",
+          "description": "烃、烃的衍生物、高分子",
+          "examWeight": 0.20,
+          "knowledgePoints": ["烷烃", "烯烃", "炔烃", "芳香烃", "卤代烃", "醇", "酚", "醛", "羧酸", "酯", "同分异构", "有机合成"]
+        },
+        "khemeia-experiment": {
+          "name": "化学实验",
+          "description": "实验操作与探究",
+          "examWeight": 0.05,
+          "knowledgePoints": ["基本操作", "物质分离提纯", "物质检验", "定量实验", "实验设计"]
+        }
+      }
+    },
+    "zoe": {
+      "name": "生物",
+      "skills": {
+        "zoe-cell": {
+          "name": "细胞与分子",
+          "description": "细胞结构、代谢、遗传分子基础",
+          "examWeight": 0.25,
+          "knowledgePoints": ["细胞的分子组成", "细胞结构", "细胞膜", "细胞器", "细胞核", "物质跨膜运输", "酶", "ATP", "细胞呼吸", "光合作用", "细胞分裂", "DNA复制", "基因表达"]
+        },
+        "zoe-genetics": {
+          "name": "遗传与进化",
+          "description": "遗传规律、变异、进化",
+          "examWeight": 0.25,
+          "knowledgePoints": ["分离定律", "自由组合定律", "伴性遗传", "DNA是遗传物质", "基因突变", "基因重组", "染色体变异", "人类遗传病", "现代生物进化理论", "物种形成"]
+        },
+        "zoe-physiology": {
+          "name": "稳态与调节",
+          "description": "人体内环境、神经体液免疫调节",
+          "examWeight": 0.25,
+          "knowledgePoints": ["内环境", "神经调节", "反射弧", "体液调节", "激素调节", "血糖调节", "体温调节", "水盐平衡", "免疫调节", "植物激素"]
+        },
+        "zoe-ecology": {
+          "name": "生态与环境",
+          "description": "种群、群落、生态系统",
+          "examWeight": 0.20,
+          "knowledgePoints": ["种群特征", "种群数量变化", "群落结构", "群落演替", "生态系统结构", "能量流动", "物质循环", "信息传递", "生态平衡", "环境保护"]
+        },
+        "zoe-biotech": {
+          "name": "生物技术",
+          "description": "基因工程、细胞工程、发酵工程",
+          "examWeight": 0.05,
+          "knowledgePoints": ["基因工程工具", "基因工程操作", "PCR技术", "细胞工程", "发酵工程", "胚胎工程"]
+        }
+      }
+    },
+    "politeia": {
+      "name": "政治",
+      "skills": {
+        "politeia-economy": {
+          "name": "经济生活",
+          "description": "生产、分配、交换、消费",
+          "examWeight": 0.30,
+          "knowledgePoints": ["商品与货币", "价格", "消费", "生产与经营", "企业与劳动者", "投资与融资", "收入分配", "财政与税收", "社会主义市场经济", "新发展理念", "现代化经济体系", "经济全球化"]
+        },
+        "politeia-politics": {
+          "name": "政治生活",
+          "description": "公民、政府、政党、国家",
+          "examWeight": 0.30,
+          "knowledgePoints": ["国家性质", "公民权利义务", "民主选举", "民主决策", "民主管理", "民主监督", "政府职能", "依法行政", "人民代表大会", "政党制度", "民族区域自治", "宗教政策", "国际关系"]
+        },
+        "politeia-culture": {
+          "name": "文化生活",
+          "description": "文化、民族精神、文化建设",
+          "examWeight": 0.20,
+          "knowledgePoints": ["文化与社会", "文化多样性", "文化传播", "传统文化", "文化创新", "中华文化", "民族精神", "先进文化", "文化自信"]
+        },
+        "politeia-philosophy": {
+          "name": "生活与哲学",
+          "description": "唯物论、辩证法、认识论、历史观",
+          "examWeight": 0.20,
+          "knowledgePoints": ["哲学与生活", "唯物论", "认识论", "联系观", "发展观", "矛盾观", "辩证否定", "社会存在与社会意识", "社会发展规律", "人民群众", "价值观", "价值判断与选择"]
+        }
+      }
+    },
+    "historia": {
+      "name": "历史",
+      "skills": {
+        "historia-ancient": {
+          "name": "中国古代史",
+          "description": "先秦至明清的政治经济文化",
+          "examWeight": 0.25,
+          "knowledgePoints": ["先秦政治", "秦汉制度", "魏晋南北朝", "隋唐盛世", "宋元政治", "明清政治", "古代经济", "古代思想", "古代科技文化"]
+        },
+        "historia-modern": {
+          "name": "中国近现代史",
+          "description": "鸦片战争至改革开放",
+          "examWeight": 0.30,
+          "knowledgePoints": ["鸦片战争", "太平天国", "洋务运动", "戊戌变法", "辛亥革命", "五四运动", "中共成立", "国民革命", "土地革命", "抗日战争", "解放战争", "新中国成立", "社会主义建设", "改革开放"]
+        },
+        "historia-world": {
+          "name": "世界史",
+          "description": "古代至现代的全球历史",
+          "examWeight": 0.30,
+          "knowledgePoints": ["古希腊罗马", "中世纪", "文艺复兴", "宗教改革", "启蒙运动", "资产阶级革命", "工业革命", "马克思主义", "两次世界大战", "冷战", "多极化趋势", "全球化"]
+        },
+        "historia-method": {
+          "name": "史学方法与素养",
+          "description": "史料分析、历史解释",
+          "examWeight": 0.15,
+          "knowledgePoints": ["史料分类", "史料辨析", "历史时序", "历史空间", "历史解释", "历史评价", "家国情怀"]
+        }
+      }
+    },
+    "geographia": {
+      "name": "地理",
+      "skills": {
+        "geographia-natural": {
+          "name": "自然地理",
+          "description": "地球、大气、水、地壳、整体性与差异性",
+          "examWeight": 0.30,
+          "knowledgePoints": ["地球运动", "地图", "大气受热", "大气运动", "天气系统", "气候", "水循环", "洋流", "地壳物质循环", "地质作用", "自然地理环境整体性", "自然地理环境差异性"]
+        },
+        "geographia-human": {
+          "name": "人文地理",
+          "description": "人口、城市、农业、工业、交通",
+          "examWeight": 0.30,
+          "knowledgePoints": ["人口增长", "人口迁移", "人口容量", "城市空间结构", "城市化", "农业区位", "农业地域类型", "工业区位", "工业地域", "交通运输", "人地关系"]
+        },
+        "geographia-regional": {
+          "name": "区域地理",
+          "description": "区域发展、区际联系、可持续发展",
+          "examWeight": 0.25,
+          "knowledgePoints": ["区域特征", "区域发展阶段", "区域发展差异", "资源跨区域调配", "产业转移", "可持续发展", "地理信息技术"]
+        },
+        "geographia-china": {
+          "name": "中国地理",
+          "description": "中国自然与人文地理",
+          "examWeight": 0.15,
+          "knowledgePoints": ["中国位置", "中国地形", "中国气候", "中国河流", "中国农业", "中国工业", "中国交通", "中国区域"]
+        }
+      }
+    }
+  }
+}

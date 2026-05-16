@@ -1,0 +1,1419 @@
+{
+  "version": "1.0",
+  "lastUpdated": "2026-05-10",
+  "subjects": {
+    "数学": {
+      "publisher": "湘教版 2019",
+      "books": [
+        {
+          "name": "必修第一册",
+          "grade": "高一",
+          "chapters": [
+            {
+              "number": 1,
+              "name": "集合与逻辑",
+              "knowledgePoints": ["集合的含义与表示", "集合的包含关系", "集合的交与并", "充分条件与必要条件", "全称量词与存在量词"]
+            },
+            {
+              "number": 2,
+              "name": "一元二次函数、方程和不等式",
+              "knowledgePoints": ["一元二次方程的解法", "一元二次不等式的解法", "一元二次函数的图像与性质"]
+            },
+            {
+              "number": 3,
+              "name": "函数的概念与性质",
+              "knowledgePoints": ["函数的概念", "函数的定义域与值域", "函数的单调性", "函数的奇偶性"]
+            },
+            {
+              "number": 4,
+              "name": "幂函数、指数函数和对数函数",
+              "knowledgePoints": ["幂函数", "指数函数", "对数函数", "指数函数与对数函数的关系"]
+            },
+            {
+              "number": 5,
+              "name": "三角函数",
+              "knowledgePoints": ["任意角与弧度制", "三角函数的定义", "同角三角函数的基本关系", "诱导公式", "正弦函数的图像与性质", "余弦函数的图像与性质", "正切函数的图像与性质"]
+            }
+          ]
+        },
+        {
+          "name": "必修第二册",
+          "grade": "高一",
+          "chapters": [
+            {
+              "number": 1,
+              "name": "平面向量及其应用",
+              "knowledgePoints": ["向量的概念", "向量的加法", "向量的数乘", "向量的分解与坐标表示", "向量的数量积", "解三角形", "平面向量的应用"]
+            },
+            {
+              "number": 2,
+              "name": "三角恒等变换",
+              "knowledgePoints": ["两角和与差的三角函数", "二倍角的三角函数", "简单的三角恒等变换"]
+            },
+            {
+              "number": 3,
+              "name": "复数",
+              "knowledgePoints": ["复数的概念", "复数的四则运算", "复数的几何表示", "复数的三角表示"]
+            },
+            {
+              "number": 4,
+              "name": "立体几何初步",
+              "knowledgePoints": ["空间的几何体", "平面", "直线与直线、直线与平面的位置关系", "平面与平面的位置关系", "简单几何体的表面积和体积"]
+            },
+            {
+              "number": 5,
+              "name": "概率",
+              "knowledgePoints": ["随机事件与样本空间", "概率及运算", "用频率估计概率", "随机事件的独立性"]
+            },
+            {
+              "number": 6,
+              "name": "数学建模",
+              "knowledgePoints": ["数学建模基础", "数学建模案例"]
+            }
+          ]
+        },
+        {
+          "name": "选择性必修第一册",
+          "grade": "高二",
+          "chapters": [
+            {
+              "number": 1,
+              "name": "坐标系与参数方程",
+              "knowledgePoints": ["直角坐标系", "极坐标系", "参数方程"]
+            },
+            {
+              "number": 2,
+              "name": "不等式",
+              "knowledgePoints": ["绝对值不等式", "基本不等式"]
+            },
+            {
+              "number": 3,
+              "name": "导数及其应用",
+              "knowledgePoints": ["导数的概念", "导数的运算", "利用导数研究函数性质", "导数的实际应用"]
+            }
+          ]
+        },
+        {
+          "name": "选择性必修第二册",
+          "grade": "高二",
+          "chapters": [
+            {
+              "number": 1,
+              "name": "数列",
+              "knowledgePoints": ["数列的概念", "等差数列", "等比数列", "数列求和"]
+            },
+            {
+              "number": 2,
+              "name": "推理与证明",
+              "knowledgePoints": ["合情推理与演绎推理", "直接证明与间接证明", "数学归纳法"]
+            }
+          ]
+        },
+        {
+          "name": "选择性必修第三册",
+          "grade": "高三",
+          "chapters": [
+            {
+              "number": 1,
+              "name": "计数原理",
+              "knowledgePoints": ["分类加法计数原理与分步乘法计数原理", "排列与组合", "二项式定理"]
+            },
+            {
+              "number": 2,
+              "name": "概率与统计",
+              "knowledgePoints": ["离散型随机变量及其分布", "二项分布与超几何分布", "正态分布", "回归分析"]
+            }
+          ]
+        }
+      ]
+    },
+    "语文": {
+      "publisher": "人教版 2019 部编版",
+      "books": [
+        {
+          "name": "必修上册",
+          "grade": "高一",
+          "chapters": [
+            {
+              "number": 1,
+              "name": "文学阅读与写作",
+              "knowledgePoints": ["沁园春·长沙", "立在地球边上放号", "红烛", "百合花", "哦香雪"]
+            },
+            {
+              "number": 2,
+              "name": "实用性阅读与交流",
+              "knowledgePoints": ["喜看稻菽千重浪", "心有一团火", "探界者钟扬", "以工匠精神雕琢时代品质"]
+            },
+            {
+              "number": 3,
+              "name": "文学阅读与写作",
+              "knowledgePoints": ["短歌行", "归园田居", "梦游天姥吟留别", "琵琶行", "念奴娇·赤壁怀古", "永遇乐·京口北固亭怀古", "声声慢"]
+            },
+            {
+              "number": 4,
+              "name": "当代文化参与",
+              "knowledgePoints": ["家乡文化生活"]
+            },
+            {
+              "number": 5,
+              "name": "整本书阅读",
+              "knowledgePoints": ["《乡土中国》"]
+            },
+            {
+              "number": 6,
+              "name": "思辨性阅读与表达",
+              "knowledgePoints": ["劝学", "师说", "反对党八股", "拿来主义"]
+            },
+            {
+              "number": 7,
+              "name": "整本书阅读",
+              "knowledgePoints": ["《红楼梦》"]
+            },
+            {
+              "number": 8,
+              "name": "古诗词诵读",
+              "knowledgePoints": ["静女", "涉江采芙蓉", "短歌行", "归园田居"]
+            }
+          ]
+        },
+        {
+          "name": "必修下册",
+          "grade": "高一",
+          "chapters": [
+            {
+              "number": 1,
+              "name": "中华文明之光",
+              "knowledgePoints": ["子路曾皙冉有公西华侍坐", "齐桓晋文之事", "庖丁解牛", "烛之武退秦师"]
+            },
+            {
+              "number": 2,
+              "name": "良知与悲悯",
+              "knowledgePoints": ["窦娥冤", "雷雨", "哈姆雷特"]
+            },
+            {
+              "number": 3,
+              "name": "探索与创新",
+              "knowledgePoints": ["青蒿素", "一名物理学家的教育历程", "中国建筑的特征"]
+            },
+            {
+              "number": 4,
+              "name": "信息时代的语文生活",
+              "knowledgePoints": ["网络媒介", "信息筛选"]
+            },
+            {
+              "number": 5,
+              "name": "整本书阅读",
+              "knowledgePoints": ["《红楼梦》（续）"]
+            },
+            {
+              "number": 6,
+              "name": "记忆与讲述",
+              "knowledgePoints": ["祝福", "林教头风雪山神庙", "装在套子里的人", "促织"]
+            },
+            {
+              "number": 7,
+              "name": "整本书阅读",
+              "knowledgePoints": ["《乡土中国》（续）"]
+            },
+            {
+              "number": 8,
+              "name": "古诗词诵读",
+              "knowledgePoints": ["登高", "琵琶行", "念奴娇"]
+            }
+          ]
+        },
+        {
+          "name": "选择性必修上册",
+          "grade": "高二",
+          "chapters": [
+            {
+              "number": 1,
+              "name": "中国革命传统作品",
+              "knowledgePoints": ["中国人民站起来了", "长征胜利万岁", "别了，\u201c斯坦福之约\u201d"]
+            },
+            {
+              "number": 2,
+              "name": "诸子百家",
+              "knowledgePoints": ["论语十二章", "大学之道", "人皆有不忍人之心", "老子四章", "五石之瓠", "兼爱"]
+            },
+            {
+              "number": 3,
+              "name": "外国小说",
+              "knowledgePoints": ["大卫·科波菲尔", "战争与和平", "复活", "老人与海", "百年孤独"]
+            },
+            {
+              "number": 4,
+              "name": "逻辑的力量",
+              "knowledgePoints": ["发现潜藏的逻辑谬误", "运用有效的推理形式", "采用合理的论证方法"]
+            }
+          ]
+        },
+        {
+          "name": "选择性必修中册",
+          "grade": "高二",
+          "chapters": [
+            {
+              "number": 1,
+              "name": "科学探秘",
+              "knowledgePoints": ["宇宙的边疆", "物理学家的战争", "青蒿素"]
+            },
+            {
+              "number": 2,
+              "name": "诗歌之韵",
+              "knowledgePoints": ["燕歌行", "李凭箜篌引", "锦瑟", "书愤"]
+            },
+            {
+              "number": 3,
+              "name": "历史与现场",
+              "knowledgePoints": ["屈原列传", "苏武传", "张衡传"]
+            }
+          ]
+        },
+        {
+          "name": "选择性必修下册",
+          "grade": "高三",
+          "chapters": [
+            {
+              "number": 1,
+              "name": "诗与远方",
+              "knowledgePoints": ["离骚", "蜀道难", "蜀相", "望海潮", "扬州慢"]
+            },
+            {
+              "number": 2,
+              "name": "戏剧",
+              "knowledgePoints": ["茶馆", "龙须沟"]
+            },
+            {
+              "number": 3,
+              "name": "文学评论",
+              "knowledgePoints": ["人间词话", "谈读诗的趣味"]
+            }
+          ]
+        }
+      ]
+    },
+    "英语": {
+      "publisher": "人教版 2019",
+      "books": [
+        {
+          "name": "必修第一册",
+          "grade": "高一",
+          "chapters": [
+            {
+              "number": 1,
+              "name": "Teenage Life",
+              "knowledgePoints": ["学校生活", "社团活动"]
+            },
+            {
+              "number": 2,
+              "name": "Travelling Around",
+              "knowledgePoints": ["旅行计划", "文化体验"]
+            },
+            {
+              "number": 3,
+              "name": "Sports and Fitness",
+              "knowledgePoints": ["运动与健康"]
+            },
+            {
+              "number": 4,
+              "name": "Natural Disasters",
+              "knowledgePoints": ["自然灾害与救援"]
+            },
+            {
+              "number": 5,
+              "name": "Languages Around the World",
+              "knowledgePoints": ["语言多样性"]
+            }
+          ]
+        },
+        {
+          "name": "必修第二册",
+          "grade": "高一",
+          "chapters": [
+            {
+              "number": 1,
+              "name": "Cultural Heritage",
+              "knowledgePoints": ["文化遗产保护"]
+            },
+            {
+              "number": 2,
+              "name": "Wildlife Protection",
+              "knowledgePoints": ["野生动物保护"]
+            },
+            {
+              "number": 3,
+              "name": "The Internet",
+              "knowledgePoints": ["互联网的影响"]
+            },
+            {
+              "number": 4,
+              "name": "History and Traditions",
+              "knowledgePoints": ["历史与传统"]
+            },
+            {
+              "number": 5,
+              "name": "Music",
+              "knowledgePoints": ["音乐与生活"]
+            }
+          ]
+        },
+        {
+          "name": "必修第三册",
+          "grade": "高二",
+          "chapters": [
+            {
+              "number": 1,
+              "name": "Festivals and Celebrations",
+              "knowledgePoints": ["节日与庆典"]
+            },
+            {
+              "number": 2,
+              "name": "Morals and Virtues",
+              "knowledgePoints": ["道德与美德"]
+            },
+            {
+              "number": 3,
+              "name": "Diverse Cultures",
+              "knowledgePoints": ["多元文化"]
+            },
+            {
+              "number": 4,
+              "name": "Space Exploration",
+              "knowledgePoints": ["太空探索"]
+            },
+            {
+              "number": 5,
+              "name": "The Value of Money",
+              "knowledgePoints": ["金钱的价值"]
+            }
+          ]
+        },
+        {
+          "name": "选择性必修第一册",
+          "grade": "高二",
+          "chapters": [
+            {
+              "number": 1,
+              "name": "People of Achievement",
+              "knowledgePoints": ["杰出人物"]
+            },
+            {
+              "number": 2,
+              "name": "Looking into the Future",
+              "knowledgePoints": ["展望未来"]
+            },
+            {
+              "number": 3,
+              "name": "Fascinating Parks",
+              "knowledgePoints": ["迷人的公园"]
+            },
+            {
+              "number": 4,
+              "name": "Body Language",
+              "knowledgePoints": ["肢体语言"]
+            },
+            {
+              "number": 5,
+              "name": "Working the Land",
+              "knowledgePoints": ["耕耘土地"]
+            }
+          ]
+        },
+        {
+          "name": "选择性必修第二册",
+          "grade": "高三",
+          "chapters": [
+            {
+              "number": 1,
+              "name": "Science and Scientists",
+              "knowledgePoints": ["科学与科学家"]
+            },
+            {
+              "number": 2,
+              "name": "Bridging Cultures",
+              "knowledgePoints": ["文化桥梁"]
+            },
+            {
+              "number": 3,
+              "name": "Food and Culture",
+              "knowledgePoints": ["食物与文化"]
+            },
+            {
+              "number": 4,
+              "name": "Journey Across a Vast Land",
+              "knowledgePoints": ["横跨广袤大地"]
+            },
+            {
+              "number": 5,
+              "name": "First Aid",
+              "knowledgePoints": ["急救"]
+            }
+          ]
+        },
+        {
+          "name": "选择性必修第三册",
+          "grade": "高三",
+          "chapters": [
+            {
+              "number": 1,
+              "name": "Art",
+              "knowledgePoints": ["艺术"]
+            },
+            {
+              "number": 2,
+              "name": "Healthy Lifestyle",
+              "knowledgePoints": ["健康生活方式"]
+            },
+            {
+              "number": 3,
+              "name": "Environmental Protection",
+              "knowledgePoints": ["环境保护"]
+            },
+            {
+              "number": 4,
+              "name": "Adapting",
+              "knowledgePoints": ["适应"]
+            },
+            {
+              "number": 5,
+              "name": "Poems",
+              "knowledgePoints": ["诗歌"]
+            }
+          ]
+        }
+      ]
+    },
+    "物理": {
+      "publisher": "人教版 2019",
+      "books": [
+        {
+          "name": "必修第一册",
+          "grade": "高一",
+          "chapters": [
+            {
+              "number": 1,
+              "name": "运动的描述",
+              "knowledgePoints": ["质点参考系", "时间位移", "速度", "加速度"]
+            },
+            {
+              "number": 2,
+              "name": "匀变速直线运动的研究",
+              "knowledgePoints": ["实验探究小车速度随时间变化的规律", "匀变速直线运动的速度与时间的关系", "匀变速直线运动的位移与时间的关系", "自由落体运动"]
+            },
+            {
+              "number": 3,
+              "name": "相互作用——力",
+              "knowledgePoints": ["重力基本相互作用", "弹力", "摩擦力", "力的合成", "力的分解"]
+            },
+            {
+              "number": 4,
+              "name": "运动和力的关系",
+              "knowledgePoints": ["牛顿第一定律", "实验探究加速度与力质量的关系", "牛顿第二定律", "牛顿第三定律", "牛顿运动定律的应用", "超重与失重"]
+            }
+          ]
+        },
+        {
+          "name": "必修第二册",
+          "grade": "高一",
+          "chapters": [
+            {
+              "number": 5,
+              "name": "抛体运动",
+              "knowledgePoints": ["曲线运动", "运动的合成与分解", "实验探究平抛运动的特点", "抛体运动的规律"]
+            },
+            {
+              "number": 6,
+              "name": "圆周运动",
+              "knowledgePoints": ["圆周运动", "向心加速度", "向心力", "生活中的圆周运动"]
+            },
+            {
+              "number": 7,
+              "name": "万有引力与宇宙航行",
+              "knowledgePoints": ["行星的运动", "万有引力定律", "万有引力理论的成就", "宇宙航行"]
+            },
+            {
+              "number": 8,
+              "name": "机械能守恒定律",
+              "knowledgePoints": ["功与功率", "重力势能", "动能和动能定理", "机械能守恒定律", "实验验证机械能守恒定律"]
+            }
+          ]
+        },
+        {
+          "name": "选择性必修第一册",
+          "grade": "高二",
+          "chapters": [
+            {
+              "number": 1,
+              "name": "动量守恒定律",
+              "knowledgePoints": ["动量", "动量定理", "动量守恒定律", "弹性碰撞与非弹性碰撞"]
+            },
+            {
+              "number": 2,
+              "name": "机械振动",
+              "knowledgePoints": ["简谐运动", "简谐运动的描述", "简谐运动的回复力和能量", "单摆", "实验用单摆测量重力加速度"]
+            },
+            {
+              "number": 3,
+              "name": "机械波",
+              "knowledgePoints": ["波的形成和传播", "波的图像", "波长频率和波速", "波的衍射和干涉", "多普勒效应"]
+            }
+          ]
+        },
+        {
+          "name": "选择性必修第二册",
+          "grade": "高二",
+          "chapters": [
+            {
+              "number": 1,
+              "name": "安培力与洛伦兹力",
+              "knowledgePoints": ["磁场", "磁感应强度", "几种常见的磁场", "安培力及其应用", "洛伦兹力"]
+            },
+            {
+              "number": 2,
+              "name": "电磁感应",
+              "knowledgePoints": ["电磁感应现象", "法拉第电磁感应定律", "楞次定律", "电磁感应现象在技术中的应用"]
+            },
+            {
+              "number": 3,
+              "name": "交变电流",
+              "knowledgePoints": ["交变电流", "描述交变电流的物理量", "电感和电容对交变电流的影响", "变压器", "电能的输送"]
+            }
+          ]
+        },
+        {
+          "name": "选择性必修第三册",
+          "grade": "高三",
+          "chapters": [
+            {
+              "number": 1,
+              "name": "分子动理论",
+              "knowledgePoints": ["分子动理论的基本内容", "分子的热运动", "分子间的作用力", "温度和内能"]
+            },
+            {
+              "number": 2,
+              "name": "气体、固体与液体",
+              "knowledgePoints": ["气体的等温变化", "气体的等压变化和等容变化", "固体和液体"]
+            },
+            {
+              "number": 3,
+              "name": "热力学定律",
+              "knowledgePoints": ["热力学第一定律", "能量守恒定律", "热力学第二定律"]
+            },
+            {
+              "number": 4,
+              "name": "原子结构与波粒二象性",
+              "knowledgePoints": ["电子的发现", "原子的核式结构模型", "光谱氢原子光谱", "原子的能级", "粒子的波动性", "概率波", "不确定性关系"]
+            }
+          ]
+        }
+      ]
+    },
+    "化学": {
+      "publisher": "人教版 2019",
+      "books": [
+        {
+          "name": "必修第一册",
+          "grade": "高一",
+          "chapters": [
+            {
+              "number": 1,
+              "name": "物质及其变化",
+              "knowledgePoints": ["物质的分类", "离子反应", "氧化还原反应"]
+            },
+            {
+              "number": 2,
+              "name": "海水中的重要元素——钠和氯",
+              "knowledgePoints": ["钠及其化合物", "氯及其化合物", "物质的量"]
+            },
+            {
+              "number": 3,
+              "name": "铁 金属材料",
+              "knowledgePoints": ["铁及其化合物", "金属材料"]
+            },
+            {
+              "number": 4,
+              "name": "物质结构 元素周期律",
+              "knowledgePoints": ["原子结构与元素周期表", "元素周期律", "化学键"]
+            }
+          ]
+        },
+        {
+          "name": "必修第二册",
+          "grade": "高一",
+          "chapters": [
+            {
+              "number": 5,
+              "name": "化工生产中的重要非金属元素",
+              "knowledgePoints": ["硫及其化合物", "氮及其化合物", "无机非金属材料"]
+            },
+            {
+              "number": 6,
+              "name": "化学反应与能量",
+              "knowledgePoints": ["化学反应与热能", "化学反应与电能", "化学反应的速率与限度"]
+            },
+            {
+              "number": 7,
+              "name": "有机化合物",
+              "knowledgePoints": ["认识有机化合物", "乙烯与有机高分子材料", "乙醇与乙酸", "基本营养物质"]
+            },
+            {
+              "number": 8,
+              "name": "化学与可持续发展",
+              "knowledgePoints": ["自然资源的开发利用", "化学品的合理使用"]
+            }
+          ]
+        },
+        {
+          "name": "选择性必修第一册",
+          "grade": "高二",
+          "chapters": [
+            {
+              "number": 1,
+              "name": "化学反应的热效应",
+              "knowledgePoints": ["反应热", "反应热的计算"]
+            },
+            {
+              "number": 2,
+              "name": "化学反应速率与化学平衡",
+              "knowledgePoints": ["化学反应速率", "化学平衡", "化学反应的方向与限度"]
+            },
+            {
+              "number": 3,
+              "name": "水溶液中的离子反应与平衡",
+              "knowledgePoints": ["弱电解质的电离平衡", "水的电离和溶液的pH", "盐类水解", "沉淀溶解平衡"]
+            }
+          ]
+        },
+        {
+          "name": "选择性必修第二册",
+          "grade": "高二",
+          "chapters": [
+            {
+              "number": 1,
+              "name": "原子结构与性质",
+              "knowledgePoints": ["原子结构", "元素周期律"]
+            },
+            {
+              "number": 2,
+              "name": "分子结构与性质",
+              "knowledgePoints": ["共价键", "分子的立体结构", "分子的性质"]
+            },
+            {
+              "number": 3,
+              "name": "晶体结构与性质",
+              "knowledgePoints": ["晶体的常识", "分子晶体与原子晶体", "金属晶体与离子晶体"]
+            }
+          ]
+        },
+        {
+          "name": "选择性必修第三册",
+          "grade": "高三",
+          "chapters": [
+            {
+              "number": 1,
+              "name": "有机化学的发展与应用",
+              "knowledgePoints": ["有机化学的发展", "有机化学的应用"]
+            },
+            {
+              "number": 2,
+              "name": "烃",
+              "knowledgePoints": ["烷烃", "烯烃", "炔烃", "苯"]
+            },
+            {
+              "number": 3,
+              "name": "烃的含氧衍生物",
+              "knowledgePoints": ["醇", "酚", "醛", "羧酸", "酯"]
+            },
+            {
+              "number": 4,
+              "name": "生物大分子与合成高分子",
+              "knowledgePoints": ["糖类", "蛋白质", "合成高分子"]
+            }
+          ]
+        }
+      ]
+    },
+    "生物": {
+      "publisher": "人教版 2019",
+      "books": [
+        {
+          "name": "必修第一册",
+          "grade": "高一",
+          "chapters": [
+            {
+              "number": 1,
+              "name": "走进细胞",
+              "knowledgePoints": ["细胞是生命活动的基本单位", "细胞的多样性和统一性"]
+            },
+            {
+              "number": 2,
+              "name": "组成细胞的分子",
+              "knowledgePoints": ["细胞中的元素和化合物", "蛋白质", "核酸", "糖类和脂质", "无机盐"]
+            },
+            {
+              "number": 3,
+              "name": "细胞的基本结构",
+              "knowledgePoints": ["细胞膜", "细胞器", "细胞核"]
+            },
+            {
+              "number": 4,
+              "name": "细胞的物质输入和输出",
+              "knowledgePoints": ["被动运输", "主动运输与胞吞胞吐"]
+            },
+            {
+              "number": 5,
+              "name": "细胞的能量供应和利用",
+              "knowledgePoints": ["酶", "ATP", "细胞呼吸", "光合作用"]
+            },
+            {
+              "number": 6,
+              "name": "细胞的生命历程",
+              "knowledgePoints": ["有丝分裂", "细胞的分化", "衰老和死亡"]
+            }
+          ]
+        },
+        {
+          "name": "必修第二册",
+          "grade": "高一",
+          "chapters": [
+            {
+              "number": 1,
+              "name": "遗传的基本规律",
+              "knowledgePoints": ["孟德尔的豌豆杂交实验", "减数分裂和受精作用"]
+            },
+            {
+              "number": 2,
+              "name": "基因和染色体的关系",
+              "knowledgePoints": ["基因在染色体上", "伴性遗传"]
+            },
+            {
+              "number": 3,
+              "name": "基因的本质",
+              "knowledgePoints": ["DNA是主要的遗传物质", "DNA的结构", "基因的表达"]
+            },
+            {
+              "number": 4,
+              "name": "生物的变异",
+              "knowledgePoints": ["基因突变和基因重组", "染色体变异", "人类遗传病"]
+            },
+            {
+              "number": 5,
+              "name": "生物的进化",
+              "knowledgePoints": ["达尔文的自然选择学说", "现代生物进化理论"]
+            }
+          ]
+        },
+        {
+          "name": "选择性必修第一册",
+          "grade": "高二",
+          "chapters": [
+            {
+              "number": 1,
+              "name": "人体的内环境与稳态",
+              "knowledgePoints": ["内环境", "稳态调节"]
+            },
+            {
+              "number": 2,
+              "name": "神经调节",
+              "knowledgePoints": ["神经调节的结构基础", "神经冲动的产生和传导"]
+            },
+            {
+              "number": 3,
+              "name": "体液调节",
+              "knowledgePoints": ["激素与内分泌系统", "激素调节实例"]
+            },
+            {
+              "number": 4,
+              "name": "免疫调节",
+              "knowledgePoints": ["免疫系统的组成", "特异性免疫", "免疫失调"]
+            },
+            {
+              "number": 5,
+              "name": "植物生命活动的调节",
+              "knowledgePoints": ["植物生长素", "其他植物激素"]
+            }
+          ]
+        },
+        {
+          "name": "选择性必修第二册",
+          "grade": "高二",
+          "chapters": [
+            {
+              "number": 1,
+              "name": "种群及其动态",
+              "knowledgePoints": ["种群的特征", "种群数量的变化"]
+            },
+            {
+              "number": 2,
+              "name": "群落及其演替",
+              "knowledgePoints": ["群落的结构", "群落的演替"]
+            },
+            {
+              "number": 3,
+              "name": "生态系统及其稳定性",
+              "knowledgePoints": ["生态系统的结构", "能量流动", "物质循环", "信息传递", "稳定性"]
+            },
+            {
+              "number": 4,
+              "name": "人与环境",
+              "knowledgePoints": ["人类活动对生态环境的影响", "生物多样性及其保护"]
+            }
+          ]
+        },
+        {
+          "name": "选择性必修第三册",
+          "grade": "高三",
+          "chapters": [
+            {
+              "number": 1,
+              "name": "发酵工程",
+              "knowledgePoints": ["微生物的培养", "发酵工程及其应用"]
+            },
+            {
+              "number": 2,
+              "name": "细胞工程",
+              "knowledgePoints": ["植物细胞工程", "动物细胞工程"]
+            },
+            {
+              "number": 3,
+              "name": "基因工程",
+              "knowledgePoints": ["DNA重组技术的基本工具", "基因工程的基本操作程序"]
+            },
+            {
+              "number": 4,
+              "name": "生物技术的安全性与伦理问题",
+              "knowledgePoints": ["生物技术的安全性", "生物技术的伦理问题"]
+            }
+          ]
+        }
+      ]
+    },
+    "政治": {
+      "publisher": "人教版 2019 统编版",
+      "books": [
+        {
+          "name": "必修第一册",
+          "grade": "高一",
+          "chapters": [
+            {
+              "number": 1,
+              "name": "人类社会的发展进程",
+              "knowledgePoints": ["原始社会", "奴隶社会", "封建社会", "资本主义社会"]
+            },
+            {
+              "number": 2,
+              "name": "社会主义从空想到科学、从理论到实践",
+              "knowledgePoints": ["空想社会主义", "科学社会主义", "社会主义实践"]
+            },
+            {
+              "number": 3,
+              "name": "只有中国特色社会主义才能发展中国",
+              "knowledgePoints": ["中国特色社会主义道路", "改革开放"]
+            },
+            {
+              "number": 4,
+              "name": "只有坚持和发展中国特色社会主义才能实现中华民族伟大复兴",
+              "knowledgePoints": ["中华民族伟大复兴", "新时代中国特色社会主义思想"]
+            }
+          ]
+        },
+        {
+          "name": "必修第二册",
+          "grade": "高一",
+          "chapters": [
+            {
+              "number": 1,
+              "name": "生产资料所有制与经济体制",
+              "knowledgePoints": ["公有制为主体", "社会主义市场经济体制"]
+            },
+            {
+              "number": 2,
+              "name": "经济发展与社会进步",
+              "knowledgePoints": ["新发展理念", "现代化经济体系", "收入分配与社会公平"]
+            },
+            {
+              "number": 3,
+              "name": "经济全球化与对外开放",
+              "knowledgePoints": ["经济全球化", "对外开放"]
+            }
+          ]
+        },
+        {
+          "name": "必修第三册",
+          "grade": "高二",
+          "chapters": [
+            {
+              "number": 1,
+              "name": "中国共产党的领导",
+              "knowledgePoints": ["历史和人民的选择", "始终走在时代前列"]
+            },
+            {
+              "number": 2,
+              "name": "人民当家作主",
+              "knowledgePoints": ["人民代表大会制度", "中国共产党领导的多党合作和政治协商制度", "民族区域自治制度", "基层群众自治制度"]
+            },
+            {
+              "number": 3,
+              "name": "全面依法治国",
+              "knowledgePoints": ["法治中国建设", "法治政府", "公正司法", "全民守法"]
+            }
+          ]
+        },
+        {
+          "name": "必修第四册",
+          "grade": "高二",
+          "chapters": [
+            {
+              "number": 1,
+              "name": "探索世界与把握规律",
+              "knowledgePoints": ["唯物论", "认识论", "唯物辩证法"]
+            },
+            {
+              "number": 2,
+              "name": "认识社会与价值选择",
+              "knowledgePoints": ["历史唯物主义", "人生价值"]
+            },
+            {
+              "number": 3,
+              "name": "文化传承与文化创新",
+              "knowledgePoints": ["文化的内涵与功能", "中华优秀传统文化", "文化强国"]
+            }
+          ]
+        },
+        {
+          "name": "选择性必修第一册",
+          "grade": "高三",
+          "chapters": [
+            {
+              "number": 1,
+              "name": "各具特色的国家",
+              "knowledgePoints": ["国体与政体"]
+            },
+            {
+              "number": 2,
+              "name": "世界多极化",
+              "knowledgePoints": ["国际组织"]
+            },
+            {
+              "number": 3,
+              "name": "经济全球化",
+              "knowledgePoints": ["经济全球化趋势", "国际经济组织"]
+            }
+          ]
+        },
+        {
+          "name": "选择性必修第二册",
+          "grade": "高三",
+          "chapters": [
+            {
+              "number": 1,
+              "name": "民事权利与义务",
+              "knowledgePoints": ["民事权利", "民事义务", "民事责任"]
+            },
+            {
+              "number": 2,
+              "name": "婚姻家庭与继承",
+              "knowledgePoints": ["婚姻制度", "家庭关系", "继承制度"]
+            },
+            {
+              "number": 3,
+              "name": "就业与创业",
+              "knowledgePoints": ["劳动合同", "就业权益", "创业基础"]
+            },
+            {
+              "number": 4,
+              "name": "社会争议解决",
+              "knowledgePoints": ["调解", "仲裁", "诉讼"]
+            }
+          ]
+        },
+        {
+          "name": "选择性必修第三册",
+          "grade": "高三",
+          "chapters": [
+            {
+              "number": 1,
+              "name": "树立科学思维观念",
+              "knowledgePoints": ["思维的含义与特征", "科学思维的特点"]
+            },
+            {
+              "number": 2,
+              "name": "遵循逻辑思维规则",
+              "knowledgePoints": ["概念", "判断", "推理"]
+            },
+            {
+              "number": 3,
+              "name": "运用辩证思维方法",
+              "knowledgePoints": ["辩证思维的特征", "分析与综合", "从抽象到具体"]
+            },
+            {
+              "number": 4,
+              "name": "提高创新思维能力",
+              "knowledgePoints": ["创新思维的含义", "创新思维的方法", "培养创新思维"]
+            }
+          ]
+        }
+      ]
+    },
+    "历史": {
+      "publisher": "人教版 2019 统编版",
+      "books": [
+        {
+          "name": "必修 中外历史纲要上",
+          "grade": "高一",
+          "chapters": [
+            {
+              "number": 1,
+              "name": "从中华文明起源到秦汉统一多民族封建国家的建立与巩固",
+              "knowledgePoints": ["中华文明的起源", "早期国家", "秦汉统一多民族国家的建立与巩固"]
+            },
+            {
+              "number": 2,
+              "name": "三国两晋南北朝的民族交融与隋唐统一多民族封建国家的发展",
+              "knowledgePoints": ["三国两晋南北朝", "隋唐盛世", "民族交融"]
+            },
+            {
+              "number": 3,
+              "name": "辽宋夏金多民族政权的并立与元朝的统一",
+              "knowledgePoints": ["两宋的政治与经济", "辽夏金元的统治", "多民族政权并立"]
+            },
+            {
+              "number": 4,
+              "name": "明清中国版图的奠定与面临的挑战",
+              "knowledgePoints": ["明朝的统治", "清朝的统治", "明清时期的对外关系"]
+            },
+            {
+              "number": 5,
+              "name": "晚清时期的内忧外患与救亡图存",
+              "knowledgePoints": ["鸦片战争", "太平天国运动", "洋务运动", "甲午战争"]
+            },
+            {
+              "number": 6,
+              "name": "辛亥革命与中华民国的建立",
+              "knowledgePoints": ["资产阶级民主革命的兴起", "辛亥革命", "中华民国的建立"]
+            },
+            {
+              "number": 7,
+              "name": "抗日战争与民族解放",
+              "knowledgePoints": ["抗日战争的爆发", "全民族抗战", "抗战胜利"]
+            },
+            {
+              "number": 8,
+              "name": "中华人民共和国成立和社会主义革命与建设",
+              "knowledgePoints": ["新中国的成立", "社会主义革命", "社会主义建设"]
+            },
+            {
+              "number": 9,
+              "name": "改革开放与中国特色社会主义道路",
+              "knowledgePoints": ["真理标准问题的讨论", "改革开放", "中国特色社会主义道路"]
+            }
+          ]
+        },
+        {
+          "name": "必修 中外历史纲要下",
+          "grade": "高一",
+          "chapters": [
+            {
+              "number": 1,
+              "name": "古代文明的产生与发展",
+              "knowledgePoints": ["古代文明的产生", "古代文明的发展", "文明的交流"]
+            },
+            {
+              "number": 2,
+              "name": "中古时期的世界",
+              "knowledgePoints": ["西欧封建社会", "拜占庭帝国", "阿拉伯帝国", "古代日本与朝鲜"]
+            },
+            {
+              "number": 3,
+              "name": "走向整体的世界",
+              "knowledgePoints": ["新航路开辟", "全球联系的初步建立", "世界格局的变化"]
+            },
+            {
+              "number": 4,
+              "name": "资本主义制度的确立",
+              "knowledgePoints": ["英国资产阶级革命", "美国独立战争", "法国大革命", "资本主义制度的确立"]
+            },
+            {
+              "number": 5,
+              "name": "工业革命与马克思主义的诞生",
+              "knowledgePoints": ["工业革命", "马克思主义的诞生", "巴黎公社"]
+            },
+            {
+              "number": 6,
+              "name": "世界殖民体系与亚非拉民族独立运动",
+              "knowledgePoints": ["世界殖民体系的形成", "亚非拉民族独立运动"]
+            },
+            {
+              "number": 7,
+              "name": "两次世界大战、十月革命与国际秩序的演变",
+              "knowledgePoints": ["第一次世界大战", "十月革命", "第二次世界大战", "国际秩序的演变"]
+            },
+            {
+              "number": 8,
+              "name": "20世纪下半叶世界的新变化",
+              "knowledgePoints": ["冷战", "资本主义的新变化", "社会主义国家的发展", "世界多极化趋势"]
+            }
+          ]
+        },
+        {
+          "name": "选择性必修1",
+          "grade": "高二",
+          "chapters": [
+            {
+              "number": 1,
+              "name": "政治体制",
+              "knowledgePoints": ["中国政治体制的演变", "西方政治体制的产生与演变"]
+            },
+            {
+              "number": 2,
+              "name": "官员的选拔与管理",
+              "knowledgePoints": ["中国古代选官制度", "西方文官制度"]
+            },
+            {
+              "number": 3,
+              "name": "法律与教化",
+              "knowledgePoints": ["中国古代的法律与教化", "近代西方的法律与教化"]
+            },
+            {
+              "number": 4,
+              "name": "民族关系与国家关系",
+              "knowledgePoints": ["中国古代的民族关系", "近代西方的民族主义与国际关系"]
+            },
+            {
+              "number": 5,
+              "name": "货币与赋税制度",
+              "knowledgePoints": ["货币制度的演变", "赋税制度的演变"]
+            },
+            {
+              "number": 6,
+              "name": "基层治理与社会保障",
+              "knowledgePoints": ["基层治理制度的演变", "社会保障制度的建立与发展"]
+            }
+          ]
+        },
+        {
+          "name": "选择性必修2",
+          "grade": "高二",
+          "chapters": [
+            {
+              "number": 1,
+              "name": "食物生产与社会生活",
+              "knowledgePoints": ["食物生产的演变", "食物生产对社会生活的影响"]
+            },
+            {
+              "number": 2,
+              "name": "生产工具与劳作方式",
+              "knowledgePoints": ["生产工具的演变", "劳作方式的变化"]
+            },
+            {
+              "number": 3,
+              "name": "商业贸易与日常生活",
+              "knowledgePoints": ["商业贸易的发展", "商业贸易对日常生活的影响"]
+            },
+            {
+              "number": 4,
+              "name": "居住环境与生活",
+              "knowledgePoints": ["居住环境的演变", "居住环境与生活方式"]
+            },
+            {
+              "number": 5,
+              "name": "交通与社会变迁",
+              "knowledgePoints": ["交通的发展", "交通对社会变迁的影响"]
+            },
+            {
+              "number": 6,
+              "name": "医疗与公共卫生",
+              "knowledgePoints": ["医疗技术的发展", "公共卫生体系的建立"]
+            }
+          ]
+        },
+        {
+          "name": "选择性必修3",
+          "grade": "高三",
+          "chapters": [
+            {
+              "number": 1,
+              "name": "源远流长的中华文化与世界文化",
+              "knowledgePoints": ["中华文化的发展历程", "世界文化的发展"]
+            },
+            {
+              "number": 2,
+              "name": "丰富多样的世界文化",
+              "knowledgePoints": ["世界文化的多样性", "世界文化遗产"]
+            },
+            {
+              "number": 3,
+              "name": "人口迁徙与文化交融",
+              "knowledgePoints": ["人口迁徙的原因", "人口迁徙对文化交融的影响"]
+            },
+            {
+              "number": 4,
+              "name": "商路贸易与文化交流",
+              "knowledgePoints": ["古代商路", "商路贸易中的文化交流"]
+            },
+            {
+              "number": 5,
+              "name": "战争与文化冲突",
+              "knowledgePoints": ["战争对文化的冲击", "文化冲突与融合"]
+            },
+            {
+              "number": 6,
+              "name": "文化遗产的保护与利用",
+              "knowledgePoints": ["文化遗产的价值", "文化遗产的保护", "文化遗产的利用"]
+            }
+          ]
+        }
+      ]
+    },
+    "地理": {
+      "publisher": "人教版 2019",
+      "books": [
+        {
+          "name": "必修第一册",
+          "grade": "高一",
+          "chapters": [
+            {
+              "number": 1,
+              "name": "宇宙中的地球",
+              "knowledgePoints": ["地球的宇宙环境", "太阳对地球的影响", "地球的历史", "地球的圈层结构"]
+            },
+            {
+              "number": 2,
+              "name": "地表形态的塑造",
+              "knowledgePoints": ["塑造地表形态的力量", "构造地貌的形成", "河流地貌的发育"]
+            },
+            {
+              "number": 3,
+              "name": "大气的运动",
+              "knowledgePoints": ["大气的组成与垂直分层", "大气受热过程", "大气热力环流与天气系统", "全球气候变化与国家安全"]
+            },
+            {
+              "number": 4,
+              "name": "水的运动",
+              "knowledgePoints": ["水循环", "海水的性质", "海水的运动"]
+            },
+            {
+              "number": 5,
+              "name": "自然环境的整体性与差异性",
+              "knowledgePoints": ["自然环境的整体性", "自然环境的地域差异性"]
+            }
+          ]
+        },
+        {
+          "name": "必修第二册",
+          "grade": "高一",
+          "chapters": [
+            {
+              "number": 1,
+              "name": "人口",
+              "knowledgePoints": ["人口分布", "人口迁移", "人口容量"]
+            },
+            {
+              "number": 2,
+              "name": "乡村和城镇",
+              "knowledgePoints": ["乡村和城镇空间结构", "城镇化", "地域文化与城乡景观"]
+            },
+            {
+              "number": 3,
+              "name": "产业区位因素",
+              "knowledgePoints": ["农业区位因素及其变化", "工业区位因素及其变化", "服务业区位因素及其变化"]
+            },
+            {
+              "number": 4,
+              "name": "交通运输布局与区域发展",
+              "knowledgePoints": ["区域发展对交通运输布局的影响", "交通运输布局对区域发展的影响"]
+            },
+            {
+              "number": 5,
+              "name": "环境与发展",
+              "knowledgePoints": ["人类面临的主要环境问题", "资源安全与国家安全", "生态保护与国家安全"]
+            }
+          ]
+        },
+        {
+          "name": "选择性必修第一册",
+          "grade": "高二",
+          "chapters": [
+            {
+              "number": 1,
+              "name": "地球的运动",
+              "knowledgePoints": ["地球的自转和公转", "地球运动的地理意义"]
+            },
+            {
+              "number": 2,
+              "name": "地表形态的塑造",
+              "knowledgePoints": ["塑造地表形态的力量", "构造地貌的形成", "河流地貌的发育"]
+            },
+            {
+              "number": 3,
+              "name": "大气的运动",
+              "knowledgePoints": ["常见天气系统", "气压带和风带", "气压带风带对气候的影响"]
+            },
+            {
+              "number": 4,
+              "name": "水的运动",
+              "knowledgePoints": ["水循环过程及地理意义", "洋流及其地理意义"]
+            }
+          ]
+        },
+        {
+          "name": "选择性必修第二册",
+          "grade": "高二",
+          "chapters": [
+            {
+              "number": 1,
+              "name": "资源、环境与区域发展",
+              "knowledgePoints": ["区域及其类型", "区域发展差异与因地制宜"]
+            },
+            {
+              "number": 2,
+              "name": "生态脆弱区的综合治理",
+              "knowledgePoints": ["荒漠化的防治", "水土流失的治理"]
+            },
+            {
+              "number": 3,
+              "name": "资源枯竭型城市的转型发展",
+              "knowledgePoints": ["资源枯竭型城市的问题", "转型发展的路径"]
+            },
+            {
+              "number": 4,
+              "name": "城市的辐射功能",
+              "knowledgePoints": ["城市辐射功能的概念", "城市辐射功能的影响因素"]
+            },
+            {
+              "number": 5,
+              "name": "产业转移与资源跨区域调配",
+              "knowledgePoints": ["产业转移", "资源跨区域调配"]
+            }
+          ]
+        },
+        {
+          "name": "选择性必修第三册",
+          "grade": "高三",
+          "chapters": [
+            {
+              "number": 1,
+              "name": "自然环境与人类社会",
+              "knowledgePoints": ["自然环境的服务功能", "自然资源及其利用"]
+            },
+            {
+              "number": 2,
+              "name": "资源安全与国家安全",
+              "knowledgePoints": ["资源安全", "中国的能源安全"]
+            },
+            {
+              "number": 3,
+              "name": "环境安全与国家安全",
+              "knowledgePoints": ["环境安全问题", "环境污染与国家安全"]
+            },
+            {
+              "number": 4,
+              "name": "保障国家安全的政策",
+              "knowledgePoints": ["走向生态文明", "国家安全的政策保障"]
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

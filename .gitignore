@@ -1,0 +1,9 @@
+# 临时文件
+github_index.html
+start-server.ps1
+simple-server.ps1
+测试文件.txt
+
+# 系统文件
+Thumbs.db
+.DS_Store

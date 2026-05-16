@@ -1,0 +1,486 @@
+{
+  "version": "1.0.0",
+  "lastUpdated": "2026-05-16",
+  "achievements": [
+    {
+      "id": "first_step",
+      "name": "初出茅庐",
+      "description": "完成首次学习记录",
+      "category": "persistence",
+      "rarity": "bronze",
+      "icon": "🌱"
+    },
+    {
+      "id": "week_warrior",
+      "name": "七日坚持",
+      "description": "连续学习7天",
+      "category": "persistence",
+      "rarity": "bronze",
+      "icon": "🔥"
+    },
+    {
+      "id": "month_master",
+      "name": "月度达人",
+      "description": "连续学习30天",
+      "category": "persistence",
+      "rarity": "silver",
+      "icon": "📅"
+    },
+    {
+      "id": "quarter_queen",
+      "name": "季度王者",
+      "description": "连续学习90天",
+      "category": "persistence",
+      "rarity": "gold",
+      "icon": "👑"
+    },
+    {
+      "id": "half_year_hero",
+      "name": "半年英雄",
+      "description": "连续学习180天",
+      "category": "persistence",
+      "rarity": "gold",
+      "icon": "🦸"
+    },
+    {
+      "id": "year_legend",
+      "name": "年度传奇",
+      "description": "连续学习365天",
+      "category": "persistence",
+      "rarity": "legend",
+      "icon": "🏆"
+    },
+    {
+      "id": "early_bird",
+      "name": "早起鸟",
+      "description": "连续7天在8点前开始学习",
+      "category": "persistence",
+      "rarity": "silver",
+      "icon": "🐦"
+    },
+    {
+      "id": "night_owl",
+      "name": "夜猫子",
+      "description": "连续7天在22点后还在学习",
+      "category": "persistence",
+      "rarity": "silver",
+      "icon": "🦉"
+    },
+    {
+      "id": "weekend_warrior",
+      "name": "周末战士",
+      "description": "连续4个周末都学习",
+      "category": "persistence",
+      "rarity": "bronze",
+      "icon": "💪"
+    },
+    {
+      "id": "holiday_hero",
+      "name": "假期英雄",
+      "description": "在法定节假日学习",
+      "category": "persistence",
+      "rarity": "silver",
+      "icon": "🎉"
+    },
+    {
+      "id": "comeback_kid",
+      "name": "回归者",
+      "description": "中断7天后重新开始学习",
+      "category": "persistence",
+      "rarity": "bronze",
+      "icon": "🔄"
+    },
+    {
+      "id": "perfect_week",
+      "name": "完美一周",
+      "description": "一周7天每天都有学习记录",
+      "category": "persistence",
+      "rarity": "silver",
+      "icon": "✨"
+    },
+    {
+      "id": "jack_of_all",
+      "name": "博学者",
+      "description": "学习过全部9个学科",
+      "category": "knowledge",
+      "rarity": "silver",
+      "icon": "📚"
+    },
+    {
+      "id": "math_whiz",
+      "name": "数学奇才",
+      "description": "数学累计学习超过50小时",
+      "category": "knowledge",
+      "rarity": "gold",
+      "icon": "🔢"
+    },
+    {
+      "id": "literature_lover",
+      "name": "文学爱好者",
+      "description": "语文累计学习超过50小时",
+      "category": "knowledge",
+      "rarity": "gold",
+      "icon": "📖"
+    },
+    {
+      "id": "polyglot",
+      "name": "语言学家",
+      "description": "英语累计学习超过50小时",
+      "category": "knowledge",
+      "rarity": "gold",
+      "icon": "🌍"
+    },
+    {
+      "id": "physics_pro",
+      "name": "物理专家",
+      "description": "物理累计学习超过50小时",
+      "category": "knowledge",
+      "rarity": "gold",
+      "icon": "⚛️"
+    },
+    {
+      "id": "chemist",
+      "name": "化学家",
+      "description": "化学累计学习超过50小时",
+      "category": "knowledge",
+      "rarity": "gold",
+      "icon": "⚗️"
+    },
+    {
+      "id": "biologist",
+      "name": "生物学家",
+      "description": "生物累计学习超过50小时",
+      "category": "knowledge",
+      "rarity": "gold",
+      "icon": "🧬"
+    },
+    {
+      "id": "historian",
+      "name": "历史学家",
+      "description": "历史累计学习超过50小时",
+      "category": "knowledge",
+      "rarity": "gold",
+      "icon": "🏛️"
+    },
+    {
+      "id": "geographer",
+      "name": "地理学家",
+      "description": "地理累计学习超过50小时",
+      "category": "knowledge",
+      "rarity": "gold",
+      "icon": "🗺️"
+    },
+    {
+      "id": "politician",
+      "name": "政治家",
+      "description": "政治累计学习超过50小时",
+      "category": "knowledge",
+      "rarity": "gold",
+      "icon": "🏛️"
+    },
+    {
+      "id": "century_hours",
+      "name": "百小时俱乐部",
+      "description": "任一学科累计学习超过100小时",
+      "category": "knowledge",
+      "rarity": "legend",
+      "icon": "💯"
+    },
+    {
+      "id": "thousand_hours",
+      "name": "千小时大师",
+      "description": "总学习时长超过1000小时",
+      "category": "knowledge",
+      "rarity": "legend",
+      "icon": "⏰"
+    },
+    {
+      "id": "bookworm",
+      "name": "书虫",
+      "description": "阅读超过10本书",
+      "category": "knowledge",
+      "rarity": "silver",
+      "icon": "📚"
+    },
+    {
+      "id": "speed_reader",
+      "name": "速读达人",
+      "description": "平均阅读速度超过300字/分钟",
+      "category": "knowledge",
+      "rarity": "gold",
+      "icon": "⚡"
+    },
+    {
+      "id": "deep_reader",
+      "name": "深度阅读者",
+      "description": "单本书阅读时长超过10小时",
+      "category": "knowledge",
+      "rarity": "silver",
+      "icon": "🤿"
+    },
+    {
+      "id": "perfect_score",
+      "name": "满分王者",
+      "description": "单次测试获得100分",
+      "category": "mastery",
+      "rarity": "gold",
+      "icon": "💯"
+    },
+    {
+      "id": "improvement_10",
+      "name": "进步之星",
+      "description": "比上次测试提高10分以上",
+      "category": "mastery",
+      "rarity": "bronze",
+      "icon": "📈"
+    },
+    {
+      "id": "improvement_20",
+      "name": "飞跃进步",
+      "description": "比上次测试提高20分以上",
+      "category": "mastery",
+      "rarity": "silver",
+      "icon": "🚀"
+    },
+    {
+      "id": "improvement_30",
+      "name": "脱胎换骨",
+      "description": "比上次测试提高30分以上",
+      "category": "mastery",
+      "rarity": "gold",
+      "icon": "🔥"
+    },
+    {
+      "id": "consistency_king",
+      "name": "稳定之王",
+      "description": "连续5次测试正确率超过90%",
+      "category": "mastery",
+      "rarity": "gold",
+      "icon": "👑"
+    },
+    {
+      "id": "shadow_hunter",
+      "name": "阴影猎手",
+      "description": "成功复习10个进入阴影队列的知识点",
+      "category": "mastery",
+      "rarity": "silver",
+      "icon": "🌙"
+    },
+    {
+      "id": "weakness_conqueror",
+      "name": "弱点征服者",
+      "description": "将一个薄弱知识点提升到掌握状态",
+      "category": "mastery",
+      "rarity": "gold",
+      "icon": "⚔️"
+    },
+    {
+      "id": "skill_master",
+      "name": "技能大师",
+      "description": "任一技能掌握度达到90%",
+      "category": "mastery",
+      "rarity": "legend",
+      "icon": "🏆"
+    },
+    {
+      "id": "subject_expert",
+      "name": "学科专家",
+      "description": "任一学科能力值达到90",
+      "category": "mastery",
+      "rarity": "legend",
+      "icon": "🎓"
+    },
+    {
+      "id": "legendary_level",
+      "name": "传说等级",
+      "description": "达到传说等级（Lv.95+）",
+      "category": "mastery",
+      "rarity": "legend",
+      "icon": "⭐"
+    },
+    {
+      "id": "xp_millionaire",
+      "name": "百万经验",
+      "description": "累计获得100万XP",
+      "category": "mastery",
+      "rarity": "legend",
+      "icon": "💰"
+    },
+    {
+      "id": "daily_500",
+      "name": "日进斗金",
+      "description": "单日获得超过500XP",
+      "category": "mastery",
+      "rarity": "silver",
+      "icon": "💎"
+    },
+    {
+      "id": "daily_1000",
+      "name": "千分达人",
+      "description": "单日获得超过1000XP",
+      "category": "mastery",
+      "rarity": "gold",
+      "icon": "💎"
+    },
+    {
+      "id": "pomodoro_10",
+      "name": "专注达人",
+      "description": "单日完成10个番茄钟",
+      "category": "mastery",
+      "rarity": "silver",
+      "icon": "🍅"
+    },
+    {
+      "id": "pomodoro_25",
+      "name": "专注大师",
+      "description": "单日完成25个番茄钟",
+      "category": "mastery",
+      "rarity": "gold",
+      "icon": "🍅"
+    },
+    {
+      "id": "no_interrupt_5",
+      "name": "心无旁骛",
+      "description": "连续5个番茄钟无中断",
+      "category": "mastery",
+      "rarity": "silver",
+      "icon": "🧘"
+    },
+    {
+      "id": "deep_work_4h",
+      "name": "深度工作",
+      "description": "单日深度工作时间超过4小时",
+      "category": "mastery",
+      "rarity": "gold",
+      "icon": "🎯"
+    },
+    {
+      "id": "early_finish",
+      "name": "提前完成",
+      "description": "比计划提前完成学习任务",
+      "category": "mastery",
+      "rarity": "bronze",
+      "icon": "⏱️"
+    },
+    {
+      "id": "first_exam",
+      "name": "初试锋芒",
+      "description": "完成首次模拟考试",
+      "category": "exploration",
+      "rarity": "bronze",
+      "icon": "📝"
+    },
+    {
+      "id": "exam_10",
+      "name": "身经百战",
+      "description": "完成10次模拟考试",
+      "category": "exploration",
+      "rarity": "silver",
+      "icon": "📊"
+    },
+    {
+      "id": "all_subjects_exam",
+      "name": "全科考生",
+      "description": "所有学科都参加过考试",
+      "category": "exploration",
+      "rarity": "gold",
+      "icon": "🎓"
+    },
+    {
+      "id": "night_study",
+      "name": "夜读人",
+      "description": "在0点-5点之间学习",
+      "category": "exploration",
+      "rarity": "bronze",
+      "icon": "🌙"
+    },
+    {
+      "id": "multi_location",
+      "name": "移动学习",
+      "description": "在3个以上不同地点学习",
+      "category": "exploration",
+      "rarity": "bronze",
+      "icon": "📍"
+    },
+    {
+      "id": "weekend_deep",
+      "name": "周末深潜",
+      "description": "周末单日学习超过6小时",
+      "category": "exploration",
+      "rarity": "silver",
+      "icon": "🤿"
+    },
+    {
+      "id": "first_review",
+      "name": "温故知新",
+      "description": "首次复习已学知识点",
+      "category": "exploration",
+      "rarity": "bronze",
+      "icon": "🔄"
+    },
+    {
+      "id": "all_skills_touched",
+      "name": "全面探索",
+      "description": "学习过所有学科的至少一个技能",
+      "category": "exploration",
+      "rarity": "gold",
+      "icon": "🗺️"
+    },
+    {
+      "id": "legend_beginning",
+      "name": "传奇开始",
+      "description": "累计学习超过100天",
+      "category": "legend",
+      "rarity": "legend",
+      "icon": "🌟"
+    },
+    {
+      "id": "all_achievements",
+      "name": "成就猎人",
+      "description": "解锁50个以上成就",
+      "category": "legend",
+      "rarity": "legend",
+      "icon": "🏆"
+    },
+    {
+      "id": "perfect_month",
+      "name": "完美一月",
+      "description": "一个月内每天都有学习记录",
+      "category": "legend",
+      "rarity": "legend",
+      "icon": "📅"
+    },
+    {
+      "id": "grandmaster",
+      "name": "大宗师",
+      "description": "所有学科能力值都达到80以上",
+      "category": "legend",
+      "rarity": "legend",
+      "icon": "👑"
+    },
+    {
+      "id": "immortal",
+      "name": "不朽传说",
+      "description": "连续学习超过500天",
+      "category": "legend",
+      "rarity": "legend",
+      "icon": "✨"
+    },
+    {
+      "id": "hidden_night_owl",
+      "name": "???",
+      "description": "???",
+      "category": "legend",
+      "rarity": "hidden",
+      "icon": "❓"
+    },
+    {
+      "id": "hidden_perfectionist",
+      "name": "???",
+      "description": "???",
+      "category": "legend",
+      "rarity": "hidden",
+      "icon": "❓"
+    }
+  ]
+}

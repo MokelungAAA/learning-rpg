@@ -1,0 +1,23 @@
+{
+  "version": "1.0.0",
+  "lastUpdated": "2026-05-16",
+  "sessions": [],
+  "settings": {
+    "defaultDuration": 25,
+    "shortBreak": 5,
+    "longBreak": 15,
+    "longBreakInterval": 4,
+    "autoStartBreak": false,
+    "autoStartPomodoro": false,
+    "notificationSound": true,
+    "backgroundTracking": true
+  },
+  "statistics": {
+    "totalSessions": 0,
+    "totalFocusMinutes": 0,
+    "totalBreakMinutes": 0,
+    "averageFocusScore": 0,
+    "currentStreak": 0,
+    "bestStreak": 0
+  }
+}
