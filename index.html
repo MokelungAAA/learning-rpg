@@ -6726,9 +6726,12 @@
     function enterMain() {
       const launchPage = document.getElementById('launchPage');
       const mainPage = document.getElementById('mainPage');
-      
+      const overlay = document.getElementById('dataLoadingOverlay');
+      if (overlay) {
+        overlay.style.display = 'none';
+        overlay.style.opacity = '0';
+      }
       launchPage.classList.add('hidden');
-      
       setTimeout(() => {
         mainPage.classList.add('visible');
         setTimeout(() => {
@@ -9237,10 +9240,9 @@
           </div>
         `;
       }).join('') : '<div style="text-align:center;padding:16px;color:var(--text-muted);font-size:13px;">暂无薄弱点，继续保持 ✨</div>';
-    }
-      // 渲染效率散点图和时段热力图
       renderEfficiencyChart();
       renderTimeSlotChart();
+    }
 
     // ========== 效率散点图 ==========
     let efficiencyChart = null;
@@ -11399,17 +11401,17 @@
       renderAll();
       console.log('[v0.6.5] 首屏渲染完成');
       
-      // Phase 2: 加载用户画像
-      await loadUserProfile();
+      // Phase 2.1: 加载用户画像
+      try { await loadUserProfile(); } catch (e) { console.warn('[v0.9.2] 用户画像加载失败:', e); }
 
-      // Phase 2.5: 加载技能树数据
-      await loadSkillTree();
+      // Phase 2.2: 加载技能树
+      try { await loadSkillTree(); } catch (e) { console.warn('[v0.9.2] 技能树加载失败:', e); }
 
-      // Phase 2.6: 加载成就数据
-      await loadAchievementsData();
+      // Phase 2.3: 加载成就数据
+      try { await loadAchievementsData(); } catch (e) { console.warn('[v0.9.2] 成就数据加载失败:', e); }
 
       // Phase 3: 后台静默加载数据
-      await backgroundDataLoad();
+      try { await backgroundDataLoad(); } catch (e) { console.warn('[v0.9.2] 后台数据加载失败:', e); }
     }
     
     /**
