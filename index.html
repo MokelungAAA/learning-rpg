@@ -5695,7 +5695,25 @@
     };
     
     // ========== 数据版本管理 ==========
-    const DATA_VERSION = 'v0.8.4';
+    const DATA_VERSION = 'v2.1';
+    // v2.1: 强制清除旧缓存以修复XP丢失问题
+    (function clearOldCache() {
+      try {
+        const meta = JSON.parse(localStorage.getItem('learning-rpg-cache-meta') || '{}');
+        const appDataStr = localStorage.getItem('learning-rpg-app-data') || localStorage.getItem('learning-rpg-appdata') || '';
+        if (appDataStr) {
+          const cached = JSON.parse(appDataStr);
+          // 如果缓存的totalXp小于131（正确的总XP），说明是旧错误数据，清除
+          if (cached.profile && cached.profile.totalXp < 131 && cached.records && cached.records.length >= 2) {
+            console.log('[v2.1] 检测到XP异常的旧缓存(totalXp=' + cached.profile.totalXp + ')，正在清除...');
+            localStorage.removeItem('learning-rpg-app-data');
+            localStorage.removeItem('learning-rpg-appdata');
+            localStorage.removeItem('learning-rpg-cache');
+            localStorage.removeItem('learning-rpg-cache-meta');
+          }
+        }
+      } catch(e) {}
+    })();
     
     function migrateAppData(data) {
       if (!data || !data.version) return data;
@@ -7010,8 +7028,10 @@
         overlay.style.display = 'none';
         overlay.style.opacity = '0';
       }
-      // 显示底部导航（移除hidden class即可显示）
-      if (bottomNav) bottomNav.classList.remove('hidden');
+      // v2.1: 导航栏滑入显示（transform动画替代display切换）
+      if (bottomNav) {
+        bottomNav.classList.remove('hidden');
+      }
       launchPage.classList.add('hidden');
       setTimeout(() => {
         mainPage.classList.add('visible');
@@ -10836,6 +10856,18 @@
       const progress = pomodoroState.totalTime > 0 ? pomodoroState.timeRemaining / pomodoroState.totalTime : 1;
       const offset = circumference * (1 - progress);
       document.getElementById('pomodoroRing').style.strokeDashoffset = offset;
+
+      // v2.1: FAB计时器同步
+      const fabTimer = document.getElementById('fabTimer');
+      const fab = document.getElementById('pomodoroFab');
+      if (fabTimer && fab) {
+        fabTimer.textContent = String(mins).padStart(2, '0') + ':' + String(secs).padStart(2, '0');
+        if (pomodoroState.isRunning) {
+          fab.classList.add('running');
+        } else {
+          fab.classList.remove('running');
+        }
+      }
 
       // Update page title
       if (pomodoroState.isRunning || pomodoroState.isPaused) {
