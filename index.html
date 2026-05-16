@@ -4100,7 +4100,7 @@
           <div class="about-stat-chip-label">覆盖学科</div>
         </div>
         <div class="about-stat-chip">
-          <div class="about-stat-chip-value" id="statAlgo">16</div>
+          <div class="about-stat-chip-value" id="statAlgo">17</div>
           <div class="about-stat-chip-label">核心算法</div>
         </div>
       </div>
@@ -4368,13 +4368,44 @@
               <div class="changelog-version-header">
                 <div class="changelog-version-left">
                   <span>v0.8.2</span>
+                  <span class="changelog-version-tag">数据</span>
                 </div>
                 <span class="changelog-toggle">▼</span>
               </div>
               <div class="changelog-items">
                 <div class="changelog-item">
                   <span class="changelog-item-version">2026-05-16</span>
-                  创建user_profile.json用户画像文件；实现多源容错加载；冷启动默认值；localStorage持久化。
+                  创建user_profile.json用户画像文件；推送到GitHub仓库；修复模板字符串语法错误（5处JS错误修复）。
+                </div>
+              </div>
+            </div>
+            <div class="changelog-version" onclick="event.stopPropagation();this.classList.toggle('expanded')">
+              <div class="changelog-version-header">
+                <div class="changelog-version-left">
+                  <span>v0.8.1</span>
+                  <span class="changelog-version-tag">算法</span>
+                </div>
+                <span class="changelog-toggle">▼</span>
+              </div>
+              <div class="changelog-items">
+                <div class="changelog-item">
+                  <span class="changelog-item-version">2026-05-16</span>
+                  自适应参数EMA更新：学科能力值（avgTemp×0.5+avgAcc×0.5）；学科修正系数（0.7×old+0.3×ratio）；全局半衰期（0.8×old+0.2×median）；全量重算机制recalculateAll()。
+                </div>
+              </div>
+            </div>
+            <div class="changelog-version" onclick="event.stopPropagation();this.classList.toggle('expanded')">
+              <div class="changelog-version-header">
+                <div class="changelog-version-left">
+                  <span>v0.8.0</span>
+                  <span class="changelog-version-tag">架构</span>
+                </div>
+                <span class="changelog-toggle">▼</span>
+              </div>
+              <div class="changelog-items">
+                <div class="changelog-item">
+                  <span class="changelog-item-version">2026-05-15</span>
+                  用户画像系统：user_profile.json（21个自适应参数）；多源加载架构（GitHub Raw→jsDelivr CDN→localStorage→兜底数据）；localStorage持久化缓存；冷启动默认值体系。
                 </div>
               </div>
             </div>
@@ -5190,9 +5221,9 @@
 
       <!-- Tabs -->
       <div class="reading-tabs">
-        <button class="reading-tab active" onclick="switchReadingTab('record')">📝 记录阅读</button>
-        <button class="reading-tab" onclick="switchReadingTab('bookshelf')">📚 我的书架</button>
-        <button class="reading-tab" onclick="switchReadingTab('stats')">📊 阅读统计</button>
+        <button class="reading-tab active" onclick="switchReadingTab('record', event)">📝 记录阅读</button>
+        <button class="reading-tab" onclick="switchReadingTab('bookshelf', event)">📚 我的书架</button>
+        <button class="reading-tab" onclick="switchReadingTab('stats', event)">📊 阅读统计</button>
       </div>
 
       <!-- Tab 1: Record Reading -->
@@ -10406,7 +10437,6 @@
       const lastSession = data.sessions[data.sessions.length - 1];
       const mins = Math.round(lastSession.actualDuration / 60);
 
-      // Create a learning record similar to manual entry
       const record = {
         date: lastSession.date,
         subject: lastSession.subject,
@@ -10416,16 +10446,24 @@
         score: lastSession.score
       };
 
-      // Add to appData if available
-      if (appData && appData.studyLog) {
-        appData.studyLog.push(record);
-        saveData();
+      if (appData && appData.records) {
+        appData.records.push(record);
+        saveAppData();
         renderAll();
         showToast('已生成学习记录: ' + lastSession.subject + ' ' + mins + '分钟');
       } else {
         showToast('学习记录已保存到番茄数据中');
       }
       dismissSummary();
+    }
+
+    function saveAppData() {
+      if (!appData) return;
+      try {
+        localStorage.setItem('learning-rpg-appdata', JSON.stringify(appData));
+      } catch (e) {
+        console.warn('[v0.8.2] 保存appData失败:', e.message);
+      }
     }
 
     // ---- Notification Sound ----
@@ -10588,10 +10626,10 @@
       if (readingCategoryChart) { try { readingCategoryChart.dispose(); } catch(e){} readingCategoryChart = null; }
     }
 
-    function switchReadingTab(tab) {
-      // Update tab buttons
+    function switchReadingTab(tab, evt) {
+      evt = evt || event;
       document.querySelectorAll('.reading-tab').forEach(t => t.classList.remove('active'));
-      event.target.classList.add('active');
+      evt.target.classList.add('active');
       // Update panels
       document.querySelectorAll('.reading-panel').forEach(p => p.classList.remove('active'));
       const panelMap = { record: 'readingPanelRecord', bookshelf: 'readingPanelBookshelf', stats: 'readingPanelStats' };
