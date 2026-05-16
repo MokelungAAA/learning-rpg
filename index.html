@@ -139,9 +139,6 @@
     [data-theme="dark"] .data-entry-info { background: #2a2f4a; }
     [data-theme="dark"] .data-entry-tab.active { background: #2a2f4a; }
     [data-theme="dark"] .data-entry-submit.secondary { background: #2a2f4a; color: #b0b8c8; }
-    [data-theme="dark"] .bottom-nav { background: rgba(30, 35, 50, 0.92); backdrop-filter: blur(var(--glass-blur-heavy)) saturate(200%); -webkit-backdrop-filter: blur(var(--glass-blur-heavy)) saturate(200%); border-top-color: #818cf8; }
-    [data-theme="dark"] .nav-item.active { background: rgba(129, 140, 248, 0.15); }
-    [data-theme="dark"] .nav-item.active .nav-label { color: #818cf8; }
     [data-theme="dark"] .course-card { background: var(--glass-bg); }
     [data-theme="dark"] .heatmap-table td { opacity: 0.9; }
     [data-theme="dark"] .hm-stats { color: #d1d5db; }
@@ -482,99 +479,89 @@
       position: relative;
       z-index: 2;
     }
-    
-    /* ========== 底部导航 ========== */
-    .bottom-nav {
-      display: flex;
+
+    /* ========== 底部导航 v2.0（全新重写，简单可靠） ========== */
+    #bottomNav {
       position: fixed;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      background: rgba(255, 255, 255, 0.95);
-      backdrop-filter: blur(var(--glass-blur-heavy)) saturate(200%);
-      -webkit-backdrop-filter: blur(var(--glass-blur-heavy)) saturate(200%);
-      border-top: 2px solid #6366f1;
-      padding: 8px 0;
-      padding-bottom: max(8px, env(safe-area-inset-bottom));
+      bottom: 0; left: 0; right: 0;
+      display: none;  /* 由 JS 控制显示 */
       z-index: 10001;
+      background: #ffffff;
+      border-top: 2px solid #6366f1;
       box-shadow: 0 -4px 20px rgba(99, 102, 241, 0.3);
-      min-height: 60px;
-      /* iOS Safari 固定定位兼容 */
-      will-change: transform;
-      -webkit-transform: translateZ(0);
-      transform: translateZ(0);
+      padding-bottom: env(safe-area-inset-bottom, 0);
+      -webkit-user-select: none;
+      user-select: none;
     }
-    
-    .nav-items {
+    #bottomNav .nav-inner {
       display: flex;
       justify-content: space-around;
+      align-items: stretch;
       max-width: 500px;
       margin: 0 auto;
-      gap: 16px;
+      height: 60px;
     }
-    
-    .nav-item {
+    #bottomNav .nav-btn {
+      flex: 1;
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 4px;
-      padding: 8px 16px;
-      min-width: 64px;
+      justify-content: center;
+      gap: 2px;
       background: none;
       border: none;
       cursor: pointer;
-      transition: all var(--duration-fast) var(--ease-smooth);
-      border-radius: var(--radius-lg);
+      padding: 4px 0;
+      min-height: 48px;
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
       position: relative;
     }
-    
-    .nav-item:hover {
-      background: rgba(59, 130, 246, 0.08);
-    }
-    
-    .nav-item:active {
+    #bottomNav .nav-btn:active {
       background: rgba(59, 130, 246, 0.12);
-      transform: scale(0.95);
     }
-    
-    .nav-item.active {
+    #bottomNav .nav-btn.active {
       background: rgba(59, 130, 246, 0.1);
     }
-
-    .nav-item.active::before {
+    #bottomNav .nav-btn.active::after {
       content: '';
       position: absolute;
-      top: -6px;
+      top: -2px;
       left: 50%;
       transform: translateX(-50%);
-      width: 20px;
+      width: 24px;
       height: 3px;
-      background: var(--accent-blue);
+      background: #3b82f6;
       border-radius: 0 0 3px 3px;
     }
-    
-    .nav-icon {
-      font-size: 24px;
-      transition: transform var(--duration-fast) var(--ease-spring);
+    #bottomNav .nav-icon {
+      font-size: 20px;
+      line-height: 1;
+      color: #666;
     }
-    
-    .nav-item.active .nav-icon {
-      transform: scale(1.15) translateY(-1px);
+    #bottomNav .nav-btn.active .nav-icon {
+      color: #3b82f6;
     }
-    
-    .nav-label {
+    #bottomNav .nav-label {
       font-size: 10px;
-      color: var(--text-muted);
+      color: #999;
       font-weight: 500;
-      transition: color var(--duration-fast);
+      line-height: 1.2;
       letter-spacing: 0.3px;
     }
-    
-    .nav-item.active .nav-label {
-      color: var(--accent-blue);
+    #bottomNav .nav-btn.active .nav-label {
+      color: #3b82f6;
       font-weight: 600;
     }
-    
+    /* 深色模式 */
+    [data-theme="dark"] #bottomNav { background: #1e2235; border-top-color: #818cf8; }
+    [data-theme="dark"] #bottomNav .nav-icon { color: #8890a0; }
+    [data-theme="dark"] #bottomNav .nav-label { color: #6b7280; }
+    [data-theme="dark"] #bottomNav .nav-btn.active { background: rgba(129, 140, 248, 0.15); }
+    [data-theme="dark"] #bottomNav .nav-btn.active .nav-icon { color: #818cf8; }
+    [data-theme="dark"] #bottomNav .nav-btn.active .nav-label { color: #818cf8; }
+    [data-theme="dark"] #bottomNav .nav-btn.active::after { background: #818cf8; }
+
     /* ========== 页面内容 ========== */
     .page-content {
       display: none;
@@ -1376,7 +1363,7 @@
     @keyframes pullSpin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
     
     /* ========== 触摸反馈增强（v0.6.10） ========== */
-    .nav-item:active, .settings-item:active, .glass-card:active { transform: scale(0.97); }
+    .settings-item:active, .glass-card:active { transform: scale(0.97); }
     button:active { transform: scale(0.95); }
     /* 页面滑动容器 */
     .page-slider { touch-action: pan-y; }
@@ -4111,7 +4098,7 @@
         </div>
         <div class="about-system-name">学习RPG · 认知操作系统</div>
         <div class="about-version">
-          <span class="about-version-badge">v1.2.2</span>
+          <span class="about-version-badge">v1.2.3</span>
         </div>
         <div class="about-developer-info">
           <div class="about-developer-name">墨澜 & MIKU</div>
@@ -4163,7 +4150,7 @@
             <div class="changelog-version expanded" onclick="event.stopPropagation();this.classList.toggle('expanded')">
               <div class="changelog-version-header current">
                 <div class="changelog-version-left">
-                  <span>v1.2.2</span>
+                  <span>v1.2.3</span>
                   <span class="changelog-version-tag">当前</span>
                 </div>
                 <span class="changelog-toggle">▼</span>
@@ -4171,7 +4158,7 @@
               <div class="changelog-items">
                 <div class="changelog-item">
                   <span class="changelog-item-version">2026-05-16</span>
-                  V1.2.2: 底部导航栏移出container容器，避免fixed定位受父元素影响；iOS Safari固定定位兼容（translateZ提升渲染层）；修复toast与导航栏z-index冲突；深色模式残差元素全量适配（关于面板/命令面板/设置项/滚动条）；移动端底部安全区域自适应（css calc动态padding）；根目录重复data.json移除，统一使用data/目录；全局window.onerror+unhandledrejection错误捕获，友善Toast替代白屏。
+                  V1.2.3: 底部导航栏彻底推倒重写——移除所有旧CSS/HTML/JS代码；使用data-page属性替代onclick事件绑定；body直接子级fixed定位（零父元素干扰）；移除所有transform属性避免iOS Safari定位bug；触控目标提升至48px满足Android触控规范；深色模式同步适配新导航。
                 </div>
               </div>
             </div>
@@ -5430,33 +5417,34 @@
         <div id="readingRecentList"></div>
       </div>
     </div>
-    <!-- 底部导航（移出 container，避免 fixed 定位受父元素 transform 影响） -->
-    <nav class="bottom-nav" id="bottomNav">
-      <div class="nav-items">
-        <button class="nav-item active" onclick="switchPage('overview')">
-          <span class="nav-icon">🏠</span>
-          <span class="nav-label">总览</span>
-        </button>
-        <button class="nav-item" onclick="switchPage('skills')">
-          <span class="nav-icon">🌳</span>
-          <span class="nav-label">技能树</span>
-        </button>
-        <button class="nav-item" onclick="switchPage('review')">
-          <span class="nav-icon">🔄</span>
-          <span class="nav-label">复习</span>
-        </button>
-        <button class="nav-item" onclick="switchPage('log')">
-          <span class="nav-icon">📊</span>
-          <span class="nav-label">日志</span>
-        </button>
-        <button class="nav-item" onclick="switchPage('settings')">
-          <span class="nav-icon">⚙️</span>
-          <span class="nav-label">更多</span>
-        </button>
-      </div>
-    </nav>
   </div>
   
+  <!-- 底部导航 v2.0（全新重写 - body 直接子级） -->
+  <nav id="bottomNav" style="display:none">
+    <div class="nav-inner">
+      <button class="nav-btn active" data-page="overview">
+        <span class="nav-icon">🏠</span>
+        <span class="nav-label">总览</span>
+      </button>
+      <button class="nav-btn" data-page="skills">
+        <span class="nav-icon">🌳</span>
+        <span class="nav-label">技能树</span>
+      </button>
+      <button class="nav-btn" data-page="review">
+        <span class="nav-icon">🔄</span>
+        <span class="nav-label">复习</span>
+      </button>
+      <button class="nav-btn" data-page="log">
+        <span class="nav-icon">📊</span>
+        <span class="nav-label">日志</span>
+      </button>
+      <button class="nav-btn" data-page="settings">
+        <span class="nav-icon">⚙️</span>
+        <span class="nav-label">更多</span>
+      </button>
+    </div>
+  </nav>
+
   <div id="toast" class="toast" style="display:none"></div>
   
   <script>
@@ -5484,6 +5472,17 @@
         toast._timer = setTimeout(() => { toast.classList.remove('show'); }, 5000);
       }
       e.preventDefault();
+    });
+    
+    // ========== v2.0 底部导航点击事件委托 ==========
+    document.addEventListener('DOMContentLoaded', function() {
+      document.getElementById('bottomNav')?.addEventListener('click', function(e) {
+        const btn = e.target.closest('.nav-btn');
+        if (btn) {
+          const page = btn.getAttribute('data-page');
+          if (page) switchPage(page);
+        }
+      });
     });
     
     // ========== v0.6.1 算法迭代系统 ==========
@@ -6879,11 +6878,14 @@
     function doEnterMain() {
       const launchPage = document.getElementById('launchPage');
       const mainPage = document.getElementById('mainPage');
+      const bottomNav = document.getElementById('bottomNav');
       const overlay = document.getElementById('dataLoadingOverlay');
       if (overlay) {
         overlay.style.display = 'none';
         overlay.style.opacity = '0';
       }
+      // 显示底部导航（iOS safe display:flex 需要显式设置）
+      if (bottomNav) bottomNav.style.display = 'flex';
       launchPage.classList.add('hidden');
       setTimeout(() => {
         mainPage.classList.add('visible');
@@ -6896,9 +6898,9 @@
     
     // ========== 页面切换 ==========
     function switchPage(page) {
-      document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
-      const activeNav = document.querySelector(`.nav-item[onclick="switchPage('${page}')"]`);
-      if (activeNav) activeNav.classList.add('active');
+      document.querySelectorAll('#bottomNav .nav-btn').forEach(btn => btn.classList.remove('active'));
+      const activeBtn = document.querySelector(`#bottomNav .nav-btn[data-page="${page}"]`);
+      if (activeBtn) activeBtn.classList.add('active');
       
       document.querySelectorAll('.page-content').forEach(p => p.classList.remove('active'));
       const activePage = document.getElementById(`page-${page}`);
