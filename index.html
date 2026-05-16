@@ -11217,6 +11217,17 @@
       }
       
       // Phase 1: 首屏即时渲染（appData 已在页面加载时设为 DEFAULT_DATA）
+      // 尝试从localStorage恢复已保存的appData
+      try {
+        const saved = localStorage.getItem('learning-rpg-appdata');
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (parsed && parsed.records) {
+            appData = parsed;
+            console.log('[v0.8.3] 从localStorage恢复appData');
+          }
+        }
+      } catch (e) {}
       initEvents();
       initGestures();
       initCommandPalette();
