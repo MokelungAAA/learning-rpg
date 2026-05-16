@@ -146,7 +146,29 @@
     [data-theme="dark"] .heatmap-table td { opacity: 0.9; }
     [data-theme="dark"] .hm-stats { color: #d1d5db; }
     [data-theme="dark"] .hm-stats strong { color: #a78bfa; }
+    /* 深色模式残差补全（v1.2.3） */
+    [data-theme="dark"] .about-content { background: rgba(30, 30, 50, 0.82); border-color: rgba(255,255,255,0.08); }
+    [data-theme="dark"] .about-content::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); }
+    [data-theme="dark"] .about-drag-handle::after { background: rgba(255,255,255,0.2); }
+    [data-theme="dark"] .about-close { background: rgba(255,255,255,0.1); color: #b0b8c8; }
+    [data-theme="dark"] .about-title { color: #e8eaf0; }
+    [data-theme="dark"] .about-system-name { color: #e8eaf0; }
+    [data-theme="dark"] .about-version-badge { color: #818cf8; background: rgba(129,140,248,0.15); }
+    [data-theme="dark"] .about-developer-name { color: #e8eaf0; }
+    [data-theme="dark"] .about-developer-desc { color: #8890a0; }
+    [data-theme="dark"] .about-stat-chip { background: rgba(255,255,255,0.04); }
+    [data-theme="dark"] .about-stat-chip-value { color: #e8eaf0; }
+    [data-theme="dark"] .about-stat-chip-label { color: #8890a0; }
+    [data-theme="dark"] .changelog-title { color: #e8eaf0; }
+    [data-theme="dark"] .changelog-item { border-bottom-color: rgba(255,255,255,0.06); }
+    [data-theme="dark"] .changelog-item-version { color: #818cf8; }
+    [data-theme="dark"] .changelog-version-header { background: rgba(255,255,255,0.03); }
+    [data-theme="dark"] .settings-item { background: var(--glass-bg); }
+    [data-theme="dark"] .settings-item:hover { background: var(--glass-bg-hover); }
+    [data-theme="dark"] .settings-name { color: #e8eaf0; }
+    [data-theme="dark"] .settings-desc { color: #8890a0; }
     
+
     /* 主题切换过渡动画 */
     .theme-transitioning,
     .theme-transitioning * {
@@ -201,7 +223,7 @@
     .container {
       max-width: 1200px;
       margin: 0 auto;
-      padding: 0 24px 100px;
+      padding: 0 24px calc(80px + env(safe-area-inset-bottom, 16px));
       position: relative;
       z-index: 1;
     }
@@ -477,6 +499,10 @@
       z-index: 10001;
       box-shadow: 0 -4px 20px rgba(99, 102, 241, 0.3);
       min-height: 60px;
+      /* iOS Safari 固定定位兼容 */
+      will-change: transform;
+      -webkit-transform: translateZ(0);
+      transform: translateZ(0);
     }
     
     .nav-items {
@@ -2209,7 +2235,7 @@
       border-radius: var(--radius-full);
       font-size: 14px;
       font-weight: 500;
-      z-index: 10001;
+      z-index: 10002;
       opacity: 0;
       transition: all var(--duration-normal) var(--ease-spring);
       border: 1px solid rgba(255, 255, 255, 0.15);
@@ -2232,7 +2258,7 @@
     
     /* ========== 响应式 ========== */
     @media (max-width: 768px) {
-      .container { padding: 16px 16px 100px; }
+      .container { padding: 16px 16px calc(80px + env(safe-area-inset-bottom, 16px)); }
       .hero-stats { grid-template-columns: repeat(2, 1fr); }
       .hero-level-card { min-width: 100px; padding: 16px 20px; }
       .hero-level-value { font-size: 32px; }
@@ -4085,7 +4111,7 @@
         </div>
         <div class="about-system-name">学习RPG · 认知操作系统</div>
         <div class="about-version">
-          <span class="about-version-badge">v1.2.1</span>
+          <span class="about-version-badge">v1.2.2</span>
         </div>
         <div class="about-developer-info">
           <div class="about-developer-name">墨澜 & MIKU</div>
@@ -4137,8 +4163,23 @@
             <div class="changelog-version expanded" onclick="event.stopPropagation();this.classList.toggle('expanded')">
               <div class="changelog-version-header current">
                 <div class="changelog-version-left">
-                  <span>v1.2.1</span>
+                  <span>v1.2.2</span>
                   <span class="changelog-version-tag">当前</span>
+                </div>
+                <span class="changelog-toggle">▼</span>
+              </div>
+              <div class="changelog-items">
+                <div class="changelog-item">
+                  <span class="changelog-item-version">2026-05-16</span>
+                  V1.2.2: 底部导航栏移出container容器，避免fixed定位受父元素影响；iOS Safari固定定位兼容（translateZ提升渲染层）；修复toast与导航栏z-index冲突；深色模式残差元素全量适配（关于面板/命令面板/设置项/滚动条）；移动端底部安全区域自适应（css calc动态padding）；根目录重复data.json移除，统一使用data/目录；全局window.onerror+unhandledrejection错误捕获，友善Toast替代白屏。
+                </div>
+              </div>
+            </div>
+            <div class="changelog-version expanded" onclick="event.stopPropagation();this.classList.toggle('expanded')">
+              <div class="changelog-version-header">
+                <div class="changelog-version-left">
+                  <span>v1.2.1</span>
+                  <span class="changelog-version-tag"></span>
                 </div>
                 <span class="changelog-toggle">▼</span>
               </div>
@@ -5388,37 +5429,63 @@
         <div class="reading-recent-title">最近阅读</div>
         <div id="readingRecentList"></div>
       </div>
-      <!-- 底部导航 -->
-      <nav class="bottom-nav" id="bottomNav">
-        <div class="nav-items">
-          <button class="nav-item active" onclick="switchPage('overview')">
-            <span class="nav-icon">🏠</span>
-            <span class="nav-label">总览</span>
-          </button>
-          <button class="nav-item" onclick="switchPage('skills')">
-            <span class="nav-icon">🌳</span>
-            <span class="nav-label">技能树</span>
-          </button>
-          <button class="nav-item" onclick="switchPage('review')">
-            <span class="nav-icon">🔄</span>
-            <span class="nav-label">复习</span>
-          </button>
-          <button class="nav-item" onclick="switchPage('log')">
-            <span class="nav-icon">📊</span>
-            <span class="nav-label">日志</span>
-          </button>
-          <button class="nav-item" onclick="switchPage('settings')">
-            <span class="nav-icon">⚙️</span>
-            <span class="nav-label">更多</span>
-          </button>
-        </div>
-      </nav>
     </div>
+    <!-- 底部导航（移出 container，避免 fixed 定位受父元素 transform 影响） -->
+    <nav class="bottom-nav" id="bottomNav">
+      <div class="nav-items">
+        <button class="nav-item active" onclick="switchPage('overview')">
+          <span class="nav-icon">🏠</span>
+          <span class="nav-label">总览</span>
+        </button>
+        <button class="nav-item" onclick="switchPage('skills')">
+          <span class="nav-icon">🌳</span>
+          <span class="nav-label">技能树</span>
+        </button>
+        <button class="nav-item" onclick="switchPage('review')">
+          <span class="nav-icon">🔄</span>
+          <span class="nav-label">复习</span>
+        </button>
+        <button class="nav-item" onclick="switchPage('log')">
+          <span class="nav-icon">📊</span>
+          <span class="nav-label">日志</span>
+        </button>
+        <button class="nav-item" onclick="switchPage('settings')">
+          <span class="nav-icon">⚙️</span>
+          <span class="nav-label">更多</span>
+        </button>
+      </div>
+    </nav>
   </div>
   
   <div id="toast" class="toast" style="display:none"></div>
   
   <script>
+    // ========== v1.2.6 全局错误捕获（友善Toast替代白屏） ==========
+    window.onerror = function(msg, url, line, col, err) {
+      const errMsg = err && err.message ? err.message : msg;
+      console.error('[全局错误]', errMsg, 'at', url, line, col);
+      const toast = document.getElementById('toast');
+      if (toast) {
+        toast.innerHTML = '⚠️ ' + errMsg.substring(0, 80);
+        toast.className = 'toast show warning';
+        clearTimeout(toast._timer);
+        toast._timer = setTimeout(() => { toast.classList.remove('show'); }, 5000);
+      }
+      return true; // 阻止默认浏览器错误提示
+    };
+    window.addEventListener('unhandledrejection', function(e) {
+      const errMsg = e.reason && e.reason.message ? e.reason.message : String(e.reason);
+      console.error('[未捕获的Promise错误]', errMsg);
+      const toast = document.getElementById('toast');
+      if (toast) {
+        toast.innerHTML = '⚠️ ' + errMsg.substring(0, 80);
+        toast.className = 'toast show warning';
+        clearTimeout(toast._timer);
+        toast._timer = setTimeout(() => { toast.classList.remove('show'); }, 5000);
+      }
+      e.preventDefault();
+    });
+    
     // ========== v0.6.1 算法迭代系统 ==========
     
     // ========== 核心配置 ==========
@@ -10141,6 +10208,10 @@
           [data-theme="dark"] .command-panel { background:rgba(30,30,50,0.95); }
           [data-theme="dark"] .command-input { color:#e0e0e0; }
           [data-theme="dark"] .command-item-label { color:#e0e0e0; }
+          [data-theme="dark"] .command-header { border-bottom-color: rgba(255,255,255,0.08); }
+          [data-theme="dark"] .command-item-desc { color:#777; }
+          [data-theme="dark"] .command-item:hover { background: rgba(255,255,255,0.06); }
+          [data-theme="dark"] .command-overlay { background: rgba(0,0,0,0.6); }
         `;
         document.head.appendChild(style);
       }

@@ -5,7 +5,7 @@ const ASSETS = [
   './index.html',
   './manifest.json',
   './icon.svg',
-  './data.json',
+  './data/data.json',
   './data/textbooks/textbooks.json',
   './data/courses/courses.json'
 ];
