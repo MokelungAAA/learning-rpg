@@ -5871,29 +5871,14 @@
     // ========== v0.6.5 四层容错数据加载 ==========
     // 策略优先级：localStorage缓存 > GitHub Raw CDN > 本地相对路径 > 内嵌兜底数据
 
-    /** 内嵌兜底数据（最后防线，不含log记录） */
+    /** 内嵌兜底数据（最后防线，v2.0 records格式） */
     const FALLBACK_DATA = {
-      version: '1.0',
+      version: '2.0',
       lastUpdated: new Date().toISOString(),
-      profile: {
-        learnerName: '墨澜',
-        globalBaseHalfLife: 4.0,
-        subjectModifiers: { '数学': 1.2, '物理': 1.2, '化学': 1.1, '语文': 1.0, '英语': 1.0, '历史': 1.0, '地理': 1.0, '生物': 0.9, '政治': 0.8 },
-        tempBoostGain: 0.4,
-        tempBoostBase: 10,
-        avgReviewsPerWeek: 0
-      },
-      subjects: {
-        '数学': { totalXp: 0, nodes: [] },
-        '语文': { totalXp: 0, nodes: [] },
-        '英语': { totalXp: 38, nodes: [{ id: '英语-001', name: '期中考试', peakTemp: 75, lastStudy: new Date().toISOString(), halfLifeDays: 4.0, repetitions: 1, accuracyHistory: [75], totalXp: 38 }] },
-        '物理': { totalXp: 0, nodes: [] },
-        '化学': { totalXp: 0, nodes: [] },
-        '生物': { totalXp: 0, nodes: [] },
-        '政治': { totalXp: 0, nodes: [] },
-        '历史': { totalXp: 0, nodes: [] },
-        '地理': { totalXp: 0, nodes: [] }
-      }
+      learnerName: '墨澜',
+      records: [
+        { id: 'rec-fb-001', timestamp: new Date().toISOString(), subject: '英语', textbook: '期中考试', chapter: 0, score: 75, duration: 30 }
+      ]
     };
 
     // ========== v0.8.2 用户画像数据 ==========
@@ -6541,141 +6526,136 @@
 
     /**
      * 将GitHub数据格式转换为appData格式
+     * 兼容 v1.0（subjects + log）和 v2.0（records 数组）
      * @param {Object} rawData - GitHub原始数据
      * @returns {Object} appData格式数据
      */
     function convertGitHubDataToAppData(rawData) {
       const now = Date.now();
       
-      // 计算总XP（直接从 rawData.subjects 读取，不依赖 appData）
-      let totalXp = 0;
-      for (const subjectData of Object.values(rawData.subjects || {})) {
-        totalXp += (subjectData.totalXp || 0);
-      }
-      
-      // 转换profile
-      const profile = {
-        level: 1,
-        xp: totalXp,
-        totalXp: totalXp,
-        combo: 0,
-        title: '初学者',
-        titleJp: 'Shogakusha',
-        achievements: []
-      };
-      
-      // 根据总XP计算等级
-      const levelInfo = calculateGlobalLevel(totalXp);
-      profile.level = levelInfo.level;
-      profile.title = levelInfo.title;
-      profile.titleJp = levelInfo.titleJp;
-      
-      // ========== 先转换所有学习记录 ==========
-      const records = (rawData.log || []).map(log => ({
-        recordID: log.id || generateUUID(),
-        timestamp: new Date(log.timestamp).getTime(),
-        subject: log.subject,
-        knowledgePoints: log.knowledgePoints || [],
-        durationMinutes: log.durationMinutes || 0,
-        activityType: log.activityType || 'practice',
-        totalQuestions: log.totalQuestions || 0,
-        correctCount: log.correctCount || 0,
-        accuracy: log.accuracy || 0,
-        xp: log.xp || 0
-      }));
-      
-      // ========== 构建知识点→活动类型映射（用于判断考试/练习/学习） ==========
-      const nodeActivityMap = {};
-      for (const rec of records) {
-        for (const kp of rec.knowledgePoints) {
-          if (!nodeActivityMap[kp]) nodeActivityMap[kp] = new Set();
-          nodeActivityMap[kp].add(rec.activityType);
-        }
-      }
-      
-      // 学习型活动（创建/强化技能树节点）
-      const LEARNING_TYPES = new Set(['recitation', 'online_course', 'study', 'practice']);
-      // 考试型活动（不进入技能树）
-      const EXAM_TYPES = new Set(['exam']);
-      
-      // ========== 转换学科数据（考试节点不列入技能树） ==========
-      const subjects = {};
+      // ========== 检测数据格式版本 ==========
+      const isV2 = Array.isArray(rawData.records) && rawData.records.length > 0;
+      const records = [];
       const examResults = [];
+      let xpBySubject = {};  // { subjectName: totalXp }
       
-      for (const [subjectName, subjectData] of Object.entries(rawData.subjects || {})) {
-        const totalSubjectXp = subjectData.totalXp || 0;
-        const skillNodes = [];
-        
-        for (const node of (subjectData.nodes || [])) {
-          const types = nodeActivityMap[node.name];
-          const hasLearningActivity = types && [...types].some(t => LEARNING_TYPES.has(t));
+      if (isV2) {
+        // ===== v2.0 格式：从 records 数组推导一切 =====
+        for (const rec of rawData.records) {
+          const dur = rec.duration || 0;
+          const scr = rec.score || 0;
+          // 用 v2.0 简易 XP 公式计算
+          const xp = Math.round(scr * dur / 20);
           
-          // 只有包含学习型活动（背诵/网课/学习/刷题）的节点才进入技能树
-          if (hasLearningActivity) {
-            skillNodes.push({
-              id: node.id || generateUUID(),
-              name: node.name,
-              subject: subjectName,
-              peakTemp: node.peakTemp || 85,
-              lastStudy: node.lastStudy || now,
-              halfLifeDays: node.halfLifeDays || 4.0,
-              repetitions: node.repetitions || 0,
-              accuracyHistory: node.accuracyHistory || [],
-              totalXp: node.totalXp || 0
-            });
-          } else {
-            // 考试节点→存入考试反思
-            const relatedRecords = records.filter(r =>
-              r.knowledgePoints.includes(node.name)
-            );
+          records.push({
+            recordID: rec.id || generateUUID(),
+            timestamp: new Date(rec.timestamp).getTime(),
+            subject: rec.subject,
+            knowledgePoints: rec.textbook ? [rec.textbook + (rec.chapter ? `·第${rec.chapter}章` : '')] : [],
+            durationMinutes: dur,
+            activityType: rec.textbook === '考试' ? 'exam' : 'practice',
+            totalQuestions: 0,
+            correctCount: 0,
+            accuracy: scr,
+            xp: xp
+          });
+          
+          // 统计各学科XP
+          xpBySubject[rec.subject] = (xpBySubject[rec.subject] || 0) + xp;
+          
+          // 考试记录存入 examResults
+          if (rec.textbook === '考试') {
             examResults.push({
-              id: node.id || generateUUID(),
-              name: node.name,
-              subject: subjectName,
-              accuracy: node.accuracyHistory?.[node.accuracyHistory.length - 1] || 
-                       relatedRecords.reduce((max, r) => Math.max(max, r.accuracy || 0), 0),
-              totalXp: node.totalXp || relatedRecords.reduce((s, r) => s + (r.xp || 0), 0),
-              lastStudy: node.lastStudy || now,
-              records: relatedRecords
+              id: rec.id || generateUUID(),
+              name: '考试',
+              subject: rec.subject,
+              accuracy: scr,
+              totalXp: xp,
+              lastStudy: new Date(rec.timestamp).getTime(),
+              records: []
             });
           }
         }
+      } else {
+        // ===== v1.0 格式：从 log + subjects 转换（原有逻辑） =====
+        for (const log of (rawData.log || [])) {
+          records.push({
+            recordID: log.id || generateUUID(),
+            timestamp: new Date(log.timestamp).getTime(),
+            subject: log.subject,
+            knowledgePoints: log.knowledgePoints || [],
+            durationMinutes: log.durationMinutes || 0,
+            activityType: log.activityType || 'practice',
+            totalQuestions: log.totalQuestions || 0,
+            correctCount: log.correctCount || 0,
+            accuracy: log.accuracy || 0,
+            xp: log.xp || 0
+          });
+        }
         
-        // 简单计算学科等级（基于XP）
-        let subLevel = 1;
-        const xp = totalSubjectXp;
-        if (xp >= 20000) subLevel = 5;
-        else if (xp >= 10000) subLevel = 4;
-        else if (xp >= 5000) subLevel = 3;
-        else if (xp >= 2000) subLevel = 2;
+        // 从 subjects 汇总各学科XP
+        for (const [subName, subData] of Object.entries(rawData.subjects || {})) {
+          xpBySubject[subName] = (subData.totalXp || 0);
+        }
         
-        subjects[subjectName] = {
-          name: subjectName,
-          level: subLevel,
-          xp: totalSubjectXp,
-          nodes: skillNodes
-        };
+        // 转换profile到CONFIG
+        if (rawData.profile) {
+          if (rawData.profile.globalBaseHalfLife) {
+            CONFIG.GLOBAL_BASE_HALFLIFE = rawData.profile.globalBaseHalfLife;
+          }
+          if (rawData.profile.subjectModifiers) {
+            Object.assign(CONFIG.SUBJECT_MODIFIERS, rawData.profile.subjectModifiers);
+          }
+        }
       }
       
-      // 更新CONFIG中的学科修正系数和基础半衰期
-      if (rawData.profile) {
-        if (rawData.profile.globalBaseHalfLife) {
-          CONFIG.GLOBAL_BASE_HALFLIFE = rawData.profile.globalBaseHalfLife;
-        }
-        if (rawData.profile.subjectModifiers) {
-          Object.assign(CONFIG.SUBJECT_MODIFIERS, rawData.profile.subjectModifiers);
-        }
+      // ========== 计算总XP ==========
+      let totalXp = 0;
+      for (const xp of Object.values(xpBySubject)) {
+        totalXp += xp;
       }
       
-      console.log(`[v0.6.5] 数据转换完成: 总XP=${totalXp}, 技能节点=${Object.values(subjects).reduce((s,sub) => s+sub.nodes.length, 0)}, 考试=${examResults.length}`);
-      
-      return {
-        profile,
-        subjects,
-        records,
-        examResults,
-        version: 'v0.6.5'
+      // ========== 构建profile ==========
+      const levelInfo = calculateGlobalLevel(totalXp);
+      const profile = {
+        level: levelInfo.level, xp: totalXp, totalXp: totalXp,
+        combo: 0, title: levelInfo.title, titleJp: levelInfo.titleJp,
+        achievements: []
       };
+      
+      // ========== 构建subjects（从 records 统计各个学科） ==========
+      const subjects = {};
+      const subjectsSet = new Set(records.map(r => r.subject));
+      for (const subName of subjectsSet) {
+        const subRecords = records.filter(r => r.subject === subName);
+        const subXp = xpBySubject[subName] || 0;
+        let subLevel = 1;
+        if (subXp >= 20000) subLevel = 5;
+        else if (subXp >= 10000) subLevel = 4;
+        else if (subXp >= 5000) subLevel = 3;
+        else if (subXp >= 2000) subLevel = 2;
+        
+        // 从学习记录中构建技能节点
+        const nodes = subRecords
+          .filter(r => r.activityType !== 'exam')
+          .map(r => ({
+            id: r.recordID,
+            name: r.knowledgePoints[0] || '',
+            subject: subName,
+            peakTemp: r.accuracy >= 90 ? 90 : r.accuracy >= 70 ? 75 : r.accuracy >= 50 ? 55 : 35,
+            lastStudy: r.timestamp,
+            halfLifeDays: 4.0,
+            repetitions: 1,
+            accuracyHistory: [r.accuracy],
+            totalXp: r.xp || 0
+          }));
+        
+        subjects[subName] = { name: subName, level: subLevel, xp: subXp, nodes };
+      }
+      
+      console.log(`[v1.3.0] 数据转换完成: 格式=${isV2?'v2.0':'v1.0'}, 总XP=${totalXp}, 记录=${records.length}`);
+      
+      return { profile, subjects, records, examResults, version: 'v1.3.0' };
     }
 
     /**
