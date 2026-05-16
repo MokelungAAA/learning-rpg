@@ -347,10 +347,31 @@
       "publisher": "南京大学出版社",
       "grade": "高一",
       "chapters": [
-        {"number": 5, "name": "抛体运动", "knowledgePoints": ["曲线运动条件", "运动的合成与分解", "平抛运动规律", "斜抛运动"]},
-        {"number": 6, "name": "圆周运动", "knowledgePoints": ["线速度角速度周期", "向心加速度推导", "向心力来源分析", "竖直面圆周运动", "离心现象"]},
-        {"number": 7, "name": "万有引力与宇宙航行", "knowledgePoints": ["开普勒三定律", "万有引力定律", "天体质量与密度", "卫星变轨问题", "宇宙速度"]},
-        {"number": 8, "name": "机械能守恒定律", "knowledgePoints": ["功与功率计算", "动能定理应用", "机械能守恒条件", "功能关系综合", "摩擦力做功"]}
+        {"number": 5, "name": "抛体运动", "sections": [
+          {"number": "5.1", "name": "曲线运动", "knowledgePoints": ["曲线运动的速度方向", "物体做曲线运动的条件"]},
+          {"number": "5.2", "name": "运动的合成与分解", "knowledgePoints": ["合运动与分运动", "运动的合成与分解方法"]},
+          {"number": "5.3", "name": "实验：探究平抛运动的特点", "knowledgePoints": ["平抛实验装置", "数据处理方法"]},
+          {"number": "5.4", "name": "抛体运动的规律", "knowledgePoints": ["平抛运动的速度", "平抛运动的位移", "一般的抛体运动"]}
+        ]},
+        {"number": 6, "name": "圆周运动", "sections": [
+          {"number": "6.1", "name": "圆周运动", "knowledgePoints": ["线速度", "角速度", "周期和转速", "线速度与角速度的关系"]},
+          {"number": "6.2", "name": "向心力", "knowledgePoints": ["向心力概念", "向心力来源分析", "变速圆周运动和一般曲线运动"]},
+          {"number": "6.3", "name": "向心加速度", "knowledgePoints": ["向心加速度推导", "向心加速度公式"]},
+          {"number": "6.4", "name": "生活中的圆周运动", "knowledgePoints": ["火车转弯", "汽车过拱形桥", "航天器中的失重现象", "离心运动"]}
+        ]},
+        {"number": 7, "name": "万有引力与宇宙航行", "sections": [
+          {"number": "7.1", "name": "行星的运动", "knowledgePoints": ["地心说与日心说", "开普勒三定律"]},
+          {"number": "7.2", "name": "万有引力定律", "knowledgePoints": ["万有引力定律的发现", "万有引力定律表达式", "引力常量"]},
+          {"number": "7.3", "name": "万有引力理论的成就", "knowledgePoints": ["计算天体质量", "计算天体密度", "发现未知天体"]},
+          {"number": "7.4", "name": "宇宙航行", "knowledgePoints": ["宇宙速度", "人造地球卫星", "同步卫星", "卫星变轨"]}
+        ]},
+        {"number": 8, "name": "机械能守恒定律", "sections": [
+          {"number": "8.1", "name": "功与功率", "knowledgePoints": ["功的计算", "正功与负功", "功率", "机车启动问题"]},
+          {"number": "8.2", "name": "重力势能", "knowledgePoints": ["重力做功特点", "重力势能", "弹性势能"]},
+          {"number": "8.3", "name": "动能和动能定理", "knowledgePoints": ["动能表达式", "动能定理", "动能定理的应用"]},
+          {"number": "8.4", "name": "机械能守恒定律", "knowledgePoints": ["机械能守恒条件", "机械能守恒定律应用"]},
+          {"number": "8.5", "name": "实验：验证机械能守恒定律", "knowledgePoints": ["实验原理", "数据处理与误差分析"]}
+        ]}
       ]
     },
     {
@@ -362,11 +383,30 @@
       "publisher": "南京大学出版社",
       "grade": "高一",
       "chapters": [
-        {"number": 1, "name": "遗传的基本规律", "knowledgePoints": ["分离定律", "自由组合定律", "减数分裂过程", "受精作用", "遗传图谱分析"]},
-        {"number": 2, "name": "基因和染色体的关系", "knowledgePoints": ["基因在染色体上", "伴性遗传规律", "性别决定方式", "X连锁遗传", "Y连锁遗传"]},
-        {"number": 3, "name": "基因的本质", "knowledgePoints": ["DNA是遗传物质", "DNA双螺旋结构", "DNA复制", "转录过程", "翻译过程", "中心法则"]},
-        {"number": 4, "name": "生物的变异", "knowledgePoints": ["基因突变", "基因重组", "染色体结构变异", "染色体数目变异", "人类遗传病类型"]},
-        {"number": 5, "name": "生物的进化", "knowledgePoints": ["自然选择学说", "种群基因频率", "物种形成", "共同进化", "生物多样性"]}
+        {"number": 1, "name": "遗传的基本规律", "sections": [
+          {"number": "1.1", "name": "孟德尔的豌豆杂交实验(一)", "knowledgePoints": ["分离定律的发现过程", "对分离现象的解释", "性状分离比的模拟实验"]},
+          {"number": "1.2", "name": "孟德尔的豌豆杂交实验(二)", "knowledgePoints": ["自由组合定律的发现", "对自由组合现象的解释", "基因型和表现型"]},
+          {"number": "1.3", "name": "减数分裂和受精作用", "knowledgePoints": ["减数分裂的过程", "精子和卵细胞的形成", "受精作用的意义"]}
+        ]},
+        {"number": 2, "name": "基因和染色体的关系", "sections": [
+          {"number": "2.1", "name": "基因在染色体上", "knowledgePoints": ["萨顿假说", "摩尔根果蝇杂交实验", "基因位于染色体上的实验证据"]},
+          {"number": "2.2", "name": "伴性遗传", "knowledgePoints": ["性别决定方式", "X连锁隐性遗传", "X连锁显性遗传", "Y连锁遗传"]}
+        ]},
+        {"number": 3, "name": "基因的本质", "sections": [
+          {"number": "3.1", "name": "DNA是主要的遗传物质", "knowledgePoints": ["肺炎双球菌转化实验", "噬菌体侵染细菌的实验"]},
+          {"number": "3.2", "name": "DNA的结构", "knowledgePoints": ["DNA双螺旋结构模型", "碱基互补配对原则"]},
+          {"number": "3.3", "name": "DNA的复制", "knowledgePoints": ["半保留复制", "DNA复制的过程"]},
+          {"number": "3.4", "name": "基因的表达", "knowledgePoints": ["转录", "翻译", "中心法则"]}
+        ]},
+        {"number": 4, "name": "生物的变异", "sections": [
+          {"number": "4.1", "name": "基因突变和基因重组", "knowledgePoints": ["基因突变的原因和特点", "基因重组"]},
+          {"number": "4.2", "name": "染色体变异", "knowledgePoints": ["染色体结构变异", "染色体数目变异", "多倍体和单倍体"]},
+          {"number": "4.3", "name": "人类遗传病", "knowledgePoints": ["遗传病的主要类型", "遗传咨询与产前诊断"]}
+        ]},
+        {"number": 5, "name": "生物的进化", "sections": [
+          {"number": "5.1", "name": "达尔文的自然选择学说", "knowledgePoints": ["自然选择学说的要点", "自然选择学说的局限性"]},
+          {"number": "5.2", "name": "现代生物进化理论", "knowledgePoints": ["种群基因频率的变化", "隔离与物种形成", "共同进化与生物多样性"]}
+        ]}
       ]
     },
     {
@@ -378,13 +418,53 @@
       "publisher": "南京大学出版社",
       "grade": "高一~高三",
       "chapters": [
-        {"number": 1, "name": "现代文阅读·论述类", "knowledgePoints": ["论证思路分析", "观点态度把握", "论证方法识别", "逻辑推断题型"]},
-        {"number": 2, "name": "现代文阅读·文学类", "knowledgePoints": ["小说人物分析", "情节结构梳理", "环境描写作用", "散文主旨概括", "语言风格鉴赏"]},
-        {"number": 3, "name": "古诗文阅读·文言文", "knowledgePoints": ["实词虚词推断", "断句方法", "翻译技巧", "文意理解与概括", "文化常识"]},
-        {"number": 4, "name": "古诗文阅读·古代诗歌", "knowledgePoints": ["意象意境分析", "表达技巧鉴赏", "情感态度把握", "炼字炼句赏析", "比较阅读"]},
-        {"number": 5, "name": "名篇名句默写", "knowledgePoints": ["理解性默写", "情境填空", "易错字辨析"]},
-        {"number": 6, "name": "语言文字运用", "knowledgePoints": ["词语辨析与运用", "病句辨析与修改", "句子补写与衔接", "修辞手法效果分析", "压缩语段"]},
-        {"number": 7, "name": "写作", "knowledgePoints": ["审题立意", "议论文结构", "记叙文选材", "论据选择与运用", "思辨性写作", "语言升格技巧"]}
+        {"number": 1, "name": "现代文阅读·论述类文本", "sections": [
+          {"number": "1.1", "name": "论证思路分析", "knowledgePoints": ["厘清论证结构", "概括论证层次"]},
+          {"number": "1.2", "name": "观点态度把握", "knowledgePoints": ["归纳中心论点", "辨析分论点关系"]},
+          {"number": "1.3", "name": "论证方法识别", "knowledgePoints": ["举例论证", "对比论证", "比喻论证", "引用论证"]},
+          {"number": "1.4", "name": "逻辑推断题型", "knowledgePoints": ["根据原文推断", "逻辑一致性判断"]}
+        ]},
+        {"number": 2, "name": "现代文阅读·文学类文本", "sections": [
+          {"number": "2.1", "name": "小说人物分析", "knowledgePoints": ["人物形象概括", "人物描写手法", "人物作用分析"]},
+          {"number": "2.2", "name": "情节结构梳理", "knowledgePoints": ["情节概括", "情节作用", "叙事手法"]},
+          {"number": "2.3", "name": "环境描写作用", "knowledgePoints": ["自然环境描写", "社会环境描写", "环境描写的作用"]},
+          {"number": "2.4", "name": "散文主旨概括", "knowledgePoints": ["散文线索梳理", "关键词句理解", "主题归纳"]},
+          {"number": "2.5", "name": "语言风格鉴赏", "knowledgePoints": ["词语选用", "句式特点", "修辞手法分析"]}
+        ]},
+        {"number": 3, "name": "古诗文阅读·文言文", "sections": [
+          {"number": "3.1", "name": "实词虚词推断", "knowledgePoints": ["一词多义辨析", "词类活用", "常见虚词用法"]},
+          {"number": "3.2", "name": "断句方法", "knowledgePoints": ["借助虚词断句", "借助句式断句", "借助文意断句"]},
+          {"number": "3.3", "name": "翻译技巧", "knowledgePoints": ["直译与意译", "补省略调语序", "特殊句式处理"]},
+          {"number": "3.4", "name": "文意理解与概括", "knowledgePoints": ["人物事迹概括", "事件因果分析", "人物品质评价"]},
+          {"number": "3.5", "name": "文化常识", "knowledgePoints": ["古代官职", "科举制度", "礼仪制度", "历法节气"]}
+        ]},
+        {"number": 4, "name": "古诗文阅读·古代诗歌", "sections": [
+          {"number": "4.1", "name": "意象意境分析", "knowledgePoints": ["常见意象含义", "意境类型判断", "画面描述题"]},
+          {"number": "4.2", "name": "表达技巧鉴赏", "knowledgePoints": ["修辞手法", "表现手法", "抒情方式"]},
+          {"number": "4.3", "name": "情感态度把握", "knowledgePoints": ["诗人情感分析", "思想内容概括"]},
+          {"number": "4.4", "name": "炼字炼句赏析", "knowledgePoints": ["关键词赏析", "名句鉴赏"]},
+          {"number": "4.5", "name": "比较阅读", "knowledgePoints": ["同题材对比", "同手法对比", "同情感对比"]}
+        ]},
+        {"number": 5, "name": "名篇名句默写", "sections": [
+          {"number": "5.1", "name": "理解性默写", "knowledgePoints": ["根据情境提示默写", "根据句意推断默写"]},
+          {"number": "5.2", "name": "情境填空", "knowledgePoints": ["上下文衔接默写", "主题相关默写"]},
+          {"number": "5.3", "name": "易错字辨析", "knowledgePoints": ["形近字辨析", "同音字辨析", "生僻字书写"]}
+        ]},
+        {"number": 6, "name": "语言文字运用", "sections": [
+          {"number": "6.1", "name": "词语辨析与运用", "knowledgePoints": ["近义词辨析", "成语使用", "词语感情色彩"]},
+          {"number": "6.2", "name": "病句辨析与修改", "knowledgePoints": ["语序不当", "搭配不当", "成分残缺或赘余", "结构混乱"]},
+          {"number": "6.3", "name": "句子补写与衔接", "knowledgePoints": ["上下文衔接", "逻辑连贯", "语句复位"]},
+          {"number": "6.4", "name": "修辞手法效果分析", "knowledgePoints": ["比喻比拟", "排比夸张", "对偶设问反问"]},
+          {"number": "6.5", "name": "压缩语段/扩展语句", "knowledgePoints": ["下定义类压缩", "概括要点类压缩", "语句扩展方法"]}
+        ]},
+        {"number": 7, "name": "写作", "sections": [
+          {"number": "7.1", "name": "审题立意", "knowledgePoints": ["材料作文审题", "话题作文审题", "任务驱动型作文审题"]},
+          {"number": "7.2", "name": "议论文结构", "knowledgePoints": ["并列式结构", "递进式结构", "对照式结构", "引议联结"]},
+          {"number": "7.3", "name": "记叙文选材与构思", "knowledgePoints": ["选材角度", "详略处理", "情节波澜"]},
+          {"number": "7.4", "name": "论据选择与运用", "knowledgePoints": ["事实论据", "理论论据", "古今中外素材积累"]},
+          {"number": "7.5", "name": "思辨性写作", "knowledgePoints": ["辩证分析", "批判性思维", "一分为二看问题"]},
+          {"number": "7.6", "name": "语言升格技巧", "knowledgePoints": ["句式变换", "修辞润色", "文采提升"]}
+        ]}
       ]
     }
   ]
