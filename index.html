@@ -6456,7 +6456,24 @@
       dataLoadState.isLoading = true;
       showDataLoading(true);
       
-      // === 第一层：localStorage 缓存（秒开）===
+      // === 第零层：saveLocalData 应用数据缓存（绝对秒开，v1.3.2）===
+      const appCache = loadLocalData();
+      if (appCache && appCache.records && appCache.records.length > 0) {
+        dataLoadState.isLoading = false;
+        showDataLoading(false);
+        dataLoadState.hasError = false;
+        dataLoadState.dataSource = 'app-cache';
+        appData = appCache;
+        // 后台静默从 GitHub 刷新
+        if (!isFileProtocol()) {
+          backgroundDataLoad().then(() => {
+            console.log('[v1.3.2] 后台静默更新完成');
+          }).catch(() => {});
+        }
+        return appCache;
+      }
+      
+      // === 第一层：GitHub 数据缓存（秒开）===
       const cached = loadDataCache();
       if (cached) {
         if (cached.isFresh) {
@@ -9010,6 +9027,7 @@
       // V0.9.0 自适应参数持久化
       updateAdaptiveParams(record);
 
+      saveLocalData();
       renderAll();
       showToast(`已添加 ${sub} · ${kp} (+${xp} XP)`, 'success');
       
@@ -9079,6 +9097,7 @@
       // V0.9.0 自适应参数持久化
       updateAdaptiveParams(record);
 
+      saveLocalData();
       renderAll();
       showToast(`已添加考试 ${name} (${score}/${total})`, 'success');
       
@@ -9126,7 +9145,10 @@
             added++;
           }
         }
-        if (added) console.log(`[v0.7.1] 合并了 ${added} 条本地记录`);
+        if (added) {
+          console.log(`[v0.7.1] 合并了 ${added} 条本地记录`);
+          saveLocalData();
+        }
       } catch(e) {}
     }
     
