@@ -2,15 +2,12 @@
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>学习RPG · 认知操作系统</title>
   <meta name="theme-color" content="#667eea">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="apple-mobile-web-app-title" content="学习RPG">
-  <meta name="format-detection" content="telephone=no">
-  <meta name="mobile-web-app-capable" content="yes">
-  <meta name="application-name" content="学习RPG">
   <link rel="manifest" href="./manifest.json">
   <link rel="icon" href="./icon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="./icon.svg">
@@ -181,16 +178,7 @@
       color: var(--text-primary);
       min-height: 100vh;
       overflow-x: hidden;
-      touch-action: manipulation;
-      -webkit-overflow-scrolling: touch;
-      -webkit-tap-highlight-color: transparent;
-      -webkit-font-smoothing: antialiased;
     }
-
-    ::-webkit-scrollbar { width: 4px; }
-    ::-webkit-scrollbar-track { background: transparent; }
-    ::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.12); border-radius: 4px; }
-    [data-theme="dark"] ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.12); }
 
     /* 多层渐变背景 */
     body::before {
@@ -2371,93 +2359,26 @@
     
     /* ========== 响应式 ========== */
     @media (max-width: 768px) {
-      .container { padding: 0 12px calc(80px + env(safe-area-inset-bottom, 12px)); }
-      .hero-stats { grid-template-columns: repeat(2, 1fr); gap: 8px; }
-      .hero-stat { padding: 12px 8px; }
-      .hero-stat-value { font-size: 24px; }
-      .hero-level-card { min-width: 100px; padding: 14px 18px; }
-      .hero-level-value { font-size: 28px; }
-      .subject-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
-      .subject-card { padding: 14px; }
-      .skill-tree-container { height: 320px; }
+      .container { padding: 16px 16px calc(80px + env(safe-area-inset-bottom, 16px)); }
+      .hero-stats { grid-template-columns: repeat(2, 1fr); }
+      .hero-level-card { min-width: 100px; padding: 16px 20px; }
+      .hero-level-value { font-size: 32px; }
+      .subject-grid { grid-template-columns: repeat(2, 1fr); }
+      .skill-tree-container { height: 350px; }
       .about-content { max-height: 80vh; }
-      .forget-chart { height: 260px; }
+      .forget-chart { height: 280px; }
       .chart-tips { display: none; }
       .node-detail-stats { grid-template-columns: repeat(2, 1fr); }
-      .hero-level-card-top { gap: 6px; }
-      .launch-level { font-size: 48px; }
-      .launch-level-display { padding: 20px 32px; }
-      .launch-title { font-size: 28px; }
-      .launch-subtitle { font-size: 13px; }
-      body { font-size: 14px; }
-      input, select, textarea, button { font-size: 16px; }
     }
     
     @media (max-width: 480px) {
-      .container { padding: 0 10px calc(76px + env(safe-area-inset-bottom, 10px)); }
-      .hero-stats { grid-template-columns: repeat(3, 1fr); gap: 6px; }
-      .hero-stat { padding: 10px 6px; }
-      .hero-stat-value { font-size: 20px; }
-      .hero-stat-icon { font-size: 16px; }
-      .hero-stat-label { font-size: 10px; }
+      .hero-stats { grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+      .hero-stat { padding: 12px 8px; }
+      .hero-stat-value { font-size: 22px; }
       .hero-level-card { display: none; }
-      .launch-level { font-size: 48px; }
-      .launch-level-display { padding: 20px 32px; }
+      .launch-level { font-size: 56px; }
+      .launch-level-display { padding: 24px 40px; }
       .about-content { max-height: 75vh; border-radius: var(--radius-xl) var(--radius-xl) 0 0; }
-      .subject-grid { gap: 8px; }
-      .subject-card { padding: 12px; }
-      .subject-card-name { font-size: 14px; }
-      .data-entry-content { padding: 16px 16px 28px; border-radius: var(--radius-xl) var(--radius-xl) 0 0; }
-      .data-entry-tabs { gap: 2px; margin-bottom: 14px; }
-      .data-entry-tab { padding: 10px 0; font-size: 12px; }
-      .data-entry-field input, .data-entry-field select { padding: 12px 10px; font-size: 16px; }
-      .data-entry-field label { font-size: 11px; }
-      .pomodoro-content { max-height: 88vh; }
-      .reading-content { max-height: 88vh; }
-      .pomodoro-timer-wrap { width: 180px; height: 180px; }
-      .pomodoro-btn { padding: 12px 20px; font-size: 14px; }
-      .header h1 { font-size: 16px; }
-      .brand-icon { font-size: 22px; }
-      .section-title { font-size: 15px; }
-      .section-desc { font-size: 12px; }
-      #bottomNav .nav-icon { font-size: 18px; }
-      #bottomNav .nav-label { font-size: 9px; }
-      #bottomNav .nav-btn { padding: 2px 0; min-height: 44px; }
-      #bottomNav .nav-inner { height: 56px; }
-      .settings-item { padding: 12px 14px; }
-      .settings-name { font-size: 14px; }
-      .settings-desc { font-size: 11px; }
-      .log-entry { padding: 12px; }
-      .log-subject { font-size: 13px; }
-      .log-kp { font-size: 11px; }
-      .tab-btn { padding: 10px 12px; font-size: 12px; min-height: 40px; }
-      .btn { padding: 10px 16px; font-size: 14px; min-height: 44px; }
-      .modal-body { padding: 12px; }
-      .review-section-toggle { padding: 10px 12px; }
-      .review-section-toggle span { font-size: 13px; }
-      .hint-card { padding: 12px 14px; font-size: 12px; }
-      .recommend-card { padding: 14px; }
-      .about-developer { padding: 16px 14px; }
-      .about-stats-row { gap: 6px; }
-      .about-stat-chip { padding: 8px 4px; }
-      .about-stat-chip-value { font-size: 15px; }
-      .about-stat-chip-label { font-size: 9px; }
-    }
-    
-    @media (max-width: 360px) {
-      .container { padding: 0 8px calc(72px + env(safe-area-inset-bottom, 8px)); }
-      .hero-stats { gap: 4px; }
-      .hero-stat { padding: 8px 4px; }
-      .hero-stat-value { font-size: 18px; }
-      .hero-stat-icon { font-size: 14px; }
-      .hero-stat-label { font-size: 9px; }
-      .subject-grid { grid-template-columns: 1fr; gap: 6px; }
-      .launch-level { font-size: 40px; }
-      .launch-level-display { padding: 16px 24px; }
-      #bottomNav .nav-icon { font-size: 16px; }
-      #bottomNav .nav-label { font-size: 8px; }
-      #bottomNav .nav-inner { height: 50px; }
-      #bottomNav .nav-btn { min-height: 40px; }
     }
   
   
@@ -4175,25 +4096,25 @@
         <div class="data-entry-row">
           <div class="data-entry-field">
             <label>时长(分钟)</label>
-            <input type="number" id="de-duration" value="30" min="1" inputmode="numeric">
+            <input type="number" id="de-duration" value="30" min="1">
           </div>
           <div class="data-entry-field">
             <label>总题数</label>
-            <input type="number" id="de-total" value="0" min="0" inputmode="numeric">
+            <input type="number" id="de-total" value="0" min="0">
           </div>
           <div class="data-entry-field">
             <label>正确数</label>
-            <input type="number" id="de-correct" value="0" min="0" inputmode="numeric">
+            <input type="number" id="de-correct" value="0" min="0">
           </div>
         </div>
         <div class="data-entry-row">
           <div class="data-entry-field" style="flex:1">
             <label>正确率(%)</label>
-            <input type="number" id="de-accuracy" value="0" min="0" max="100" inputmode="numeric">
+            <input type="number" id="de-accuracy" value="0" min="0" max="100">
           </div>
           <div class="data-entry-field" style="flex:1">
             <label>获得XP</label>
-            <input type="number" id="de-xp" value="0" min="0" inputmode="numeric">
+            <input type="number" id="de-xp" value="0" min="0">
           </div>
         </div>
         <div class="data-entry-field">
@@ -4365,7 +4286,7 @@
               <div class="changelog-items">
                 <div class="changelog-item">
                   <span class="changelog-item-version">2026-05-16</span>
-                  V2.0 正式版：致命Bug修复 — knowledgeStates数据构建（激活背包算法/提分诊断/技能聚合/特长检测四大核心功能）；特长检测全链路接入XP引擎（getTalentMultiplier替代硬编码1.0）；假性熟练检测覆盖全部9学科；版本号全系统统一v2.0；移动端深度优化（3断点响应式+安全区+iOS全屏+inputmode+触控反馈+字体/间距/导航精细调校）；PWA meta标签增强。
+                  V2.0 正式版：导航栏彻底重写（body直接子级fixed定位）；深色模式全量适配；全局错误捕获；data.json v2.0 records格式统一；多源数据加载容错；localStorage持久化增强；GitHub API反向写入；参考文档v2.0路线图更新；README微信数据助手指南重写。
                 </div>
               </div>
             </div>
@@ -5788,7 +5709,7 @@
     };
     
     // ========== 数据版本管理 ==========
-    const DATA_VERSION = 'v2.0';
+    const DATA_VERSION = 'v2.1';
     // v2.1: 强制清除旧缓存以修复XP丢失问题
     (function clearOldCache() {
       try {
@@ -6481,8 +6402,8 @@
       const activityType = record.activityType || 'practice';
       const activityWeight = profile.activityWeights?.[activityType] || 1.0;
 
-      // 特长加成（读取用户画像中的特长判定结果）
-      const talentMultiplier = getTalentMultiplier(subjectKey);
+      // 特长加成（V0.9预留）
+      const talentMultiplier = 1.0;
 
       // 质量乘数
       const qual = efficiency * difficulty * (1 + momentum) * activityWeight * talentMultiplier;
@@ -6910,54 +6831,9 @@
         subjects[subName] = { name: subName, level: subLevel, xp: subXp, nodes };
       }
       
-      // ========== 构建 knowledgeStates（知识状态映射） ==========
-      const knowledgeStates = {};
-      const now = Date.now();
-      const reverseSubjectMap = {'logos':'数学','mythos':'语文','lingua':'英语','physis':'物理','khemeia':'化学','zoe':'生物','politeia':'政治','historia':'历史','geographia':'地理'};
+      console.log(`[v1.3.0] 数据转换完成: 格式=${isV2?'v2.0':'v1.0'}, 总XP=${totalXp}, 记录=${records.length}`);
       
-      for (const rec of records) {
-        const kps = rec.knowledgePoints || [];
-        for (const kp of kps) {
-          if (!kp || kp.trim() === '') continue;
-          if (!knowledgeStates[kp]) {
-            knowledgeStates[kp] = {
-              temperature: 0,
-              avgAccuracy: rec.accuracy || 0,
-              lastStudy: rec.timestamp,
-              examWeight: 1.0,
-              subject: getSubjectKey(rec.subject),
-              peakTemp: (rec.accuracy >= 90) ? 90 : (rec.accuracy >= 70) ? 75 : (rec.accuracy >= 50 ? 55 : 35),
-              halfLifeDays: 4.0,
-              repetitions: 1,
-              accuracyHistory: [rec.accuracy || 0]
-            };
-          } else {
-            knowledgeStates[kp].repetitions++;
-            knowledgeStates[kp].accuracyHistory.push(rec.accuracy || 0);
-            if (rec.timestamp >= knowledgeStates[kp].lastStudy) {
-              knowledgeStates[kp].lastStudy = rec.timestamp;
-              knowledgeStates[kp].peakTemp = (rec.accuracy >= 90) ? 90 : (rec.accuracy >= 70) ? 75 : (rec.accuracy >= 50 ? 55 : 35);
-            }
-          }
-        }
-      }
-      
-      for (const [kp, state] of Object.entries(knowledgeStates)) {
-        const avgAcc = state.accuracyHistory.reduce((a, b) => a + b, 0) / state.accuracyHistory.length;
-        state.avgAccuracy = Math.round(avgAcc);
-        const subjectName = reverseSubjectMap[state.subject] || '数学';
-        state.halfLifeDays = calculateHalfLife(subjectName, 1.0, state.repetitions, state.accuracyHistory);
-        const elapsedDays = (now - state.lastStudy) / (24 * 3600 * 1000);
-        if (elapsedDays < 0) { state.temperature = state.peakTemp; }
-        else {
-          const retention = Math.pow(2, -elapsedDays / Math.max(0.5, state.halfLifeDays));
-          state.temperature = Math.max(0, Math.min(100, Math.round(state.peakTemp * retention)));
-        }
-      }
-      
-      console.log(`[v2.0] 数据转换完成: 格式=${isV2?'v2.0':'v1.0'}, 总XP=${totalXp}, 记录=${records.length}, 知识点状态=${Object.keys(knowledgeStates).length}`);
-      
-      return { profile, subjects, records, examResults, knowledgeStates, version: '2.0' };
+      return { profile, subjects, records, examResults, version: 'v1.3.0' };
     }
 
     /**
@@ -7416,11 +7292,10 @@
       if (filtered.length === 0) {
         container.innerHTML = '<div class="log-empty">暂无学习记录 ✨</div>';
       } else {
-        const totalCount = filtered.length;
-        const shown = filtered.slice().reverse();
-        const displayLimit = 100;
-        const shownItems = shown.slice(0, displayLimit);
-        container.innerHTML = shownItems
+        container.innerHTML = filtered
+          .slice()
+          .reverse()
+          .slice(0, 50)
           .map(r => {
             const score = getRecordScore(r);
             const scoreText = r.activityType === 'recitation' 
@@ -7452,9 +7327,6 @@
               </div>
             `;
           }).join('');
-        if (totalCount > displayLimit) {
-          container.innerHTML += `<div style="text-align:center;padding:12px;color:var(--text-muted);font-size:12px;">显示前${displayLimit}条，共${totalCount}条记录</div>`;
-        }
       }
       
       // v0.6.1: 增强成就展示 - 已移至 renderAchievements() 独立函数
@@ -7983,7 +7855,7 @@
       if (!appData.records || appData.records.length < 5) return [];
       
       const warnings = [];
-      const subjectKeys = ['logos', 'mythos', 'lingua', 'physis', 'khemeia', 'zoe', 'politeia', 'historia', 'geographia'];
+      const subjectKeys = ['logos', 'mythos', 'lingua', 'physis', 'khemeia', 'zoe'];
       
       subjectKeys.forEach(subjectKey => {
         const records = appData.records.filter(r => getSubjectKey(r.subject) === subjectKey);
@@ -7999,7 +7871,7 @@
           
           // 如果高分记录的平均时长显著低于整体平均时长，可能是假性熟练
           if (avgDuration < avgAllDuration * 0.6) {
-            const subjectNames = {'logos':'数学','mythos':'语文','lingua':'英语','physis':'物理','khemeia':'化学','zoe':'生物','politeia':'政治','historia':'历史','geographia':'地理'};
+            const subjectNames = {'logos':'数学','mythos':'语文','lingua':'英语','physis':'物理','khemeia':'化学','zoe':'生物'};
             warnings.push({
               subject: subjectNames[subjectKey] || subjectKey,
               subjectKey: subjectKey,
@@ -9978,31 +9850,6 @@
       return talents;
     }
 
-    function getTalentMultiplier(subjectKey) {
-      const talents = userProfile?.skillTalents || {};
-      for (const [skillId, talent] of Object.entries(talents)) {
-        if (talent.subjectKey === subjectKey) return talent.bonus || 1.0;
-      }
-      return 1.0;
-    }
-
-    function updateUserProfileTalents() {
-      if (!userProfile) return;
-      userProfile.skillTalents = userProfile.skillTalents || {};
-      const subjectKeys = ['logos', 'mythos', 'lingua', 'physis', 'khemeia', 'zoe', 'politeia', 'historia', 'geographia'];
-      subjectKeys.forEach(key => {
-        const talents = detectSkillTalents(key);
-        Object.entries(talents).forEach(([skillId, talent]) => {
-          userProfile.skillTalents[skillId] = {
-            name: talent.name,
-            mastery: talent.mastery,
-            bonus: talent.bonus,
-            subjectKey: key
-          };
-        });
-      });
-    }
-
     // 获取所有学科的技能掌握度数据（用于雷达图）
     function getAllSkillsData() {
       const result = {};
@@ -10038,8 +9885,6 @@
       
       // 计算连续天数
       appData.profile.combo = calculateCombo();
-      
-      if (skillTreeData) updateUserProfileTalents();
       
       // 计算今日XP
       const todayXp = calculateTodayXp();
