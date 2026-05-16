@@ -40,6 +40,33 @@
           "teacher": "一数",
           "url": "https://space.bilibili.com/14229967",
           "description": "高一数学知识点全覆盖"
+        },
+        {
+          "id": "math-yishu-gaokao",
+          "name": "一数·高考数学一轮复习",
+          "teacher": "一数",
+          "url": "https://space.bilibili.com/14229967",
+          "description": "高考数学一轮系统复习",
+          "videos": 80,
+          "duration": "约50小时"
+        },
+        {
+          "id": "math-yishu-jichu",
+          "name": "一数·数学基础巩固",
+          "teacher": "一数",
+          "url": "https://space.bilibili.com/14229967",
+          "description": "数学基础薄弱者补强课",
+          "videos": 40,
+          "duration": "约25小时"
+        },
+        {
+          "id": "math-yishu-danti",
+          "name": "一数·高考真题精讲",
+          "teacher": "一数",
+          "url": "https://space.bilibili.com/14229967",
+          "description": "历年高考数学真题逐题讲解",
+          "videos": 100,
+          "duration": "约60小时"
         }
       ]
     },
@@ -82,6 +109,45 @@
             {"number": 3, "name": "Diverse Cultures", "videos": 8, "duration": "约5小时"},
             {"number": 4, "name": "Space Exploration", "videos": 8, "duration": "约5小时"},
             {"number": 5, "name": "The Value of Money", "videos": 8, "duration": "约5小时"}
+          ]
+        },
+        {
+          "id": "english-renjiao-bixiu1-yiyinger",
+          "name": "人教版必修第一册同步课",
+          "teacher": "一英儿",
+          "url": "https://space.bilibili.com/3546631473237127",
+          "chapters": [
+            {"number": 1, "name": "Teenage Life", "videos": 6, "duration": "约4小时"},
+            {"number": 2, "name": "Travelling Around", "videos": 6, "duration": "约4小时"},
+            {"number": 3, "name": "Sports and Fitness", "videos": 6, "duration": "约4小时"},
+            {"number": 4, "name": "Natural Disasters", "videos": 6, "duration": "约4小时"},
+            {"number": 5, "name": "Languages Around the World", "videos": 6, "duration": "约4小时"}
+          ]
+        },
+        {
+          "id": "english-renjiao-bixiu2-yiyinger",
+          "name": "人教版必修第二册同步课",
+          "teacher": "一英儿",
+          "url": "https://space.bilibili.com/3546631473237127",
+          "chapters": [
+            {"number": 1, "name": "Cultural Heritage", "videos": 6, "duration": "约4小时"},
+            {"number": 2, "name": "Wildlife Protection", "videos": 6, "duration": "约4小时"},
+            {"number": 3, "name": "The Internet", "videos": 6, "duration": "约4小时"},
+            {"number": 4, "name": "History and Traditions", "videos": 6, "duration": "约4小时"},
+            {"number": 5, "name": "Music", "videos": 6, "duration": "约4小时"}
+          ]
+        },
+        {
+          "id": "english-renjiao-bixiu3-yiyinger",
+          "name": "人教版必修第三册同步课",
+          "teacher": "一英儿",
+          "url": "https://space.bilibili.com/3546631473237127",
+          "chapters": [
+            {"number": 1, "name": "Festivals and Celebrations", "videos": 6, "duration": "约4小时"},
+            {"number": 2, "name": "Morals and Virtues", "videos": 6, "duration": "约4小时"},
+            {"number": 3, "name": "Diverse Cultures", "videos": 6, "duration": "约4小时"},
+            {"number": 4, "name": "Space Exploration", "videos": 6, "duration": "约4小时"},
+            {"number": 5, "name": "The Value of Money", "videos": 6, "duration": "约4小时"}
           ]
         }
       ],
@@ -157,6 +223,42 @@
           "description": "历年高考英语真题逐题讲解",
           "videos": 100,
           "duration": "约60小时"
+        },
+        {
+          "id": "yiyinger-vocabulary",
+          "name": "一英儿·高考词汇精讲",
+          "teacher": "一英儿",
+          "url": "https://space.bilibili.com/3546631473237127",
+          "description": "高考3500词系统讲解",
+          "videos": 60,
+          "duration": "约35小时"
+        },
+        {
+          "id": "yiyinger-grammar",
+          "name": "一英儿·语法系统课",
+          "teacher": "一英儿",
+          "url": "https://space.bilibili.com/3546631473237127",
+          "description": "高中英语语法体系全覆盖",
+          "videos": 40,
+          "duration": "约25小时"
+        },
+        {
+          "id": "yiyinger-reading",
+          "name": "一英儿·阅读技巧精讲",
+          "teacher": "一英儿",
+          "url": "https://space.bilibili.com/3546631473237127",
+          "description": "阅读理解题型技巧详解",
+          "videos": 30,
+          "duration": "约18小时"
+        },
+        {
+          "id": "yiyinger-writing",
+          "name": "一英儿·写作高分课",
+          "teacher": "一英儿",
+          "url": "https://space.bilibili.com/3546631473237127",
+          "description": "应用文+读后续写高分策略",
+          "videos": 35,
+          "duration": "约22小时"
         }
       ]
     },

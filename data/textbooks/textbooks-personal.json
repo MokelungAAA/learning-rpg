@@ -337,6 +337,55 @@
       "status": "未开始",
       "totalExercises": 128,
       "completedExercises": 0
+    },
+    {
+      "id": "material-physics-bixiu2-jt",
+      "subject": "物理",
+      "name": "解题觉醒·必修第二册",
+      "type": "练习册",
+      "status": "未开始",
+      "publisher": "南京大学出版社",
+      "grade": "高一",
+      "chapters": [
+        {"number": 5, "name": "抛体运动", "knowledgePoints": ["曲线运动条件", "运动的合成与分解", "平抛运动规律", "斜抛运动"]},
+        {"number": 6, "name": "圆周运动", "knowledgePoints": ["线速度角速度周期", "向心加速度推导", "向心力来源分析", "竖直面圆周运动", "离心现象"]},
+        {"number": 7, "name": "万有引力与宇宙航行", "knowledgePoints": ["开普勒三定律", "万有引力定律", "天体质量与密度", "卫星变轨问题", "宇宙速度"]},
+        {"number": 8, "name": "机械能守恒定律", "knowledgePoints": ["功与功率计算", "动能定理应用", "机械能守恒条件", "功能关系综合", "摩擦力做功"]}
+      ]
+    },
+    {
+      "id": "material-biology-bixiu2-jt",
+      "subject": "生物",
+      "name": "解题觉醒·必修第二册",
+      "type": "练习册",
+      "status": "未开始",
+      "publisher": "南京大学出版社",
+      "grade": "高一",
+      "chapters": [
+        {"number": 1, "name": "遗传的基本规律", "knowledgePoints": ["分离定律", "自由组合定律", "减数分裂过程", "受精作用", "遗传图谱分析"]},
+        {"number": 2, "name": "基因和染色体的关系", "knowledgePoints": ["基因在染色体上", "伴性遗传规律", "性别决定方式", "X连锁遗传", "Y连锁遗传"]},
+        {"number": 3, "name": "基因的本质", "knowledgePoints": ["DNA是遗传物质", "DNA双螺旋结构", "DNA复制", "转录过程", "翻译过程", "中心法则"]},
+        {"number": 4, "name": "生物的变异", "knowledgePoints": ["基因突变", "基因重组", "染色体结构变异", "染色体数目变异", "人类遗传病类型"]},
+        {"number": 5, "name": "生物的进化", "knowledgePoints": ["自然选择学说", "种群基因频率", "物种形成", "共同进化", "生物多样性"]}
+      ]
+    },
+    {
+      "id": "material-chinese-gaokao-jt",
+      "subject": "语文",
+      "name": "高考解题觉醒",
+      "type": "练习册",
+      "status": "未开始",
+      "publisher": "南京大学出版社",
+      "grade": "高一~高三",
+      "chapters": [
+        {"number": 1, "name": "现代文阅读·论述类", "knowledgePoints": ["论证思路分析", "观点态度把握", "论证方法识别", "逻辑推断题型"]},
+        {"number": 2, "name": "现代文阅读·文学类", "knowledgePoints": ["小说人物分析", "情节结构梳理", "环境描写作用", "散文主旨概括", "语言风格鉴赏"]},
+        {"number": 3, "name": "古诗文阅读·文言文", "knowledgePoints": ["实词虚词推断", "断句方法", "翻译技巧", "文意理解与概括", "文化常识"]},
+        {"number": 4, "name": "古诗文阅读·古代诗歌", "knowledgePoints": ["意象意境分析", "表达技巧鉴赏", "情感态度把握", "炼字炼句赏析", "比较阅读"]},
+        {"number": 5, "name": "名篇名句默写", "knowledgePoints": ["理解性默写", "情境填空", "易错字辨析"]},
+        {"number": 6, "name": "语言文字运用", "knowledgePoints": ["词语辨析与运用", "病句辨析与修改", "句子补写与衔接", "修辞手法效果分析", "压缩语段"]},
+        {"number": 7, "name": "写作", "knowledgePoints": ["审题立意", "议论文结构", "记叙文选材", "论据选择与运用", "思辨性写作", "语言升格技巧"]}
+      ]
     }
   ]
 }
