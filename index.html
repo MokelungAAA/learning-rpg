@@ -5885,7 +5885,7 @@
             userProfileLoadState.isLoading = false;
             return userProfile;
           } catch (e) {
-            console.warn([v0.8.2]  失败: );
+            console.warn('[v0.8.5] 用户画像加载失败:', e.message);
             continue;
           }
         }
@@ -6008,29 +6008,35 @@
     let skillTreeLoadState = { loaded: false, error: null, source: null };
 
     async function loadSkillTree() {
-      // 先尝试localStorage缓存
       const cached = localStorage.getItem('skillTreeData');
       if (cached) {
         try {
           skillTreeData = JSON.parse(cached);
           skillTreeLoadState = { loaded: true, error: null, source: 'cache' };
+          console.log('[v0.8.5] 技能树缓存命中');
           return;
         } catch(e) {}
       }
 
       for (const url of SKILL_TREE_SOURCES) {
         try {
-          const resp = await fetch(url);
+          console.log('[v0.8.5] 尝试加载技能树:', url);
+          const resp = await fetchWithTimeout(url);
           if (resp.ok) {
             skillTreeData = await resp.json();
             localStorage.setItem('skillTreeData', JSON.stringify(skillTreeData));
             skillTreeLoadState = { loaded: true, error: null, source: url };
+            console.log('[v0.8.5] 技能树加载成功');
             return;
           }
-        } catch(e) { continue; }
+        } catch(e) {
+          console.warn('[v0.8.5] 技能树加载失败:', e.message);
+          continue;
+        }
       }
 
       skillTreeLoadState = { loaded: false, error: 'All sources failed', source: null };
+      console.warn('[v0.8.5] 技能树全部加载源失败');
     }
 
     // ========== v0.8.3 XP引擎2.0 ==========
@@ -8303,18 +8309,28 @@
     async function loadAchievementsData() {
       const cached = localStorage.getItem('achievementsData');
       if (cached) {
-        try { achievementsData = JSON.parse(cached); return; } catch(e) {}
+        try {
+          achievementsData = JSON.parse(cached);
+          console.log('[v0.8.5] 成就数据缓存命中');
+          return;
+        } catch(e) {}
       }
       for (const url of ACHIEVEMENTS_SOURCES) {
         try {
-          const resp = await fetch(url);
+          console.log('[v0.8.5] 尝试加载成就数据:', url);
+          const resp = await fetchWithTimeout(url);
           if (resp.ok) {
             achievementsData = await resp.json();
             localStorage.setItem('achievementsData', JSON.stringify(achievementsData));
+            console.log('[v0.8.5] 成就数据加载成功');
             return;
           }
-        } catch(e) { continue; }
+        } catch(e) {
+          console.warn('[v0.8.5] 成就数据加载失败:', e.message);
+          continue;
+        }
       }
+      console.warn('[v0.8.5] 成就数据全部加载源失败');
     }
 
     // ========== v0.6.7 教材进度地图 ==========
