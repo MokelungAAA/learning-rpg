@@ -2247,7 +2247,1246 @@
       .launch-level-display { padding: 24px 40px; }
       .about-content { max-height: 75vh; border-radius: var(--radius-xl) var(--radius-xl) 0 0; }
     }
-  </style>
+  
+  
+    /* ========== V1.1.0 番茄专注系统样式 ========== */
+    .pomodoro-modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 1001;
+      animation: fadeIn 0.3s ease;
+    }
+    .pomodoro-modal.active { display: block; }
+
+    .pomodoro-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.4);
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+    }
+
+    .pomodoro-content {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      max-height: 92vh;
+      background: rgba(255, 255, 255, 0.78);
+      backdrop-filter: blur(14px) saturate(130%);
+      -webkit-backdrop-filter: blur(14px) saturate(130%);
+      border: 1px solid rgba(255, 255, 255, 0.5);
+      border-radius: var(--radius-2xl) var(--radius-2xl) 0 0;
+      padding: 0 20px 32px;
+      overflow-y: auto;
+      animation: slideUp 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: var(--glass-shadow-lg);
+    }
+    .pomodoro-content::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 40%;
+      background: linear-gradient(180deg, rgba(255,255,255,0.35) 0%, transparent 100%);
+      pointer-events: none;
+      border-radius: var(--radius-2xl) var(--radius-2xl) 0 0;
+      z-index: 0;
+    }
+    .pomodoro-content > * { position: relative; z-index: 1; }
+    .pomodoro-content::-webkit-scrollbar { width: 4px; }
+    .pomodoro-content::-webkit-scrollbar-track { background: transparent; }
+    .pomodoro-content::-webkit-scrollbar-thumb { background: rgba(200,200,220,0.4); border-radius: 2px; }
+
+    [data-theme="dark"] .pomodoro-content {
+      background: rgba(30, 30, 40, 0.82);
+      border-color: rgba(255,255,255,0.08);
+    }
+    [data-theme="dark"] .pomodoro-content::before {
+      background: linear-gradient(180deg, rgba(255,255,255,0.06) 0%, transparent 100%);
+    }
+
+    .pomodoro-drag-handle {
+      display: flex;
+      justify-content: center;
+      padding: 12px 0 8px;
+      position: sticky;
+      top: 0;
+      z-index: 2;
+    }
+    .pomodoro-drag-handle::after {
+      content: '';
+      width: 40px;
+      height: 4px;
+      background: rgba(0,0,0,0.15);
+      border-radius: 2px;
+    }
+    [data-theme="dark"] .pomodoro-drag-handle::after {
+      background: rgba(255,255,255,0.2);
+    }
+
+    .pomodoro-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+    .pomodoro-header-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+    .pomodoro-close {
+      width: 32px; height: 32px;
+      border: none; border-radius: 50%;
+      background: rgba(0,0,0,0.06);
+      color: var(--text-secondary);
+      font-size: 16px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s;
+    }
+    .pomodoro-close:hover { background: rgba(0,0,0,0.1); }
+    [data-theme="dark"] .pomodoro-close { background: rgba(255,255,255,0.1); }
+
+    /* Tabs */
+    .pomodoro-tabs {
+      display: flex;
+      gap: 4px;
+      margin-bottom: 20px;
+      background: rgba(0,0,0,0.05);
+      border-radius: 10px;
+      padding: 3px;
+    }
+    [data-theme="dark"] .pomodoro-tabs { background: rgba(255,255,255,0.06); }
+    .pomodoro-tab {
+      flex: 1;
+      padding: 8px 0;
+      border: none;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      background: transparent;
+      color: var(--text-secondary);
+      transition: all 0.2s;
+    }
+    .pomodoro-tab.active {
+      background: #fff;
+      color: var(--text-primary);
+      box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    }
+    [data-theme="dark"] .pomodoro-tab.active {
+      background: rgba(255,255,255,0.1);
+    }
+
+    .pomodoro-panel { display: none; }
+    .pomodoro-panel.active { display: block; }
+
+    /* Subject Selector */
+    .pomodoro-subject-row {
+      margin-bottom: 16px;
+      text-align: center;
+    }
+    .pomodoro-subject-select {
+      padding: 8px 16px;
+      border: 1px solid rgba(0,0,0,0.1);
+      border-radius: 10px;
+      font-size: 14px;
+      background: rgba(255,255,255,0.7);
+      color: var(--text-primary);
+      outline: none;
+      cursor: pointer;
+      backdrop-filter: blur(8px);
+    }
+    [data-theme="dark"] .pomodoro-subject-select {
+      background: rgba(255,255,255,0.08);
+      border-color: rgba(255,255,255,0.12);
+      color: #e0e0e0;
+    }
+
+    /* Timer Circle */
+    .pomodoro-timer-wrap {
+      position: relative;
+      width: 220px;
+      height: 220px;
+      margin: 0 auto 16px;
+    }
+    .pomodoro-timer-svg {
+      width: 100%;
+      height: 100%;
+      transform: rotate(-90deg);
+    }
+    .pomodoro-timer-bg {
+      fill: none;
+      stroke: rgba(0,0,0,0.06);
+      stroke-width: 8;
+    }
+    [data-theme="dark"] .pomodoro-timer-bg { stroke: rgba(255,255,255,0.08); }
+    .pomodoro-timer-ring {
+      fill: none;
+      stroke: url(#pomodoroGrad);
+      stroke-width: 8;
+      stroke-linecap: round;
+      stroke-dasharray: 553;
+      stroke-dashoffset: 0;
+      transition: stroke-dashoffset 0.5s ease;
+    }
+    .pomodoro-timer-inner {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    .pomodoro-timer-phase {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      margin-bottom: 4px;
+    }
+    .pomodoro-timer-display {
+      font-size: 42px;
+      font-weight: 700;
+      color: var(--text-primary);
+      font-variant-numeric: tabular-nums;
+      letter-spacing: 2px;
+    }
+
+    /* Session Dots */
+    .pomodoro-dots {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+    .pomodoro-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: rgba(0,0,0,0.1);
+      transition: all 0.3s ease;
+    }
+    .pomodoro-dot.completed {
+      background: linear-gradient(135deg, #6366f1, #8b5cf6);
+      box-shadow: 0 0 8px rgba(99,102,241,0.4);
+    }
+    .pomodoro-dot.current {
+      background: #6366f1;
+      animation: pomodoroPulse 1.5s ease infinite;
+    }
+    @keyframes pomodoroPulse {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.3); opacity: 0.7; }
+    }
+
+    /* Control Buttons */
+    .pomodoro-controls {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .pomodoro-btn {
+      border: none;
+      border-radius: 12px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      padding: 10px 20px;
+      transition: transform 0.15s, box-shadow 0.15s;
+    }
+    .pomodoro-btn:active { transform: scale(0.96); }
+    .pomodoro-btn-primary {
+      background: linear-gradient(135deg, #6366f1, #8b5cf6);
+      color: #fff;
+      box-shadow: 0 4px 14px rgba(99,102,241,0.35);
+      min-width: 100px;
+    }
+    .pomodoro-btn-secondary {
+      background: rgba(0,0,0,0.06);
+      color: var(--text-secondary);
+    }
+    [data-theme="dark"] .pomodoro-btn-secondary {
+      background: rgba(255,255,255,0.08);
+      color: #bbb;
+    }
+
+    /* Interrupt Dialog */
+    .pomodoro-interrupt {
+      background: rgba(255,255,255,0.6);
+      backdrop-filter: blur(10px);
+      border-radius: 16px;
+      padding: 16px;
+      margin-top: 12px;
+      border: 1px solid rgba(0,0,0,0.05);
+      animation: fadeIn 0.2s ease;
+    }
+    [data-theme="dark"] .pomodoro-interrupt {
+      background: rgba(255,255,255,0.06);
+      border-color: rgba(255,255,255,0.08);
+    }
+    .pomodoro-interrupt-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 12px;
+      text-align: center;
+    }
+    .pomodoro-interrupt-types {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+    .pomodoro-interrupt-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 10px 8px;
+      border: 1px solid rgba(0,0,0,0.08);
+      border-radius: 10px;
+      background: rgba(255,255,255,0.5);
+      font-size: 13px;
+      color: var(--text-primary);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .pomodoro-interrupt-btn:hover {
+      background: rgba(99,102,241,0.1);
+      border-color: #6366f1;
+    }
+    .pomodoro-interrupt-btn span { font-size: 16px; }
+    [data-theme="dark"] .pomodoro-interrupt-btn {
+      background: rgba(255,255,255,0.05);
+      border-color: rgba(255,255,255,0.1);
+    }
+    .pomodoro-interrupt-note {
+      width: 100%;
+      padding: 8px 12px;
+      border: 1px solid rgba(0,0,0,0.08);
+      border-radius: 10px;
+      font-size: 13px;
+      background: rgba(255,255,255,0.5);
+      color: var(--text-primary);
+      outline: none;
+      margin-bottom: 8px;
+      box-sizing: border-box;
+    }
+    [data-theme="dark"] .pomodoro-interrupt-note {
+      background: rgba(255,255,255,0.05);
+      border-color: rgba(255,255,255,0.1);
+      color: #e0e0e0;
+    }
+    .pomodoro-interrupt-skip {
+      display: block;
+      width: 100%;
+      padding: 8px;
+      border: none;
+      border-radius: 8px;
+      background: transparent;
+      color: var(--text-secondary);
+      font-size: 13px;
+      cursor: pointer;
+    }
+
+    /* Session Summary */
+    .pomodoro-summary {
+      background: rgba(255,255,255,0.6);
+      backdrop-filter: blur(10px);
+      border-radius: 16px;
+      padding: 20px 16px;
+      margin-top: 12px;
+      border: 1px solid rgba(0,0,0,0.05);
+      animation: fadeIn 0.3s ease;
+      text-align: center;
+    }
+    [data-theme="dark"] .pomodoro-summary {
+      background: rgba(255,255,255,0.06);
+      border-color: rgba(255,255,255,0.08);
+    }
+    .pomodoro-summary-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 16px;
+    }
+    .pomodoro-summary-stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    .pomodoro-summary-stat {
+      background: rgba(255,255,255,0.5);
+      border-radius: 12px;
+      padding: 12px 8px;
+    }
+    [data-theme="dark"] .pomodoro-summary-stat {
+      background: rgba(255,255,255,0.04);
+    }
+    .pomodoro-summary-stat-value {
+      font-size: 20px;
+      font-weight: 700;
+      color: #6366f1;
+      margin-bottom: 2px;
+    }
+    .pomodoro-summary-stat-label {
+      font-size: 12px;
+      color: var(--text-secondary);
+    }
+
+    /* Stats Grid */
+    .pomodoro-stats-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    .pomodoro-stat-card {
+      background: rgba(255,255,255,0.5);
+      backdrop-filter: blur(8px);
+      border-radius: 14px;
+      padding: 14px 10px;
+      text-align: center;
+      border: 1px solid rgba(0,0,0,0.04);
+    }
+    [data-theme="dark"] .pomodoro-stat-card {
+      background: rgba(255,255,255,0.05);
+      border-color: rgba(255,255,255,0.06);
+    }
+    .pomodoro-stat-card-value {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 2px;
+    }
+    .pomodoro-stat-card-label {
+      font-size: 11px;
+      color: var(--text-secondary);
+    }
+    .pomodoro-chart-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 10px;
+    }
+    .pomodoro-chart {
+      width: 100%;
+      height: 200px;
+      background: rgba(255,255,255,0.3);
+      border-radius: 14px;
+      overflow: hidden;
+    }
+    [data-theme="dark"] .pomodoro-chart {
+      background: rgba(255,255,255,0.03);
+    }
+
+    /* Settings */
+    .pomodoro-setting-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 14px 0;
+      border-bottom: 1px solid rgba(0,0,0,0.05);
+    }
+    [data-theme="dark"] .pomodoro-setting-item {
+      border-bottom-color: rgba(255,255,255,0.06);
+    }
+    .pomodoro-setting-label {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text-primary);
+    }
+    .pomodoro-setting-options {
+      display: flex;
+      gap: 4px;
+    }
+    .pomo-opt {
+      padding: 6px 12px;
+      border: 1px solid rgba(0,0,0,0.08);
+      border-radius: 8px;
+      background: transparent;
+      font-size: 12px;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .pomo-opt.active {
+      background: linear-gradient(135deg, #6366f1, #8b5cf6);
+      color: #fff;
+      border-color: transparent;
+    }
+    [data-theme="dark"] .pomo-opt {
+      border-color: rgba(255,255,255,0.1);
+      color: #aaa;
+    }
+
+    /* Toggle Switch */
+    .pomodoro-toggle-wrap { display: flex; align-items: center; }
+    .pomodoro-toggle {
+      position: relative;
+      display: inline-block;
+      width: 44px;
+      height: 24px;
+    }
+    .pomodoro-toggle input { opacity: 0; width: 0; height: 0; }
+    .pomodoro-toggle-slider {
+      position: absolute;
+      inset: 0;
+      background: rgba(0,0,0,0.12);
+      border-radius: 24px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+    .pomodoro-toggle-slider::before {
+      content: '';
+      position: absolute;
+      width: 18px;
+      height: 18px;
+      left: 3px;
+      bottom: 3px;
+      background: #fff;
+      border-radius: 50%;
+      transition: 0.3s;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+    }
+    .pomodoro-toggle input:checked + .pomodoro-toggle-slider {
+      background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    }
+    .pomodoro-toggle input:checked + .pomodoro-toggle-slider::before {
+      transform: translateX(20px);
+    }
+    [data-theme="dark"] .pomodoro-toggle-slider {
+      background: rgba(255,255,255,0.15);
+    }
+
+    /* Welcome back notification */
+    .pomodoro-welcome-back {
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(255,255,255,0.85);
+      backdrop-filter: blur(12px);
+      border-radius: 12px;
+      padding: 12px 20px;
+      font-size: 14px;
+      color: var(--text-primary);
+      box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+      z-index: 2000;
+      animation: fadeIn 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    [data-theme="dark"] .pomodoro-welcome-back {
+      background: rgba(30,30,40,0.9);
+    }
+
+    /* ========== V1.2.0 阅读记录系统样式 ========== */
+    .reading-modal {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      z-index: 1000;
+    }
+    .reading-modal.active { display: block; }
+    .reading-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.4);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+    }
+    .reading-content {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(255,255,255,0.78);
+      backdrop-filter: blur(14px) saturate(130%);
+      -webkit-backdrop-filter: blur(14px) saturate(130%);
+      overflow-y: auto;
+      z-index: 1;
+    }
+    .reading-content::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 40%;
+      background: linear-gradient(180deg, rgba(255,255,255,0.35) 0%, transparent 100%);
+      pointer-events: none;
+      border-radius: 0;
+      z-index: 0;
+    }
+    .reading-content > * { position: relative; z-index: 1; }
+    .reading-content::-webkit-scrollbar { width: 4px; }
+    .reading-content::-webkit-scrollbar-track { background: transparent; }
+    .reading-content::-webkit-scrollbar-thumb { background: rgba(200,200,220,0.4); border-radius: 2px; }
+
+    [data-theme="dark"] .reading-content {
+      background: rgba(30, 30, 40, 0.82);
+      border-color: rgba(255,255,255,0.08);
+    }
+    [data-theme="dark"] .reading-content::before {
+      background: linear-gradient(180deg, rgba(255,255,255,0.06) 0%, transparent 100%);
+    }
+
+    .reading-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px 20px;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      background: rgba(255,255,255,0.6);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+    }
+    [data-theme="dark"] .reading-header {
+      background: rgba(30,30,40,0.7);
+    }
+    .reading-header-title {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+    .reading-close {
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      border: none;
+      background: rgba(0,0,0,0.06);
+      color: var(--text-secondary);
+      font-size: 18px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+    }
+    .reading-close:hover {
+      background: rgba(0,0,0,0.12);
+    }
+    [data-theme="dark"] .reading-close {
+      background: rgba(255,255,255,0.1);
+      color: var(--text-primary);
+    }
+
+    /* Tabs */
+    .reading-tabs {
+      display: flex;
+      gap: 4px;
+      padding: 0 20px 12px;
+    }
+    .reading-tab {
+      flex: 1;
+      padding: 10px 8px;
+      border: none;
+      border-radius: 12px;
+      background: rgba(0,0,0,0.04);
+      color: var(--text-secondary);
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.25s;
+    }
+    .reading-tab.active {
+      background: rgba(0,0,0,0.08);
+      color: var(--text-primary);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+    [data-theme="dark"] .reading-tab {
+      background: rgba(255,255,255,0.06);
+      color: rgba(255,255,255,0.6);
+    }
+    [data-theme="dark"] .reading-tab.active {
+      background: rgba(255,255,255,0.12);
+      color: #fff;
+    }
+
+    /* Tab panels */
+    .reading-panel {
+      display: none;
+      padding: 0 20px 30px;
+      animation: fadeIn 0.3s ease;
+    }
+    .reading-panel.active { display: block; }
+
+    /* Form styles */
+    .reading-form-group {
+      margin-bottom: 16px;
+    }
+    .reading-form-label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      margin-bottom: 6px;
+    }
+    .reading-form-input,
+    .reading-form-select,
+    .reading-form-textarea {
+      width: 100%;
+      padding: 10px 14px;
+      border: 1.5px solid rgba(0,0,0,0.08);
+      border-radius: 12px;
+      background: rgba(255,255,255,0.6);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      font-size: 15px;
+      color: var(--text-primary);
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      box-sizing: border-box;
+    }
+    .reading-form-input:focus,
+    .reading-form-select:focus,
+    .reading-form-textarea:focus {
+      border-color: rgba(100,100,200,0.4);
+      box-shadow: 0 0 0 3px rgba(100,100,200,0.1);
+    }
+    [data-theme="dark"] .reading-form-input,
+    [data-theme="dark"] .reading-form-select,
+    [data-theme="dark"] .reading-form-textarea {
+      background: rgba(255,255,255,0.08);
+      border-color: rgba(255,255,255,0.1);
+      color: #fff;
+    }
+    [data-theme="dark"] .reading-form-input:focus,
+    [data-theme="dark"] .reading-form-select:focus,
+    [data-theme="dark"] .reading-form-textarea:focus {
+      border-color: rgba(150,150,255,0.4);
+    }
+    .reading-form-textarea {
+      min-height: 80px;
+      resize: vertical;
+      font-family: inherit;
+    }
+    .reading-form-row {
+      display: flex;
+      gap: 12px;
+    }
+    .reading-form-row .reading-form-group {
+      flex: 1;
+    }
+
+    /* Star rating */
+    .reading-star-rating {
+      display: flex;
+      gap: 4px;
+      align-items: center;
+    }
+    .reading-star {
+      font-size: 28px;
+      cursor: pointer;
+      color: rgba(0,0,0,0.15);
+      transition: color 0.15s, transform 0.15s;
+      user-select: none;
+    }
+    .reading-star:hover,
+    .reading-star.hover {
+      color: #f0c040;
+      transform: scale(1.15);
+    }
+    .reading-star.active {
+      color: #f0a030;
+    }
+    .reading-star.active.hover {
+      color: #f0c040;
+    }
+    .reading-rating-text {
+      font-size: 13px;
+      color: var(--text-secondary);
+      margin-left: 8px;
+    }
+
+    /* Save button */
+    .reading-save-btn {
+      width: 100%;
+      padding: 14px;
+      border: none;
+      border-radius: 14px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: #fff;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.25s;
+      box-shadow: 0 4px 15px rgba(102,126,234,0.3);
+      margin-top: 8px;
+    }
+    .reading-save-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px rgba(102,126,234,0.4);
+    }
+    .reading-save-btn:active {
+      transform: translateY(0);
+    }
+
+    /* Autocomplete */
+    .reading-autocomplete {
+      position: absolute;
+      top: 100%;
+      left: 0; right: 0;
+      background: rgba(255,255,255,0.95);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border-radius: 12px;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+      z-index: 100;
+      max-height: 200px;
+      overflow-y: auto;
+      display: none;
+    }
+    .reading-autocomplete.show { display: block; }
+    .reading-autocomplete-item {
+      padding: 10px 14px;
+      cursor: pointer;
+      font-size: 14px;
+      color: var(--text-primary);
+      transition: background 0.15s;
+      border-bottom: 1px solid rgba(0,0,0,0.04);
+    }
+    .reading-autocomplete-item:last-child { border-bottom: none; }
+    .reading-autocomplete-item:hover {
+      background: rgba(102,126,234,0.08);
+    }
+    .reading-autocomplete-item .ac-author {
+      font-size: 12px;
+      color: var(--text-secondary);
+    }
+    [data-theme="dark"] .reading-autocomplete {
+      background: rgba(40,40,50,0.95);
+    }
+    [data-theme="dark"] .reading-autocomplete-item:hover {
+      background: rgba(150,150,255,0.1);
+    }
+
+    /* Bookshelf */
+    .reading-search-bar {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+    .reading-search-bar .reading-form-input {
+      flex: 1;
+    }
+    .reading-category-chips {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin-bottom: 16px;
+    }
+    .reading-chip {
+      padding: 6px 12px;
+      border-radius: 20px;
+      border: 1.5px solid rgba(0,0,0,0.08);
+      background: rgba(255,255,255,0.5);
+      font-size: 12px;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+    .reading-chip.active {
+      background: rgba(102,126,234,0.15);
+      border-color: rgba(102,126,234,0.3);
+      color: #667eea;
+      font-weight: 600;
+    }
+    [data-theme="dark"] .reading-chip {
+      background: rgba(255,255,255,0.06);
+      border-color: rgba(255,255,255,0.1);
+      color: rgba(255,255,255,0.6);
+    }
+    [data-theme="dark"] .reading-chip.active {
+      background: rgba(102,126,234,0.2);
+      border-color: rgba(102,126,234,0.4);
+      color: #a0b0ff;
+    }
+
+    .reading-add-btn {
+      width: 100%;
+      padding: 12px;
+      border: 2px dashed rgba(0,0,0,0.1);
+      border-radius: 14px;
+      background: transparent;
+      color: var(--text-secondary);
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      margin-bottom: 16px;
+    }
+    .reading-add-btn:hover {
+      border-color: rgba(102,126,234,0.3);
+      color: #667eea;
+      background: rgba(102,126,234,0.04);
+    }
+    [data-theme="dark"] .reading-add-btn {
+      border-color: rgba(255,255,255,0.1);
+      color: rgba(255,255,255,0.5);
+    }
+    [data-theme="dark"] .reading-add-btn:hover {
+      border-color: rgba(102,126,234,0.4);
+      color: #a0b0ff;
+      background: rgba(102,126,234,0.06);
+    }
+
+    /* Book card */
+    .reading-book-card {
+      background: rgba(255,255,255,0.5);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: 1px solid rgba(0,0,0,0.06);
+      border-radius: 16px;
+      padding: 16px;
+      margin-bottom: 12px;
+      cursor: pointer;
+      transition: all 0.25s;
+    }
+    .reading-book-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+    }
+    [data-theme="dark"] .reading-book-card {
+      background: rgba(255,255,255,0.06);
+      border-color: rgba(255,255,255,0.08);
+    }
+    .reading-book-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 8px;
+    }
+    .reading-book-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text-primary);
+      line-height: 1.3;
+    }
+    .reading-book-author {
+      font-size: 13px;
+      color: var(--text-secondary);
+      margin-top: 2px;
+    }
+    .reading-book-category {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 20px;
+      background: rgba(102,126,234,0.1);
+      color: #667eea;
+      font-size: 11px;
+      font-weight: 600;
+    }
+    [data-theme="dark"] .reading-book-category {
+      background: rgba(102,126,234,0.15);
+      color: #a0b0ff;
+    }
+    .reading-book-progress {
+      margin-top: 10px;
+    }
+    .reading-progress-bar {
+      height: 6px;
+      background: rgba(0,0,0,0.06);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+    [data-theme="dark"] .reading-progress-bar {
+      background: rgba(255,255,255,0.08);
+    }
+    .reading-progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #667eea, #764ba2);
+      border-radius: 3px;
+      transition: width 0.5s ease;
+    }
+    .reading-progress-text {
+      display: flex;
+      justify-content: space-between;
+      font-size: 11px;
+      color: var(--text-secondary);
+      margin-top: 4px;
+    }
+    .reading-book-meta {
+      display: flex;
+      gap: 12px;
+      margin-top: 8px;
+      font-size: 12px;
+      color: var(--text-secondary);
+    }
+    .reading-book-meta span {
+      display: flex;
+      align-items: center;
+      gap: 3px;
+    }
+    .reading-book-actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 10px;
+      padding-top: 10px;
+      border-top: 1px solid rgba(0,0,0,0.05);
+    }
+    [data-theme="dark"] .reading-book-actions {
+      border-top-color: rgba(255,255,255,0.06);
+    }
+    .reading-book-action-btn {
+      padding: 6px 12px;
+      border: none;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .reading-book-action-btn.primary {
+      background: rgba(102,126,234,0.12);
+      color: #667eea;
+    }
+    .reading-book-action-btn.primary:hover {
+      background: rgba(102,126,234,0.2);
+    }
+    .reading-book-action-btn.danger {
+      background: rgba(239,68,68,0.08);
+      color: #ef4444;
+    }
+    .reading-book-action-btn.danger:hover {
+      background: rgba(239,68,68,0.15);
+    }
+    [data-theme="dark"] .reading-book-action-btn.primary {
+      background: rgba(102,126,234,0.15);
+      color: #a0b0ff;
+    }
+    [data-theme="dark"] .reading-book-action-btn.danger {
+      background: rgba(239,68,68,0.12);
+      color: #f87171;
+    }
+
+    /* Book history */
+    .reading-history-list {
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid rgba(0,0,0,0.05);
+    }
+    [data-theme="dark"] .reading-history-list {
+      border-top-color: rgba(255,255,255,0.06);
+    }
+    .reading-history-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 0;
+      font-size: 13px;
+      border-bottom: 1px solid rgba(0,0,0,0.03);
+    }
+    [data-theme="dark"] .reading-history-item {
+      border-bottom-color: rgba(255,255,255,0.04);
+    }
+    .reading-history-date {
+      color: var(--text-secondary);
+      font-size: 12px;
+    }
+    .reading-history-pages {
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+    .reading-history-rating {
+      color: #f0a030;
+    }
+
+    /* Add book form */
+    .reading-add-form {
+      background: rgba(255,255,255,0.5);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: 1px solid rgba(0,0,0,0.06);
+      border-radius: 16px;
+      padding: 16px;
+      margin-bottom: 16px;
+      display: none;
+      animation: fadeIn 0.3s ease;
+    }
+    .reading-add-form.show { display: block; }
+    [data-theme="dark"] .reading-add-form {
+      background: rgba(255,255,255,0.06);
+      border-color: rgba(255,255,255,0.08);
+    }
+    .reading-add-form-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+    .reading-add-form-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+    .reading-form-actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 12px;
+    }
+    .reading-form-actions .reading-save-btn {
+      flex: 1;
+      padding: 10px;
+      font-size: 14px;
+    }
+    .reading-cancel-btn {
+      padding: 10px 16px;
+      border: 1.5px solid rgba(0,0,0,0.08);
+      border-radius: 14px;
+      background: transparent;
+      color: var(--text-secondary);
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .reading-cancel-btn:hover {
+      background: rgba(0,0,0,0.04);
+    }
+    [data-theme="dark"] .reading-cancel-btn {
+      border-color: rgba(255,255,255,0.1);
+      color: rgba(255,255,255,0.6);
+    }
+
+    /* Statistics */
+    .reading-stats-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    .reading-stat-card {
+      background: rgba(255,255,255,0.5);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: 1px solid rgba(0,0,0,0.06);
+      border-radius: 14px;
+      padding: 16px;
+      text-align: center;
+    }
+    [data-theme="dark"] .reading-stat-card {
+      background: rgba(255,255,255,0.06);
+      border-color: rgba(255,255,255,0.08);
+    }
+    .reading-stat-value {
+      font-size: 28px;
+      font-weight: 800;
+      color: var(--text-primary);
+      line-height: 1.2;
+    }
+    .reading-stat-label {
+      font-size: 12px;
+      color: var(--text-secondary);
+      margin-top: 4px;
+    }
+    .reading-chart-container {
+      background: rgba(255,255,255,0.5);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: 1px solid rgba(0,0,0,0.06);
+      border-radius: 16px;
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+    [data-theme="dark"] .reading-chart-container {
+      background: rgba(255,255,255,0.06);
+      border-color: rgba(255,255,255,0.08);
+    }
+    .reading-chart-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 12px;
+    }
+    .reading-chart {
+      width: 100%;
+      height: 220px;
+    }
+    .reading-recent-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 12px;
+    }
+    .reading-recent-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px;
+      background: rgba(255,255,255,0.4);
+      border-radius: 12px;
+      margin-bottom: 8px;
+      border: 1px solid rgba(0,0,0,0.04);
+    }
+    [data-theme="dark"] .reading-recent-item {
+      background: rgba(255,255,255,0.04);
+      border-color: rgba(255,255,255,0.06);
+    }
+    .reading-recent-info {
+      flex: 1;
+    }
+    .reading-recent-book {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+    .reading-recent-detail {
+      font-size: 12px;
+      color: var(--text-secondary);
+      margin-top: 2px;
+    }
+    .reading-recent-right {
+      text-align: right;
+    }
+    .reading-recent-pages {
+      font-size: 14px;
+      font-weight: 700;
+      color: #667eea;
+    }
+    .reading-recent-date {
+      font-size: 11px;
+      color: var(--text-secondary);
+    }
+    .reading-empty {
+      text-align: center;
+      padding: 40px 20px;
+      color: var(--text-secondary);
+      font-size: 14px;
+    }
+    .reading-empty-icon {
+      font-size: 48px;
+      margin-bottom: 12px;
+      opacity: 0.5;
+    }
+
+    /* Mobile responsive */
+    @media (max-width: 480px) {
+      .reading-stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
+      }
+      .reading-stat-card {
+        padding: 12px;
+      }
+      .reading-stat-value {
+        font-size: 22px;
+      }
+      .reading-form-row {
+        flex-direction: column;
+        gap: 0;
+      }
+      .reading-chart {
+        height: 180px;
+      }
+    }
+</style>
 </head>
 <body>
   <!-- 下拉刷新指示器（v0.6.10） -->
@@ -2290,7 +3529,7 @@
           <div class="brand-icon">📚</div>
           <div class="brand-text">
             <h1>学习RPG · 认知操作系统</h1>
-            <p>v0.7.10</p>
+            <p>v1.2.0</p>
           </div>
         </div>
       </header>
@@ -2417,6 +3656,14 @@
           <div class="analysis-chart-glass" style="margin-top:10px;">
             <div style="font-size:12px;font-weight:600;color:var(--text-secondary);margin-bottom:8px;">💪 薄弱点识别</div>
             <div class="analysis-weakpoints" id="weakPointsList"></div>
+          <div class="glass-card" style="margin-top: 16px; padding: 16px;">
+            <div class="section-title">📊 效率分布（时长 vs 正确率）</div>
+            <div id="efficiencyChart" style="width: 100%; height: 300px;"></div>
+          </div>
+          <div class="glass-card" style="margin-top: 16px; padding: 16px;">
+            <div class="section-title">⏰ 学习时段分布</div>
+            <div id="timeSlotChart" style="width: 100%; height: 250px;"></div>
+          </div>
           </div>
         </div>
         </div><!-- /fold-body -->
@@ -2466,6 +3713,11 @@
               </div>
             </div>
           </div>
+        </div>
+
+        <div class="glass-card" style="margin-top: 16px; padding: 16px;">
+          <div class="section-title">📊 技能雷达图</div>
+          <div id="skillRadarChart" style="width: 100%; height: 350px;"></div>
         </div>
       </div>
       
@@ -2592,6 +3844,29 @@
             <span class="settings-arrow">›</span>
           </div>
           
+
+          <div class="settings-item" onclick="openPomodoro()">
+            <div class="settings-info">
+              <span class="settings-icon">🍅</span>
+              <div>
+                <div class="settings-name">番茄专注</div>
+                <div class="settings-desc">专注计时、休息管理、专注分析</div>
+              </div>
+            </div>
+            <span class="settings-arrow">›</span>
+          </div>
+
+
+          <div class="settings-item" onclick="openReading()">
+            <div class="settings-info">
+              <span class="settings-icon">📖</span>
+              <div>
+                <div class="settings-name">阅读记录</div>
+                <div class="settings-desc">记录阅读、管理书架、阅读统计</div>
+              </div>
+            </div>
+            <span class="settings-arrow">›</span>
+          </div>
           <div class="settings-item disabled">
             <div class="settings-info">
               <span class="settings-icon">📊</span>
@@ -2798,7 +4073,7 @@
         </div>
         <div class="about-system-name">学习RPG · 认知操作系统</div>
         <div class="about-version">
-          <span class="about-version-badge">v0.8.3</span>
+          <span class="about-version-badge">v1.2.0</span>
         </div>
         <div class="about-developer-info">
           <div class="about-developer-name">墨澜 & MIKU</div>
@@ -2809,7 +4084,7 @@
       <!-- 统计概览 -->
       <div class="about-stats-row" id="aboutStats">
         <div class="about-stat-chip">
-          <div class="about-stat-chip-value" id="statVersions">30</div>
+          <div class="about-stat-chip-value" id="statVersions">34</div>
           <div class="about-stat-chip-label">版本迭代</div>
         </div>
         <div class="about-stat-chip">
@@ -2825,7 +4100,7 @@
           <div class="about-stat-chip-label">覆盖学科</div>
         </div>
         <div class="about-stat-chip">
-          <div class="about-stat-chip-value" id="statAlgo">7</div>
+          <div class="about-stat-chip-value" id="statAlgo">16</div>
           <div class="about-stat-chip-label">核心算法</div>
         </div>
       </div>
@@ -2834,12 +4109,15 @@
       <div class="changelog-section">
         <div class="changelog-title">更新日志</div>
         
-        <!-- ====== V0.8 — 功能扩展 ====== -->
+
+
+
+        <!-- ====== V1.2 — 阅读记录系统 ====== -->
         <div class="changelog-major expanded" onclick="this.classList.toggle('expanded')">
           <div class="changelog-major-header current">
             <div class="changelog-major-left">
-              <span class="changelog-major-label">V0.8</span>
-              <span class="changelog-major-tag">当前 · 功能扩展</span>
+              <span class="changelog-major-label">V1.2</span>
+              <span class="changelog-major-tag">当前 · 阅读记录系统</span>
             </div>
             <span class="changelog-major-toggle">▼</span>
           </div>
@@ -2847,8 +4125,235 @@
             <div class="changelog-version expanded" onclick="event.stopPropagation();this.classList.toggle('expanded')">
               <div class="changelog-version-header current">
                 <div class="changelog-version-left">
-                  <span>v0.8.3</span>
+                  <span>v1.2.0</span>
                   <span class="changelog-version-tag">当前</span>
+                </div>
+                <span class="changelog-toggle">▼</span>
+              </div>
+              <div class="changelog-items">
+                <div class="changelog-item">
+                  <span class="changelog-item-version">2026-05-16</span>
+                  V1.2.0: 独立阅读记录系统；12分类书籍管理；自动书架同步；星级评分；月度阅读图表；分类分布图；阅读成就系统；书架搜索过滤。
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ====== V1.1 — 番茄专注系统 ====== -->
+        <div class="changelog-major expanded" onclick="this.classList.toggle('expanded')">
+          <div class="changelog-major-header ">
+            <div class="changelog-major-left">
+              <span class="changelog-major-label">V1.1</span>
+              <span class="changelog-major-tag">番茄专注系统</span>
+            </div>
+            <span class="changelog-major-toggle">▼</span>
+          </div>
+          <div class="changelog-major-body">
+            <div class="changelog-version expanded" onclick="event.stopPropagation();this.classList.toggle('expanded')">
+              <div class="changelog-version-header">
+                <div class="changelog-version-left">
+                  <span>v1.1.0</span>
+                  <span class="changelog-version-tag">v1.1.0</span>
+                </div>
+                <span class="changelog-toggle">▼</span>
+              </div>
+              <div class="changelog-items">
+                <div class="changelog-item">
+                  <span class="changelog-item-version">2026-05-16</span>
+                  V1.1.0: 番茄钟专注计时系统；25/5/15分钟标准节奏；中断分类与专注评分；后台离开检测；自动生成学习记录；专注统计与周报图表；可配置时长参数；成就系统集成。
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ====== V0.15 — UI重构 ====== -->
+        <div class="changelog-major expanded" onclick="this.classList.toggle('expanded')">
+          <div class="changelog-major-header">
+            <div class="changelog-major-left">
+              <span class="changelog-major-label">V0.15</span>
+              <span class="changelog-major-tag">UI重构</span>
+            </div>
+            <span class="changelog-major-toggle">▼</span>
+          </div>
+          <div class="changelog-major-body">
+            <div class="changelog-version expanded" onclick="event.stopPropagation();this.classList.toggle('expanded')">
+              <div class="changelog-version-header">
+                <div class="changelog-version-left">
+                  <span>v0.15.0</span>
+                  <span class="changelog-version-tag">功能</span>
+                </div>
+                <span class="changelog-toggle">▼</span>
+              </div>
+              <div class="changelog-items">
+                <div class="changelog-item">
+                  <span class="changelog-item-version">2026-05-16</span>
+                  V0.15.0: 全局命令面板（Ctrl+K快捷键）；模糊搜索功能/页面跳转/常用操作；毛玻璃浮层设计；深色模式适配。
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ====== V0.14 — 统计系统增强 ====== -->
+        <div class="changelog-major expanded" onclick="this.classList.toggle('expanded')">
+          <div class="changelog-major-header">
+            <div class="changelog-major-left">
+              <span class="changelog-major-label">V0.14</span>
+              <span class="changelog-major-tag">统计系统增强</span>
+            </div>
+            <span class="changelog-major-toggle">▼</span>
+          </div>
+          <div class="changelog-major-body">
+            <div class="changelog-version expanded" onclick="event.stopPropagation();this.classList.toggle('expanded')">
+              <div class="changelog-version-header">
+                <div class="changelog-version-left">
+                  <span>v0.14.0</span>
+                  <span class="changelog-version-tag">功能</span>
+                </div>
+                <span class="changelog-toggle">▼</span>
+              </div>
+              <div class="changelog-items">
+                <div class="changelog-item">
+                  <span class="changelog-item-version">2026-05-16</span>
+                  V0.14.0: 效率散点图（学习时长vs正确率，ECharts散点图）；时段热力图（24小时学习时段分布柱状图）；分析页面图表区域扩展。
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ====== V0.13 — 考试推荐 ====== -->
+        <div class="changelog-major expanded" onclick="this.classList.toggle('expanded')">
+          <div class="changelog-major-header">
+            <div class="changelog-major-left">
+              <span class="changelog-major-label">V0.13</span>
+              <span class="changelog-major-tag">考试推荐</span>
+            </div>
+            <span class="changelog-major-toggle">▼</span>
+          </div>
+          <div class="changelog-major-body">
+            <div class="changelog-version expanded" onclick="event.stopPropagation();this.classList.toggle('expanded')">
+              <div class="changelog-version-header">
+                <div class="changelog-version-left">
+                  <span>v0.13.0</span>
+                  <span class="changelog-version-tag">功能</span>
+                </div>
+                <span class="changelog-toggle">▼</span>
+              </div>
+              <div class="changelog-items">
+                <div class="changelog-item">
+                  <span class="changelog-item-version">2026-05-16</span>
+                  V0.13.0: 考试推荐系统（距上次考试天数/累积学时/成绩趋势/假性熟练四维触发）；多条件联合判断智能推荐模拟考试。
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ====== V0.12 — 成就系统升级 ====== -->
+        <div class="changelog-major expanded" onclick="this.classList.toggle('expanded')">
+          <div class="changelog-major-header">
+            <div class="changelog-major-left">
+              <span class="changelog-major-label">V0.12</span>
+              <span class="changelog-major-tag">成就系统升级</span>
+            </div>
+            <span class="changelog-major-toggle">▼</span>
+          </div>
+          <div class="changelog-major-body">
+            <div class="changelog-version expanded" onclick="event.stopPropagation();this.classList.toggle('expanded')">
+              <div class="changelog-version-header">
+                <div class="changelog-version-left">
+                  <span>v0.12.0</span>
+                  <span class="changelog-version-tag">功能</span>
+                </div>
+                <span class="changelog-toggle">▼</span>
+              </div>
+              <div class="changelog-items">
+                <div class="changelog-item">
+                  <span class="changelog-item-version">2026-05-16</span>
+                  V0.12.0: 成就系统升级——外部JSON数据驱动（achievements-data.json）；五级稀有度（青铜/白银/黄金/传说/隐藏）；22项成就覆盖学习时长/学科/考试/连续天数等维度；成就解锁Toast通知。
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- ====== V0.11 — 智能复习+低输入负担 ====== -->
+        <div class="changelog-major expanded" onclick="this.classList.toggle('expanded')">
+          <div class="changelog-major-header">
+            <div class="changelog-major-left">
+              <span class="changelog-major-label">V0.11</span>
+              <span class="changelog-major-tag">智能复习+低输入负担</span>
+            </div>
+            <span class="changelog-major-toggle">▼</span>
+          </div>
+          <div class="changelog-major-body">
+            <div class="changelog-version expanded" onclick="event.stopPropagation();this.classList.toggle('expanded')">
+              <div class="changelog-version-header">
+                <div class="changelog-version-left">
+                  <span>v0.11.0</span>
+                  <span class="changelog-version-tag">功能</span>
+                </div>
+                <span class="changelog-toggle">▼</span>
+              </div>
+              <div class="changelog-items">
+                <div class="changelog-item">
+                  <span class="changelog-item-version">2026-05-16</span>
+                  V0.10.0: 0/1背包算法求解最优复习组合；提分潜力诊断（技能级考试权重×掌握度差距）；假性熟练检测（高正确率+短时长预警）。
+                </div>
+                <div class="changelog-item">
+                  <span class="changelog-item-version">2026-05-16</span>
+                  V0.11.0: 倒排索引模糊搜索（精确/前缀/包含/莱文斯坦距离四级匹配）；做题/订正时间分离+EMA推断；搜索索引自动构建。
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ====== V0.9 — 三层技能体系 ====== -->
+        <div class="changelog-major expanded" onclick="this.classList.toggle('expanded')">
+          <div class="changelog-major-header">
+            <div class="changelog-major-left">
+              <span class="changelog-major-label">V0.9</span>
+              <span class="changelog-major-tag">三层技能体系</span>
+            </div>
+            <span class="changelog-major-toggle">▼</span>
+          </div>
+          <div class="changelog-major-body">
+            <div class="changelog-version expanded" onclick="event.stopPropagation();this.classList.toggle('expanded')">
+              <div class="changelog-version-header">
+                <div class="changelog-version-left">
+                  <span>v0.9.0</span>
+                  <span class="changelog-version-tag">完结</span>
+                </div>
+                <span class="changelog-toggle">▼</span>
+              </div>
+              <div class="changelog-items">
+                <div class="changelog-item">
+                  <span class="changelog-item-version">2026-05-16</span>
+                  三层技能体系：skill-tree.json加载（9学科42技能）；知识点→技能→学科聚合算法；技能掌握度计算；技能雷达图ECharts可视化；技能级特长判定+XP加成10%；自适应参数持久化（学科能力值/修正系数/全局半衰期EMA更新）；全量重算机制。
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ====== V0.8 — 功能扩展 ====== -->
+        <div class="changelog-major expanded" onclick="this.classList.toggle('expanded')">
+          <div class="changelog-major-header">
+            <div class="changelog-major-left">
+              <span class="changelog-major-label">V0.8</span>
+              <span class="changelog-major-tag">已完成 · 功能扩展</span>
+            </div>
+            <span class="changelog-major-toggle">▼</span>
+          </div>
+          <div class="changelog-major-body">
+            <div class="changelog-version expanded" onclick="event.stopPropagation();this.classList.toggle('expanded')">
+              <div class="changelog-version-header">
+                <div class="changelog-version-left">
+                  <span>v0.8.3</span>
+                  <span class="changelog-version-tag">完结</span>
                 </div>
                 <span class="changelog-toggle">▼</span>
               </div>
@@ -3464,6 +4969,370 @@
     </div>
   </div>
   
+
+  <!-- ========== V1.1.0 番茄专注模态框 ========== -->
+  <div class="pomodoro-modal" id="pomodoroModal">
+    <div class="pomodoro-overlay" onclick="closePomodoro()"></div>
+    <div class="pomodoro-content">
+      <div class="pomodoro-drag-handle"></div>
+
+      <!-- Header -->
+      <div class="pomodoro-header">
+        <div class="pomodoro-header-title">番茄专注</div>
+        <button class="pomodoro-close" onclick="closePomodoro()">✕</button>
+      </div>
+
+      <!-- Tabs -->
+      <div class="pomodoro-tabs">
+        <button class="pomodoro-tab active" onclick="switchPomodoroTab('timer', this)">计时</button>
+        <button class="pomodoro-tab" onclick="switchPomodoroTab('stats', this)">统计</button>
+        <button class="pomodoro-tab" onclick="switchPomodoroTab('settings', this)">设置</button>
+      </div>
+
+      <!-- ===== Timer Tab ===== -->
+      <div class="pomodoro-panel active" id="pomodoroPanelTimer">
+        <!-- Subject Selector -->
+        <div class="pomodoro-subject-row">
+          <select class="pomodoro-subject-select" id="pomodoroSubject" onchange="pomodoroState.currentSubject=this.value">
+            <option value="数学">数学</option>
+            <option value="物理">物理</option>
+            <option value="化学">化学</option>
+            <option value="语文">语文</option>
+            <option value="英语">英语</option>
+            <option value="历史">历史</option>
+            <option value="地理">地理</option>
+            <option value="生物">生物</option>
+            <option value="政治">政治</option>
+          </select>
+        </div>
+
+        <!-- Timer Circle -->
+        <div class="pomodoro-timer-wrap">
+          <svg class="pomodoro-timer-svg" viewBox="0 0 200 200">
+            <defs>
+              <linearGradient id="pomodoroGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" style="stop-color:#6366f1"/>
+                <stop offset="100%" style="stop-color:#8b5cf6"/>
+              </linearGradient>
+            </defs>
+            <circle class="pomodoro-timer-bg" cx="100" cy="100" r="88"/>
+            <circle class="pomodoro-timer-ring" id="pomodoroRing" cx="100" cy="100" r="88"/>
+          </svg>
+          <div class="pomodoro-timer-inner">
+            <div class="pomodoro-timer-phase" id="pomodoroPhase">专注中</div>
+            <div class="pomodoro-timer-display" id="pomodoroDisplay">25:00</div>
+          </div>
+        </div>
+
+        <!-- Session Dots -->
+        <div class="pomodoro-dots" id="pomodoroDots"></div>
+
+        <!-- Control Buttons -->
+        <div class="pomodoro-controls">
+          <button class="pomodoro-btn pomodoro-btn-secondary" id="pomodoroResetBtn" onclick="resetPomodoro()">重置</button>
+          <button class="pomodoro-btn pomodoro-btn-primary" id="pomodoroStartBtn" onclick="togglePomodoro()">开始</button>
+          <button class="pomodoro-btn pomodoro-btn-secondary" id="pomodoroSkipBtn" onclick="skipPhase()">跳过</button>
+        </div>
+
+        <!-- Interrupt Dialog (inline, shown on pause) -->
+        <div class="pomodoro-interrupt" id="pomodoroInterrupt" style="display:none">
+          <div class="pomodoro-interrupt-title">记录中断原因</div>
+          <div class="pomodoro-interrupt-types">
+            <button class="pomodoro-interrupt-btn" onclick="recordInterrupt('external')">
+              <span>\U0001f6ab</span> 外部干扰
+            </button>
+            <button class="pomodoro-interrupt-btn" onclick="recordInterrupt('distracted')">
+              <span>\U0001f9e0</span> 走神
+            </button>
+            <button class="pomodoro-interrupt-btn" onclick="recordInterrupt('phone')">
+              <span>\U0001f4f1</span> 手机
+            </button>
+            <button class="pomodoro-interrupt-btn" onclick="recordInterrupt('persisted')">
+              <span>\U0001f4aa</span> 坚持住了
+            </button>
+          </div>
+          <input class="pomodoro-interrupt-note" id="pomodoroInterruptNote" placeholder="备注（可选）">
+          <button class="pomodoro-interrupt-skip" onclick="dismissInterrupt()">跳过</button>
+        </div>
+
+        <!-- Session Summary (shown after completed focus) -->
+        <div class="pomodoro-summary" id="pomodoroSummary" style="display:none">
+          <div class="pomodoro-summary-title">专注完成</div>
+          <div class="pomodoro-summary-stats">
+            <div class="pomodoro-summary-stat">
+              <div class="pomodoro-summary-stat-value" id="summaryDuration">25:00</div>
+              <div class="pomodoro-summary-stat-label">专注时长</div>
+            </div>
+            <div class="pomodoro-summary-stat">
+              <div class="pomodoro-summary-stat-value" id="summarySubject">数学</div>
+              <div class="pomodoro-summary-stat-label">学习科目</div>
+            </div>
+            <div class="pomodoro-summary-stat">
+              <div class="pomodoro-summary-stat-value" id="summaryInterrupts">0</div>
+              <div class="pomodoro-summary-stat-label">中断次数</div>
+            </div>
+            <div class="pomodoro-summary-stat">
+              <div class="pomodoro-summary-stat-value" id="summaryScore">100</div>
+              <div class="pomodoro-summary-stat-label">专注评分</div>
+            </div>
+          </div>
+          <button class="pomodoro-btn pomodoro-btn-primary" style="width:100%;margin-top:12px" onclick="autoGenerateRecord()">生成学习记录</button>
+          <button class="pomodoro-btn pomodoro-btn-secondary" style="width:100%;margin-top:8px" onclick="dismissSummary()">继续</button>
+        </div>
+      </div>
+
+      <!-- ===== Stats Tab ===== -->
+      <div class="pomodoro-panel" id="pomodoroPanelStats">
+        <div class="pomodoro-stats-grid">
+          <div class="pomodoro-stat-card">
+            <div class="pomodoro-stat-card-value" id="pomoStatToday">0分钟</div>
+            <div class="pomodoro-stat-card-label">今日专注</div>
+          </div>
+          <div class="pomodoro-stat-card">
+            <div class="pomodoro-stat-card-value" id="pomoStatTotal">0</div>
+            <div class="pomodoro-stat-card-label">总完成次数</div>
+          </div>
+          <div class="pomodoro-stat-card">
+            <div class="pomodoro-stat-card-value" id="pomoStatStreak">0</div>
+            <div class="pomodoro-stat-card-label">当前连续天数</div>
+          </div>
+          <div class="pomodoro-stat-card">
+            <div class="pomodoro-stat-card-value" id="pomoStatBest">0</div>
+            <div class="pomodoro-stat-card-label">最佳连续天数</div>
+          </div>
+          <div class="pomodoro-stat-card">
+            <div class="pomodoro-stat-card-value" id="pomoStatAvgScore">0</div>
+            <div class="pomodoro-stat-card-label">平均专注评分</div>
+          </div>
+          <div class="pomodoro-stat-card">
+            <div class="pomodoro-stat-card-value" id="pomoStatTotalMin">0分钟</div>
+            <div class="pomodoro-stat-card-label">累计专注时长</div>
+          </div>
+        </div>
+        <div class="pomodoro-chart-title">近7天专注时长</div>
+        <div class="pomodoro-chart" id="pomodoroWeeklyChart"></div>
+      </div>
+
+      <!-- ===== Settings Tab ===== -->
+      <div class="pomodoro-panel" id="pomodoroPanelSettings">
+        <div class="pomodoro-setting-item">
+          <div class="pomodoro-setting-label">专注时长</div>
+          <div class="pomodoro-setting-options" id="pomoSettingFocus">
+            <button class="pomo-opt" data-val="15" onclick="setPomodoroSetting('defaultDuration',15,this)">15分</button>
+            <button class="pomo-opt active" data-val="25" onclick="setPomodoroSetting('defaultDuration',25,this)">25分</button>
+            <button class="pomo-opt" data-val="30" onclick="setPomodoroSetting('defaultDuration',30,this)">30分</button>
+            <button class="pomo-opt" data-val="45" onclick="setPomodoroSetting('defaultDuration',45,this)">45分</button>
+            <button class="pomo-opt" data-val="60" onclick="setPomodoroSetting('defaultDuration',60,this)">60分</button>
+          </div>
+        </div>
+        <div class="pomodoro-setting-item">
+          <div class="pomodoro-setting-label">短休息时长</div>
+          <div class="pomodoro-setting-options" id="pomoSettingShort">
+            <button class="pomo-opt" data-val="3" onclick="setPomodoroSetting('shortBreak',3,this)">3分</button>
+            <button class="pomo-opt active" data-val="5" onclick="setPomodoroSetting('shortBreak',5,this)">5分</button>
+            <button class="pomo-opt" data-val="10" onclick="setPomodoroSetting('shortBreak',10,this)">10分</button>
+          </div>
+        </div>
+        <div class="pomodoro-setting-item">
+          <div class="pomodoro-setting-label">长休息时长</div>
+          <div class="pomodoro-setting-options" id="pomoSettingLong">
+            <button class="pomo-opt" data-val="10" onclick="setPomodoroSetting('longBreak',10,this)">10分</button>
+            <button class="pomo-opt active" data-val="15" onclick="setPomodoroSetting('longBreak',15,this)">15分</button>
+            <button class="pomo-opt" data-val="20" onclick="setPomodoroSetting('longBreak',20,this)">20分</button>
+          </div>
+        </div>
+        <div class="pomodoro-setting-item">
+          <div class="pomodoro-setting-label">长休息间隔</div>
+          <div class="pomodoro-setting-options" id="pomoSettingInterval">
+            <button class="pomo-opt" data-val="3" onclick="setPomodoroSetting('longBreakInterval',3,this)">3次</button>
+            <button class="pomo-opt active" data-val="4" onclick="setPomodoroSetting('longBreakInterval',4,this)">4次</button>
+            <button class="pomo-opt" data-val="5" onclick="setPomodoroSetting('longBreakInterval',5,this)">5次</button>
+          </div>
+        </div>
+        <div class="pomodoro-setting-item">
+          <div class="pomodoro-setting-label">自动开始休息</div>
+          <div class="pomodoro-toggle-wrap">
+            <label class="pomodoro-toggle">
+              <input type="checkbox" id="pomoAutoBreak" onchange="setPomodoroSetting('autoStartBreak',this.checked)">
+              <span class="pomodoro-toggle-slider"></span>
+            </label>
+          </div>
+        </div>
+        <div class="pomodoro-setting-item">
+          <div class="pomodoro-setting-label">自动开始专注</div>
+          <div class="pomodoro-toggle-wrap">
+            <label class="pomodoro-toggle">
+              <input type="checkbox" id="pomoAutoFocus" onchange="setPomodoroSetting('autoStartPomodoro',this.checked)">
+              <span class="pomodoro-toggle-slider"></span>
+            </label>
+          </div>
+        </div>
+        <div class="pomodoro-setting-item">
+          <div class="pomodoro-setting-label">提示音</div>
+          <div class="pomodoro-toggle-wrap">
+            <label class="pomodoro-toggle">
+              <input type="checkbox" id="pomoNotifSound" checked onchange="setPomodoroSetting('notificationSound',this.checked)">
+              <span class="pomodoro-toggle-slider"></span>
+            </label>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  <!-- ========== V1.2.0 阅读记录模态框 ========== -->
+  <div class="reading-modal" id="readingModal">
+    <div class="reading-overlay" onclick="closeReading()"></div>
+    <div class="reading-content">
+      <div class="reading-header">
+        <div class="reading-header-title">📖 阅读记录</div>
+        <button class="reading-close" onclick="closeReading()">✕</button>
+      </div>
+
+      <!-- Tabs -->
+      <div class="reading-tabs">
+        <button class="reading-tab active" onclick="switchReadingTab('record')">📝 记录阅读</button>
+        <button class="reading-tab" onclick="switchReadingTab('bookshelf')">📚 我的书架</button>
+        <button class="reading-tab" onclick="switchReadingTab('stats')">📊 阅读统计</button>
+      </div>
+
+      <!-- Tab 1: Record Reading -->
+      <div class="reading-panel active" id="readingPanelRecord">
+        <div class="reading-form-group" style="position:relative;">
+          <label class="reading-form-label">书名</label>
+          <input class="reading-form-input" id="readingBookTitle" placeholder="输入书名..." autocomplete="off" oninput="searchBooks(this.value)">
+          <div class="reading-autocomplete" id="readingAutocomplete"></div>
+        </div>
+        <div class="reading-form-group">
+          <label class="reading-form-label">作者</label>
+          <input class="reading-form-input" id="readingAuthor" placeholder="输入作者...">
+        </div>
+        <div class="reading-form-group">
+          <label class="reading-form-label">分类</label>
+          <select class="reading-form-select" id="readingCategory">
+            <option value="">选择分类...</option>
+            <option value="文学小说">文学小说</option>
+            <option value="历史">历史</option>
+            <option value="哲学">哲学</option>
+            <option value="科普/科学">科普/科学</option>
+            <option value="技术/编程">技术/编程</option>
+            <option value="心理学">心理学</option>
+            <option value="社会学">社会学</option>
+            <option value="经济学">经济学</option>
+            <option value="传记">传记</option>
+            <option value="个人成长">个人成长</option>
+            <option value="教材/教辅">教材/教辅</option>
+            <option value="其他">其他</option>
+          </select>
+        </div>
+        <div class="reading-form-row">
+          <div class="reading-form-group">
+            <label class="reading-form-label">本次阅读页数</label>
+            <input class="reading-form-input" id="readingPagesRead" type="number" min="1" placeholder="页数">
+          </div>
+          <div class="reading-form-group">
+            <label class="reading-form-label">总页数</label>
+            <input class="reading-form-input" id="readingTotalPages" type="number" min="1" placeholder="总页数">
+          </div>
+        </div>
+        <div class="reading-form-row">
+          <div class="reading-form-group">
+            <label class="reading-form-label">阅读日期</label>
+            <input class="reading-form-input" id="readingDate" type="date">
+          </div>
+          <div class="reading-form-group">
+            <label class="reading-form-label">阅读时长(分钟)</label>
+            <input class="reading-form-input" id="readingDuration" type="number" min="0" placeholder="可选">
+          </div>
+        </div>
+        <div class="reading-form-group">
+          <label class="reading-form-label">评分</label>
+          <div class="reading-star-rating" id="readingStarRating">
+            <span class="reading-star" data-value="1" onclick="setReadingRating(1)" onmouseenter="previewReadingRating(1)" onmouseleave="resetReadingRatingPreview()">★</span>
+            <span class="reading-star" data-value="2" onclick="setReadingRating(2)" onmouseenter="previewReadingRating(2)" onmouseleave="resetReadingRatingPreview()">★</span>
+            <span class="reading-star" data-value="3" onclick="setReadingRating(3)" onmouseenter="previewReadingRating(3)" onmouseleave="resetReadingRatingPreview()">★</span>
+            <span class="reading-star" data-value="4" onclick="setReadingRating(4)" onmouseenter="previewReadingRating(4)" onmouseleave="resetReadingRatingPreview()">★</span>
+            <span class="reading-star" data-value="5" onclick="setReadingRating(5)" onmouseenter="previewReadingRating(5)" onmouseleave="resetReadingRatingPreview()">★</span>
+            <span class="reading-rating-text" id="readingRatingText">未评分</span>
+          </div>
+        </div>
+        <div class="reading-form-group">
+          <label class="reading-form-label">读书笔记（可选）</label>
+          <textarea class="reading-form-textarea" id="readingNotes" placeholder="记录你的想法..."></textarea>
+        </div>
+        <button class="reading-save-btn" onclick="saveReadingRecord()">保存记录</button>
+      </div>
+
+      <!-- Tab 2: Bookshelf -->
+      <div class="reading-panel" id="readingPanelBookshelf">
+        <div class="reading-search-bar">
+          <input class="reading-form-input" id="bookshelfSearch" placeholder="搜索书籍..." oninput="renderBookshelf()">
+        </div>
+        <div class="reading-category-chips" id="bookshelfChips">
+          <span class="reading-chip active" data-cat="" onclick="filterBookshelfCategory(this, '')">全部</span>
+        </div>
+        <button class="reading-add-btn" id="addBookBtn" onclick="toggleAddBookForm()">+ 添加新书</button>
+        <div class="reading-add-form" id="addBookForm">
+          <div class="reading-add-form-header">
+            <div class="reading-add-form-title">添加新书</div>
+            <button class="reading-close" style="width:28px;height:28px;font-size:14px;" onclick="toggleAddBookForm()">✕</button>
+          </div>
+          <div class="reading-form-group">
+            <label class="reading-form-label">书名</label>
+            <input class="reading-form-input" id="addBookTitle" placeholder="书名">
+          </div>
+          <div class="reading-form-group">
+            <label class="reading-form-label">作者</label>
+            <input class="reading-form-input" id="addBookAuthor" placeholder="作者">
+          </div>
+          <div class="reading-form-row">
+            <div class="reading-form-group">
+              <label class="reading-form-label">分类</label>
+              <select class="reading-form-select" id="addBookCategory">
+                <option value="">选择分类...</option>
+                <option value="文学小说">文学小说</option>
+                <option value="历史">历史</option>
+                <option value="哲学">哲学</option>
+                <option value="科普/科学">科普/科学</option>
+                <option value="技术/编程">技术/编程</option>
+                <option value="心理学">心理学</option>
+                <option value="社会学">社会学</option>
+                <option value="经济学">经济学</option>
+                <option value="传记">传记</option>
+                <option value="个人成长">个人成长</option>
+                <option value="教材/教辅">教材/教辅</option>
+                <option value="其他">其他</option>
+              </select>
+            </div>
+            <div class="reading-form-group">
+              <label class="reading-form-label">总页数</label>
+              <input class="reading-form-input" id="addBookTotalPages" type="number" min="1" placeholder="总页数">
+            </div>
+          </div>
+          <div class="reading-form-actions">
+            <button class="reading-cancel-btn" onclick="toggleAddBookForm()">取消</button>
+            <button class="reading-save-btn" onclick="addBookToShelf()">添加</button>
+          </div>
+        </div>
+        <div id="bookshelfList"></div>
+      </div>
+
+      <!-- Tab 3: Statistics -->
+      <div class="reading-panel" id="readingPanelStats">
+        <div class="reading-stats-grid" id="readingStatsGrid"></div>
+        <div class="reading-chart-container">
+          <div class="reading-chart-title">月度阅读量（近6个月）</div>
+          <div class="reading-chart" id="readingMonthlyChart"></div>
+        </div>
+        <div class="reading-chart-container">
+          <div class="reading-chart-title">分类分布</div>
+          <div class="reading-chart" id="readingCategoryChart"></div>
+        </div>
+        <div class="reading-recent-title">最近阅读</div>
+        <div id="readingRecentList"></div>
+      </div>
+    </div>
+  </div>
+
   <!-- 底部导航 -->
   <nav class="bottom-nav" id="bottomNav">
     <div class="nav-items">
@@ -3861,8 +5730,6 @@
       }
     };
 
-    };
-
     // ========== v0.8.2 用户画像数据 ==========
     /** 用户画像数据源（多源容错） */
     const USER_PROFILE_SOURCES = [
@@ -3947,9 +5814,9 @@
       if (!isFileProtocol()) {
         for (const source of USER_PROFILE_SOURCES) {
           try {
-            console.log([v0.8.2] 尝试从  加载用户画像...);
+            console.log(`[v0.8.2] 尝试从 ${source.name} 加载用户画像...`);
             const response = await fetchWithTimeout(source.url);
-            if (!response.ok) throw new Error(HTTP \);
+            if (!response.ok) throw new Error("HTTP " + response.status);
             const data = await response.json();
             if (!data || typeof data !== 'object') throw new Error('无效数据格式');
             
@@ -3957,7 +5824,7 @@
             userProfileLoadState.dataSource = source.name;
             userProfileLoadState.hasError = false;
             saveUserProfile();
-            console.log([v0.8.2] 用户画像加载成功 ✓ 来源: );
+            console.log(`[v0.8.2] 用户画像加载成功 ✓ 来源: ${source.name}`);
             userProfileLoadState.isLoading = false;
             return userProfile;
           } catch (e) {
@@ -4016,6 +5883,97 @@
       // 保存到 localStorage
       saveUserProfile();
       console.log('[v0.8.2] 用户画像已更新');
+    }
+
+    // ========== 自适应参数更新 ==========
+    function updateAdaptiveParams(record) {
+      if (!userProfile || !appData.records || appData.records.length < 3) return;
+
+      const subjectKey = getSubjectKey(record.subject);
+      const records = appData.records.filter(r => r.subject === record.subject);
+
+      if (records.length < 3) return;
+
+      // 更新学科能力值：平均温度x0.5 + 平均正确率x0.5
+      const subjectRecords = records.slice(-20); // 最近20条
+      const avgTemp = subjectRecords.reduce((s, r) => s + (r.currentTemp || 50), 0) / subjectRecords.length;
+      const avgAccuracy = subjectRecords.reduce((s, r) => s + (r.score || 0), 0) / subjectRecords.length;
+      const newAbility = avgTemp * 0.5 + avgAccuracy * 0.5;
+
+      if (userProfile.subjectAbility) {
+        const oldAbility = userProfile.subjectAbility[subjectKey] || 50;
+        userProfile.subjectAbility[subjectKey] = Math.round(oldAbility * 0.7 + newAbility * 0.3);
+      }
+
+      // 更新学科修正系数
+      if (userProfile.subjectModifiers) {
+        const subjectHalfLives = records.slice(-10).map(r => r.halfLife || 3);
+        const avgHalfLife = subjectHalfLives.reduce((a, b) => a + b, 0) / subjectHalfLives.length;
+        const baseHalfLife = userProfile.globalBaseHalfLife || 3;
+        const newModifier = avgHalfLife / Math.max(0.5, baseHalfLife);
+        const oldModifier = userProfile.subjectModifiers[subjectKey] || 1.0;
+        userProfile.subjectModifiers[subjectKey] = Math.round((oldModifier * 0.7 + newModifier * 0.3) * 100) / 100;
+        // 限制范围 0.5-2.0
+        userProfile.subjectModifiers[subjectKey] = Math.max(0.5, Math.min(2.0, userProfile.subjectModifiers[subjectKey]));
+      }
+
+      // 更新全局半衰期
+      const allHalfLives = appData.records.slice(-30).map(r => r.halfLife || 3);
+      if (allHalfLives.length >= 5) {
+        allHalfLives.sort((a, b) => a - b);
+        const median = allHalfLives[Math.floor(allHalfLives.length / 2)];
+        const oldBase = userProfile.globalBaseHalfLife || 3;
+        userProfile.globalBaseHalfLife = Math.round((oldBase * 0.8 + median * 0.2) * 100) / 100;
+        userProfile.globalBaseHalfLife = Math.max(1, Math.min(10, userProfile.globalBaseHalfLife));
+      }
+
+      // 更新统计
+      userProfile.totalXP = (userProfile.totalXP || 0) + (record.xp || 0);
+      userProfile.totalStudyMinutes = (userProfile.totalStudyMinutes || 0) + (record.duration || 0);
+
+      // 设置首次时间戳
+      if (!userProfile.firstTimestamp) {
+        userProfile.firstTimestamp = appData.records[0]?.timestamp || new Date().toISOString();
+      }
+
+      // 保存到localStorage
+      saveUserProfile();
+    }
+
+    // ========== V0.9.0 skill-tree.json 加载 ==========
+    const SKILL_TREE_SOURCES = [
+      'https://raw.githubusercontent.com/MokelungAAA/learning-rpg/main/data/skill-tree.json',
+      'https://cdn.jsdelivr.net/gh/MokelungAAA/learning-rpg@main/data/skill-tree.json',
+      './data/skill-tree.json'
+    ];
+
+    let skillTreeData = null;
+    let skillTreeLoadState = { loaded: false, error: null, source: null };
+
+    async function loadSkillTree() {
+      // 先尝试localStorage缓存
+      const cached = localStorage.getItem('skillTreeData');
+      if (cached) {
+        try {
+          skillTreeData = JSON.parse(cached);
+          skillTreeLoadState = { loaded: true, error: null, source: 'cache' };
+          return;
+        } catch(e) {}
+      }
+
+      for (const url of SKILL_TREE_SOURCES) {
+        try {
+          const resp = await fetch(url);
+          if (resp.ok) {
+            skillTreeData = await resp.json();
+            localStorage.setItem('skillTreeData', JSON.stringify(skillTreeData));
+            skillTreeLoadState = { loaded: true, error: null, source: url };
+            return;
+          }
+        } catch(e) { continue; }
+      }
+
+      skillTreeLoadState = { loaded: false, error: 'All sources failed', source: null };
     }
 
     // ========== v0.8.3 XP引擎2.0 ==========
@@ -4171,6 +6129,56 @@
       const score = record.accuracy || record.score || 0;
       const duration = record.durationMinutes || record.duration || 0;
       return Math.max(1, Math.round(score * duration / 20));
+    }
+
+    // ========== 全量重算 ==========
+    function recalculateAll() {
+      if (!appData.records || appData.records.length === 0) return;
+
+      let totalXP = 0;
+      let totalMinutes = 0;
+
+      // 按时间顺序重算每条记录
+      appData.records.forEach((record, index) => {
+        // 重算XP（使用到当前记录为止的历史数据计算动量）
+        const momentum = calculateMomentum(appData.records.slice(0, index + 1));
+        record.xp = calculateXPForRecord(record, momentum);
+        totalXP += record.xp || 0;
+        totalMinutes += record.duration || 0;
+      });
+
+      // 更新userProfile统计
+      if (userProfile) {
+        userProfile.totalXP = totalXP;
+        userProfile.totalStudyMinutes = totalMinutes;
+        saveUserProfile();
+      }
+
+      // 重新渲染
+      renderAll();
+      showToast('全量重算完成', 'success');
+    }
+
+    // 为重算提供的XP计算（接受外部momentum参数）
+    function calculateXPForRecord(record, momentum) {
+      const profile = userProfile || {};
+      const xpBasePerMin = profile.xpBasePerMinute || 2.0;
+      const duration = Math.min(record.duration || 0, profile.maxEffectiveDuration || 90);
+      const rawBase = xpBasePerMin * duration;
+      const score = record.score || 0;
+      const efficiency = score / 100;
+      const subjectKey = getSubjectKey(record.subject);
+      const difficulty = getSubjectDifficulty(subjectKey);
+      const activityType = record.activityType || 'practice';
+      const activityWeight = profile.activityWeights?.[activityType] || 1.0;
+      const qual = efficiency * difficulty * (1 + (momentum || 0)) * activityWeight;
+      const decay = getGlobalDecay();
+      let examBonus = 1.0;
+      if (activityType === 'exam') {
+        examBonus = profile.examWeightBase || 1.5;
+      }
+      const rawXP = rawBase * qual * decay * examBonus;
+      return Math.max(1, Math.round(rawXP));
     }
 
     /** 数据加载状态 */
@@ -4498,7 +6506,9 @@
               0%, 100% { transform: translateY(0); }
               50% { transform: translateY(-10px); }
             }
-          </style>
+          
+
+  </style>
         `;
         loadingEl.style.display = 'flex';
         loadingEl.style.opacity = '1';
@@ -4609,6 +6619,9 @@
       
       if (page === 'skills' && skillTreeChart) {
         setTimeout(() => skillTreeChart.resize(), 100);
+      }
+      if (page === 'skills' && skillTreeData) {
+        setTimeout(() => renderSkillRadar('logos'), 150);
       }
       if (page === 'review' && forgetChart) {
         setTimeout(() => forgetChart.resize(), 100);
@@ -4856,25 +6869,25 @@
       // v0.6.1: 增强成就展示 - 已移至 renderAchievements() 独立函数
     }
     
-    // ========== 渲染成就（独立函数，供概览页共用） ==========
+    // ========== v0.12.0 渲染成就（支持稀有度） ==========
     function renderAchievements() {
-      const achievements = appData.profile.achievements || [];
-      
-      // 概览页成就
-      const overviewContainer = document.getElementById('achievementsOverview');
-      if (overviewContainer) {
-        if (achievements.length > 0) {
-          overviewContainer.innerHTML = achievements.map(a => {
-            const def = ACHIEVEMENT_DEFS[a];
-            if (def) {
-              return `<span class="achievement-badge" style="background:linear-gradient(135deg, ${def.color}22, ${def.color}08);border:1px solid ${def.color}40;color:${def.color};cursor:help;" title="${def.desc}"><span>${def.icon}</span><span>${def.name}</span></span>`;
-            }
-            return `<span class="achievement-badge"><span>🏆</span><span>${a}</span></span>`;
-          }).join('');
-        } else {
-          overviewContainer.innerHTML = '<div style="font-size:13px;color:var(--text-muted);">继续学习以解锁成就 ✨</div>';
-        }
+      const container = document.getElementById('achievementsOverview');
+      if (!container) return;
+
+      const unlocked = appData.profile?.achievements || [];
+
+      if (unlocked.length === 0) {
+        container.innerHTML = '<div style="font-size:13px;color:var(--text-muted);">继续学习以解锁成就 ✨</div>';
+        return;
       }
+
+      container.innerHTML = unlocked.map(id => {
+        const ach = getAchievementDef(id);
+        if (!ach) return '';
+        const rarity = RARITY_COLORS[ach.rarity] || RARITY_COLORS.bronze;
+        const label = RARITY_LABELS[ach.rarity] || '';
+        return `<span class="achievement-badge" style="background:${rarity.bg};border:1px solid ${rarity.border};color:${rarity.text};cursor:help;" title="${ach.description} [${label}]"><span>${ach.icon}</span><span>${ach.name}</span></span>`;
+      }).join('');
     }
     
     // ========== v0.4.3 渲染阴影队列（基于新urgency指标） ==========
@@ -5202,7 +7215,339 @@
         `;
       }).join('');
     }
-    
+    // ========== 0/1背包算法求解最优复习组合 ==========
+    function solveKnapsack(items, timeBudget) {
+      // items: [{id, name, benefit, estimatedTime, subject, ...}]
+      // timeBudget: 可用复习时间（分钟）
+      const n = items.length;
+      if (n === 0 || timeBudget <= 0) return [];
+      
+      // 将时间离散化为5分钟单位
+      const W = Math.ceil(timeBudget / 5);
+      const dp = Array.from({length: n + 1}, () => new Array(W + 1).fill(0));
+      const selected = Array.from({length: n + 1}, () => new Array(W + 1).fill(false));
+      
+      for (let i = 1; i <= n; i++) {
+        const w = Math.ceil(items[i-1].estimatedTime / 5);
+        const v = items[i-1].benefit;
+        for (let j = 0; j <= W; j++) {
+          dp[i][j] = dp[i-1][j];
+          if (j >= w && dp[i-1][j-w] + v > dp[i][j]) {
+            dp[i][j] = dp[i-1][j-w] + v;
+            selected[i][j] = true;
+          }
+        }
+      }
+      
+      // 回溯找出选中的项目
+      const result = [];
+      let j = W;
+      for (let i = n; i >= 1; i--) {
+        if (selected[i][j]) {
+          result.push(items[i-1]);
+          j -= Math.ceil(items[i-1].estimatedTime / 5);
+        }
+      }
+      
+      return result.reverse();
+    }
+
+    // 获取需要复习的知识点列表（按收益排序）
+    function getReviewItems() {
+      if (!appData.knowledgeStates) return [];
+      
+      const items = [];
+      Object.entries(appData.knowledgeStates).forEach(([kp, state]) => {
+        const temp = state.temperature || 0;
+        if (temp < 80 && temp > 0) { // 只推荐温度在1-79之间的
+          const benefit = (80 - temp) * (state.examWeight || 1);
+          const estimatedTime = Math.max(5, Math.round((80 - temp) / 10 * 5)); // 温度越低需要时间越长
+          items.push({
+            id: kp,
+            name: kp,
+            benefit: benefit,
+            estimatedTime: estimatedTime,
+            subject: state.subject || '未知',
+            temperature: temp
+          });
+        }
+      });
+      
+      return items.sort((a, b) => b.benefit - a.benefit);
+    }
+
+    // ========== 提分潜力诊断 ==========
+    function diagnoseImprovementPotential() {
+      if (!skillTreeData || !appData.knowledgeStates) return [];
+      
+      const diagnosis = [];
+      const subjectKeys = Object.keys(skillTreeData.subjects || {});
+      
+      subjectKeys.forEach(subjectKey => {
+        const skills = skillTreeData.subjects[subjectKey]?.skills || {};
+        Object.entries(skills).forEach(([skillId, skill]) => {
+          const mastery = calculateSkillMastery(subjectKey, skillId);
+          const examWeight = skill.examWeight || 0.2;
+          
+          // 提分潜力 = 考试权重 × (100 - 掌握度) / 100
+          const potential = examWeight * (100 - mastery) / 100;
+          
+          if (potential > 0.05) { // 只显示有意义的潜力项
+            diagnosis.push({
+              subject: skillTreeData.subjects[subjectKey].name,
+              subjectKey: subjectKey,
+              skillId: skillId,
+              skillName: skill.name,
+              mastery: Math.round(mastery),
+              examWeight: examWeight,
+              potential: Math.round(potential * 100) / 100,
+              priority: 'high' // 后续可根据数据细化
+            });
+          }
+        });
+      });
+      
+      return diagnosis.sort((a, b) => b.potential - a.potential).slice(0, 10); // 返回前10
+    }
+
+    // ========== 假性熟练检测 ==========
+    // ========== V0.13.0 考试推荐系统 ==========
+    function checkExamRecommendation() {
+      if (!appData.records || appData.records.length < 5) return null;
+
+      const records = appData.records;
+      const totalMinutes = records.reduce((s, r) => s + (r.duration || 0), 0);
+      const totalDays = new Set(records.map(r => new Date(r.timestamp).toDateString())).size;
+      const exams = records.filter(r => r.activityType === 'exam');
+      const lastExam = exams.length > 0 ? exams[exams.length - 1] : null;
+
+      // 触发条件检查
+      const triggers = [];
+
+      // 条件1：距上次考试>14天
+      if (lastExam) {
+        const daysSinceExam = (Date.now() - new Date(lastExam.timestamp).getTime()) / 86400000;
+        if (daysSinceExam > 14) triggers.push(`距上次考试已${Math.round(daysSinceExam)}天`);
+      } else if (totalDays > 14) {
+        triggers.push('尚未进行过任何考试');
+      }
+
+      // 条件2：累积学时>15小时
+      if (totalMinutes > 900) triggers.push(`累计学习${Math.round(totalMinutes/60)}小时`);
+
+      // 条件3：多项技能快速进步（简化版：最近5条记录平均分>前5条）
+      if (records.length >= 10) {
+        const recent5 = records.slice(-5);
+        const prev5 = records.slice(-10, -5);
+        const recentAvg = recent5.reduce((s,r) => s + (r.score||0), 0) / 5;
+        const prevAvg = prev5.reduce((s,r) => s + (r.score||0), 0) / 5;
+        if (recentAvg > prevAvg + 5) triggers.push('近期成绩显著提升');
+      }
+
+      // 条件4：假性熟练警告
+      const falseMastery = detectFalseMastery();
+      if (falseMastery.length > 0) triggers.push(`检测到${falseMastery.length}个假性熟练警告`);
+
+      if (triggers.length >= 2) {
+        return {
+          recommended: true,
+          reasons: triggers,
+          suggestion: '建议进行一次模拟考试以检验真实水平'
+        };
+      }
+
+      return null;
+    }
+    function detectFalseMastery() {
+      if (!appData.records || appData.records.length < 5) return [];
+      
+      const warnings = [];
+      const subjectKeys = ['logos', 'mythos', 'lingua', 'physis', 'khemeia', 'zoe'];
+      
+      subjectKeys.forEach(subjectKey => {
+        const records = appData.records.filter(r => getSubjectKey(r.subject) === subjectKey);
+        if (records.length < 5) return;
+        
+        const recent = records.slice(-10);
+        const highScoreRecords = recent.filter(r => r.score >= 85);
+        
+        if (highScoreRecords.length >= 5) {
+          // 检查是否有足够的订正时间
+          const avgDuration = highScoreRecords.reduce((s, r) => s + (r.duration || 0), 0) / highScoreRecords.length;
+          const avgAllDuration = recent.reduce((s, r) => s + (r.duration || 0), 0) / recent.length;
+          
+          // 如果高分记录的平均时长显著低于整体平均时长，可能是假性熟练
+          if (avgDuration < avgAllDuration * 0.6) {
+            const subjectNames = {'logos':'数学','mythos':'语文','lingua':'英语','physis':'物理','khemeia':'化学','zoe':'生物'};
+            warnings.push({
+              subject: subjectNames[subjectKey] || subjectKey,
+              subjectKey: subjectKey,
+              reason: '高正确率但学习时长显著偏短',
+              avgHighScoreDuration: Math.round(avgDuration),
+              avgAllDuration: Math.round(avgAllDuration),
+              suggestion: '建议进行深度检测：增加订正时间，关注错因分析'
+            });
+          }
+        }
+      });
+      
+      return warnings;
+    }
+
+    // ========== 倒排索引模糊搜索 ==========
+    const searchIndex = {
+      textbooks: {},  // {keyword: [{textbook, subject, bookIndex}]}
+      chapters: {},   // {keyword: [{chapter, textbook, subject, chapterIndex}]}
+      built: false
+    };
+
+    function buildSearchIndex() {
+      if (searchIndex.built || !textbooksData) return;
+      
+      const subjectKeys = Object.keys(textbooksData.subjects || {});
+      subjectKeys.forEach(subjectKey => {
+        const subject = textbooksData.subjects[subjectKey];
+        (subject.books || []).forEach((book, bookIdx) => {
+          // 教材名索引
+          const bookKeywords = [book.name, book.grade || '', subjectKey, subject.publisher || ''].filter(Boolean);
+          bookKeywords.forEach(kw => {
+            const key = kw.toLowerCase();
+            if (!searchIndex.textbooks[key]) searchIndex.textbooks[key] = [];
+            searchIndex.textbooks[key].push({textbook: book.name, subject: subjectKey, bookIndex: bookIdx});
+          });
+          
+          // 章节名索引
+          (book.chapters || []).forEach((ch, chIdx) => {
+            const chKeywords = [ch.name, `第${ch.number}章`, `${ch.number}`, subjectKey].filter(Boolean);
+            chKeywords.forEach(kw => {
+              const key = kw.toLowerCase();
+              if (!searchIndex.chapters[key]) searchIndex.chapters[key] = [];
+              searchIndex.chapters[key].push({
+                chapter: ch.name,
+                chapterNumber: ch.number,
+                textbook: book.name,
+                subject: subjectKey,
+                chapterIndex: chIdx
+              });
+            });
+          });
+        });
+      });
+      
+      searchIndex.built = true;
+    }
+
+    // 模糊搜索（支持莱文斯坦距离）
+    function fuzzySearch(query, index, maxResults = 10) {
+      buildSearchIndex();
+      const q = query.toLowerCase().trim();
+      if (!q) return [];
+      
+      const results = new Map(); // key: item string, value: {item, score}
+      
+      // 精确匹配
+      if (index[q]) {
+        index[q].forEach(item => results.set(JSON.stringify(item), {item, score: 100}));
+      }
+      
+      // 前缀匹配
+      Object.keys(index).forEach(key => {
+        if (key.startsWith(q) || q.startsWith(key)) {
+          const score = key === q ? 100 : 80;
+          index[key].forEach(item => {
+            const k = JSON.stringify(item);
+            if (!results.has(k) || results.get(k).score < score) {
+              results.set(k, {item, score});
+            }
+          });
+        }
+      });
+      
+      // 包含匹配
+      Object.keys(index).forEach(key => {
+        if (key.includes(q) || q.includes(key)) {
+          const score = 60;
+          index[key].forEach(item => {
+            const k = JSON.stringify(item);
+            if (!results.has(k) || results.get(k).score < score) {
+              results.set(k, {item, score});
+            }
+          });
+        }
+      });
+      
+      // 莱文斯坦距离匹配（仅对短查询）
+      if (q.length >= 2 && q.length <= 10) {
+        Object.keys(index).forEach(key => {
+          const dist = levenshteinDistance(q, key);
+          if (dist <= 2 && dist > 0) {
+            const score = Math.max(10, 50 - dist * 15);
+            index[key].forEach(item => {
+              const k = JSON.stringify(item);
+              if (!results.has(k) || results.get(k).score < score) {
+                results.set(k, {item, score});
+              }
+            });
+          }
+        });
+      }
+      
+      return Array.from(results.values())
+        .sort((a, b) => b.score - a.score)
+        .slice(0, maxResults)
+        .map(r => r.item);
+    }
+
+    function levenshteinDistance(a, b) {
+      const m = a.length, n = b.length;
+      const dp = Array.from({length: m + 1}, () => new Array(n + 1).fill(0));
+      for (let i = 0; i <= m; i++) dp[i][0] = i;
+      for (let j = 0; j <= n; j++) dp[0][j] = j;
+      for (let i = 1; i <= m; i++) {
+        for (let j = 1; j <= n; j++) {
+          dp[i][j] = a[i-1] === b[j-1]
+            ? dp[i-1][j-1]
+            : 1 + Math.min(dp[i-1][j], dp[i][j-1], dp[i-1][j-1]);
+        }
+      }
+      return dp[m][n];
+    }
+
+    // ========== 做题/订正时间分离 ==========
+    // 在数据录入时，如果用户提供了practiceTime和reviewTime，则使用它们
+    // 否则根据个人习惯EMA推断
+
+    function inferTimeSplit(subject, totalDuration, score) {
+      const profile = userProfile || {};
+      const baseRatio = profile.baseReviewRatio || 0.20;
+      
+      // 从历史数据中学习该学科的订正占比
+      const subjectKey = getSubjectKey(subject);
+      const historyRecords = (appData.records || []).filter(r => 
+        getSubjectKey(r.subject) === subjectKey && r.reviewTime !== undefined
+      );
+      
+      if (historyRecords.length >= 3) {
+        const avgRatio = historyRecords.reduce((s, r) => {
+          return s + r.reviewTime / Math.max(1, r.duration);
+        }, 0) / historyRecords.length;
+        const ratio = baseRatio * 0.3 + avgRatio * 0.7; // EMA
+        return {
+          practiceTime: Math.round(totalDuration * (1 - ratio)),
+          reviewTime: Math.round(totalDuration * ratio)
+        };
+      }
+      
+      // 根据分数调整：分数越低，订正时间越多
+      const scoreAdjust = score < 60 ? 1.3 : score < 80 ? 1.0 : 0.8;
+      const ratio = Math.min(0.5, baseRatio * scoreAdjust);
+      
+      return {
+        practiceTime: Math.round(totalDuration * (1 - ratio)),
+        reviewTime: Math.round(totalDuration * ratio)
+      };
+    }
+
     // ========== 技能树初始化 ==========
     function buildSkillTreeData() {
       const nodes = [];
@@ -5672,78 +8017,81 @@
       return DAILY_STATES.normal;
     }
     
-    // ========== v0.6.1 成就检测系统 ==========
-    const ACHIEVEMENT_DEFS = {
-      'First Light': { name: 'First Light', icon: '✨', desc: '首次完成学习记录', color: '#FFD700' },
-      'Combo x7': { name: 'Combo x7', icon: '🔥', desc: '连续7天学习', color: '#3b82f6' },
-      'Limit Break': { name: 'Limit Break', icon: '💥', desc: '单日XP破个人纪录', color: '#8b5cf6' },
-      'Eureka': { name: 'Eureka', icon: '💡', desc: '错因分析后正确率显著提升', color: '#10b981' },
-      'Shadow Path': { name: 'Shadow Path', icon: '🌑', desc: '知识点进入阴影复习队列', color: '#6B7280' },
-      'Achilles Heel': { name: 'Achilles Heel', icon: '🎯', desc: '系统识别薄弱知识点', color: '#ef4444' },
-      'Phoenix Down': { name: 'Phoenix Down', icon: '🔥', desc: '薄弱点成功逆袭', color: '#f59e0b' },
-      'Overflow': { name: 'Overflow', icon: '🌊', desc: '溢出进度条触发', color: '#06b6d4' }
+    // ========== v0.12.0 成就检测系统升级 ==========
+    // 稀有度颜色映射
+    const RARITY_COLORS = {
+      bronze: { bg: 'linear-gradient(135deg, #CD7F3244, #CD7F3222)', border: '#CD7F3266', text: '#CD7F32' },
+      silver: { bg: 'linear-gradient(135deg, #C0C0C044, #C0C0C022)', border: '#C0C0C066', text: '#808080' },
+      gold:   { bg: 'linear-gradient(135deg, #FFD70044, #FFD70022)', border: '#FFD70066', text: '#DAA520' },
+      legend: { bg: 'linear-gradient(135deg, #8B5CF644, #8B5CF622)', border: '#8B5CF666', text: '#8B5CF6' },
+      hidden: { bg: 'linear-gradient(135deg, #EF444444, #EF444422)', border: '#EF444466', text: '#EF4444' }
     };
-    
+
+    const RARITY_LABELS = { bronze: '青铜', silver: '白银', gold: '黄金', legend: '传说', hidden: '隐藏' };
+
+    function getAchievementDef(id) {
+      if (!achievementsData?.achievements) return null;
+      return achievementsData.achievements.find(a => a.id === id);
+    }
+
     function detectAchievements() {
-      const achievements = new Set(appData.profile.achievements || []);
-      const now = Date.now();
-      const todayStart = new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate()).getTime();
-      const todayRecords = appData.records.filter(r => r.timestamp >= todayStart);
-      
-      // First Light: 有学习记录
-      if (appData.records.length > 0) achievements.add('First Light');
-      
-      // Combo x7: 连续7天
-      if (appData.profile.combo >= 7) achievements.add('Combo x7');
-      
-      // Shadow Path: 有阴影队列项
-      const hasShadowItems = Object.values(appData.subjects).some(s => 
-        s.nodes?.some(n => getCurrentTemp(n, now) > 0 && getCurrentTemp(n, now) < CONFIG.SHADOW_QUEUE.TEMP_THRESHOLD_COLD)
-      );
-      if (hasShadowItems) achievements.add('Shadow Path');
-      
-      // Achilles Heel: 有温度<30%的节点
-      const hasWeakNodes = Object.values(appData.subjects).some(s => 
-        s.nodes?.some(n => getCurrentTemp(n, now) > 0 && getCurrentTemp(n, now) < 30)
-      );
-      if (hasWeakNodes) achievements.add('Achilles Heel');
-      
-      // Limit Break: 今日XP超过之前最高（简化判断：今日XP>500）
-      const todayXp = todayRecords.reduce((sum, r) => sum + (r.xp || 0), 0);
-      if (todayXp > 500) achievements.add('Limit Break');
-      
-      // Overflow: 总XP超过当前等级上限的90%
-      const currentLevelData = LEVELS.find(l => l.l === appData.profile.level);
-      const nextLevelData = LEVELS.find(l => l.l > appData.profile.level);
-      if (currentLevelData && nextLevelData) {
-        const progress = (appData.profile.totalXp - currentLevelData.r) / (nextLevelData.r - currentLevelData.r);
-        if (progress > 0.9) achievements.add('Overflow');
-      }
-      
-      // Eureka: 有正确率从低变高的记录（简化：最近一条正确率>80%且之前有<60%的记录）
-      if (todayRecords.length >= 2) {
-        const sortedByTime = [...todayRecords].sort((a, b) => a.timestamp - b.timestamp);
-        const hasLowBefore = sortedByTime.slice(0, -1).some(r => getRecordScore(r) < 60);
-        const latestHigh = getRecordScore(sortedByTime[sortedByTime.length - 1]) > 80;
-        if (hasLowBefore && latestHigh) achievements.add('Eureka');
-      }
-      
-      // Phoenix Down: 有节点温度从<30%回升到>60%
-      Object.values(appData.subjects).forEach(s => {
-        if (!s.nodes) return;
-        s.nodes.forEach(n => {
-          if (n.accuracyHistory.length >= 2) {
-            const latestAcc = n.accuracyHistory[n.accuracyHistory.length - 1];
-            if (latestAcc >= 60 && n.repetitions >= 2) {
-              // 检查之前是否薄弱
-              const prevAccs = n.accuracyHistory.slice(0, -1);
-              if (prevAccs.some(a => a < 50)) achievements.add('Phoenix Down');
-            }
-          }
-        });
+      if (!achievementsData?.achievements || !appData.records) return appData.profile?.achievements || [];
+
+      const unlocked = appData.profile?.achievements || [];
+      const newAchievements = [];
+      const records = appData.records;
+      const totalDays = new Set(records.map(r => new Date(r.timestamp).toDateString())).size;
+      const totalMinutes = records.reduce((s, r) => s + (r.duration || 0), 0);
+      const subjects = new Set(records.map(r => r.subject));
+
+      achievementsData.achievements.forEach(ach => {
+        if (unlocked.includes(ach.id)) return;
+
+        let earned = false;
+
+        switch(ach.id) {
+          case 'first_step': earned = records.length >= 1; break;
+          case 'week_warrior': earned = totalDays >= 7; break;
+          case 'month_master': earned = totalDays >= 30; break;
+          case 'quarter_queen': earned = totalDays >= 90; break;
+          case 'half_year_hero': earned = totalDays >= 180; break;
+          case 'year_legend': earned = totalDays >= 365; break;
+          case 'perfect_score': earned = records.some(r => r.score === 100); break;
+          case 'jack_of_all': earned = subjects.size >= 9; break;
+          case 'century_hours': earned = totalMinutes >= 6000; break;
+          case 'thousand_hours': earned = totalMinutes >= 60000; break;
+          case 'daily_500': earned = getTodayTotalXP() >= 500; break;
+          case 'daily_1000': earned = getTodayTotalXP() >= 1000; break;
+          case 'first_exam': earned = records.some(r => r.activityType === 'exam'); break;
+          case 'exam_10': earned = records.filter(r => r.activityType === 'exam').length >= 10; break;
+          case 'first_review': earned = records.length >= 2; break;
+          case 'perfect_week': earned = totalDays >= 7 && records.length >= 7; break;
+          case 'legend_beginning': earned = totalDays >= 100; break;
+          // 学科特定成就
+          case 'math_whiz': earned = records.filter(r => r.subject === '数学').reduce((s,r) => s+(r.duration||0), 0) >= 3000; break;
+          case 'literature_lover': earned = records.filter(r => r.subject === '语文').reduce((s,r) => s+(r.duration||0), 0) >= 3000; break;
+          case 'polyglot': earned = records.filter(r => r.subject === '英语').reduce((s,r) => s+(r.duration||0), 0) >= 3000; break;
+          case 'physics_pro': earned = records.filter(r => r.subject === '物理').reduce((s,r) => s+(r.duration||0), 0) >= 3000; break;
+          case 'chemist': earned = records.filter(r => r.subject === '化学').reduce((s,r) => s+(r.duration||0), 0) >= 3000; break;
+          case 'biologist': earned = records.filter(r => r.subject === '生物').reduce((s,r) => s+(r.duration||0), 0) >= 3000; break;
+          default: break;
+        }
+
+        if (earned) {
+          newAchievements.push(ach);
+          unlocked.push(ach.id);
+        }
       });
-      
-      return Array.from(achievements);
+
+      if (newAchievements.length > 0) {
+        appData.profile.achievements = unlocked;
+        saveLocalData();
+        newAchievements.forEach(ach => {
+          showToast(`🏆 成就解锁：${ach.name}`, 'success');
+        });
+      }
+
+      return unlocked;
     }
     
     // ========== v0.6.1 计算今日XP ==========
@@ -5839,6 +8187,32 @@
           </div>
         `;
       }).join('');
+    }
+
+    // ========== v0.12.0 成就数据加载 ==========
+    const ACHIEVEMENTS_SOURCES = [
+      'https://raw.githubusercontent.com/MokelungAAA/learning-rpg/main/data/achievements-data.json',
+      'https://cdn.jsdelivr.net/gh/MokelungAAA/learning-rpg@main/data/achievements-data.json',
+      './data/achievements-data.json'
+    ];
+
+    let achievementsData = null;
+
+    async function loadAchievementsData() {
+      const cached = localStorage.getItem('achievementsData');
+      if (cached) {
+        try { achievementsData = JSON.parse(cached); return; } catch(e) {}
+      }
+      for (const url of ACHIEVEMENTS_SOURCES) {
+        try {
+          const resp = await fetch(url);
+          if (resp.ok) {
+            achievementsData = await resp.json();
+            localStorage.setItem('achievementsData', JSON.stringify(achievementsData));
+            return;
+          }
+        } catch(e) { continue; }
+      }
     }
 
     // ========== v0.6.7 教材进度地图 ==========
@@ -6290,6 +8664,9 @@
       appData.subjects[sub].xp = (appData.subjects[sub].xp || 0) + xp;
       appData.profile.totalXp = (appData.profile.totalXp || 0) + xp;
       
+      // V0.9.0 自适应参数持久化
+      updateAdaptiveParams(record);
+
       renderAll();
       showToast(`已添加 ${sub} · ${kp} (+${xp} XP)`, 'success');
       
@@ -6356,6 +8733,9 @@
       appData.subjects[sub].xp = (appData.subjects[sub].xp || 0) + xp;
       appData.profile.totalXp = (appData.profile.totalXp || 0) + xp;
       
+      // V0.9.0 自适应参数持久化
+      updateAdaptiveParams(record);
+
       renderAll();
       showToast(`已添加考试 ${name} (${score}/${total})`, 'success');
       
@@ -6674,6 +9054,251 @@
         `;
       }).join('') : '<div style="text-align:center;padding:16px;color:var(--text-muted);font-size:13px;">暂无薄弱点，继续保持 ✨</div>';
     }
+      // 渲染效率散点图和时段热力图
+      renderEfficiencyChart();
+      renderTimeSlotChart();
+
+    // ========== 效率散点图 ==========
+    let efficiencyChart = null;
+
+    function renderEfficiencyChart() {
+      const container = document.getElementById('efficiencyChart');
+      if (!container || !appData.records || appData.records.length < 3) return;
+      
+      const records = appData.records.slice(-50); // 最近50条
+      const data = records.map(r => [r.duration || 0, r.score || 0, r.subject || '']);
+      
+      if (efficiencyChart) efficiencyChart.dispose();
+      efficiencyChart = echarts.init(container);
+      
+      const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+      
+      efficiencyChart.setOption({
+        tooltip: {
+          trigger: 'item',
+          formatter: p => `${p.data[2]}<br/>时长: ${p.data[0]}分钟<br/>得分: ${p.data[1]}`
+        },
+        xAxis: { name: '学习时长(分钟)', type: 'value', nameTextStyle: {color: isDark ? '#ccc' : '#666'}, axisLine: {lineStyle: {color: isDark ? '#555' : '#ccc'}} },
+        yAxis: { name: '正确率(%)', type: 'value', min: 0, max: 100, nameTextStyle: {color: isDark ? '#ccc' : '#666'}, axisLine: {lineStyle: {color: isDark ? '#555' : '#ccc'}} },
+        series: [{
+          type: 'scatter',
+          data: data,
+          symbolSize: d => Math.max(6, Math.min(20, d[0] / 3)),
+          itemStyle: { color: '#6366f1', opacity: 0.6 },
+          emphasis: { itemStyle: { color: '#f59e0b', opacity: 1 } }
+        }],
+        grid: { left: 50, right: 20, top: 40, bottom: 40 }
+      });
+    }
+
+    // ========== 时段热力图 ==========
+    let timeSlotChart = null;
+
+    function renderTimeSlotChart() {
+      const container = document.getElementById('timeSlotChart');
+      if (!container || !appData.records || appData.records.length < 3) return;
+      
+      // 统计每个时段的学习次数
+      const hours = Array(24).fill(0);
+      appData.records.forEach(r => {
+        const h = new Date(r.timestamp).getHours();
+        hours[h] += (r.duration || 0);
+      });
+      
+      const maxVal = Math.max(...hours, 1);
+      const data = hours.map((v, h) => [h, v]);
+      
+      if (timeSlotChart) timeSlotChart.dispose();
+      timeSlotChart = echarts.init(container);
+      
+      const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+      
+      timeSlotChart.setOption({
+        tooltip: { formatter: p => `${p.data[0]}:00 - 学习${p.data[1]}分钟` },
+        xAxis: { 
+          type: 'category', 
+          data: Array(24).fill(0).map((_, i) => `${i}:00`),
+          axisLabel: { interval: 2, color: isDark ? '#aaa' : '#666' }
+        },
+        yAxis: { type: 'value', name: '分钟', nameTextStyle: {color: isDark ? '#ccc' : '#666'} },
+        series: [{
+          type: 'bar',
+          data: data.map(d => ({
+            value: d[1],
+            itemStyle: { color: `rgba(99, 102, 241, ${0.2 + 0.8 * d[1] / maxVal})` }
+          })),
+          barWidth: '60%'
+        }],
+        grid: { left: 50, right: 20, top: 30, bottom: 30 }
+      });
+    }
+
+    // ========== 技能雷达图 ==========
+    let skillRadarChart = null;
+
+    function renderSkillRadar(subjectKey) {
+      const container = document.getElementById('skillRadarChart');
+      if (!container) return;
+
+      const skills = getSubjectSkills(subjectKey);
+      const skillIds = Object.keys(skills);
+      if (skillIds.length === 0) {
+        container.innerHTML = '<div style="text-align:center;color:var(--text-muted);padding:40px;">暂无技能数据，请先加载skill-tree.json</div>';
+        return;
+      }
+
+      const indicators = skillIds.map(id => ({
+        name: skills[id].name,
+        max: 100
+      }));
+
+      const data = skillIds.map(id => Math.round(calculateSkillMastery(subjectKey, id)));
+
+      if (skillRadarChart) {
+        skillRadarChart.dispose();
+      }
+
+      skillRadarChart = echarts.init(container);
+
+      const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+      const textColor = isDark ? '#e0e0e0' : '#333';
+      const splitLineColor = isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)';
+
+      skillRadarChart.setOption({
+        tooltip: { trigger: 'item' },
+        radar: {
+          indicator: indicators,
+          shape: 'polygon',
+          splitNumber: 5,
+          axisName: { color: textColor, fontSize: 11 },
+          splitLine: { lineStyle: { color: splitLineColor } },
+          splitArea: { areaStyle: { color: isDark ? ['rgba(255,255,255,0.02)', 'rgba(255,255,255,0.05)'] : ['rgba(99,102,241,0.02)', 'rgba(99,102,241,0.06)'] } },
+          axisLine: { lineStyle: { color: splitLineColor } }
+        },
+        series: [{
+          type: 'radar',
+          data: [{
+            value: data,
+            name: '技能掌握度',
+            areaStyle: { color: 'rgba(99, 102, 241, 0.2)' },
+            lineStyle: { color: '#6366f1', width: 2 },
+            itemStyle: { color: '#6366f1' }
+          }]
+        }]
+      });
+    }
+
+    // ========== 三层技能聚合 ==========
+
+    // 获取学科的所有技能
+    function getSubjectSkills(subjectKey) {
+      if (!skillTreeData?.subjects?.[subjectKey]?.skills) return {};
+      return skillTreeData.subjects[subjectKey].skills;
+    }
+
+    // 计算单个技能掌握度
+    function calculateSkillMastery(subjectKey, skillId) {
+      const skill = getSubjectSkills(subjectKey)[skillId];
+      if (!skill || !appData.knowledgeStates) return 0;
+
+      const kps = skill.knowledgePoints || [];
+      if (kps.length === 0) return 0;
+
+      let totalTemp = 0;
+      let totalAccuracy = 0;
+      let masteredCount = 0;
+
+      kps.forEach(kp => {
+        const state = appData.knowledgeStates[kp];
+        if (state) {
+          totalTemp += state.temperature || 0;
+          totalAccuracy += state.avgAccuracy || 0;
+          if ((state.temperature || 0) >= 60) masteredCount++;
+        } else {
+          totalTemp += 0;
+          totalAccuracy += 0;
+        }
+      });
+
+      const avgTemp = totalTemp / kps.length;
+      const avgAccuracy = totalAccuracy / kps.length;
+      const masteryRatio = masteredCount / kps.length;
+
+      return avgTemp * 0.5 + avgAccuracy * 0.3 + masteryRatio * 100 * 0.2;
+    }
+
+    // 计算学科能力值（基于技能聚合）
+    function calculateSubjectAbilityFromSkills(subjectKey) {
+      const skills = getSubjectSkills(subjectKey);
+      const skillIds = Object.keys(skills);
+      if (skillIds.length === 0) return 50;
+
+      let totalWeightedMastery = 0;
+      let totalWeight = 0;
+
+      skillIds.forEach(skillId => {
+        const skill = skills[skillId];
+        const mastery = calculateSkillMastery(subjectKey, skillId);
+        const weight = skill.examWeight || 0.2;
+        totalWeightedMastery += mastery * weight;
+        totalWeight += weight;
+      });
+
+      return totalWeight > 0 ? totalWeightedMastery / totalWeight : 50;
+    }
+
+    // 技能级特长判定
+    function detectSkillTalents(subjectKey) {
+      const skills = getSubjectSkills(subjectKey);
+      const skillIds = Object.keys(skills);
+      if (skillIds.length === 0) return {};
+
+      const talents = {};
+      const subjectMastery = calculateSubjectAbilityFromSkills(subjectKey);
+
+      skillIds.forEach(skillId => {
+        const mastery = calculateSkillMastery(subjectKey, skillId);
+        const skill = skills[skillId];
+
+        // 条件1：技能掌握度 > 学科平均掌握度 + 15
+        const condition1 = mastery > subjectMastery + 15;
+
+        // 条件2：需要半衰期数据（暂时用掌握度>80代替）
+        const condition2 = mastery > 80;
+
+        if (condition1 && condition2) {
+          talents[skillId] = {
+            name: skill.name,
+            mastery: Math.round(mastery),
+            bonus: 1.1 // XP加成10%
+          };
+        }
+      });
+
+      return talents;
+    }
+
+    // 获取所有学科的技能掌握度数据（用于雷达图）
+    function getAllSkillsData() {
+      const result = {};
+      const subjectKeys = ['logos', 'mythos', 'lingua', 'physis', 'khemeia', 'zoe', 'politeia', 'historia', 'geographia'];
+
+      subjectKeys.forEach(key => {
+        const skills = getSubjectSkills(key);
+        const skillIds = Object.keys(skills);
+        result[key] = {};
+
+        skillIds.forEach(skillId => {
+          result[key][skillId] = {
+            name: skills[skillId].name,
+            mastery: Math.round(calculateSkillMastery(key, skillId)),
+            examWeight: skills[skillId].examWeight
+          };
+        });
+      });
+
+      return result;
+    }
 
     // ========== 渲染全部 ==========
     function renderAll() {
@@ -6771,6 +9396,12 @@
       // 修复：使用 getSkillTreeOption 而非 buildSkillTreeData
       if (skillTreeChart) {
         skillTreeChart.setOption(getSkillTreeOption());
+      }
+
+      // V0.9.0 渲染技能雷达图（默认显示第一个学科）
+      if (skillTreeData) {
+        const defaultSubject = 'logos';
+        renderSkillRadar(defaultSubject);
       }
     }
     
@@ -7183,6 +9814,1356 @@
       }
     }, { passive: true });
 
+    // ========== 全局命令面板 ==========
+    function initCommandPalette() {
+      document.addEventListener('keydown', (e) => {
+        if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+          e.preventDefault();
+          toggleCommandPalette();
+        }
+        if (e.key === 'Escape') {
+          closeCommandPalette();
+        }
+      });
+    }
+
+    function toggleCommandPalette() {
+      let panel = document.getElementById('commandPalette');
+      if (!panel) {
+        panel = document.createElement('div');
+        panel.id = 'commandPalette';
+        panel.innerHTML = `
+          <div class="command-overlay" onclick="closeCommandPalette()"></div>
+          <div class="command-panel">
+            <div class="command-header">
+              <span class="command-icon">🔍</span>
+              <input type="text" class="command-input" id="commandInput" placeholder="搜索功能、跳转页面..." oninput="filterCommands(this.value)" autofocus>
+              <span class="command-hint">ESC 关闭</span>
+            </div>
+            <div class="command-list" id="commandList"></div>
+          </div>
+        `;
+        document.body.appendChild(panel);
+
+        const style = document.createElement('style');
+        style.textContent = `
+          .command-overlay { position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:10000; }
+          .command-panel { position:fixed;top:20%;left:50%;transform:translateX(-50%);width:90%;max-width:500px;background:rgba(255,255,255,0.95);backdrop-filter:blur(24px) saturate(180%);border-radius:16px;box-shadow:0 16px 48px rgba(0,0,0,0.15);z-index:10001;overflow:hidden; }
+          .command-header { display:flex;align-items:center;gap:12px;padding:16px;border-bottom:1px solid rgba(0,0,0,0.08); }
+          .command-icon { font-size:20px; }
+          .command-input { flex:1;border:none;outline:none;font-size:16px;background:transparent;color:#333; }
+          .command-hint { font-size:11px;color:#999; }
+          .command-list { max-height:300px;overflow-y:auto;padding:8px; }
+          .command-item { display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:8px;cursor:pointer;transition:background 0.15s; }
+          .command-item:hover { background:rgba(99,102,241,0.08); }
+          .command-item-icon { font-size:18px;width:28px;text-align:center; }
+          .command-item-label { font-size:14px;color:#333; }
+          .command-item-desc { font-size:11px;color:#999; }
+          [data-theme="dark"] .command-panel { background:rgba(30,30,50,0.95); }
+          [data-theme="dark"] .command-input { color:#e0e0e0; }
+          [data-theme="dark"] .command-item-label { color:#e0e0e0; }
+        `;
+        document.head.appendChild(style);
+      }
+
+      panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+      if (panel.style.display === 'block') {
+        document.getElementById('commandInput')?.focus();
+        filterCommands('');
+      }
+    }
+
+    function closeCommandPalette() {
+      const panel = document.getElementById('commandPalette');
+      if (panel) panel.style.display = 'none';
+    }
+
+    function filterCommands(query) {
+      const commands = [
+        { icon: '🏠', label: '总览', desc: '查看学习总览', action: () => switchPage('overview') },
+        { icon: '🌳', label: '技能树', desc: '查看技能树', action: () => switchPage('skills') },
+        { icon: '🔄', label: '复习中心', desc: '查看复习推荐', action: () => switchPage('review') },
+        { icon: '📊', label: '学习日志', desc: '查看学习记录', action: () => switchPage('log') },
+        { icon: '⚙️', label: '更多', desc: '设置与关于', action: () => switchPage('settings') },
+        { icon: '🔄', label: '全量重算', desc: '重算所有XP和等级', action: () => { recalculateAll(); closeCommandPalette(); } },
+        { icon: '🌙', label: '切换主题', desc: '深色/浅色模式', action: () => { toggleTheme(); closeCommandPalette(); } },
+        { icon: '🍅', label: '番茄专注', desc: '打开番茄钟计时器', action: () => { openPomodoro(); closeCommandPalette(); } },
+        { icon: '📖', label: '阅读记录', desc: '记录阅读、管理书架', action: () => { openReading(); closeCommandPalette(); } },
+        { icon: '📤', label: '导出数据', desc: '导出JSON数据', action: () => { exportDataJson(); closeCommandPalette(); } },
+      ];
+
+      const q = query.toLowerCase().trim();
+      const filtered = q ? commands.filter(c => c.label.includes(q) || c.desc.includes(q)) : commands;
+
+      const list = document.getElementById('commandList');
+      if (!list) return;
+
+      list.innerHTML = filtered.map((c, i) => `
+        <div class="command-item" onclick="document.getElementById('commandPalette').style.display='none'; window._cmdActions[${i}]()">
+          <span class="command-item-icon">${c.icon}</span>
+          <div>
+            <div class="command-item-label">${c.label}</div>
+            <div class="command-item-desc">${c.desc}</div>
+          </div>
+        </div>
+      `).join('');
+
+      window._cmdActions = filtered.map(c => c.action);
+    }
+
+
+
+    // ========== V1.1.0 番茄专注系统 ==========
+
+    let pomodoroState = {
+      isRunning: false,
+      isPaused: false,
+      phase: 'focus',
+      timeRemaining: 25 * 60,
+      totalTime: 25 * 60,
+      currentSession: 1,
+      completedSessions: 0,
+      interrupts: [],
+      currentSubject: '数学',
+      timerInterval: null,
+      sessionStartTime: null,
+      backgroundLeaveTime: null,
+      backgroundTime: 0
+    };
+
+    let pomodoroSettings = {
+      defaultDuration: 25,
+      shortBreak: 5,
+      longBreak: 15,
+      longBreakInterval: 4,
+      autoStartBreak: false,
+      autoStartPomodoro: false,
+      notificationSound: true,
+      backgroundTracking: true
+    };
+
+    let pomodoroWeeklyChart = null;
+
+    function openPomodoro() {
+      loadPomodoroSettings();
+      const modal = document.getElementById('pomodoroModal');
+      modal.classList.add('active');
+      document.body.style.overflow = 'hidden';
+      pomodoroState.currentSubject = document.getElementById('pomodoroSubject').value;
+      updateTimerDisplay();
+      updateSessionDots();
+      renderPomodoroStats();
+      setTimeout(() => renderPomodoroWeeklyChart(), 200);
+    }
+
+    function closePomodoro() {
+      if (pomodoroState.isRunning) {
+        pausePomodoro();
+      }
+      const modal = document.getElementById('pomodoroModal');
+      modal.classList.remove('active');
+      document.body.style.overflow = '';
+      document.getElementById('pomodoroInterrupt').style.display = 'none';
+      document.getElementById('pomodoroSummary').style.display = 'none';
+    }
+
+    function switchPomodoroTab(tab, btn) {
+      document.querySelectorAll('.pomodoro-tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.pomodoro-panel').forEach(p => p.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('pomodoroPanel' + tab.charAt(0).toUpperCase() + tab.slice(1)).classList.add('active');
+      if (tab === 'stats') {
+        renderPomodoroStats();
+        setTimeout(() => renderPomodoroWeeklyChart(), 100);
+      }
+    }
+
+    function togglePomodoro() {
+      if (pomodoroState.isRunning) {
+        pausePomodoro();
+      } else {
+        startPomodoro();
+      }
+    }
+
+    function startPomodoro() {
+      if (!pomodoroState.sessionStartTime) {
+        pomodoroState.sessionStartTime = Date.now();
+      }
+      pomodoroState.isRunning = true;
+      pomodoroState.isPaused = false;
+      document.getElementById('pomodoroStartBtn').textContent = '暂停';
+      document.getElementById('pomodoroInterrupt').style.display = 'none';
+      document.getElementById('pomodoroSummary').style.display = 'none';
+      pomodoroState.timerInterval = setInterval(tickPomodoro, 1000);
+    }
+
+    function pausePomodoro() {
+      pomodoroState.isRunning = false;
+      pomodoroState.isPaused = true;
+      clearInterval(pomodoroState.timerInterval);
+      document.getElementById('pomodoroStartBtn').textContent = '继续';
+      // Show interrupt dialog only during focus phase
+      if (pomodoroState.phase === 'focus') {
+        document.getElementById('pomodoroInterrupt').style.display = 'block';
+      }
+    }
+
+    function resetPomodoro() {
+      clearInterval(pomodoroState.timerInterval);
+      pomodoroState.isRunning = false;
+      pomodoroState.isPaused = false;
+      pomodoroState.interrupts = [];
+      pomodoroState.backgroundTime = 0;
+      pomodoroState.sessionStartTime = null;
+      pomodoroState.timeRemaining = pomodoroState.totalTime;
+      document.getElementById('pomodoroStartBtn').textContent = '开始';
+      document.getElementById('pomodoroInterrupt').style.display = 'none';
+      document.getElementById('pomodoroSummary').style.display = 'none';
+      updateTimerDisplay();
+    }
+
+    function skipPhase() {
+      clearInterval(pomodoroState.timerInterval);
+      pomodoroState.isRunning = false;
+      pomodoroState.isPaused = false;
+      document.getElementById('pomodoroInterrupt').style.display = 'none';
+      document.getElementById('pomodoroSummary').style.display = 'none';
+      if (pomodoroState.phase === 'focus') {
+        // Skip focus - don't record
+        pomodoroState.timeRemaining = pomodoroState.totalTime;
+        pomodoroState.interrupts = [];
+        pomodoroState.backgroundTime = 0;
+        pomodoroState.sessionStartTime = null;
+        updateTimerDisplay();
+        document.getElementById('pomodoroStartBtn').textContent = '开始';
+      } else {
+        // Skip break - go to next focus
+        pomodoroState.phase = 'focus';
+        pomodoroState.totalTime = pomodoroSettings.defaultDuration * 60;
+        pomodoroState.timeRemaining = pomodoroState.totalTime;
+        pomodoroState.sessionStartTime = null;
+        updateTimerDisplay();
+        updateSessionDots();
+        document.getElementById('pomodoroStartBtn').textContent = '开始';
+        if (pomodoroSettings.autoStartPomodoro) startPomodoro();
+      }
+    }
+
+    function tickPomodoro() {
+      pomodoroState.timeRemaining--;
+      if (pomodoroState.timeRemaining <= 0) {
+        pomodoroState.timeRemaining = 0;
+        clearInterval(pomodoroState.timerInterval);
+        pomodoroState.isRunning = false;
+        completePhase();
+      }
+      updateTimerDisplay();
+    }
+
+    function completePhase() {
+      if (pomodoroState.phase === 'focus') {
+        // Focus completed
+        pomodoroState.completedSessions++;
+        const actualDuration = pomodoroState.totalTime - pomodoroState.backgroundTime;
+        const score = calculateFocusScore();
+        const session = {
+          id: Date.now(),
+          date: new Date().toISOString().split('T')[0],
+          time: new Date().toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' }),
+          subject: pomodoroState.currentSubject,
+          plannedDuration: pomodoroState.totalTime,
+          actualDuration: actualDuration,
+          interrupts: [...pomodoroState.interrupts],
+          interruptCount: pomodoroState.interrupts.filter(i => i.type !== 'persisted').length,
+          score: score,
+          backgroundTime: pomodoroState.backgroundTime
+        };
+        savePomodoroSession(session);
+        showSessionSummary(session);
+        playNotification();
+        checkPomodoroAchievements();
+        // Transition to break
+        if (pomodoroState.completedSessions % pomodoroSettings.longBreakInterval === 0) {
+          pomodoroState.phase = 'longBreak';
+          pomodoroState.totalTime = pomodoroSettings.longBreak * 60;
+        } else {
+          pomodoroState.phase = 'shortBreak';
+          pomodoroState.totalTime = pomodoroSettings.shortBreak * 60;
+        }
+        pomodoroState.timeRemaining = pomodoroState.totalTime;
+        pomodoroState.interrupts = [];
+        pomodoroState.backgroundTime = 0;
+        pomodoroState.sessionStartTime = null;
+        updateTimerDisplay();
+        updateSessionDots();
+        document.getElementById('pomodoroStartBtn').textContent = '开始';
+        if (pomodoroSettings.autoStartBreak) startPomodoro();
+      } else {
+        // Break completed
+        playNotification();
+        pomodoroState.phase = 'focus';
+        pomodoroState.totalTime = pomodoroSettings.defaultDuration * 60;
+        pomodoroState.timeRemaining = pomodoroState.totalTime;
+        pomodoroState.sessionStartTime = null;
+        updateTimerDisplay();
+        document.getElementById('pomodoroStartBtn').textContent = '开始';
+        if (pomodoroSettings.autoStartPomodoro) startPomodoro();
+      }
+    }
+
+    function calculateFocusScore() {
+      const realInterrupts = pomodoroState.interrupts.filter(i => i.type !== 'persisted').length;
+      const persistedCount = pomodoroState.interrupts.filter(i => i.type === 'persisted').length;
+      const actualSeconds = pomodoroState.totalTime - pomodoroState.backgroundTime;
+      const plannedSeconds = pomodoroState.totalTime;
+      const durationRatio = Math.min(actualSeconds / plannedSeconds, 1);
+      let score = Math.round(100 - realInterrupts * 12 + persistedCount * 3);
+      score = Math.round(score * (0.7 + 0.3 * durationRatio));
+      return Math.max(0, Math.min(100, score));
+    }
+
+    function showSessionSummary(session) {
+      const mins = Math.floor(session.actualDuration / 60);
+      const secs = session.actualDuration % 60;
+      document.getElementById('summaryDuration').textContent = mins + ':' + String(secs).padStart(2, '0');
+      document.getElementById('summarySubject').textContent = session.subject;
+      document.getElementById('summaryInterrupts').textContent = session.interruptCount;
+      document.getElementById('summaryScore').textContent = session.score;
+      document.getElementById('pomodoroSummary').style.display = 'block';
+      document.getElementById('pomodoroInterrupt').style.display = 'none';
+    }
+
+    function dismissSummary() {
+      document.getElementById('pomodoroSummary').style.display = 'none';
+    }
+
+    function recordInterrupt(type) {
+      const note = document.getElementById('pomodoroInterruptNote').value.trim();
+      pomodoroState.interrupts.push({
+        type: type,
+        time: Date.now() - pomodoroState.sessionStartTime,
+        note: note
+      });
+      document.getElementById('pomodoroInterruptNote').value = '';
+      document.getElementById('pomodoroInterrupt').style.display = 'none';
+    }
+
+    function dismissInterrupt() {
+      document.getElementById('pomodoroInterrupt').style.display = 'none';
+      document.getElementById('pomodoroInterruptNote').value = '';
+    }
+
+    function updateTimerDisplay() {
+      const mins = Math.floor(pomodoroState.timeRemaining / 60);
+      const secs = pomodoroState.timeRemaining % 60;
+      document.getElementById('pomodoroDisplay').textContent =
+        String(mins).padStart(2, '0') + ':' + String(secs).padStart(2, '0');
+
+      // Phase label
+      const phaseLabels = { focus: '专注中', shortBreak: '短休息', longBreak: '长休息' };
+      document.getElementById('pomodoroPhase').textContent = phaseLabels[pomodoroState.phase] || '专注中';
+
+      // SVG ring progress
+      const circumference = 2 * Math.PI * 88; // ~553
+      const progress = pomodoroState.totalTime > 0 ? pomodoroState.timeRemaining / pomodoroState.totalTime : 1;
+      const offset = circumference * (1 - progress);
+      document.getElementById('pomodoroRing').style.strokeDashoffset = offset;
+
+      // Update page title
+      if (pomodoroState.isRunning || pomodoroState.isPaused) {
+        const phaseIcon = pomodoroState.phase === 'focus' ? '\U0001f345' : '\u2615';
+        document.title = String(mins).padStart(2, '0') + ':' + String(secs).padStart(2, '0') + ' ' + phaseIcon + ' ' + phaseLabels[pomodoroState.phase];
+      } else {
+        document.title = '学习RPG \u00b7 认知操作系统';
+      }
+    }
+
+    function updateSessionDots() {
+      const container = document.getElementById('pomodoroDots');
+      const interval = pomodoroSettings.longBreakInterval;
+      const currentInCycle = pomodoroState.completedSessions % interval;
+      let html = '';
+      for (let i = 0; i < interval; i++) {
+        let cls = 'pomodoro-dot';
+        if (i < currentInCycle) cls += ' completed';
+        else if (i === currentInCycle && pomodoroState.phase === 'focus') cls += ' current';
+        html += '<div class="' + cls + '"></div>';
+      }
+      container.innerHTML = html;
+    }
+
+    // ---- Settings ----
+    function loadPomodoroSettings() {
+      try {
+        const saved = localStorage.getItem('pomodoro_settings');
+        if (saved) {
+          Object.assign(pomodoroSettings, JSON.parse(saved));
+        }
+      } catch(e) {}
+      // Apply to UI
+      applySettingsToUI();
+      // Reset timer to new duration if not running
+      if (!pomodoroState.isRunning && !pomodoroState.isPaused) {
+        pomodoroState.totalTime = pomodoroSettings.defaultDuration * 60;
+        pomodoroState.timeRemaining = pomodoroState.totalTime;
+        pomodoroState.phase = 'focus';
+        updateTimerDisplay();
+        updateSessionDots();
+      }
+    }
+
+    function applySettingsToUI() {
+      // Duration buttons
+      setOptActive('pomoSettingFocus', pomodoroSettings.defaultDuration);
+      setOptActive('pomoSettingShort', pomodoroSettings.shortBreak);
+      setOptActive('pomoSettingLong', pomodoroSettings.longBreak);
+      setOptActive('pomoSettingInterval', pomodoroSettings.longBreakInterval);
+      // Toggles
+      document.getElementById('pomoAutoBreak').checked = pomodoroSettings.autoStartBreak;
+      document.getElementById('pomoAutoFocus').checked = pomodoroSettings.autoStartPomodoro;
+      document.getElementById('pomoNotifSound').checked = pomodoroSettings.notificationSound;
+    }
+
+    function setOptActive(containerId, value) {
+      const container = document.getElementById(containerId);
+      if (!container) return;
+      container.querySelectorAll('.pomo-opt').forEach(btn => {
+        btn.classList.toggle('active', parseInt(btn.dataset.val) === value);
+      });
+    }
+
+    function setPomodoroSetting(key, value, btn) {
+      pomodoroSettings[key] = value;
+      localStorage.setItem('pomodoro_settings', JSON.stringify(pomodoroSettings));
+      // Update button active state
+      if (btn) {
+        btn.parentElement.querySelectorAll('.pomo-opt').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+      }
+      // If timer is not running, update duration
+      if (!pomodoroState.isRunning && !pomodoroState.isPaused) {
+        if (key === 'defaultDuration') {
+          pomodoroState.totalTime = value * 60;
+          pomodoroState.timeRemaining = value * 60;
+          updateTimerDisplay();
+        }
+        if (key === 'longBreakInterval') {
+          updateSessionDots();
+        }
+      }
+    }
+
+    // ---- Data Persistence ----
+    function savePomodoroSession(session) {
+      let data = loadPomodoroSessions();
+      data.sessions.push(session);
+      // Update statistics
+      data.statistics.totalSessions++;
+      data.statistics.totalFocusMinutes += Math.round(session.actualDuration / 60);
+      data.statistics.totalBreakMinutes += 0; // breaks not tracked separately here
+      // Average score
+      const allScores = data.sessions.map(s => s.score);
+      data.statistics.averageFocusScore = Math.round(allScores.reduce((a,b) => a+b, 0) / allScores.length);
+      // Streak calculation
+      data.statistics = calculatePomodoroStreak(data.statistics, data.sessions);
+      data.lastUpdated = new Date().toISOString();
+      localStorage.setItem('pomodoro_sessions', JSON.stringify(data));
+    }
+
+    function loadPomodoroSessions() {
+      try {
+        const saved = localStorage.getItem('pomodoro_sessions');
+        if (saved) return JSON.parse(saved);
+      } catch(e) {}
+      return {
+        version: '1.1.0',
+        lastUpdated: new Date().toISOString(),
+        sessions: [],
+        settings: { ...pomodoroSettings },
+        statistics: {
+          totalSessions: 0,
+          totalFocusMinutes: 0,
+          totalBreakMinutes: 0,
+          averageFocusScore: 0,
+          currentStreak: 0,
+          bestStreak: 0
+        }
+      };
+    }
+
+    function calculatePomodoroStreak(stats, sessions) {
+      if (sessions.length === 0) return stats;
+      const today = new Date().toISOString().split('T')[0];
+      const dates = [...new Set(sessions.map(s => s.date))].sort().reverse();
+      if (!dates.includes(today)) {
+        // Check if yesterday exists for streak continuity
+        const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
+        if (!dates.includes(yesterday)) {
+          stats.currentStreak = 0;
+        }
+      } else {
+        // Calculate streak from today backwards
+        let streak = 0;
+        let checkDate = new Date();
+        while (true) {
+          const dateStr = checkDate.toISOString().split('T')[0];
+          if (dates.includes(dateStr)) {
+            streak++;
+            checkDate.setDate(checkDate.getDate() - 1);
+          } else {
+            break;
+          }
+        }
+        stats.currentStreak = streak;
+      }
+      stats.bestStreak = Math.max(stats.bestStreak, stats.currentStreak);
+      return stats;
+    }
+
+    // ---- Statistics Rendering ----
+    function renderPomodoroStats() {
+      const data = loadPomodoroSessions();
+      const stats = data.statistics;
+      const today = new Date().toISOString().split('T')[0];
+      const todaySessions = data.sessions.filter(s => s.date === today);
+      const todayMinutes = todaySessions.reduce((sum, s) => sum + Math.round(s.actualDuration / 60), 0);
+
+      document.getElementById('pomoStatToday').textContent = todayMinutes + '分钟';
+      document.getElementById('pomoStatTotal').textContent = stats.totalSessions;
+      document.getElementById('pomoStatStreak').textContent = stats.currentStreak + '天';
+      document.getElementById('pomoStatBest').textContent = stats.bestStreak + '天';
+      document.getElementById('pomoStatAvgScore').textContent = stats.averageFocusScore;
+      document.getElementById('pomoStatTotalMin').textContent = stats.totalFocusMinutes + '分钟';
+    }
+
+    function renderPomodoroWeeklyChart() {
+      const container = document.getElementById('pomodoroWeeklyChart');
+      if (!container) return;
+      if (typeof echarts === 'undefined') return;
+
+      const data = loadPomodoroSessions();
+      const days = [];
+      const values = [];
+      const weekDays = ['日', '一', '二', '三', '四', '五', '六'];
+
+      for (let i = 6; i >= 0; i--) {
+        const d = new Date(Date.now() - i * 86400000);
+        const dateStr = d.toISOString().split('T')[0];
+        days.push('周' + weekDays[d.getDay()]);
+        const daySessions = data.sessions.filter(s => s.date === dateStr);
+        values.push(daySessions.reduce((sum, s) => sum + Math.round(s.actualDuration / 60), 0));
+      }
+
+      if (pomodoroWeeklyChart) {
+        pomodoroWeeklyChart.dispose();
+      }
+      pomodoroWeeklyChart = echarts.init(container);
+
+      const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+      const option = {
+        grid: { top: 20, right: 10, bottom: 24, left: 36 },
+        xAxis: {
+          type: 'category',
+          data: days,
+          axisLabel: { fontSize: 11, color: isDark ? '#999' : '#666' },
+          axisLine: { show: false },
+          axisTick: { show: false }
+        },
+        yAxis: {
+          type: 'value',
+          axisLabel: { fontSize: 10, color: isDark ? '#999' : '#666' },
+          splitLine: { lineStyle: { color: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)' } },
+          axisLine: { show: false },
+          axisTick: { show: false }
+        },
+        series: [{
+          type: 'bar',
+          data: values,
+          barWidth: '40%',
+          itemStyle: {
+            borderRadius: [6, 6, 0, 0],
+            color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+              { offset: 0, color: '#6366f1' },
+              { offset: 1, color: '#a78bfa' }
+            ])
+          }
+        }],
+        tooltip: {
+          trigger: 'axis',
+          formatter: function(params) {
+            return params[0].name + ': ' + params[0].value + '分钟';
+          }
+        }
+      };
+      pomodoroWeeklyChart.setOption(option);
+    }
+
+    // ---- Auto-generate learning record ----
+    function autoGenerateRecord() {
+      const data = loadPomodoroSessions();
+      if (data.sessions.length === 0) return;
+      const lastSession = data.sessions[data.sessions.length - 1];
+      const mins = Math.round(lastSession.actualDuration / 60);
+
+      // Create a learning record similar to manual entry
+      const record = {
+        date: lastSession.date,
+        subject: lastSession.subject,
+        duration: mins,
+        type: 'pomodoro',
+        note: '番茄专注 ' + mins + '分钟 | 评分:' + lastSession.score + ' | 中断:' + lastSession.interruptCount + '次',
+        score: lastSession.score
+      };
+
+      // Add to appData if available
+      if (appData && appData.studyLog) {
+        appData.studyLog.push(record);
+        saveData();
+        renderAll();
+        showToast('已生成学习记录: ' + lastSession.subject + ' ' + mins + '分钟');
+      } else {
+        showToast('学习记录已保存到番茄数据中');
+      }
+      dismissSummary();
+    }
+
+    // ---- Notification Sound ----
+    function playNotification() {
+      if (!pomodoroSettings.notificationSound) return;
+      try {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.frequency.value = 800;
+        osc.type = 'sine';
+        gain.gain.setValueAtTime(0.3, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.8);
+        osc.start(ctx.currentTime);
+        osc.stop(ctx.currentTime + 0.8);
+        // Second beep
+        setTimeout(() => {
+          const osc2 = ctx.createOscillator();
+          const gain2 = ctx.createGain();
+          osc2.connect(gain2);
+          gain2.connect(ctx.destination);
+          osc2.frequency.value = 1000;
+          osc2.type = 'sine';
+          gain2.gain.setValueAtTime(0.3, ctx.currentTime);
+          gain2.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.6);
+          osc2.start(ctx.currentTime);
+          osc2.stop(ctx.currentTime + 0.6);
+        }, 300);
+      } catch(e) {}
+    }
+
+    // ---- Background Tracking ----
+    document.addEventListener('visibilitychange', function() {
+      if (!pomodoroSettings.backgroundTracking) return;
+      if (!pomodoroState.isRunning) return;
+
+      if (document.hidden) {
+        pomodoroState.backgroundLeaveTime = Date.now();
+      } else {
+        if (pomodoroState.backgroundLeaveTime) {
+          const awayMs = Date.now() - pomodoroState.backgroundLeaveTime;
+          const awaySeconds = Math.round(awayMs / 1000);
+          pomodoroState.backgroundTime += awaySeconds;
+          pomodoroState.backgroundLeaveTime = null;
+
+          // Show welcome back if away > 2 minutes during focus
+          if (awaySeconds > 120 && pomodoroState.phase === 'focus') {
+            showWelcomeBack(awaySeconds);
+          }
+        }
+      }
+    });
+
+    function showWelcomeBack(awaySeconds) {
+      const mins = Math.floor(awaySeconds / 60);
+      const el = document.createElement('div');
+      el.className = 'pomodoro-welcome-back';
+      el.innerHTML = '\U0001f345 欢迎回来！你离开了 ' + mins + ' 分钟';
+      document.body.appendChild(el);
+      setTimeout(() => {
+        el.style.opacity = '0';
+        el.style.transition = 'opacity 0.5s';
+        setTimeout(() => el.remove(), 500);
+      }, 3000);
+    }
+
+    // ---- Achievement Integration ----
+    function checkPomodoroAchievements() {
+      const data = loadPomodoroSessions();
+      const stats = data.statistics;
+      const achievements = [];
+
+      if (stats.totalSessions === 1) {
+        achievements.push({ name: '第一个番茄', desc: '完成第一个番茄专注' });
+      }
+      if (stats.totalSessions >= 10) {
+        achievements.push({ name: '十连专注', desc: '累计完成10个番茄' });
+      }
+      if (stats.totalSessions >= 50) {
+        achievements.push({ name: '专注达人', desc: '累计完成50个番茄' });
+      }
+      if (stats.totalSessions >= 100) {
+        achievements.push({ name: '专注大师', desc: '累计完成100个番茄' });
+      }
+
+      // 4-hour focus day check
+      const today = new Date().toISOString().split('T')[0];
+      const todayMin = data.sessions.filter(s => s.date === today).reduce((sum, s) => sum + Math.round(s.actualDuration / 60), 0);
+      if (todayMin >= 240) {
+        achievements.push({ name: '四小时挑战', desc: '单日专注超过4小时' });
+      }
+
+      // 7-day streak
+      if (stats.currentStreak >= 7) {
+        achievements.push({ name: '七日不间断', desc: '连续7天完成番茄专注' });
+      }
+
+      // Show achievement toasts
+      achievements.forEach((a, i) => {
+        setTimeout(() => {
+          showToast('\U0001f3c6 成就解锁: ' + a.name + ' - ' + a.desc);
+        }, i * 1500);
+      });
+    }
+
+    // Handle window resize for chart
+    window.addEventListener('resize', function() {
+      if (pomodoroWeeklyChart) {
+        try { pomodoroWeeklyChart.resize(); } catch(e) {}
+      }
+    });
+
+
+    // ========== V1.2.0 阅读记录系统 ==========
+    let readingRecords = [];
+    let bookshelf = [];
+    let currentReadingRating = 0;
+    let readingMonthlyChart = null;
+    let readingCategoryChart = null;
+    let currentBookshelfCategory = '';
+    let expandedBookId = null;
+
+    const READING_CATEGORIES = ['文学小说','历史','哲学','科普/科学','技术/编程','心理学','社会学','经济学','传记','个人成长','教材/教辅','其他'];
+
+    function openReading() {
+      loadReadingRecords();
+      loadBookshelf();
+      const modal = document.getElementById('readingModal');
+      modal.classList.add('active');
+      document.body.style.overflow = 'hidden';
+      // Set default date to today
+      const today = new Date().toISOString().split('T')[0];
+      document.getElementById('readingDate').value = today;
+      // Render bookshelf category chips
+      renderBookshelfChips();
+      // Render bookshelf
+      renderBookshelf();
+      // Render stats
+      renderReadingStats();
+    }
+
+    function closeReading() {
+      const modal = document.getElementById('readingModal');
+      modal.classList.remove('active');
+      document.body.style.overflow = '';
+      // Reset form
+      document.getElementById('readingBookTitle').value = '';
+      document.getElementById('readingAuthor').value = '';
+      document.getElementById('readingCategory').value = '';
+      document.getElementById('readingPagesRead').value = '';
+      document.getElementById('readingTotalPages').value = '';
+      document.getElementById('readingDuration').value = '';
+      document.getElementById('readingNotes').value = '';
+      setReadingRating(0);
+      expandedBookId = null;
+      // Dispose charts
+      if (readingMonthlyChart) { try { readingMonthlyChart.dispose(); } catch(e){} readingMonthlyChart = null; }
+      if (readingCategoryChart) { try { readingCategoryChart.dispose(); } catch(e){} readingCategoryChart = null; }
+    }
+
+    function switchReadingTab(tab) {
+      // Update tab buttons
+      document.querySelectorAll('.reading-tab').forEach(t => t.classList.remove('active'));
+      event.target.classList.add('active');
+      // Update panels
+      document.querySelectorAll('.reading-panel').forEach(p => p.classList.remove('active'));
+      const panelMap = { record: 'readingPanelRecord', bookshelf: 'readingPanelBookshelf', stats: 'readingPanelStats' };
+      const panel = document.getElementById(panelMap[tab]);
+      if (panel) panel.classList.add('active');
+      // Render on switch
+      if (tab === 'bookshelf') {
+        renderBookshelfChips();
+        renderBookshelf();
+      } else if (tab === 'stats') {
+        renderReadingStats();
+      }
+    }
+
+    // ---- Data persistence ----
+    function loadReadingRecords() {
+      try {
+        const data = localStorage.getItem('reading_records');
+        readingRecords = data ? JSON.parse(data) : [];
+      } catch(e) { readingRecords = []; }
+    }
+
+    function saveReadingRecords(records) {
+      readingRecords = records || readingRecords;
+      localStorage.setItem('reading_records', JSON.stringify(readingRecords));
+    }
+
+    function loadBookshelf() {
+      try {
+        const data = localStorage.getItem('bookshelf');
+        bookshelf = data ? JSON.parse(data) : [];
+      } catch(e) { bookshelf = []; }
+    }
+
+    function saveBookshelf(books) {
+      bookshelf = books || bookshelf;
+      localStorage.setItem('bookshelf', JSON.stringify(bookshelf));
+    }
+
+    // ---- Star rating ----
+    function setReadingRating(value) {
+      currentReadingRating = value;
+      updateStarDisplay(value);
+      const labels = ['未评分','很差','较差','一般','推荐','强烈推荐'];
+      document.getElementById('readingRatingText').textContent = labels[value] || '未评分';
+    }
+
+    function previewReadingRating(value) {
+      updateStarDisplay(value);
+    }
+
+    function resetReadingRatingPreview() {
+      updateStarDisplay(currentReadingRating);
+    }
+
+    function updateStarDisplay(value) {
+      document.querySelectorAll('#readingStarRating .reading-star').forEach(star => {
+        const v = parseInt(star.dataset.value);
+        star.classList.toggle('active', v <= value);
+      });
+    }
+
+    // ---- Autocomplete ----
+    function searchBooks(query) {
+      const ac = document.getElementById('readingAutocomplete');
+      if (!query || query.length < 1) {
+        ac.classList.remove('show');
+        return;
+      }
+      const q = query.toLowerCase();
+      const matches = bookshelf.filter(b =>
+        b.title.toLowerCase().includes(q) || (b.author && b.author.toLowerCase().includes(q))
+      ).slice(0, 5);
+      if (matches.length === 0) {
+        ac.classList.remove('show');
+        return;
+      }
+      ac.innerHTML = matches.map(b => `
+        <div class="reading-autocomplete-item" onclick="selectAutocompleteBook('${escapeHtml(b.title)}','${escapeHtml(b.author || '')}','${escapeHtml(b.category || '')}',${b.totalPages || 0})">
+          <div>${escapeHtml(b.title)}</div>
+          <div class="ac-author">${escapeHtml(b.author || '')} · ${escapeHtml(b.category || '')}</div>
+        </div>
+      `).join('');
+      ac.classList.add('show');
+    }
+
+    function selectAutocompleteBook(title, author, category, totalPages) {
+      document.getElementById('readingBookTitle').value = title;
+      document.getElementById('readingAuthor').value = author;
+      if (category) document.getElementById('readingCategory').value = category;
+      if (totalPages > 0) document.getElementById('readingTotalPages').value = totalPages;
+      document.getElementById('readingAutocomplete').classList.remove('show');
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+    }
+
+    // ---- Save reading record ----
+    function saveReadingRecord() {
+      const title = document.getElementById('readingBookTitle').value.trim();
+      const author = document.getElementById('readingAuthor').value.trim();
+      const category = document.getElementById('readingCategory').value;
+      const pagesRead = parseInt(document.getElementById('readingPagesRead').value) || 0;
+      const totalPages = parseInt(document.getElementById('readingTotalPages').value) || 0;
+      const date = document.getElementById('readingDate').value;
+      const duration = parseInt(document.getElementById('readingDuration').value) || 0;
+      const notes = document.getElementById('readingNotes').value.trim();
+
+      // Validation
+      if (!title) { showToast('请输入书名'); return; }
+      if (pagesRead <= 0) { showToast('请输入阅读页数'); return; }
+      if (!date) { showToast('请选择阅读日期'); return; }
+
+      const record = {
+        id: Date.now().toString(36) + Math.random().toString(36).substr(2, 5),
+        bookTitle: title,
+        author: author,
+        category: category,
+        pagesRead: pagesRead,
+        totalPages: totalPages,
+        date: date,
+        rating: currentReadingRating,
+        notes: notes,
+        duration: duration,
+        createdAt: new Date().toISOString()
+      };
+
+      readingRecords.unshift(record);
+      saveReadingRecords();
+
+      // Auto-update bookshelf
+      updateBookProgress(title, pagesRead, totalPages, author, category, date, currentReadingRating, duration);
+
+      // Check achievements
+      checkReadingAchievements();
+
+      // Reset form
+      document.getElementById('readingBookTitle').value = '';
+      document.getElementById('readingAuthor').value = '';
+      document.getElementById('readingCategory').value = '';
+      document.getElementById('readingPagesRead').value = '';
+      document.getElementById('readingTotalPages').value = '';
+      document.getElementById('readingDuration').value = '';
+      document.getElementById('readingNotes').value = '';
+      setReadingRating(0);
+
+      showToast('📖 阅读记录已保存');
+    }
+
+    function deleteReadingRecord(id) {
+      if (!confirm('确定删除这条阅读记录？')) return;
+      readingRecords = readingRecords.filter(r => r.id !== id);
+      saveReadingRecords();
+      renderReadingStats();
+      showToast('记录已删除');
+    }
+
+    // ---- Bookshelf management ----
+    function updateBookProgress(bookTitle, pagesRead, totalPages, author, category, date, rating, duration) {
+      let book = bookshelf.find(b => b.title === bookTitle);
+      if (!book) {
+        // Auto-add to bookshelf
+        book = {
+          id: Date.now().toString(36) + Math.random().toString(36).substr(2, 5),
+          title: bookTitle,
+          author: author || '',
+          category: category || '',
+          totalPages: totalPages || 0,
+          currentPage: 0,
+          rating: 0,
+          totalReadingTime: 0,
+          lastReadDate: '',
+          createdAt: new Date().toISOString()
+        };
+        bookshelf.push(book);
+      }
+      // Update progress
+      book.currentPage = Math.max(book.currentPage, 0) + pagesRead;
+      if (totalPages > 0) book.totalPages = totalPages;
+      if (author) book.author = author;
+      if (category) book.category = category;
+      if (date) book.lastReadDate = date;
+      if (rating > 0) book.rating = rating;
+      if (duration > 0) book.totalReadingTime = (book.totalReadingTime || 0) + duration;
+      saveBookshelf();
+    }
+
+    function addBookToShelf() {
+      const title = document.getElementById('addBookTitle').value.trim();
+      const author = document.getElementById('addBookAuthor').value.trim();
+      const category = document.getElementById('addBookCategory').value;
+      const totalPages = parseInt(document.getElementById('addBookTotalPages').value) || 0;
+
+      if (!title) { showToast('请输入书名'); return; }
+
+      // Check duplicate
+      if (bookshelf.find(b => b.title === title)) {
+        showToast('该书已在书架中');
+        return;
+      }
+
+      const book = {
+        id: Date.now().toString(36) + Math.random().toString(36).substr(2, 5),
+        title: title,
+        author: author,
+        category: category,
+        totalPages: totalPages,
+        currentPage: 0,
+        rating: 0,
+        totalReadingTime: 0,
+        lastReadDate: '',
+        createdAt: new Date().toISOString()
+      };
+
+      bookshelf.push(book);
+      saveBookshelf();
+
+      // Reset form
+      document.getElementById('addBookTitle').value = '';
+      document.getElementById('addBookAuthor').value = '';
+      document.getElementById('addBookCategory').value = '';
+      document.getElementById('addBookTotalPages').value = '';
+      toggleAddBookForm();
+      renderBookshelf();
+      showToast('📚 已添加到书架');
+    }
+
+    function removeBookFromShelf(id) {
+      if (!confirm('确定从书架移除这本书？相关阅读记录不会被删除。')) return;
+      bookshelf = bookshelf.filter(b => b.id !== id);
+      saveBookshelf();
+      renderBookshelf();
+      showToast('已从书架移除');
+    }
+
+    function toggleAddBookForm() {
+      const form = document.getElementById('addBookForm');
+      form.classList.toggle('show');
+    }
+
+    function renderBookshelfChips() {
+      const container = document.getElementById('bookshelfChips');
+      const usedCats = [...new Set(bookshelf.map(b => b.category).filter(Boolean))];
+      let html = '<span class="reading-chip' + (currentBookshelfCategory === '' ? ' active' : '') + '" data-cat="" onclick="filterBookshelfCategory(this, \'\')">全部</span>';
+      usedCats.forEach(cat => {
+        html += '<span class="reading-chip' + (currentBookshelfCategory === cat ? ' active' : '') + '" data-cat="' + escapeHtml(cat) + '" onclick="filterBookshelfCategory(this, \'' + escapeHtml(cat) + '\')">' + escapeHtml(cat) + '</span>';
+      });
+      container.innerHTML = html;
+    }
+
+    function filterBookshelfCategory(el, cat) {
+      currentBookshelfCategory = cat;
+      document.querySelectorAll('#bookshelfChips .reading-chip').forEach(c => c.classList.remove('active'));
+      el.classList.add('active');
+      renderBookshelf();
+    }
+
+    function renderBookshelf() {
+      const container = document.getElementById('bookshelfList');
+      const query = (document.getElementById('bookshelfSearch')?.value || '').toLowerCase().trim();
+
+      let books = [...bookshelf];
+      if (currentBookshelfCategory) {
+        books = books.filter(b => b.category === currentBookshelfCategory);
+      }
+      if (query) {
+        books = books.filter(b =>
+          b.title.toLowerCase().includes(query) ||
+          (b.author && b.author.toLowerCase().includes(query))
+        );
+      }
+
+      if (books.length === 0) {
+        container.innerHTML = '<div class="reading-empty"><div class="reading-empty-icon">📚</div>书架空空如也，开始添加吧！</div>';
+        return;
+      }
+
+      container.innerHTML = books.map(book => {
+        const progress = book.totalPages > 0 ? Math.min(100, Math.round((book.currentPage / book.totalPages) * 100)) : 0;
+        const isExpanded = expandedBookId === book.id;
+        const bookRecords = readingRecords.filter(r => r.bookTitle === book.title);
+        const stars = book.rating > 0 ? '★'.repeat(book.rating) + '☆'.repeat(5 - book.rating) : '未评分';
+        const readingTimeStr = book.totalReadingTime > 0 ? Math.round(book.totalReadingTime) + '分钟' : '-';
+
+        let historyHtml = '';
+        if (isExpanded && bookRecords.length > 0) {
+          historyHtml = '<div class="reading-history-list">' +
+            bookRecords.slice(0, 20).map(r => {
+              const rStars = r.rating > 0 ? '★'.repeat(r.rating) : '';
+              return '<div class="reading-history-item">' +
+                '<span class="reading-history-date">' + escapeHtml(r.date) + '</span>' +
+                '<span class="reading-history-pages">+' + r.pagesRead + '页</span>' +
+                (rStars ? '<span class="reading-history-rating">' + rStars + '</span>' : '') +
+                '<button class="reading-book-action-btn danger" style="padding:3px 8px;font-size:11px;" onclick="event.stopPropagation();deleteReadingRecord(\'' + r.id + '\')">删除</button>' +
+                '</div>';
+            }).join('') +
+            '</div>';
+        }
+
+        return '<div class="reading-book-card" onclick="toggleBookExpand(\'' + book.id + '\')">' +
+          '<div class="reading-book-card-header">' +
+            '<div>' +
+              '<div class="reading-book-title">' + escapeHtml(book.title) + '</div>' +
+              '<div class="reading-book-author">' + escapeHtml(book.author || '未知作者') + '</div>' +
+            '</div>' +
+            (book.category ? '<span class="reading-book-category">' + escapeHtml(book.category) + '</span>' : '') +
+          '</div>' +
+          (book.totalPages > 0 ?
+            '<div class="reading-book-progress">' +
+              '<div class="reading-progress-bar"><div class="reading-progress-fill" style="width:' + progress + '%"></div></div>' +
+              '<div class="reading-progress-text"><span>' + book.currentPage + ' / ' + book.totalPages + '页</span><span>' + progress + '%</span></div>' +
+            '</div>' : '') +
+          '<div class="reading-book-meta">' +
+            '<span>⭐ ' + stars + '</span>' +
+            '<span>⏱ ' + readingTimeStr + '</span>' +
+            (book.lastReadDate ? '<span>📅 ' + escapeHtml(book.lastReadDate) + '</span>' : '') +
+          '</div>' +
+          historyHtml +
+          '<div class="reading-book-actions">' +
+            '<button class="reading-book-action-btn primary" onclick="event.stopPropagation();quickRecordBook(\'' + escapeHtml(book.title) + '\')">📝 记录阅读</button>' +
+            '<button class="reading-book-action-btn danger" onclick="event.stopPropagation();removeBookFromShelf(\'' + book.id + '\')">🗑 删除</button>' +
+          '</div>' +
+        '</div>';
+      }).join('');
+    }
+
+    function toggleBookExpand(id) {
+      expandedBookId = expandedBookId === id ? null : id;
+      renderBookshelf();
+    }
+
+    function quickRecordBook(title) {
+      const book = bookshelf.find(b => b.title === title);
+      if (!book) return;
+      // Switch to record tab
+      document.querySelectorAll('.reading-tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.reading-tab')[0].classList.add('active');
+      document.querySelectorAll('.reading-panel').forEach(p => p.classList.remove('active'));
+      document.getElementById('readingPanelRecord').classList.add('active');
+      // Fill form
+      document.getElementById('readingBookTitle').value = book.title;
+      document.getElementById('readingAuthor').value = book.author || '';
+      if (book.category) document.getElementById('readingCategory').value = book.category;
+      if (book.totalPages > 0) document.getElementById('readingTotalPages').value = book.totalPages;
+      const today = new Date().toISOString().split('T')[0];
+      document.getElementById('readingDate').value = today;
+    }
+
+    // ---- Statistics ----
+    function renderReadingStats() {
+      renderStatsCards();
+      setTimeout(() => {
+        renderReadingMonthlyChart();
+        renderReadingCategoryChart();
+      }, 200);
+      renderRecentReadings();
+    }
+
+    function renderStatsCards() {
+      const totalBooks = bookshelf.length;
+      const totalPages = readingRecords.reduce((s, r) => s + (r.pagesRead || 0), 0);
+      const totalMinutes = readingRecords.reduce((s, r) => s + (r.duration || 0), 0);
+      const ratedRecords = readingRecords.filter(r => r.rating > 0);
+      const avgRating = ratedRecords.length > 0 ? (ratedRecords.reduce((s, r) => s + r.rating, 0) / ratedRecords.length).toFixed(1) : '-';
+
+      const hours = totalMinutes >= 60 ? (totalMinutes / 60).toFixed(1) + 'h' : totalMinutes + 'min';
+
+      document.getElementById('readingStatsGrid').innerHTML =
+        '<div class="reading-stat-card"><div class="reading-stat-value">' + totalBooks + '</div><div class="reading-stat-label">📚 书籍总数</div></div>' +
+        '<div class="reading-stat-card"><div class="reading-stat-value">' + totalPages + '</div><div class="reading-stat-label">📄 总阅读页数</div></div>' +
+        '<div class="reading-stat-card"><div class="reading-stat-value">' + hours + '</div><div class="reading-stat-label">⏱ 总阅读时长</div></div>' +
+        '<div class="reading-stat-card"><div class="reading-stat-value">' + avgRating + '</div><div class="reading-stat-label">⭐ 平均评分</div></div>';
+    }
+
+    function renderReadingMonthlyChart() {
+      const container = document.getElementById('readingMonthlyChart');
+      if (!container || typeof echarts === 'undefined') return;
+
+      if (readingMonthlyChart) { try { readingMonthlyChart.dispose(); } catch(e){} }
+
+      // Calculate last 6 months
+      const months = [];
+      const now = new Date();
+      for (let i = 5; i >= 0; i--) {
+        const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+        months.push({
+          key: d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0'),
+          label: d.getFullYear() + '/' + String(d.getMonth() + 1).padStart(2, '0')
+        });
+      }
+
+      const pagesByMonth = {};
+      months.forEach(m => pagesByMonth[m.key] = 0);
+      readingRecords.forEach(r => {
+        if (r.date) {
+          const mKey = r.date.substring(0, 7);
+          if (pagesByMonth.hasOwnProperty(mKey)) {
+            pagesByMonth[mKey] += (r.pagesRead || 0);
+          }
+        }
+      });
+
+      const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+      const textColor = isDark ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.6)';
+
+      readingMonthlyChart = echarts.init(container);
+      readingMonthlyChart.setOption({
+        grid: { top: 20, right: 16, bottom: 30, left: 45 },
+        xAxis: {
+          type: 'category',
+          data: months.map(m => m.label),
+          axisLabel: { color: textColor, fontSize: 11 },
+          axisLine: { lineStyle: { color: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.08)' } }
+        },
+        yAxis: {
+          type: 'value',
+          axisLabel: { color: textColor, fontSize: 11 },
+          splitLine: { lineStyle: { color: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)' } }
+        },
+        series: [{
+          type: 'bar',
+          data: months.map(m => pagesByMonth[m.key]),
+          barWidth: '50%',
+          itemStyle: {
+            borderRadius: [6, 6, 0, 0],
+            color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+              { offset: 0, color: '#667eea' },
+              { offset: 1, color: '#764ba2' }
+            ])
+          }
+        }],
+        tooltip: {
+          trigger: 'axis',
+          formatter: '{b}<br/>阅读 {c} 页'
+        }
+      });
+    }
+
+    function renderReadingCategoryChart() {
+      const container = document.getElementById('readingCategoryChart');
+      if (!container || typeof echarts === 'undefined') return;
+
+      if (readingCategoryChart) { try { readingCategoryChart.dispose(); } catch(e){} }
+
+      const catCount = {};
+      readingRecords.forEach(r => {
+        if (r.category) {
+          catCount[r.category] = (catCount[r.category] || 0) + (r.pagesRead || 0);
+        }
+      });
+
+      const data = Object.entries(catCount).map(([name, value]) => ({ name, value })).sort((a, b) => b.value - a.value);
+
+      if (data.length === 0) {
+        container.innerHTML = '<div class="reading-empty" style="padding:20px;">暂无数据</div>';
+        return;
+      }
+
+      const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+
+      readingCategoryChart = echarts.init(container);
+      readingCategoryChart.setOption({
+        tooltip: {
+          trigger: 'item',
+          formatter: '{b}: {c}页 ({d}%)'
+        },
+        series: [{
+          type: 'pie',
+          radius: ['40%', '70%'],
+          center: ['50%', '50%'],
+          avoidLabelOverlap: true,
+          itemStyle: {
+            borderRadius: 6,
+            borderColor: isDark ? 'rgba(30,30,40,0.82)' : 'rgba(255,255,255,0.78)',
+            borderWidth: 2
+          },
+          label: {
+            color: isDark ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.6)',
+            fontSize: 11
+          },
+          data: data
+        }],
+        color: ['#667eea','#764ba2','#f093fb','#4facfe','#43e97b','#fa709a','#fee140','#a18cd1','#fbc2eb','#84fab0','#8fd3f4','#d4fc79']
+      });
+    }
+
+    function renderRecentReadings() {
+      const container = document.getElementById('readingRecentList');
+      const recent = readingRecords.slice(0, 10);
+
+      if (recent.length === 0) {
+        container.innerHTML = '<div class="reading-empty"><div class="reading-empty-icon">📝</div>还没有阅读记录</div>';
+        return;
+      }
+
+      container.innerHTML = recent.map(r => {
+        const stars = r.rating > 0 ? '★'.repeat(r.rating) : '';
+        return '<div class="reading-recent-item">' +
+          '<div class="reading-recent-info">' +
+            '<div class="reading-recent-book">' + escapeHtml(r.bookTitle) + (stars ? ' <span style="color:#f0a030;font-size:12px;">' + stars + '</span>' : '') + '</div>' +
+            '<div class="reading-recent-detail">' + escapeHtml(r.author || '') + (r.category ? ' · ' + escapeHtml(r.category) : '') + '</div>' +
+          '</div>' +
+          '<div class="reading-recent-right">' +
+            '<div class="reading-recent-pages">+' + r.pagesRead + '页</div>' +
+            '<div class="reading-recent-date">' + escapeHtml(r.date || '') + '</div>' +
+          '</div>' +
+        '</div>';
+      }).join('');
+    }
+
+    // ---- Reading achievements ----
+    function checkReadingAchievements() {
+      const achievements = [];
+
+      // First reading
+      if (readingRecords.length === 1) {
+        achievements.push({ id: 'reading_first', icon: '📖', name: '初次阅读', desc: '记录第一条阅读' });
+      }
+
+      // 10 different books
+      const uniqueBooks = new Set(readingRecords.map(r => r.bookTitle));
+      if (uniqueBooks.size >= 10) {
+        achievements.push({ id: 'reading_bookworm', icon: '📚', name: '书虫', desc: '阅读10本不同的书' });
+      }
+
+      // Total pages milestones
+      const totalPages = readingRecords.reduce((s, r) => s + (r.pagesRead || 0), 0);
+      if (totalPages >= 100) {
+        achievements.push({ id: 'reading_100', icon: '📖', name: '百页斩', desc: '累计阅读100页' });
+      }
+      if (totalPages >= 1000) {
+        achievements.push({ id: 'reading_1000', icon: '📖', name: '千页大师', desc: '累计阅读1000页' });
+      }
+      if (totalPages >= 5000) {
+        achievements.push({ id: 'reading_5000', icon: '📖', name: '阅读达人', desc: '累计阅读5000页' });
+      }
+
+      // Rate 10+ books
+      const ratedBooks = new Set(readingRecords.filter(r => r.rating > 0).map(r => r.bookTitle));
+      if (ratedBooks.size >= 10) {
+        achievements.push({ id: 'reading_critic', icon: '⭐', name: '严格评论家', desc: '为10本书评分' });
+      }
+
+      // Monthly reader: 10+ different days in a month
+      const currentMonth = new Date().toISOString().substring(0, 7);
+      const daysThisMonth = new Set(readingRecords.filter(r => r.date && r.date.startsWith(currentMonth)).map(r => r.date));
+      if (daysThisMonth.size >= 10) {
+        achievements.push({ id: 'reading_monthly', icon: '📅', name: '月度读者', desc: '一个月内阅读10天以上' });
+      }
+
+      // 5+ categories
+      const categories = new Set(readingRecords.map(r => r.category).filter(Boolean));
+      if (categories.size >= 5) {
+        achievements.push({ id: 'reading_diverse', icon: '🏆', name: '博览群书', desc: '阅读5个以上分类的书籍' });
+      }
+
+      // Show achievement toasts
+      achievements.forEach((a, i) => {
+        setTimeout(() => {
+          showToast(a.icon + ' 成就解锁: ' + a.name + ' - ' + a.desc);
+        }, i * 1500);
+      });
+    }
+
+    // Handle resize for reading charts
+    window.addEventListener('resize', function() {
+      if (readingMonthlyChart) { try { readingMonthlyChart.resize(); } catch(e){} }
+      if (readingCategoryChart) { try { readingCategoryChart.resize(); } catch(e){} }
+    });
+
     // ========== 初始化（v0.6.5 快速启动 + 后台静默加载） ==========
     async function init() {
       console.log('[v0.6.5] 快速启动...');
@@ -7200,11 +11181,18 @@
       // Phase 1: 首屏即时渲染（appData 已在页面加载时设为 DEFAULT_DATA）
       initEvents();
       initGestures();
+      initCommandPalette();
       renderAll();
       console.log('[v0.6.5] 首屏渲染完成');
       
       // Phase 2: 加载用户画像
       await loadUserProfile();
+
+      // Phase 2.5: 加载技能树数据
+      await loadSkillTree();
+
+      // Phase 2.6: 加载成就数据
+      await loadAchievementsData();
 
       // Phase 3: 后台静默加载数据
       await backgroundDataLoad();
