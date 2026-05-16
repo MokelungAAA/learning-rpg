@@ -5750,13 +5750,21 @@
      * @returns {string} 颜色代码
      */
     function getTempColor(temp) {
-      if (temp >= 95) return "#FF4500";
-      if (temp >= 80) return "#FF8C00";
-      if (temp >= 60) return "#FFD700";
-      if (temp >= 40) return "#62A0EA";
-      if (temp >= 20) return "#6B7280";
-      if (temp > 0) return "#9CA3AF";
-      return "#D1D5DB";
+      if (temp >= 80) return "#FF4500";
+      if (temp >= 60) return "#FF8C00";
+      if (temp >= 40) return "#FFD700";
+      if (temp >= 20) return "#62A0EA";
+      if (temp > 0) return "#1A5FB4";
+      return "#6B7280";
+    }
+
+    function getTempLabel(temp) {
+      if (temp >= 80) return '炙热';
+      if (temp >= 60) return '温热';
+      if (temp >= 40) return '温暖';
+      if (temp >= 20) return '正常';
+      if (temp > 0) return '微凉';
+      return '冻结';
     }
     
     // ========== v0.6.5 四层容错数据加载 ==========
@@ -7900,9 +7908,9 @@
       }
       
       const reviewPoints = [
-        { retention: 60, hours: Math.round(24 * baseHL * Math.log2(100/60)), label: '60%复习点' },
-        { retention: 40, hours: Math.round(24 * baseHL * Math.log2(100/40)), label: '40%复习点' },
-        { retention: 20, hours: Math.round(24 * baseHL * Math.log2(100/20)), label: '20%复习点' }
+        { retention: 80, hours: Math.round(24 * baseHL * Math.log2(100/80)), label: '80%复习阈值', color: '#10b981' },
+        { retention: 60, hours: Math.round(24 * baseHL * Math.log2(100/60)), label: '60%复习点', color: '#f59e0b' },
+        { retention: 40, hours: Math.round(24 * baseHL * Math.log2(100/40)), label: '40%复习点', color: '#ef4444' }
       ];
       
       const getClosestIndex = (hours) => {
@@ -7968,10 +7976,12 @@
         visualMap: {
           show: false,
           pieces: [
-            { gte: 60, color: 'rgba(255, 140, 0, 0.1)' },
-            { gt: 40, lt: 60, color: 'rgba(98, 160, 234, 0.1)' },
-            { gt: 20, lt: 40, color: 'rgba(107, 114, 128, 0.15)' },
-            { lte: 20, color: 'rgba(59, 130, 246, 0.2)' }
+            { gte: 80, color: 'rgba(255, 69, 0, 0.1)' },
+            { gte: 60, lt: 80, color: 'rgba(255, 140, 0, 0.1)' },
+            { gte: 40, lt: 60, color: 'rgba(255, 215, 0, 0.1)' },
+            { gte: 20, lt: 40, color: 'rgba(98, 160, 234, 0.1)' },
+            { gt: 0, lt: 20, color: 'rgba(26, 95, 180, 0.1)' },
+            { lte: 0, color: 'rgba(107, 114, 128, 0.1)' }
           ],
           outOfRange: { color: 'rgba(255, 255, 255, 0)' }
         },
