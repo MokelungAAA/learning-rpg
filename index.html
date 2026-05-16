@@ -553,7 +553,7 @@
       color: #3b82f6;
       font-weight: 600;
     }
-    #bottomNav.hidden { display: none; }
+    #bottomNav.hidden { display: none !important; }
     /* 深色模式 */
     [data-theme="dark"] #bottomNav { background: #1e2235; border-top-color: #818cf8; }
     [data-theme="dark"] #bottomNav .nav-icon { color: #8890a0; }
@@ -562,7 +562,6 @@
     [data-theme="dark"] #bottomNav .nav-btn.active .nav-icon { color: #818cf8; }
     [data-theme="dark"] #bottomNav .nav-btn.active .nav-label { color: #818cf8; }
     [data-theme="dark"] #bottomNav .nav-btn.active::after { background: #818cf8; }
-    #bottomNav.hidden { display: none !important; }
 
     /* ========== 页面内容 ========== */
     .page-content {
@@ -5890,7 +5889,7 @@
       lastUpdated: new Date().toISOString(),
       learnerName: '墨澜',
       records: [
-        { id: 'rec-fb-001', timestamp: new Date().toISOString(), subject: '英语', textbook: '期中考试', chapter: 0, score: 75, duration: 30 }
+        { id: 'rec-fb-001', timestamp: new Date().toISOString(), subject: '英语', textbook: '期中考试', chapter: 0, score: 75, duration: 30, xp: 113 }
       ]
     };
 
@@ -6316,7 +6315,7 @@
         const momentum = calculateMomentum(appData.records.slice(0, index + 1));
         record.xp = calculateXPForRecord(record, momentum);
         totalXP += record.xp || 0;
-        totalMinutes += record.duration || 0;
+        totalMinutes += record.durationMinutes || record.duration || 0;
       });
 
       // 更新userProfile统计
@@ -6335,9 +6334,9 @@
     function calculateXPForRecord(record, momentum) {
       const profile = userProfile || {};
       const xpBasePerMin = profile.xpBasePerMinute || 2.0;
-      const duration = Math.min(record.duration || 0, profile.maxEffectiveDuration || 90);
+      const duration = Math.min(record.durationMinutes || record.duration || 0, profile.maxEffectiveDuration || 90);
       const rawBase = xpBasePerMin * duration;
-      const score = record.score || 0;
+      const score = record.accuracy || record.score || 0;
       const efficiency = score / 100;
       const subjectKey = getSubjectKey(record.subject);
       const difficulty = getSubjectDifficulty(subjectKey);
@@ -6587,7 +6586,7 @@
             subject: rec.subject,
             knowledgePoints: rec.textbook ? [rec.textbook + (rec.chapter ? `·第${rec.chapter}章` : '')] : [],
             durationMinutes: dur,
-            activityType: rec.textbook === '考试' ? 'exam' : 'practice',
+            activityType: (rec.textbook && rec.textbook.includes('考试')) || rec.activityType === 'exam' ? 'exam' : 'practice',
             totalQuestions: 0,
             correctCount: 0,
             accuracy: scr,
@@ -6597,8 +6596,8 @@
           // 统计各学科XP
           xpBySubject[rec.subject] = (xpBySubject[rec.subject] || 0) + xp;
           
-          // 考试记录存入 examResults
-          if (rec.textbook === '考试') {
+          // 考试记录存入 examResults（模糊匹配：含"考试"或activityType为exam）
+          if (rec.textbook && rec.textbook.includes('考试') || rec.activityType === 'exam') {
             examResults.push({
               id: rec.id || generateUUID(),
               name: '考试',
@@ -6919,6 +6918,9 @@
       document.querySelectorAll('.page-content').forEach(p => p.classList.remove('active'));
       const activePage = document.getElementById(`page-${page}`);
       if (activePage) activePage.classList.add('active');
+      
+      // v1.3.2: 切换页面后滚动到顶部
+      window.scrollTo({ top: 0, behavior: 'instant' });
       
       if (page === 'skills' && skillTreeChart) {
         setTimeout(() => skillTreeChart.resize(), 100);
@@ -9292,13 +9294,8 @@
       setTimeout(() => reportChart?.resize(), 100);
     }
     
-    /** 导出完整 data.json */
+    /** 导出完整 data.json（v2.0 格式） */
     function exportDataJson() {
-      const subjects = {};
-      for (const [name, sub] of Object.entries(appData.subjects)) {
-        subjects[name] = { totalXp: sub.xp || 0, nodes: sub.nodes || [] };
-      }
-      
       // 整合本地录入数据（localStorage）
       let allRecords = [...(appData.records || [])];
       try {
@@ -9306,28 +9303,19 @@
         if (localRecords.length) allRecords = [...localRecords, ...allRecords];
       } catch(e) {}
       
+      // v1.3.2: 统一导出为 v2.0 records 格式（与 commitToGitHub 一致）
       const out = {
-        version: '1.0',
+        version: '2.0',
         lastUpdated: new Date().toISOString().replace('Z', '+08:00'),
-        profile: {
-          learnerName: '墨澜',
-          globalBaseHalfLife: CONFIG.GLOBAL_BASE_HALFLIFE || 4.0,
-          subjectModifiers: CONFIG.SUBJECT_MODIFIERS || {},
-          tempBoostGain: 0.4,
-          tempBoostBase: 10,
-          avgReviewsPerWeek: 0
-        },
-        subjects,
-        log: allRecords.map(r => ({
+        learnerName: '墨澜',
+        records: allRecords.map(r => ({
           id: r.recordID,
-          timestamp: new Date(r.timestamp).toISOString().replace('Z', '+08:00'),
+          timestamp: new Date(r.timestamp).toISOString(),
           subject: r.subject,
-          knowledgePoints: r.knowledgePoints || [],
-          durationMinutes: r.durationMinutes || 0,
-          activityType: r.activityType || 'practice',
-          totalQuestions: r.totalQuestions || 0,
-          correctCount: r.correctCount || 0,
-          accuracy: r.accuracy || 0,
+          textbook: r.knowledgePoints && r.knowledgePoints[0] ? r.knowledgePoints[0] : '',
+          chapter: 0,
+          score: r.accuracy || 0,
+          duration: r.durationMinutes || 0,
           xp: r.xp || 0
         }))
       };
@@ -10212,7 +10200,8 @@
         textbook: r.knowledgePoints && r.knowledgePoints[0] ? r.knowledgePoints[0] : '',
         chapter: 0,
         score: r.accuracy || 0,
-        duration: r.durationMinutes || 0
+        duration: r.durationMinutes || 0,
+        xp: r.xp || 0  // v1.3.2: 保留原始XP值，防止推送后XP丢失
       }));
       
       const payload = {
@@ -10996,7 +10985,9 @@
       if (!appData) return;
       appData.version = DATA_VERSION;
       try {
-        localStorage.setItem('learning-rpg-appdata', JSON.stringify(appData));
+        // v1.3.2: 统一使用 learning-rpg-app-data 键名（与saveLocalData一致）
+        localStorage.setItem('learning-rpg-app-data', JSON.stringify(appData));
+        localStorage.removeItem('learning-rpg-appdata'); // 清理旧键
       } catch (e) {
         console.warn('[v0.8.4] 保存appData失败:', e.message);
       }
@@ -11773,7 +11764,9 @@
       // Phase 2: 首屏即时渲染（使用缓存或默认数据）
       // 尝试从localStorage恢复已保存的appData
       try {
-        const saved = localStorage.getItem('learning-rpg-appdata');
+        // v1.3.2: 优先从新键读取，兼容旧键
+        let saved = localStorage.getItem('learning-rpg-app-data');
+        if (!saved) saved = localStorage.getItem('learning-rpg-appdata'); // 兼容旧版
         if (saved) {
           const parsed = JSON.parse(saved);
           if (parsed && parsed.records) {
@@ -11843,6 +11836,10 @@
           mergeLocalRecords();
           renderAll();
           console.log(`[v0.6.5] 后台加载完成 ✓ ${source.desc}`);
+          
+          // v1.3.2: 额外加载教材和网课数据（之前因 return 导致永远不执行）
+          loadTextbookData();
+          loadCoursesData();
           return;
         } catch (e) {
           console.log(`[v0.9.3] ${source.desc} 不可用: ${e.message}`);
@@ -11850,7 +11847,7 @@
         }
       }
       
-      // 额外加载教材和网课数据（独立于主数据，不影响进度）
+      // 无网络 → 也尝试加载辅助数据
       loadTextbookData();
       loadCoursesData();
       
