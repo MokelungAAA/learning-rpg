@@ -6247,21 +6247,36 @@
     };
 
     /** 带超时的 fetch（默认5秒） */
-    async function fetchWithTimeout(url, timeoutMs = 5000) {
-      const controller = new AbortController();
-      const timer = setTimeout(() => controller.abort(), timeoutMs);
-      try {
-        const response = await fetch(url, {
-          signal: controller.signal,
-          method: 'GET',
-          headers: { 'Accept': 'application/json', 'Cache-Control': 'no-cache' }
-        });
-        return response;
-      } catch (e) {
-        if (e.name === 'AbortError') throw new Error('请求超时(5s)');
-        throw e;
-      } finally {
-        clearTimeout(timer);
+    async function fetchWithTimeout(url, timeoutMs = 5000, retries = 2) {
+      for (let attempt = 1; attempt <= retries; attempt++) {
+        const controller = new AbortController();
+        const timer = setTimeout(() => controller.abort(), timeoutMs);
+        try {
+          const response = await fetch(url, {
+            signal: controller.signal,
+            method: 'GET',
+            headers: { 'Accept': 'application/json', 'Cache-Control': 'no-cache' }
+          });
+          return response;
+        } catch (e) {
+          clearTimeout(timer);
+          if (e.name === 'AbortError') {
+            if (attempt < retries) {
+              console.warn(`[v0.8.5] 请求超时(5s) 第${attempt}次, 重试...`);
+              await new Promise(r => setTimeout(r, attempt * 1000));
+              continue;
+            }
+            throw new Error('请求超时(5s)');
+          }
+          if (attempt < retries) {
+            console.warn(`[v0.8.5] 请求失败 第${attempt}次, 重试...`);
+            await new Promise(r => setTimeout(r, attempt * 1000));
+            continue;
+          }
+          throw e;
+        } finally {
+          clearTimeout(timer);
+        }
       }
     }
 
@@ -6293,8 +6308,9 @@
         if (!raw) return null;
         const meta = JSON.parse(store.getItem('learning-rpg-cache-meta') || '{}');
         const ageHours = ((Date.now() - (meta.cachedAt || 0)) / 3600000).toFixed(1);
-        console.log(`[v0.6.5] 缓存命中 (${ageHours}小时前)`);
-        return JSON.parse(raw);
+        const isFresh = ageHours < 1;
+        console.log(`[v0.8.5] 缓存命中 (${ageHours}小时前) ${isFresh ? '✓新鲜' : '⚠过期'}`);
+        return { data: JSON.parse(raw), ageHours: parseFloat(ageHours), isFresh };
       } catch (e) { return null; }
     }
 
@@ -6315,11 +6331,23 @@
       // === 第一层：localStorage 缓存（秒开）===
       const cached = loadDataCache();
       if (cached) {
-        dataLoadState.isLoading = false;
-        showDataLoading(false);
+        if (cached.isFresh) {
+          dataLoadState.isLoading = false;
+          showDataLoading(false);
+          dataLoadState.hasError = false;
+          dataLoadState.dataSource = 'cache';
+          return convertGitHubDataToAppData(cached.data);
+        }
+        // 缓存过期，先用着，后台静默更新
         dataLoadState.hasError = false;
         dataLoadState.dataSource = 'cache';
-        return convertGitHubDataToAppData(cached);
+        const staleData = convertGitHubDataToAppData(cached.data);
+        if (!isFileProtocol()) {
+          backgroundDataLoad().then(() => {
+            console.log('[v0.8.5] 后台静默更新完成');
+          }).catch(() => {});
+        }
+        return staleData;
       }
       
       // === 第二层：网络请求（三源并发尝试）===
