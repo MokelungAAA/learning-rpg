@@ -460,6 +460,7 @@
     
     /* ========== 底部导航 ========== */
     .bottom-nav {
+      display: flex;
       position: fixed;
       bottom: 0;
       left: 0;
@@ -6720,6 +6721,8 @@
     });
     
     appData = JSON.parse(JSON.stringify(DEFAULT_DATA));
+    let dataReady = false;       // v0.9.4: 在线数据是否已就绪
+    let dataLoading = false;     // v0.9.4: 是否正在加载在线数据
     let skillTreeChart = null;
     let forgetChart = null;
     
@@ -6756,6 +6759,40 @@
 
     // ========== 启动页进入主页面 ==========
     function enterMain() {
+      if (!dataReady) {
+        showToast('⏳ 正在从GitHub同步数据，请稍候...', 'info');
+        if (dataLoading) return;
+        dataLoading = true;
+        const btn = document.querySelector('.launch-btn');
+        if (btn) {
+          btn.textContent = '⏳ 同步中...';
+          btn.style.opacity = '0.7';
+          btn.style.cursor = 'wait';
+        }
+        backgroundDataLoad().then(() => {
+          dataReady = true;
+          dataLoading = false;
+          if (btn) {
+            btn.textContent = 'LAUNCH';
+            btn.style.opacity = '1';
+            btn.style.cursor = 'pointer';
+          }
+          doEnterMain();
+        }).catch(() => {
+          dataLoading = false;
+          if (btn) {
+            btn.textContent = 'LAUNCH';
+            btn.style.opacity = '1';
+            btn.style.cursor = 'pointer';
+          }
+          doEnterMain();
+        });
+        return;
+      }
+      doEnterMain();
+    }
+    
+    function doEnterMain() {
       const launchPage = document.getElementById('launchPage');
       const mainPage = document.getElementById('mainPage');
       const overlay = document.getElementById('dataLoadingOverlay');
@@ -11408,9 +11445,9 @@
       if (readingCategoryChart) { try { readingCategoryChart.resize(); } catch(e){} }
     });
 
-    // ========== 初始化（v0.6.5 快速启动 + 后台静默加载） ==========
+    // ========== 初始化（v0.9.4: 提前并行拉取在线数据） ==========
     async function init() {
-      console.log('[v0.6.5] 快速启动...');
+      console.log('[v0.9.4] 快速启动...');
       
       // 应用主题偏好
       applyTheme(getPreferredTheme());
@@ -11422,7 +11459,17 @@
         });
       }
       
-      // Phase 1: 首屏即时渲染（appData 已在页面加载时设为 DEFAULT_DATA）
+      // Phase 1: 立即开始后台拉取在线数据（与渲染并行）
+      const dataPromise = backgroundDataLoad().then(() => {
+        dataReady = true;
+        dataLoading = false;
+        console.log('[v0.9.4] 在线数据就绪 ✓');
+      }).catch(e => {
+        console.warn('[v0.9.4] 在线数据拉取失败:', e);
+        dataReady = true;
+      });
+      
+      // Phase 2: 首屏即时渲染（使用缓存或默认数据）
       // 尝试从localStorage恢复已保存的appData
       try {
         const saved = localStorage.getItem('learning-rpg-appdata');
@@ -11438,19 +11485,19 @@
       initGestures();
       initCommandPalette();
       renderAll();
-      console.log('[v0.6.5] 首屏渲染完成');
+      console.log('[v0.9.4] 首屏渲染完成');
       
-      // Phase 2.1: 加载用户画像
-      try { await loadUserProfile(); } catch (e) { console.warn('[v0.9.2] 用户画像加载失败:', e); }
-
-      // Phase 2.2: 加载技能树
-      try { await loadSkillTree(); } catch (e) { console.warn('[v0.9.2] 技能树加载失败:', e); }
-
-      // Phase 2.3: 加载成就数据
-      try { await loadAchievementsData(); } catch (e) { console.warn('[v0.9.2] 成就数据加载失败:', e); }
-
-      // Phase 3: 后台静默加载数据
-      try { await backgroundDataLoad(); } catch (e) { console.warn('[v0.9.2] 后台数据加载失败:', e); }
+      // Phase 3: 等待数据就绪（最多8秒超时），更新启动页
+      await Promise.race([
+        dataPromise,
+        new Promise(r => setTimeout(r, 8000))
+      ]);
+      console.log('[v0.9.4] 启动就绪, dataReady=' + dataReady);
+      
+      // Phase 4: 非阻塞加载辅助数据（用户画像/技能树/成就）
+      loadUserProfile().catch(e => console.warn('[v0.9.4] 用户画像加载失败:', e));
+      loadSkillTree().catch(e => console.warn('[v0.9.4] 技能树加载失败:', e));
+      loadAchievementsData().catch(e => console.warn('[v0.9.4] 成就数据加载失败:', e));
     }
     
     /**
