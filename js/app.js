@@ -10,23 +10,12 @@
   window._launchApp = function () {
     if (_launched) return;
     _launched = true;
-    try {
-      var lp = document.getElementById('launchPage');
-      var mp = document.getElementById('mainPage');
-      if (lp) { lp.classList.add('hidden'); }
-      if (mp) { mp.classList.add('visible'); }
-      loadAllData();
-    } catch (e) {
-      console.error('Launch error:', e);
-      try {
-        var lp2 = document.getElementById('launchPage');
-        var mp2 = document.getElementById('mainPage');
-        if (lp2) { lp2.classList.add('hidden'); }
-        if (mp2) { mp2.classList.add('visible'); }
-        if (typeof loadAllData === 'function') { loadAllData(); }
-        else { document.getElementById('page-overview').innerHTML = '<div style="padding:40px;text-align:center"><h2>⚠️ 加载失败</h2><p>请刷新页面重试</p></div>'; }
-      } catch (ignore) {}
-    }
+    var lp = document.getElementById('launchPage');
+    var mp = document.getElementById('mainPage');
+    if (lp) lp.classList.add('hidden');
+    if (mp) mp.classList.add('visible');
+    try { renderImmediateOverview(); } catch (e) { console.error(e); }
+    setTimeout(function () { try { loadAllData(); } catch (e) { console.error(e); } }, 50);
   };
 
   window.addEventListener('error', function (e) {
@@ -89,17 +78,23 @@
     loadingOverlay.innerHTML = '<div class="loading-spinner"></div><div style="font-size:14px;color:var(--md-on-surface-variant)">加载数据中...</div>';
     document.body.appendChild(loadingOverlay);
 
-    var timeoutId = setTimeout(function () {
-      loadingOverlay.innerHTML = '<div style="text-align:center;color:var(--md-on-surface-variant)">加载超时，使用演示数据</div>';
+    var done = false;
+    var finish = function () {
+      if (done) return;
+      done = true;
+      try { initNavigation(); } catch (e) { console.error(e); }
+      try { renderOverview(); } catch (e) { console.error('renderOverview error:', e); renderFallbackOverview(); }
+      try { renderSettings(); } catch (e) { console.error(e); }
+      try { initPomodoroFab(); } catch (e) { console.error(e); }
+      loadingOverlay.style.opacity = '0';
       setTimeout(function () {
-        try { initNavigation(); } catch (e) { console.error(e); }
-        try { renderFallbackOverview(); } catch (e) { console.error(e); }
-        try { renderSettings(); } catch (e) { console.error(e); }
-        try { initPomodoroFab(); } catch (e) { console.error(e); }
-        loadingOverlay.style.opacity = '0';
-        setTimeout(function () { try { if (loadingOverlay.parentNode) loadingOverlay.parentNode.removeChild(loadingOverlay); } catch (ignore) {} }, 400);
-      }, 1000);
-    }, 12000);
+        try { if (loadingOverlay.parentNode) loadingOverlay.parentNode.removeChild(loadingOverlay); } catch (ignore) {}
+      }, 400);
+    };
+
+    setTimeout(function () {
+      if (!done) { console.warn('Data load timeout, using available data'); finish(); }
+    }, 10000);
 
     loadAppData()
       .then(function () { return loadUserProfile(); })
@@ -110,28 +105,10 @@
       .then(function () { return loadPomodoroSessions(); })
       .then(function () { return loadReadingRecords(); })
       .then(function () { return loadBookshelf(); })
-      .then(function () {
-        clearTimeout(timeoutId);
-        try { initNavigation(); } catch (e) { console.error(e); }
-        try { renderOverview(); } catch (e) { console.error('renderOverview error:', e); renderFallbackOverview(); }
-        try { renderSettings(); } catch (e) { console.error(e); }
-        try { initPomodoroFab(); } catch (e) { console.error(e); }
-        loadingOverlay.style.opacity = '0';
-        setTimeout(function () {
-          try { if (loadingOverlay.parentNode) loadingOverlay.parentNode.removeChild(loadingOverlay); } catch (ignore) {}
-        }, 400);
-      })
+      .then(function () { finish(); })
       .catch(function (err) {
-        clearTimeout(timeoutId);
         console.warn('Data load error:', err);
-        try { initNavigation(); } catch (e) { console.error(e); }
-        try { renderOverview(); } catch (e) { console.error('renderOverview error:', e); renderFallbackOverview(); }
-        try { renderSettings(); } catch (e) { console.error(e); }
-        try { initPomodoroFab(); } catch (e) { console.error(e); }
-        loadingOverlay.style.opacity = '0';
-        setTimeout(function () {
-          try { if (loadingOverlay.parentNode) loadingOverlay.parentNode.removeChild(loadingOverlay); } catch (ignore) {}
-        }, 400);
+        finish();
       });
   }
 
@@ -767,90 +744,164 @@
     return { icon: '📖', text: '平日', color: '#3B82F6' };
   }
 
-  function renderOverview() {
+  function renderImmediateOverview() {
     var container = document.getElementById('page-overview');
     if (!container) return;
-    var totalXp = appData.profile ? (appData.profile.totalXp || 0) : 0;
-    var todayXp = calcTodayXp();
-    var streak = calcStreakDays();
-    var dayStatus = getDayStatus();
-    var levelInfo = calcLevelInfo(totalXp);
-    var levelTitle = getLevelTitle(totalXp);
+    var cached = null;
+    try {
+      var raw = localStorage.getItem('lts-appData');
+      if (raw) cached = JSON.parse(raw);
+    } catch (ignore) {}
+    if (!cached) {
+      try {
+        var raw2 = localStorage.getItem('lts-cache-appData');
+        if (raw2) { var entry = JSON.parse(raw2); cached = entry.data; }
+      } catch (ignore) {}
+    }
+    var records = (cached && cached.records) || [];
+    var profile = (cached && cached.profile) || { totalXp: 0 };
+    var totalXp = profile.totalXp || 0;
+    var todayKey = getTodayKey();
+    var todayXp = 0;
+    for (var i = 0; i < records.length; i++) {
+      try {
+        var ts = records[i].timestamp;
+        if (ts && getDayKey(parseISO(ts)) === todayKey) {
+          todayXp += records[i].xp || 0;
+        }
+      } catch (ignore) {}
+    }
+    var level = Math.floor(Math.log(totalXp / 100 + 1) / Math.log(1.5)) + 1;
+    if (totalXp < 100) level = 1;
+    var currentLevelXp = Math.floor(100 * (Math.pow(1.5, level - 1) - 1));
+    var nextLevelXp = Math.floor(100 * (Math.pow(1.5, level) - 1));
+    var xpInLevel = totalXp - currentLevelXp;
+    var xpNeeded = nextLevelXp - currentLevelXp;
+    var percent = Math.min(100, Math.round((xpInLevel / xpNeeded) * 100)) || 0;
 
     var html = '';
     html += '<div class="overview-hero">';
     html += '<div class="hero-level-card">';
-    html += '<div class="hero-level-value">Lv' + levelInfo.level + '</div>';
-    html += '<div class="hero-level-title">' + levelTitle.cn + '</div>';
-    html += '<div class="hero-level-jp">' + levelTitle.name + '</div>';
+    html += '<div class="hero-level-value">Lv' + level + '</div>';
+    html += '<div class="hero-level-title">' + getLevelTitle(totalXp).cn + '</div>';
+    html += '<div class="hero-level-jp">' + getLevelTitle(totalXp).name + '</div>';
     html += '</div>';
     html += '<div class="stat-card"><div class="stat-card-icon">⚡</div><div class="stat-card-value" style="color:var(--color-success)">+' + todayXp + '</div><div class="stat-card-label">今日XP</div></div>';
-    html += '<div class="stat-card"><div class="stat-card-icon">🔥</div><div class="stat-card-value" style="color:var(--color-warning)">' + streak + '天</div><div class="stat-card-label">连续学习</div></div>';
-    html += '<div class="stat-card"><div class="stat-card-icon">' + dayStatus.icon + '</div><div class="stat-card-value" style="color:' + dayStatus.color + '">' + dayStatus.text + '</div><div class="stat-card-label">每日状态</div></div>';
+    html += '<div class="stat-card"><div class="stat-card-icon">🔥</div><div class="stat-card-value" style="color:var(--color-warning)">' + calcStreakDays() + '天</div><div class="stat-card-label">连续学习</div></div>';
+    html += '<div class="stat-card"><div class="stat-card-icon">' + getDayStatus().icon + '</div><div class="stat-card-value" style="color:' + getDayStatus().color + '">' + getDayStatus().text + '</div><div class="stat-card-label">每日状态</div></div>';
     html += '<div class="stat-card"><div class="stat-card-icon">🏆</div><div class="stat-card-value">' + formatNumber(totalXp) + '</div><div class="stat-card-label">总XP</div></div>';
     html += '</div>';
-
     html += '<div class="total-progress">';
-    html += '<div class="progress-header"><span class="progress-label">总等级进度</span><span class="progress-value">' + formatNumber(levelInfo.xpInLevel) + ' / ' + formatNumber(levelInfo.xpNeeded) + ' XP</span></div>';
-    html += '<div class="progress-bar"><div class="progress-fill" style="width:' + levelInfo.percent + '%"></div></div>';
+    html += '<div class="progress-header"><span class="progress-label">总等级进度</span><span class="progress-value">' + formatNumber(xpInLevel) + ' / ' + formatNumber(xpNeeded) + ' XP</span></div>';
+    html += '<div class="progress-bar"><div class="progress-fill" style="width:' + percent + '%"></div></div>';
     html += '</div>';
-
-    html += '<div class="section-title">📊 学科等级</div>';
-    html += '<div class="subject-grid" id="subjectGrid">';
-    var subjectNames = ['数学', '语文', '英语', '物理', '化学', '生物', '政治', '历史', '地理'];
-    for (var i = 0; i < subjectNames.length; i++) {
-      var sn = subjectNames[i];
-      var icon = SUBJECT_ICONS[sn] || '📚';
-      var subjectScore = 0;
-      var subjRecords = appData.records.filter(function (r) { return r.subject === sn; });
-      if (subjRecords.length > 0) {
-        var avgScore = subjRecords.reduce(function (s, r) { return s + (r.score || 0); }, 0) / subjRecords.length;
-        subjectScore = Math.round(avgScore * 0.6 + Math.min(100, subjRecords.length * 5) * 0.4);
+    html += '<div class="section-title">📊 学科等级</div><div class="subject-grid">';
+    var subjects = ['数学','语文','英语','物理','化学','生物','政治','历史','地理'];
+    var icons = ['📐','📖','🔤','⚡','🧪','🧬','⚖️','📜','🌍'];
+    for (var j = 0; j < subjects.length; j++) {
+      var subjRecs = records.filter(function(r) { return r.subject === subjects[j]; });
+      var subjScore = 0;
+      if (subjRecs.length > 0) {
+        var avg = subjRecs.reduce(function(s,r) { return s + (r.score||0); }, 0) / subjRecs.length;
+        subjScore = Math.round(avg * 0.6 + Math.min(100, subjRecs.length * 5) * 0.4);
       }
-      var sl = getLevelTitle(subjectScore);
-      html += '<div class="subject-card" data-subject="' + sn + '">';
-      html += '<div class="subject-card-icon">' + icon + '</div>';
-      html += '<div class="subject-card-name">' + sn + '</div>';
-      html += '<div class="subject-card-level">' + sl.cn + ' (' + sl.name + ')</div>';
-      html += '<div class="subject-card-progress"><div class="progress-bar"><div class="progress-fill" style="width:' + subjectScore + '%"></div></div></div>';
-      html += '<div class="subject-card-meta"><span>⭐ ' + (subjRecords.length > 0 ? Math.round(subjRecords.reduce(function (s, r) { return s + (r.xp || 0); }, 0)) : 0) + ' XP</span><span>' + subjRecords.length + ' 条记录</span></div>';
+      var slTitle = getLevelTitle(subjScore);
+      var subjXp = subjRecs.length > 0 ? Math.round(subjRecs.reduce(function(s,r){ return s + (r.xp||0); }, 0)) : 0;
+      html += '<div class="subject-card"><div class="subject-card-icon">' + icons[j] + '</div><div class="subject-card-name">' + subjects[j] + '</div><div class="subject-card-level">' + slTitle.cn + '(' + slTitle.name + ')</div><div class="subject-card-progress"><div class="progress-bar"><div class="progress-fill" style="width:' + subjScore + '%"></div></div></div><div class="subject-card-meta"><span>⭐' + subjXp + 'XP</span><span>' + subjRecs.length + '条记录</span></div></div>';
+    }
+    html += '</div>';
+    try { container.innerHTML = html; } catch (e) { console.error(e); }
+  }
+
+  function renderOverview() {
+    var container = document.getElementById('page-overview');
+    if (!container) return;
+    try {
+      var totalXp = appData.profile ? (appData.profile.totalXp || 0) : 0;
+      var todayXp = calcTodayXp();
+      var streak = calcStreakDays();
+      var dayStatus = getDayStatus();
+      var levelInfo = calcLevelInfo(totalXp);
+      var levelTitle = getLevelTitle(totalXp);
+
+      var html = '';
+      html += '<div class="overview-hero">';
+      html += '<div class="hero-level-card">';
+      html += '<div class="hero-level-value">Lv' + levelInfo.level + '</div>';
+      html += '<div class="hero-level-title">' + levelTitle.cn + '</div>';
+      html += '<div class="hero-level-jp">' + levelTitle.name + '</div>';
       html += '</div>';
-    }
-    html += '</div>';
+      html += '<div class="stat-card"><div class="stat-card-icon">⚡</div><div class="stat-card-value" style="color:var(--color-success)">+' + todayXp + '</div><div class="stat-card-label">今日XP</div></div>';
+      html += '<div class="stat-card"><div class="stat-card-icon">🔥</div><div class="stat-card-value" style="color:var(--color-warning)">' + streak + '天</div><div class="stat-card-label">连续学习</div></div>';
+      html += '<div class="stat-card"><div class="stat-card-icon">' + dayStatus.icon + '</div><div class="stat-card-value" style="color:' + dayStatus.color + '">' + dayStatus.text + '</div><div class="stat-card-label">每日状态</div></div>';
+      html += '<div class="stat-card"><div class="stat-card-icon">🏆</div><div class="stat-card-value">' + formatNumber(totalXp) + '</div><div class="stat-card-label">总XP</div></div>';
+      html += '</div>';
 
-    html += '<div class="fold-section">';
-    html += '<div class="fold-header" onclick="var b=this.nextElementSibling;var a=this.querySelector(\'.fold-arrow\');b.classList.toggle(\'open\');a.classList.toggle(\'open\')"><span>▼ 更多数据</span><span class="fold-arrow">▼</span></div>';
-    html += '<div class="fold-body">';
-    html += '<div class="section-title" style="margin-top:16px">📅 学习日历</div>';
-    html += '<div id="calendarHeatmap" style="overflow-x:auto;padding:8px 0"></div>';
-    html += '<div class="section-title" style="margin-top:16px">📊 学习报告（近30天）</div>';
-    html += '<div id="overviewChart" style="width:100%;height:280px"></div>';
-    html += '<div class="section-title" style="margin-top:16px">📊 学科时长分布</div>';
-    html += '<div id="subjectDurationChart" style="width:100%;height:280px"></div>';
-    html += '<div class="section-title" style="margin-top:16px">📊 效率散点图（得分 × 时长）</div>';
-    html += '<div id="efficiencyChart" style="width:100%;height:280px"></div>';
-    html += '<div class="section-title" style="margin-top:16px">🕐 学习时段热力图</div>';
-    html += '<div id="timeHeatmapChart" style="width:100%;height:280px"></div>';
-    html += '<div class="section-title" style="margin-top:16px">🏆 成就徽章</div>';
-    html += '<div id="achievementsOverview"></div>';
-    html += '<div class="section-title" style="margin-top:16px">📚 教材进度</div>';
-    html += '<div id="textbooksOverview"></div>';
-    html += '<div class="section-title" style="margin-top:16px">🎬 网课资源</div>';
-    html += '<div id="coursesOverview"></div>';
-    html += '</div>';
-    html += '</div>';
+      html += '<div class="total-progress">';
+      html += '<div class="progress-header"><span class="progress-label">总等级进度</span><span class="progress-value">' + formatNumber(levelInfo.xpInLevel) + ' / ' + formatNumber(levelInfo.xpNeeded) + ' XP</span></div>';
+      html += '<div class="progress-bar"><div class="progress-fill" style="width:' + levelInfo.percent + '%"></div></div>';
+      html += '</div>';
 
-    container.innerHTML = html;
-    var subjectGrid = document.getElementById('subjectGrid');
-    if (subjectGrid) {
-      subjectGrid.addEventListener('click', function (e) {
-        var card = e.target.closest('.subject-card');
-        if (!card) return;
-        var subjectName = card.getAttribute('data-subject');
-        if (subjectName) showSubjectDetail(subjectName);
-      });
+      html += '<div class="section-title">📊 学科等级</div>';
+      html += '<div class="subject-grid" id="subjectGrid">';
+      var subjectNames = ['数学', '语文', '英语', '物理', '化学', '生物', '政治', '历史', '地理'];
+      for (var i = 0; i < subjectNames.length; i++) {
+        var sn = subjectNames[i];
+        var icon = SUBJECT_ICONS[sn] || '📚';
+        var subjectScore = 0;
+        var subjRecords = appData.records.filter(function (r) { return r.subject === sn; });
+        if (subjRecords.length > 0) {
+          var avgScore = subjRecords.reduce(function (s, r) { return s + (r.score || 0); }, 0) / subjRecords.length;
+          subjectScore = Math.round(avgScore * 0.6 + Math.min(100, subjRecords.length * 5) * 0.4);
+        }
+        var sl = getLevelTitle(subjectScore);
+        html += '<div class="subject-card" data-subject="' + sn + '">';
+        html += '<div class="subject-card-icon">' + icon + '</div>';
+        html += '<div class="subject-card-name">' + sn + '</div>';
+        html += '<div class="subject-card-level">' + sl.cn + ' (' + sl.name + ')</div>';
+        html += '<div class="subject-card-progress"><div class="progress-bar"><div class="progress-fill" style="width:' + subjectScore + '%"></div></div></div>';
+        html += '<div class="subject-card-meta"><span>⭐ ' + (subjRecords.length > 0 ? Math.round(subjRecords.reduce(function (s, r) { return s + (r.xp || 0); }, 0)) : 0) + ' XP</span><span>' + subjRecords.length + ' 条记录</span></div>';
+        html += '</div>';
+      }
+      html += '</div>';
+
+      html += '<div class="fold-section">';
+      html += '<div class="fold-header" onclick="var b=this.nextElementSibling;var a=this.querySelector(\'.fold-arrow\');b.classList.toggle(\'open\');a.classList.toggle(\'open\')"><span>▼ 更多数据</span><span class="fold-arrow">▼</span></div>';
+      html += '<div class="fold-body">';
+      html += '<div class="section-title" style="margin-top:16px">📅 学习日历</div>';
+      html += '<div id="calendarHeatmap" style="overflow-x:auto;padding:8px 0"></div>';
+      html += '<div class="section-title" style="margin-top:16px">📊 学习报告（近30天）</div>';
+      html += '<div id="overviewChart" style="width:100%;height:280px"></div>';
+      html += '<div class="section-title" style="margin-top:16px">📊 学科时长分布</div>';
+      html += '<div id="subjectDurationChart" style="width:100%;height:280px"></div>';
+      html += '<div class="section-title" style="margin-top:16px">📊 效率散点图（得分 × 时长）</div>';
+      html += '<div id="efficiencyChart" style="width:100%;height:280px"></div>';
+      html += '<div class="section-title" style="margin-top:16px">🕐 学习时段热力图</div>';
+      html += '<div id="timeHeatmapChart" style="width:100%;height:280px"></div>';
+      html += '<div class="section-title" style="margin-top:16px">🏆 成就徽章</div>';
+      html += '<div id="achievementsOverview"></div>';
+      html += '<div class="section-title" style="margin-top:16px">📚 教材进度</div>';
+      html += '<div id="textbooksOverview"></div>';
+      html += '<div class="section-title" style="margin-top:16px">🎬 网课资源</div>';
+      html += '<div id="coursesOverview"></div>';
+      html += '</div>';
+      html += '</div>';
+
+      container.innerHTML = html;
+      var subjectGrid = document.getElementById('subjectGrid');
+      if (subjectGrid) {
+        subjectGrid.addEventListener('click', function (e) {
+          var card = e.target.closest('.subject-card');
+          if (!card) return;
+          var subjectName = card.getAttribute('data-subject');
+          if (subjectName) showSubjectDetail(subjectName);
+        });
+      }
+      setTimeout(function () { renderCalendarHeatmap(); renderOverviewCharts(); renderEfficiencyChart(); renderTimeHeatmap(); renderAchievementsOverview(); renderTextbooksOverview(); renderCoursesOverview(); }, 100);
+    } catch (e) {
+      console.error('renderOverview failed:', e);
+      renderFallbackOverview();
     }
-    setTimeout(function () { renderCalendarHeatmap(); renderOverviewCharts(); renderEfficiencyChart(); renderTimeHeatmap(); renderAchievementsOverview(); renderTextbooksOverview(); renderCoursesOverview(); }, 100);
   }
 
   function renderFallbackOverview() {
