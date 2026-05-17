@@ -54,21 +54,7 @@ function calcSubjectLevel(subjectKey) {
   return { score: score, title: getLevelTitle(score), progress: score };
 }
 
-function getLevelTitle(score) {
-  var titles = [
-    { name: '見習い', cn: '见习', color: '#9CA3AF', min: 0 },
-    { name: '初心者', cn: '初心者', color: '#6B7280', min: 10 },
-    { name: '学徒', cn: '学徒', color: '#3B82F6', min: 20 },
-    { name: '熟練者', cn: '熟练者', color: '#10B981', min: 40 },
-    { name: '達人', cn: '达人', color: '#F59E0B', min: 60 },
-    { name: '名人', cn: '名人', color: '#EF4444', min: 80 },
-    { name: '伝説', cn: '传说', color: '#8B5CF6', min: 95 }
-  ];
-  for (var i = titles.length - 1; i >= 0; i--) {
-    if (score >= titles[i].min) return titles[i];
-  }
-  return titles[0];
-}
+
 
 function calcBaseXP(score, duration) {
   if (!duration || duration <= 0) return 1;

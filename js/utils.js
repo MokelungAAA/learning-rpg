@@ -218,3 +218,50 @@ function toggleTheme() {
 function isMobile() {
   return window.innerWidth < 768;
 }
+
+/* ================================================================
+   全局常量定义
+   ================================================================ */
+
+var SUBJECT_NAMES = {
+  'logos': '数学', 'mythos': '语文', 'lingua': '英语',
+  'physis': '物理', 'khemeia': '化学', 'zoe': '生物',
+  'politeia': '政治', 'historia': '历史', 'geographia': '地理'
+};
+
+var SUBJECT_ICONS = {
+  '数学': '📐', '语文': '📖', '英语': '🔤',
+  '物理': '⚡', '化学': '🧪', '生物': '🧬',
+  '政治': '⚖️', '历史': '📜', '地理': '🌍'
+};
+
+var SUBJECT_COLORS = {
+  '数学': 'var(--subj-math)', '语文': 'var(--subj-chinese)', '英语': 'var(--subj-english)',
+  '物理': 'var(--subj-physics)', '化学': 'var(--subj-chemistry)', '生物': 'var(--subj-biology)',
+  '政治': 'var(--subj-politics)', '历史': 'var(--subj-history)', '地理': 'var(--subj-geography)'
+};
+
+var SUBJECT_KEYS = ['logos', 'mythos', 'lingua', 'physis', 'khemeia', 'zoe', 'politeia', 'historia', 'geographia'];
+
+var NAME_TO_KEY = {
+  '数学': 'logos', '语文': 'mythos', '英语': 'lingua',
+  '物理': 'physis', '化学': 'khemeia', '生物': 'zoe',
+  '政治': 'politeia', '历史': 'historia', '地理': 'geographia'
+};
+
+var LEVEL_TITLES = [
+  { name: '見習い', cn: '见习', color: '#9CA3AF', min: 0 },
+  { name: '初心者', cn: '初心者', color: '#6B7280', min: 10 },
+  { name: '学徒', cn: '学徒', color: '#3B82F6', min: 20 },
+  { name: '熟練者', cn: '熟练者', color: '#10B981', min: 40 },
+  { name: '達人', cn: '达人', color: '#F59E0B', min: 60 },
+  { name: '名人', cn: '名人', color: '#EF4444', min: 80 },
+  { name: '伝説', cn: '传说', color: '#8B5CF6', min: 95 }
+];
+
+function getLevelTitle(score) {
+  for (var i = LEVEL_TITLES.length - 1; i >= 0; i--) {
+    if (score >= LEVEL_TITLES[i].min) return LEVEL_TITLES[i];
+  }
+  return LEVEL_TITLES[0];
+}

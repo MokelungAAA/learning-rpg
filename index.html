@@ -30,7 +30,7 @@
           <span id="launchCurrentXp">0</span> / <span id="launchNextXp">5000</span> XP
         </div>
       </div>
-      <button class="launch-btn" id="launchBtn" onclick="(function(){var f=window._launchApp;if(f){f();return;}var lp=document.getElementById('launchPage');var mp=document.getElementById('mainPage');if(lp)lp.classList.add('hidden');if(mp)mp.classList.add('visible')})()">LAUNCH</button>
+      <button class="launch-btn" id="launchBtn" onclick="console.log('✅ Inline onclick called!'); if (window._launchApp) { window._launchApp(); } else { console.error('❌ window._launchApp not found!'); alert('window._launchApp not found!'); }">LAUNCH</button>
     </div>
   </div>
 
@@ -89,6 +89,15 @@
     <svg viewBox="0 0 24 24" width="28" height="28"><path d="M12 2a9 9 0 00-9 9v1a1 1 0 002 0v-1a7 7 0 1114 0v1a1 1 0 002 0v-1a9 9 0 00-9-9z"/><path d="M12 6a1 1 0 00-1 1v5.586l-2.293 2.293a1 1 0 101.414 1.414l2.586-2.586A1 1 0 0013 13V7a1 1 0 00-1-1z"/></svg>
   </button>
 
+  <div class="pom-panel" id="pomodoroPanel">
+    <div class="pom-panel-header">
+      <h3 style="font-size:18px;font-weight:600">🍅 番茄钟</h3>
+      <button class="btn-icon" onclick="closePomodoro()" style="background:transparent;border:none;font-size:20px;cursor:pointer;color:var(--md-on-surface-variant)">✕</button>
+    </div>
+    <div class="pom-panel-body" id="pomodoroBody"></div>
+  </div>
+  <div class="pom-backdrop" id="pomodoroBackdrop" onclick="closePomodoro()"></div>
+
   <div class="modal-overlay" id="modalOverlay"></div>
   <div class="modal-container" id="modalContainer"></div>
   <div class="command-palette" id="commandPalette"></div>
@@ -96,7 +105,9 @@
 
   <script src="js/utils.js"></script>
   <script src="js/algorithms.js"></script>
+  <script src="js/persistence.js"></script>
   <script src="js/data.js"></script>
+  <script src="js/recorder.js"></script>
   <script src="js/app.js"></script>
 </body>
 </html>

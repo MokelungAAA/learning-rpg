@@ -120,8 +120,14 @@ function buildGitHubUrls(path) {
 
 function loadFromMultiSource(path) {
   if (isFileProtocol()) {
-    return Promise.reject(new Error('File protocol, skip network'));
+    return loadLocalFile(path).catch(function () {
+      return tryGitHubUrls(path);
+    });
   }
+  return tryGitHubUrls(path);
+}
+
+function tryGitHubUrls(path) {
   var urls = buildGitHubUrls(path);
   var errors = [];
   function tryUrl(index) {
@@ -136,29 +142,58 @@ function loadFromMultiSource(path) {
   return tryUrl(0);
 }
 
+function loadLocalFile(path) {
+  return new Promise(function (resolve, reject) {
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', path, true);
+    xhr.timeout = 5000;
+    xhr.onload = function () {
+      if (xhr.status >= 200 && xhr.status < 300) {
+        try {
+          resolve(JSON.parse(xhr.responseText));
+        } catch (e) {
+          reject(new Error('JSON parse error: ' + path));
+        }
+      } else {
+        reject(new Error('Local file not found: ' + path));
+      }
+    };
+    xhr.onerror = function () { reject(new Error('XHR error: ' + path)); };
+    xhr.ontimeout = function () { reject(new Error('XHR timeout: ' + path)); };
+    xhr.send();
+  });
+}
+
 function loadAppData() {
+  var local = loadLocal('appData');
+  if (local) {
+    appData = local;
+    appData.dataSource = 'local';
+    console.log('📦 从 localStorage 加载数据 (' + (appData.records||[]).length + ' 条记录)');
+    backgroundDataLoad();
+    return Promise.resolve(appData);
+  }
+
   var cached = getCache('appData');
   if (cached) {
     appData = deepClone(cached);
     appData.dataSource = 'cache';
+    console.log('📦 从缓存加载数据 (' + (appData.records||[]).length + ' 条记录)');
     backgroundDataLoad();
     return Promise.resolve(appData);
   }
+
   return loadFromMultiSource('data/data.json')
     .then(function (data) {
       data = convertGitHubData(data);
       setCache('appData', data);
+      saveLocal('appData', data);
       appData = data;
       appData.dataSource = 'github';
+      console.log('📦 从 GitHub/本地文件加载数据 (' + (appData.records||[]).length + ' 条记录)');
       return appData;
     })
     .catch(function () {
-      var local = loadLocal('appData');
-      if (local) {
-        appData = local;
-        appData.dataSource = 'local';
-        return appData;
-      }
       appData = deepClone(FALLBACK_DATA);
       appData.dataSource = 'fallback';
       return appData;
@@ -174,11 +209,14 @@ function backgroundDataLoad() {
       var oldSource = appData.dataSource;
       appData = data;
       appData.dataSource = 'github';
-      if (oldSource === 'cache') {
+      console.log('🔄 后台同步完成');
+      if (oldSource === 'cache' || oldSource === 'local') {
         refreshUI();
       }
     })
-    .catch(function () {});
+    .catch(function () {
+      console.log('🔄 后台同步跳过（离线）');
+    });
 }
 
 function convertGitHubData(raw) {
@@ -186,7 +224,7 @@ function convertGitHubData(raw) {
   var data = {
     version: raw.version || DATA_VERSION,
     records: [],
-    profile: raw.profile || FALLBACK_DATA.profile
+    profile: raw.profile || deepClone(FALLBACK_DATA.profile)
   };
   if (raw.records && Array.isArray(raw.records)) {
     data.records = raw.records;
@@ -211,6 +249,13 @@ function convertGitHubData(raw) {
     }
     data.records = v1Records;
     data.profile.totalXp = raw.profile ? raw.profile.totalXp || 0 : 0;
+  }
+  if (!data.profile.totalXp && data.records.length > 0) {
+    var sum = 0;
+    for (var r = 0; r < data.records.length; r++) {
+      sum += data.records[r].xp || 0;
+    }
+    data.profile.totalXp = sum;
   }
   return data;
 }
