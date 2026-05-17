@@ -30,7 +30,7 @@
           <span id="launchCurrentXp">0</span> / <span id="launchNextXp">5000</span> XP
         </div>
       </div>
-      <button class="launch-btn" id="launchBtn" onclick="if(window._launchApp)window._launchApp()">LAUNCH</button>
+      <button class="launch-btn" id="launchBtn" onclick="(function(){var f=window._launchApp;if(f){f();return}var lp=document.getElementById('launchPage');var mp=document.getElementById('mainPage');if(lp)lp.classList.add('hidden');if(mp)mp.classList.add('visible')})()">LAUNCH</button>
     </div>
   </div>
 

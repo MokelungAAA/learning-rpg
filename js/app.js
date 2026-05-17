@@ -5,14 +5,32 @@
 (function () {
   'use strict';
 
+  window._launchApp = function () {
+    try {
+      var lp = document.getElementById('launchPage');
+      var mp = document.getElementById('mainPage');
+      if (lp) { lp.classList.add('hidden'); }
+      if (mp) { mp.classList.add('visible'); }
+      loadAllData();
+    } catch (e) {
+      console.error('Launch error:', e);
+      var lp2 = document.getElementById('launchPage');
+      var mp2 = document.getElementById('mainPage');
+      if (lp2) { lp2.classList.add('hidden'); }
+      if (mp2) { mp2.classList.add('visible'); }
+      if (typeof loadAllData === 'function') { loadAllData(); }
+      else { document.body.innerHTML = '<div style="padding:40px;text-align:center"><h2>⚠️ 加载失败</h2><p>请刷新页面重试</p></div>'; }
+    }
+  };
+
   window.addEventListener('error', function (e) {
     console.error('Global Error:', e.message, e.filename, e.lineno);
-    showToast('系统遇到错误，请刷新页面', 'error');
+    try { showToast('系统遇到错误，请刷新页面', 'error'); } catch (ignore) {}
   });
 
   window.addEventListener('unhandledrejection', function (e) {
     console.error('Unhandled Promise:', e.reason);
-    showToast('网络请求失败，请检查连接', 'error');
+    try { showToast('网络请求失败，请检查连接', 'error'); } catch (ignore) {}
   });
 
   var currentPage = 'overview';
@@ -23,7 +41,11 @@
     launchBtn.addEventListener('click', function () {
       window._launchApp();
     });
-    animateLaunchProgress();
+    try {
+      animateLaunchProgress();
+    } catch (e) {
+      console.warn('Launch progress animation failed:', e);
+    }
   }
 
   function animateLaunchProgress() {
@@ -1706,13 +1728,6 @@
   }
 
   window._exportData = exportAllData;
-  window._launchApp = function () {
-    var lp = document.getElementById('launchPage');
-    var mp = document.getElementById('mainPage');
-    if (lp) { lp.classList.add('hidden'); }
-    if (mp) { mp.classList.add('visible'); }
-    loadAllData();
-  };
 
   document.addEventListener('DOMContentLoaded', function () {
     initTheme();
