@@ -3775,7 +3775,7 @@
           <span id="launchCurrentXp">0</span> / <span id="launchNextXp">5000</span> XP
         </div>
       </div>
-      <button class="launch-btn" id="launchBtn" onclick="enterMain()">LAUNCH</button>
+      <button class="launch-btn" id="launchBtn" onclick="(function(){var l=document.getElementById('launchPage');if(l){l.style.display='none';l.style.opacity='0';l.style.pointerEvents='none';}var m=document.getElementById('mainPage');if(m){m.style.display='block';m.style.opacity='1';}var b=document.getElementById('bottomNav');if(b){b.classList.remove('hidden');}var o=document.getElementById('dataLoadingOverlay');if(o){o.style.display='none';o.style.opacity='0';}if(typeof enterMain==='function'){enterMain();}})()">LAUNCH</button>
     </div>
   </div>
   
@@ -6987,7 +6987,6 @@
       
       // ========== 构建 knowledgeStates（知识状态映射） ==========
       const knowledgeStates = {};
-      const now = Date.now();
       const reverseSubjectMap = {'logos':'数学','mythos':'语文','lingua':'英语','physis':'物理','khemeia':'化学','zoe':'生物','politeia':'政治','historia':'历史','geographia':'地理'};
       
       for (const rec of records) {
