@@ -12,7 +12,6 @@
   <link rel="stylesheet" href="css/layout.css">
   <link rel="stylesheet" href="css/components.css">
   <link rel="stylesheet" href="css/pages.css">
-  <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
 </head>
 <body>
 
@@ -30,7 +29,7 @@
           <span id="launchCurrentXp">0</span> / <span id="launchNextXp">5000</span> XP
         </div>
       </div>
-      <button class="launch-btn" id="launchBtn" onclick="console.log('✅ Inline onclick called!'); if (window._launchApp) { window._launchApp(); } else { console.error('❌ window._launchApp not found!'); alert('window._launchApp not found!'); }">LAUNCH</button>
+      <button class="launch-btn" id="launchBtn">LAUNCH</button>
     </div>
   </div>
 
@@ -105,9 +104,10 @@
 
   <script src="js/utils.js"></script>
   <script src="js/algorithms.js"></script>
-  <script src="js/persistence.js"></script>
   <script src="js/data.js"></script>
+  <script src="js/persistence.js"></script>
   <script src="js/recorder.js"></script>
   <script src="js/app.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
 </body>
 </html>

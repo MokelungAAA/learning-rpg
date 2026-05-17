@@ -1195,16 +1195,21 @@ function renderPomodoroDone() {
 
   var xpEarned = 0;
   if (completed && pomodoroMode !== 'break') {
-    var kps = pomodoroKPs ? pomodoroKPs.split(/[,，、\s]+/).filter(function(s){return s.length>0;}) : [];
-    var record = createLearningRecord({
+    var record = {
+      id: uuid(),
+      timestamp: toLocalISO(),
       subject: pomodoroSubject || '未指定',
-      knowledgePoints: kps,
+      knowledgePoints: pomodoroKPs ? pomodoroKPs.split(/[,，、\s]+/).filter(function(s){return s.length>0;}) : [],
       duration: minutes,
       activityType: 'practice',
       score: focusScore,
-      source: 'pomodoro'
-    });
-    xpEarned = commitRecord(record);
+      source: 'pomodoro',
+      xp: calcBaseXP(focusScore, minutes)
+    };
+    appData.records.push(record);
+    if (appData.profile) appData.profile.totalXp = (appData.profile.totalXp || 0) + record.xp;
+    xpEarned = record.xp;
+    saveAppData();
   }
 
   var html = '<div class="pom-celebration">';
@@ -1228,6 +1233,7 @@ function renderPomodoroDone() {
     setTimeout(function () {
       showToast('✅ +' + xpEarned + ' XP', 'success');
       renderOverview();
+      checkAchievements();
     }, 500);
   }
 }
@@ -1389,7 +1395,9 @@ window._saveRecord = function () {
   var notesEl = document.getElementById('entryNotes');
   var notes = notesEl ? notesEl.value.trim() : '';
 
-  var record = createLearningRecord({
+  var record = {
+    id: uuid(),
+    timestamp: toLocalISO(),
     subject: subject,
     knowledgePoints: knowledgePoints,
     activityType: activityType,
@@ -1397,14 +1405,27 @@ window._saveRecord = function () {
     duration: duration,
     practiceDuration: practiceDuration,
     reviewDuration: reviewDuration,
-    notes: notes,
-    source: 'web'
-  });
+    totalQuestions: 0,
+    correctCount: 0,
+    source: 'web',
+    notes: notes
+  };
+  record.xp = calcBaseXP(score, duration);
 
-  var xp = commitRecord(record);
+  appData.records.push(record);
+  if (appData.profile) {
+    appData.profile.totalXp = (appData.profile.totalXp || 0) + record.xp;
+    appData.profile.totalStudyMinutes = (appData.profile.totalStudyMinutes || 0) + duration;
+  }
+  buildKnowledgeStates(appData.records, appData.skillTree);
+  updateUserProfile();
+  saveAppData();
   closeModal();
-  showToast('✅ +' + xp + ' XP', 'success');
-  setTimeout(function () { renderOverview(); }, 300);
+  showToast('✅ +' + record.xp + ' XP', 'success');
+  setTimeout(function () {
+    renderOverview();
+    checkAchievements();
+  }, 300);
 };
 
 window._deleteRecord = function (id) {
@@ -1428,9 +1449,14 @@ window._confirmDelete = function (id) {
   for (var i = 0; i < appData.records.length; i++) {
     if (appData.records[i].id === id) { idx = i; break; }
   }
-  if (removeRecordById(id)) {
-    closeModal();
-    showToast('记录已删除', 'info');
+  if (idx < 0) { closeModal(); showToast('记录未找到', 'error'); return; }
+  var r = appData.records[idx];
+  if (appData.profile) appData.profile.totalXp = Math.max(0, (appData.profile.totalXp || 0) - (r.xp || 0));
+  appData.records.splice(idx, 1);
+  buildKnowledgeStates(appData.records, appData.skillTree);
+  saveAppData();
+  closeModal();
+  showToast('记录已删除', 'info');
   renderLog();
   setTimeout(function () { renderOverview(); }, 200);
 };
@@ -1461,29 +1487,33 @@ window._editRecord = function (id) {
 window._saveEdit = function () {
   var idEl = document.getElementById('editRecordId');
   var id = idEl ? idEl.value : '';
+  var r = null;
+  for (var i = 0; i < appData.records.length; i++) {
+    if (appData.records[i].id === id) { r = appData.records[i]; break; }
+  }
+  if (!r) { closeModal(); showToast('记录未找到', 'error'); return; }
 
   var subjectEl = document.getElementById('editSubject');
   var scoreEl = document.getElementById('editScore');
   var durationEl = document.getElementById('editDuration');
-  var kpEl = document.getElementById('editKPs');
+  var oldXp = r.xp || 0;
+  r.subject = subjectEl ? subjectEl.value : r.subject;
+  r.score = parseInt(scoreEl ? scoreEl.value : 0) || r.score;
+  r.duration = parseInt(durationEl ? durationEl.value : 0) || r.duration;
 
-  var patch = {};
-  if (subjectEl) patch.subject = subjectEl.value;
-  if (scoreEl) patch.score = parseInt(scoreEl.value) || 0;
-  if (durationEl) patch.duration = parseInt(durationEl.value) || 0;
+  var kpEl = document.getElementById('editKPs');
   if (kpEl) {
     var kpsRaw = kpEl.value.trim();
-    patch.knowledgePoints = kpsRaw ? kpsRaw.split(/[,，、\s]+/).filter(function(s){return s.length>0;}) : [];
+    r.knowledgePoints = kpsRaw ? kpsRaw.split(/[,，、\s]+/).filter(function(s){return s.length>0;}) : [];
   }
 
-  if (updateRecordById(id, patch)) {
-    closeModal();
-    showToast('记录已更新', 'success');
-  } else {
-    closeModal();
-    showToast('记录未找到', 'error');
-    return;
-  }
+  r.xp = calcBaseXP(r.score, r.duration);
+  if (appData.profile) appData.profile.totalXp = (appData.profile.totalXp || 0) - oldXp + r.xp;
+
+  buildKnowledgeStates(appData.records, appData.skillTree);
+  saveAppData();
+  closeModal();
+  showToast('记录已更新', 'success');
   renderLog();
   setTimeout(function () { renderOverview(); }, 200);
 };
