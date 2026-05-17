@@ -1,8 +1,12 @@
 # 临时文件
 github_index.html
-start-server.ps1
-simple-server.ps1
 测试文件.txt
+
+# 脚本工具（已移至 scripts/ 目录）
+scripts/
+
+# 历史备份（已移至 backups/ 目录）
+backups/
 
 # 系统文件
 Thumbs.db

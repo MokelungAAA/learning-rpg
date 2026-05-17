@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
@@ -3775,7 +3775,7 @@
           <span id="launchCurrentXp">0</span> / <span id="launchNextXp">5000</span> XP
         </div>
       </div>
-      <button class="launch-btn" onclick="enterMain()">LAUNCH</button>
+      <button class="launch-btn" id="launchBtn" onclick="enterMain()">LAUNCH</button>
     </div>
   </div>
   
@@ -4358,7 +4358,7 @@
         </div>
         <div class="about-system-name">学习RPG · 认知操作系统</div>
         <div class="about-version">
-          <span class="about-version-badge">v2.2</span>
+          <span class="about-version-badge">v2.3</span>
         </div>
         <div class="about-developer-info">
           <div class="about-developer-name">墨澜 & MIKU</div>
@@ -4401,8 +4401,8 @@
         <div class="changelog-major expanded" onclick="this.classList.toggle('expanded')">
           <div class="changelog-major-header current">
             <div class="changelog-major-left">
-              <span class="changelog-major-label">V1.2</span>
-              <span class="changelog-major-tag">当前 · 阅读记录系统</span>
+              <span class="changelog-major-label">V2.3</span>
+              <span class="changelog-major-tag">当前 · 代码重构与Bug修复</span>
             </div>
             <span class="changelog-major-toggle">▼</span>
           </div>
@@ -4410,8 +4410,23 @@
               <div class="changelog-version expanded" onclick="event.stopPropagation();this.classList.toggle('expanded')">
               <div class="changelog-version-header current">
                 <div class="changelog-version-left">
-                  <span>v2.0</span>
+                  <span>v2.3</span>
                   <span class="changelog-version-tag">当前</span>
+                </div>
+                <span class="changelog-toggle">▼</span>
+              </div>
+              <div class="changelog-items">
+                <div class="changelog-item">
+                  <span class="changelog-item-version">2026-05-17</span>
+                  V2.3 代码重构：合并enterMain/forceEnterMain/doEnterMain为单一函数（强制进入永不阻塞）；启动按钮添加ID+备用事件监听（click+touchend双保险）；renderAll全面null检查（修复dailyStateIcon等7处DOM崩溃点）；修复currentLevelEnd/progressPercent作用域Bug（const→var提升至函数作用域）；底部导航移动端始终可见（移除hidden类）；仓库结构整理（7个备份HTML→backups/，2个脚本→scripts/，删除github_index.html）；清理46行冗余console.log调试输出；DATA_VERSION→v2.3。
+                </div>
+              </div>
+            </div>
+              <div class="changelog-version expanded" onclick="event.stopPropagation();this.classList.toggle('expanded')">
+              <div class="changelog-version-header">
+                <div class="changelog-version-left">
+                  <span>v2.0</span>
+                  <span class="changelog-version-tag"></span>
                 </div>
                 <span class="changelog-toggle">▼</span>
               </div>
@@ -5687,8 +5702,8 @@
     </div>
   </div>
   
-  <!-- 底部导航 v2.1（常驻显示，启动页时 transform 隐藏） -->
-  <nav id="bottomNav" class="hidden">
+  <!-- 底部导航 v2.3（移动端始终可见，桌面端CSS隐藏） -->
+  <nav id="bottomNav">
     <div class="nav-inner">
       <button class="nav-btn active" data-page="overview">
         <span class="nav-icon"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></span>
@@ -5767,7 +5782,6 @@
             if (page) { e.preventDefault(); switchPage(page); }
           }
         });
-        console.log('[v2.0] 底部导航事件已绑定');
       }
       const dnav = document.getElementById('desktopNav');
       if (dnav) {
@@ -5873,7 +5887,7 @@
     };
     
     // ========== 数据版本管理 ==========
-    const DATA_VERSION = 'v2.2';
+    const DATA_VERSION = 'v2.3';
     // v2.1: 强制清除旧缓存以修复XP丢失问题
     (function clearOldCache() {
       try {
@@ -5883,7 +5897,6 @@
           const cached = JSON.parse(appDataStr);
           // 如果缓存的totalXp小于131（正确的总XP），说明是旧错误数据，清除
           if (cached.profile && cached.profile.totalXp < 131 && cached.records && cached.records.length >= 2) {
-            console.log('[v2.1] 检测到XP异常的旧缓存(totalXp=' + cached.profile.totalXp + ')，正在清除...');
             localStorage.removeItem('learning-rpg-app-data');
             localStorage.removeItem('learning-rpg-appdata');
             localStorage.removeItem('learning-rpg-cache');
@@ -6276,18 +6289,16 @@
             const parsed = JSON.parse(cached);
             userProfile = { ...DEFAULT_USER_PROFILE, ...parsed };
             userProfileLoadState.dataSource = 'cache';
-            console.log('[v0.8.2] 用户画像缓存命中');
             userProfileLoadState.isLoading = false;
             return userProfile;
           }
-        } catch (e) { console.warn('[v0.8.2] 用户画像缓存解析失败:', e); }
+        } catch (e) { }
       }
       
       // === 第二层：网络请求（多源容错）===
       if (!isFileProtocol()) {
         for (const source of USER_PROFILE_SOURCES) {
           try {
-            console.log(`[v0.8.2] 尝试从 ${source.name} 加载用户画像...`);
             const response = await fetchWithTimeout(source.url);
             if (!response.ok) throw new Error("HTTP " + response.status);
             const data = await response.json();
@@ -6297,18 +6308,15 @@
             userProfileLoadState.dataSource = source.name;
             userProfileLoadState.hasError = false;
             saveUserProfile();
-            console.log(`[v0.8.2] 用户画像加载成功 ✓ 来源: ${source.name}`);
             userProfileLoadState.isLoading = false;
             return userProfile;
           } catch (e) {
-            console.warn('[v0.8.5] 用户画像加载失败:', e.message);
             continue;
           }
         }
       }
       
       // === 第三层：使用默认值（冷启动）===
-      console.log('[v0.8.2] 使用默认用户画像（冷启动）');
       userProfileLoadState.dataSource = 'default';
       userProfileLoadState.hasError = false;
       userProfileLoadState.isLoading = false;
@@ -6324,9 +6332,7 @@
       try {
         userProfile.lastUpdated = new Date().toISOString();
         store.setItem('learning-rpg-user-profile', JSON.stringify(userProfile));
-        console.log('[v0.8.2] 用户画像已保存');
       } catch (e) {
-        console.warn('[v0.8.2] 用户画像保存失败:', e);
       }
     }
 
@@ -6355,7 +6361,6 @@
       
       // 保存到 localStorage
       saveUserProfile();
-      console.log('[v0.8.2] 用户画像已更新');
     }
 
     // ========== 自适应参数更新 ==========
@@ -6430,30 +6435,25 @@
         try {
           skillTreeData = JSON.parse(cached);
           skillTreeLoadState = { loaded: true, error: null, source: 'cache' };
-          console.log('[v0.8.5] 技能树缓存命中');
           return;
         } catch(e) {}
       }
 
       for (const url of SKILL_TREE_SOURCES) {
         try {
-          console.log('[v0.8.5] 尝试加载技能树:', url);
           const resp = await fetchWithTimeout(url);
           if (resp.ok) {
             skillTreeData = await resp.json();
             localStorage.setItem('skillTreeData', JSON.stringify(skillTreeData));
             skillTreeLoadState = { loaded: true, error: null, source: url };
-            console.log('[v0.8.5] 技能树加载成功');
             return;
           }
         } catch(e) {
-          console.warn('[v0.8.5] 技能树加载失败:', e.message);
           continue;
         }
       }
 
       skillTreeLoadState = { loaded: false, error: 'All sources failed', source: null };
-      console.warn('[v0.8.5] 技能树全部加载源失败');
     }
 
     // ========== v0.8.3 XP引擎2.0 ==========
@@ -6685,14 +6685,12 @@
           clearTimeout(timer);
           if (e.name === 'AbortError') {
             if (attempt < retries) {
-              console.warn(`[v0.8.5] 请求超时(5s) 第${attempt}次, 重试...`);
               await new Promise(r => setTimeout(r, attempt * 1000));
               continue;
             }
             throw new Error('请求超时(5s)');
           }
           if (attempt < retries) {
-            console.warn(`[v0.8.5] 请求失败 第${attempt}次, 重试...`);
             await new Promise(r => setTimeout(r, attempt * 1000));
             continue;
           }
@@ -6728,7 +6726,6 @@
       if (!store) return;
       try {
         store.setItem('learning-rpg-app-data', JSON.stringify(appData));
-        console.log('[v1.2.1] 本地数据已保存');
       } catch (e) {
         console.warn('[v1.2.1] 本地数据保存失败:', e);
       }
@@ -6758,7 +6755,6 @@
         const meta = JSON.parse(store.getItem('learning-rpg-cache-meta') || '{}');
         const ageHours = ((Date.now() - (meta.cachedAt || 0)) / 3600000).toFixed(1);
         const isFresh = ageHours < 1;
-        console.log(`[v0.8.5] 缓存命中 (${ageHours}小时前) ${isFresh ? '✓新鲜' : '⚠过期'}`);
         return { data: JSON.parse(raw), ageHours: parseFloat(ageHours), isFresh };
       } catch (e) { return null; }
     }
@@ -6811,7 +6807,6 @@
         showDataLoading(false);
         if (!isFileProtocol()) {
           backgroundDataLoad().then(() => {
-            console.log('[v0.8.5] 后台静默更新完成');
           }).catch(() => {});
         }
         return staleData;
@@ -6829,14 +6824,12 @@
         
         for (const source of sources) {
           try {
-            console.log(`[v0.6.5] 尝试从 ${source.desc} 加载...`);
             const response = await fetchWithTimeout(source.url);
             if (!response.ok) throw new Error(`HTTP ${response.status}`);
             const rawData = await response.json();
             if (!rawData || typeof rawData !== 'object') throw new Error('无效数据格式');
             
             const totalXp = Object.values(rawData.subjects || {}).reduce((s, sub) => s + (sub.totalXp || 0), 0);
-            console.log(`[v0.6.5] ${source.desc} 成功 ✓ 总XP: ${totalXp}`);
             
             dataLoadState.hasError = false;
             dataLoadState.lastUpdate = new Date(rawData.lastUpdated);
@@ -6845,16 +6838,13 @@
             showDataLoading(false);
             return convertGitHubDataToAppData(rawData);
           } catch (e) {
-            console.warn(`[v0.6.5] ${source.desc} 失败: ${e.name}: ${e.message}`);
             continue;
           }
         }
       } else {
-        console.warn('[v0.6.5] file:// 协议，跳过网络请求');
       }
       
       // === 第三层：内嵌兜底数据（最后防线）===
-      console.warn('[v0.6.5] 网络加载失败，使用内嵌兜底数据');
       dataLoadState.hasError = true;
       dataLoadState.dataSource = 'fallback';
       dataLoadState.lastUpdate = new Date();
@@ -7040,7 +7030,6 @@
         }
       }
       
-      console.log(`[v2.0] 数据转换完成: 格式=${isV2?'v2.0':'v1.0'}, 总XP=${totalXp}, 记录=${records.length}, 知识点状态=${Object.keys(knowledgeStates).length}`);
       
       return { profile, subjects, records, examResults, knowledgeStates, version: '2.0' };
     }
@@ -7138,7 +7127,6 @@
      * 显示数据加载错误
      */
     function showDataLoadError(message) {
-      console.warn('[v0.8.5] 数据加载错误:', message);
       showToast('数据加载失败: ' + message, 'warning');
     }
     
@@ -7197,7 +7185,6 @@
       try { localStorage.removeItem('learning-rpg-cache'); localStorage.removeItem('learning-rpg-cache-meta'); } catch(e) {}
       
       appData = await loadAppData();
-      console.log(`[v0.6.5] 重新同步完成，来源: ${dataLoadState.dataSource}`);
       
       renderAll();
       
@@ -7207,40 +7194,36 @@
       setTimeout(() => { arrow.textContent = currentText; }, 3000);
     }
 
-    // ========== 启动页进入主页面（v2.1：强制即时进入，永不阻塞） ==========
+    // ========== 启动页进入主页面（v2.3：合并为单一函数，强制进入永不阻塞） ==========
     function enterMain() {
-      try { doEnterMain(); } catch(e) { console.error('[enterMain] doEnterMain失败:', e); forceEnterMain(); }
-      if (!dataReady && !dataLoading) {
-        dataLoading = true;
-        backgroundDataLoad().then(() => { dataReady = true; dataLoading = false; }).catch(() => { dataLoading = false; });
-      }
-    }
-    
-    function forceEnterMain() {
-      var lp = document.getElementById('launchPage');
-      var mp = document.getElementById('mainPage');
-      var bn = document.getElementById('bottomNav');
-      if (lp) { lp.style.display = 'none'; lp.style.opacity = '0'; lp.style.pointerEvents = 'none'; }
-      if (mp) { mp.style.display = 'block'; mp.style.opacity = '1'; }
-      if (bn) { bn.classList.remove('hidden'); }
-    }
-    
-    function doEnterMain() {
       var lp = document.getElementById('launchPage');
       var mp = document.getElementById('mainPage');
       var bn = document.getElementById('bottomNav');
       var ov = document.getElementById('dataLoadingOverlay');
-      if (!lp || !mp) { console.error('[doEnterMain] DOM缺失!'); return forceEnterMain(); }
+      
+      // 强制隐藏启动页（即使后续代码出错也能进入主页）
+      if (lp) { lp.style.display = 'none'; lp.style.opacity = '0'; lp.style.pointerEvents = 'none'; }
+      if (mp) { mp.style.display = 'block'; mp.style.opacity = '1'; }
+      if (bn) { bn.classList.remove('hidden'); }
       if (ov) { ov.style.display = 'none'; ov.style.opacity = '0'; }
-      if (bn) bn.classList.remove('hidden');
-      lp.classList.add('hidden');
-      setTimeout(function() {
-        mp.classList.add('visible');
+      
+      // 尝试平滑过渡动画
+      if (lp && mp) {
+        try { lp.classList.add('hidden'); } catch(e) {}
         setTimeout(function() {
-          try { initSkillTree(); } catch(e) {}
-          try { initForgetChart(); } catch(e) {}
-        }, 100);
-      }, 400);
+          try { mp.classList.add('visible'); } catch(e) {}
+          setTimeout(function() {
+            try { if (typeof initSkillTree === 'function') initSkillTree(); } catch(e) {}
+            try { if (typeof initForgetChart === 'function') initForgetChart(); } catch(e) {}
+          }, 100);
+        }, 400);
+      }
+      
+      // 触发后台数据加载
+      if (!dataReady && !dataLoading) {
+        dataLoading = true;
+        backgroundDataLoad().then(function() { dataReady = true; dataLoading = false; }).catch(function() { dataLoading = false; });
+      }
     }
     
     // ========== 页面切换 ==========
@@ -8893,26 +8876,21 @@
       if (cached) {
         try {
           achievementsData = JSON.parse(cached);
-          console.log('[v0.8.5] 成就数据缓存命中');
           return;
         } catch(e) {}
       }
       for (const url of ACHIEVEMENTS_SOURCES) {
         try {
-          console.log('[v0.8.5] 尝试加载成就数据:', url);
           const resp = await fetchWithTimeout(url);
           if (resp.ok) {
             achievementsData = await resp.json();
             localStorage.setItem('achievementsData', JSON.stringify(achievementsData));
-            console.log('[v0.8.5] 成就数据加载成功');
             return;
           }
         } catch(e) {
-          console.warn('[v0.8.5] 成就数据加载失败:', e.message);
           continue;
         }
       }
-      console.warn('[v0.8.5] 成就数据全部加载源失败');
     }
 
     // ========== v0.6.7 教材进度地图（v1.3.1 多源增强） ==========
@@ -10094,10 +10072,8 @@
     function renderAll() {
       // 安全检查：确保 appData 已初始化
       if (!appData || !appData.profile) {
-        console.warn('[renderAll] appData 未初始化，跳过渲染');
         return;
       }
-      console.log('[DEBUG] renderAll: appData =', appData, '| profile.xp =', appData?.profile?.xp);
       // 更新成就
       appData.profile.achievements = detectAchievements();
       
@@ -10114,46 +10090,48 @@
       const dsBadge = document.getElementById('dailyStateBadge');
       if (dsBadge && dailyState) {
         dsBadge.style.display = 'flex';
-        document.getElementById('dailyStateIcon').textContent = dailyState.icon || '📖';
-        document.getElementById('dailyStateName').textContent = dailyState.name || 'Heijitsu';
-        document.getElementById('dailyStateMeaning').textContent = '· ' + (dailyState.meaning || '常规学习日');
+        var dsi = document.getElementById('dailyStateIcon');
+        var dsn = document.getElementById('dailyStateName');
+        var dsm = document.getElementById('dailyStateMeaning');
+        if (dsi) dsi.textContent = dailyState.icon || '📖';
+        if (dsn) dsn.textContent = dailyState.name || 'Heijitsu';
+        if (dsm) dsm.textContent = '· ' + (dailyState.meaning || '常规学习日');
       }
       
       // 启动页
+      var _nextLevel = LEVELS.find(function(l) { return l.l > appData.profile.level; });
+      var _currentLevel = LEVELS.find(function(l) { return l.l === appData.profile.level; });
+      var _levelStart = _currentLevel ? _currentLevel.r : 0;
+      var _levelEnd = _nextLevel ? _nextLevel.r : _levelStart + 50000;
+      var _progressPercent = _levelEnd > _levelStart 
+        ? Math.min(100, ((appData.profile.totalXp - _levelStart) / (_levelEnd - _levelStart)) * 100) 
+        : 0;
       try {
-        document.getElementById('launchLevel').textContent = `Lv${appData.profile.level}`;
-        document.getElementById('launchRank').textContent = appData.profile.title;
-        document.getElementById('launchRankJp').textContent = appData.profile.titleJp;
-        const nextLevel = LEVELS.find(l => l.l > appData.profile.level);
-        const currentLevelStart = LEVELS.find(l => l.l === appData.profile.level)?.r || 0;
-        const currentLevelEnd = nextLevel?.r || currentLevelStart + 50000;
-        document.getElementById('launchCurrentXp').textContent = appData.profile.totalXp;
-        document.getElementById('launchNextXp').textContent = currentLevelEnd;
-        const progressPercent = currentLevelEnd > currentLevelStart 
-          ? Math.min(100, ((appData.profile.totalXp - currentLevelStart) / (currentLevelEnd - currentLevelStart)) * 100) 
-          : 0;
+        var _el;
+        _el = document.getElementById('launchLevel'); if (_el) _el.textContent = 'Lv' + appData.profile.level;
+        _el = document.getElementById('launchRank'); if (_el) _el.textContent = appData.profile.title;
+        _el = document.getElementById('launchRankJp'); if (_el) _el.textContent = appData.profile.titleJp;
+        _el = document.getElementById('launchCurrentXp'); if (_el) _el.textContent = appData.profile.totalXp;
+        _el = document.getElementById('launchNextXp'); if (_el) _el.textContent = _levelEnd;
         setTimeout(function() {
-          var el = document.getElementById('launchProgressFill');
-          if (el) el.style.width = progressPercent + '%';
+          var fill = document.getElementById('launchProgressFill');
+          if (fill) fill.style.width = _progressPercent + '%';
         }, 300);
       } catch(e) {}
 
-      // 概览页 - v0.7.4 视觉增强：动态数字动画
+      // 概览页数据更新（v2.3: 全部加null检查）
       animateNumber('todayXp', todayXp, '+', true);
       animateNumber('streak', appData.profile.combo || 0, '', false);
-      const displayXp = appData.profile.totalXp >= 1000 
-        ? `${(appData.profile.totalXp / 1000).toFixed(1)}k` 
+      var displayXp = appData.profile.totalXp >= 1000 
+        ? (appData.profile.totalXp / 1000).toFixed(1) + 'k'
         : appData.profile.totalXp;
-      document.getElementById('totalXp').textContent = displayXp;
-      document.getElementById('totalXp').style.color = appData.profile.totalXp > 0 ? '#10b981' : '';
-      
-      document.getElementById('levelDisplay').textContent = `Lv${appData.profile.level}`;
-      document.getElementById('titleDisplay').textContent = appData.profile.title;
-      document.getElementById('titleJpDisplay').textContent = appData.profile.titleJp;
-      
-      document.getElementById('xpProgress').textContent = appData.profile.totalXp;
-      document.getElementById('xpNeeded').textContent = currentLevelEnd;
-      document.getElementById('progressFill').style.width = `${progressPercent}%`;
+      var el2 = document.getElementById('totalXp'); if (el2) { el2.textContent = displayXp; el2.style.color = appData.profile.totalXp > 0 ? '#10b981' : ''; }
+      el2 = document.getElementById('levelDisplay'); if (el2) el2.textContent = 'Lv' + appData.profile.level;
+      el2 = document.getElementById('titleDisplay'); if (el2) el2.textContent = appData.profile.title;
+      el2 = document.getElementById('titleJpDisplay'); if (el2) el2.textContent = appData.profile.titleJp;
+      el2 = document.getElementById('xpProgress'); if (el2) el2.textContent = appData.profile.totalXp;
+      el2 = document.getElementById('xpNeeded'); if (el2) el2.textContent = _levelEnd;
+      el2 = document.getElementById('progressFill'); if (el2) el2.style.width = _progressPercent + '%';
       
       // 动态计算开发天数（从2026-05-06开始）
       const projectStart = new Date(2026, 4, 6); // 5月6日立项
@@ -11208,7 +11186,6 @@
       try {
         localStorage.setItem('pomodoro_sessions', JSON.stringify(data));
       } catch (e) {
-        console.warn('[v0.8.5] 保存番茄钟数据失败:', e.message);
       }
     }
 
@@ -11394,7 +11371,6 @@
         localStorage.setItem('learning-rpg-app-data', JSON.stringify(appData));
         localStorage.removeItem('learning-rpg-appdata'); // 清理旧键
       } catch (e) {
-        console.warn('[v0.8.4] 保存appData失败:', e.message);
       }
     }
 
@@ -11589,7 +11565,6 @@
       try {
         localStorage.setItem('reading_records', JSON.stringify(readingRecords));
       } catch (e) {
-        console.warn('[v0.8.5] 保存阅读记录失败:', e.message);
       }
     }
 
@@ -11605,7 +11580,6 @@
       try {
         localStorage.setItem('bookshelf', JSON.stringify(bookshelf));
       } catch (e) {
-        console.warn('[v0.8.5] 保存书架数据失败:', e.message);
       }
     }
 
@@ -12144,10 +12118,16 @@
 
     // ========== 初始化（v0.9.4: 提前并行拉取在线数据） ==========
     async function init() {
-      console.log('[v0.9.4] 快速启动...');
       
       // 应用主题偏好
       applyTheme(getPreferredTheme());
+      
+      // v2.3: 备用启动按钮监听（即使onclick失效也能工作）
+      var launchBtn = document.getElementById('launchBtn');
+      if (launchBtn) {
+        launchBtn.addEventListener('click', enterMain);
+        launchBtn.addEventListener('touchend', function(e) { e.preventDefault(); enterMain(); });
+      }
       
       // 注册 Service Worker（PWA 离线支持）
       if ('serviceWorker' in navigator) {
@@ -12160,9 +12140,7 @@
       const dataPromise = backgroundDataLoad().then(() => {
         dataReady = true;
         dataLoading = false;
-        console.log('[v0.9.4] 在线数据就绪 ✓');
       }).catch(e => {
-        console.warn('[v0.9.4] 在线数据拉取失败:', e);
         dataReady = true;
       });
       
@@ -12176,7 +12154,6 @@
           const parsed = JSON.parse(saved);
           if (parsed && parsed.records) {
             appData = migrateAppData(parsed);
-            console.log('[v0.8.4] 从localStorage恢复appData, 版本:' + appData.version);
           }
         }
       } catch (e) {}
@@ -12184,19 +12161,17 @@
       try { initGestures(); } catch(e) { console.warn('[init] initGestures失败:', e); }
       try { initCommandPalette(); } catch(e) { console.warn('[init] initCommandPalette失败:', e); }
       try { renderAll(); } catch(e) { console.warn('[init] renderAll失败:', e); }
-      console.log('[v2.2] 首屏渲染完成');
       
       // Phase 3: 等待数据就绪（最多8秒超时），更新启动页
       await Promise.race([
         dataPromise,
         new Promise(r => setTimeout(r, 8000))
       ]);
-      console.log('[v0.9.4] 启动就绪, dataReady=' + dataReady);
       
       // Phase 4: 非阻塞加载辅助数据（用户画像/技能树/成就）
-      loadUserProfile().catch(e => console.warn('[v0.9.4] 用户画像加载失败:', e));
-      loadSkillTree().catch(e => console.warn('[v0.9.4] 技能树加载失败:', e));
-      loadAchievementsData().catch(e => console.warn('[v0.9.4] 成就数据加载失败:', e));
+      loadUserProfile().catch(e => {});
+      loadSkillTree().catch(e => {});
+      loadAchievementsData().catch(e => {});
     }
     
     /**
@@ -12208,7 +12183,6 @@
       // 1. 缓存秒开
       const cached = loadDataCache();
       if (cached) {
-        console.log('[v0.8.5] 缓存命中，后台刷新...');
         updateLoadingStatus('加载缓存数据...');
         appData = convertGitHubDataToAppData(cached.data);
         dataLoadState.dataSource = 'cache';
@@ -12240,14 +12214,12 @@
           appData = convertGitHubDataToAppData(rawData);
           mergeLocalRecords();
           renderAll();
-          console.log(`[v0.6.5] 后台加载完成 ✓ ${source.desc}`);
           
           // v1.3.2: 额外加载教材和网课数据（之前因 return 导致永远不执行）
           loadTextbookData();
           loadCoursesData();
           return;
         } catch (e) {
-          console.log(`[v0.9.3] ${source.desc} 不可用: ${e.message}`);
           continue;
         }
       }
@@ -12258,7 +12230,6 @@
       
       // 3. 无缓存 + 网络失败 → 内嵌兜底
       if (!cached) {
-        console.warn('[v0.6.5] 使用内嵌兜底数据');
         appData = convertGitHubDataToAppData(FALLBACK_DATA);
         dataLoadState.dataSource = 'fallback';
         mergeLocalRecords();
@@ -12270,7 +12241,6 @@
         retryBtn.onclick = () => { retryBtn.remove(); init(); };
         document.body.appendChild(retryBtn);
       } else {
-        console.log(`[v0.6.5] 后台加载完成 (数据源: ${dataLoadState.dataSource})`);
       }
     }
     
