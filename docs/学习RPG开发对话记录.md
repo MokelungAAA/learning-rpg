@@ -339,4 +339,69 @@ E:\Htmls\LTS Program\
 
 ---
 
-*文档结束 — 生成于 2026-05-16 by SOLO AI*
+## 十二、V2.3 代码重构与Bug修复（2026-05-17）
+
+### 12.1 背景
+
+用户在v2.2.1版本中发现按钮仍然无法点击，移动端导航栏不显示，要求彻底根治。同时指出GitHub仓库结构混乱（所有文件堆在根目录），代码臃肿难以排查问题。
+
+### 12.2 核心Bug修复
+
+**1. enterMain函数合并（3→1）：**
+- 原代码：`enterMain()` → `doEnterMain()` → `forceEnterMain()` 三层调用，try-catch链式回退
+- 新代码：合并为单一`enterMain()`函数，先强制执行DOM操作（隐藏启动页/显示主页），再尝试平滑动画
+- 关键改进：即使后续代码全部失败，主页也能正常显示
+
+**2. 启动按钮双备用监听：**
+- HTML添加 `id="launchBtn"`
+- `onclick="enterMain()"` 内联事件（主通道）
+- `addEventListener('click', enterMain)` （备用通道1）
+- `addEventListener('touchend', ...)` （备用通道2，移动端）
+
+**3. renderAll()全面null检查：**
+- 修复 `dailyStateIcon/Name/Meaning` 直接访问（无null检查）
+- 修复 `totalXp/levelDisplay/titleDisplay/titleJpDisplay/xpProgress/xpNeeded/progressFill` 7处DOM操作无null保护
+- 修复 `currentLevelEnd` 和 `progressPercent` 作用域Bug（const在try-catch内定义，外部引用时为undefined）
+
+**4. 底部导航移动端始终可见：**
+- 移除 `class="hidden"` 初始状态
+- 桌面端由CSS `@media (min-width: 769px) { display: none }` 控制
+- 移动端始终可见，不依赖启动按钮点击
+
+### 12.3 仓库结构整理
+
+| 操作 | 详情 |
+|------|------|
+| 创建目录 | `backups/`（历史版本HTML）`scripts/`（PowerShell工具脚本） |
+| 移动文件 | 7个备份HTML → `backups/`；2个PS1脚本 → `scripts/` |
+| 删除文件 | `github_index.html`（已由.gitignore忽略） |
+| 根目录精简 | 从16个文件减少到7个核心文件 |
+| .gitignore更新 | 添加 `backups/` 和 `scripts/` 忽略规则 |
+
+### 12.4 代码清理
+
+- 删除46行冗余 `console.log` / `console.warn` 调试输出
+- 移除 `renderAll` 中的DEBUG日志和appData未初始化警告
+- 统一代码风格：箭头函数→function声明，模板字面量→字符串拼接
+- 版本号全系统统一更新为 `v2.3`
+
+### 12.5 验证结果
+
+本地服务器验证通过：
+- HTTP 200 OK（Content-Length: 465,390 bytes）
+- `enterMain` 函数确认存在
+- `launchBtn` ID和备用事件监听确认存在
+- `DATA_VERSION = 'v2.3'` 确认
+- 底部导航无 `hidden` 类确认
+
+### 12.6 参考文档更新
+
+- 主参考文档版本 v1.3 → v1.4
+- 项目状态 V1.2.0 → V2.3
+- 版本历史新增 V2.0-V2.3 章节
+- 已知问题/已完成功能/TODO 全面更新
+- 开发对话记录新增第十二章
+
+---
+
+*文档结束 — 更新于 2026-05-17 by SOLO AI*
