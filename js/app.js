@@ -595,7 +595,8 @@ function renderSkillTree() {
   var knowledgeStates = appData.knowledgeStates;
 
   if (Object.keys(knowledgeStates).length === 0 && records.length > 0) {
-    knowledgeStates = buildKnowledgeStates(records, skillTree);
+    buildKnowledgeStates(records, skillTree);
+    knowledgeStates = appData.knowledgeStates;
   }
 
   var html = '<div class="section-title">🌳 技能树图谱</div>';
@@ -654,6 +655,9 @@ function renderSkillForceGraph(kpKeys, states) {
     return;
   }
 
+  var existing = echarts.getInstanceByDom(chartDom);
+  if (existing) existing.dispose();
+
   var nodes = [];
   var edges = [];
   var kpMap = {};
@@ -680,10 +684,14 @@ function renderSkillForceGraph(kpKeys, states) {
     });
   }
 
+  // Limit edges: connect each node to at most 3 neighbors in same subject
+  var maxNeighbors = 3;
   for (var i = 0; i < nodes.length; i++) {
-    for (var j = i + 1; j < nodes.length; j++) {
+    var count = 0;
+    for (var j = i + 1; j < nodes.length && count < maxNeighbors; j++) {
       if (nodes[i].subject === nodes[j].subject && nodes[i].subject) {
         edges.push({ source: nodes[i].id, target: nodes[j].id });
+        count++;
       }
     }
   }
@@ -703,7 +711,7 @@ function renderSkillForceGraph(kpKeys, states) {
       layout: 'force',
       roam: true,
       draggable: true,
-      force: { repulsion: 200, edgeLength: [100, 300], gravity: 0.1 },
+      force: { repulsion: 150, edgeLength: [80, 200], gravity: 0.05, layoutAnimation: false },
       data: nodes,
       edges: edges,
       lineStyle: { color: 'var(--md-outline-variant)', opacity: 0.3, curveness: 0.2 },
@@ -747,7 +755,8 @@ function renderReviewCenter() {
   var knowledgeStates = appData.knowledgeStates;
   var records = appData.records || [];
   if (Object.keys(knowledgeStates).length === 0 && records.length > 0) {
-    knowledgeStates = buildKnowledgeStates(records, appData.skillTree);
+    buildKnowledgeStates(records, appData.skillTree);
+    knowledgeStates = appData.knowledgeStates;
   }
 
   var shadowQueue = calcShadowQueue(knowledgeStates);
@@ -812,6 +821,9 @@ function renderReviewCenter() {
 function renderForgettingCurve(states) {
   var chartDom = document.getElementById('forgettingCurveChart');
   if (!chartDom || typeof echarts === 'undefined') return;
+
+  var existing = echarts.getInstanceByDom(chartDom);
+  if (existing) existing.dispose();
 
   var now = Date.now();
   var decayPoints = [];
@@ -964,10 +976,15 @@ var pomodoroKPs = '';
 var pomodoroPaused = false;
 var pomodoroPhase = 'config'; // config | running | done
 
+var _fabLongPressed = false;
+
 function initPomodoroFab() {
   var fab = document.getElementById('pomodoroFab');
   if (!fab) return;
-  fab.addEventListener('click', function () {
+  fab.style.touchAction = 'manipulation';
+
+  fab.addEventListener('click', function (e) {
+    if (_fabLongPressed) { _fabLongPressed = false; return; }
     if (pomodoroPhase === 'running') {
       openPomodoro();
     } else {
@@ -980,19 +997,13 @@ function initPomodoroFab() {
       renderPomodoroConfig();
     }
   });
+
   var longPressTimer;
-  fab.addEventListener('mousedown', function () {
-    longPressTimer = setTimeout(function () {
-      if (pomodoroPhase !== 'running') {
-        pomodoroMode = 'standard';
-        pomodoroSubject = '';
-        openPomodoro();
-        startPomodoroTimer(25);
-      }
-    }, 500);
-  });
   fab.addEventListener('touchstart', function (e) {
+    e.preventDefault();
+    _fabLongPressed = false;
     longPressTimer = setTimeout(function () {
+      _fabLongPressed = true;
       if (pomodoroPhase !== 'running') {
         pomodoroMode = 'standard';
         pomodoroSubject = '';
@@ -1000,10 +1011,10 @@ function initPomodoroFab() {
         startPomodoroTimer(25);
       }
     }, 500);
-  });
-  fab.addEventListener('mouseup', function () { clearTimeout(longPressTimer); });
+  }, { passive: false });
+
   fab.addEventListener('touchend', function () { clearTimeout(longPressTimer); });
-  fab.addEventListener('mouseleave', function () { clearTimeout(longPressTimer); });
+  fab.addEventListener('touchcancel', function () { clearTimeout(longPressTimer); });
 }
 
 function openPomodoro() {
@@ -1011,6 +1022,7 @@ function openPomodoro() {
   var backdrop = document.getElementById('pomodoroBackdrop');
   if (panel) panel.classList.add('open');
   if (backdrop) backdrop.classList.add('open');
+  try { document.body.style.overflow = 'hidden'; } catch (e) {}
 }
 
 function closePomodoro() {
@@ -1022,6 +1034,7 @@ function closePomodoro() {
   var backdrop = document.getElementById('pomodoroBackdrop');
   if (panel) panel.classList.remove('open');
   if (backdrop) backdrop.classList.remove('open');
+  try { document.body.style.overflow = ''; } catch (e) {}
   pomodoroPhase = 'config';
   pomodoroPaused = false;
 }
@@ -1060,7 +1073,7 @@ function renderPomodoroConfig() {
   html += '<input class="input" id="pomKPInput" placeholder="知识点（可选，如：函数单调性）" value="' + escapeHtml(pomodoroKPs) + '">';
   html += '</div>';
 
-  html += '<button class="btn btn-primary btn-lg" style="width:100%" onclick="startPomodoroFromConfig()">▶ 开始专注</button>';
+  html += '<button class="btn btn-primary btn-lg" onclick="startPomodoroFromConfig()" style="width:100%;min-height:52px;font-size:18px;font-weight:700">▶ 开始专注</button>';
 
   body.innerHTML = html;
 }
@@ -1108,6 +1121,7 @@ function renderPomodoroRunning() {
   var body = document.getElementById('pomodoroBody');
   if (!body) return;
 
+  var modeLabel = pomodoroMode === 'standard' ? '标准番茄' : pomodoroMode === 'sprint' ? '长专注' : '短休息';
   var circumference = 2 * Math.PI * 95;
   var html = '';
   html += '<div class="pom-timer-ring">';
@@ -1117,16 +1131,27 @@ function renderPomodoroRunning() {
   html += '</svg>';
   html += '<div class="pom-timer-text">';
   html += '<div class="pom-timer-time" id="pomTimerTime">' + formatPomTime(pomodoroRemaining) + '</div>';
-  html += '<div class="pom-timer-label" id="pomTimerLabel">' + (pomodoroSubject || '专注中') + '</div>';
+  html += '<div class="pom-timer-label" id="pomTimerLabel">' + (pomodoroSubject || modeLabel) + '</div>';
   html += '</div>';
   html += '</div>';
 
   html += '<div class="pom-actions">';
-  html += '<button class="btn btn-outline" id="pomPauseBtn" onclick="togglePomodoroPause()">⏸ 暂停</button>';
-  html += '<button class="btn btn-danger" onclick="endPomodoroEarly()">⏹ 结束</button>';
+  html += '<button class="btn btn-outline btn-lg" id="pomPauseBtn" onclick="togglePomodoroPause()" style="flex:1;min-height:48px;font-size:16px">⏸ 暂停</button>';
+  html += '<button class="btn btn-danger btn-lg" onclick="endPomodoroEarly()" style="flex:1;min-height:48px;font-size:16px">⏹ 结束</button>';
+  html += '</div>';
+
+  html += '<div style="display:flex;gap:8px;width:100%">';
+  html += '<button class="btn btn-ghost btn-sm" onclick="adjustPomTime(-60)" style="flex:1">−1分钟</button>';
+  html += '<button class="btn btn-ghost btn-sm" onclick="adjustPomTime(60)" style="flex:1">+1分钟</button>';
   html += '</div>';
 
   body.innerHTML = html;
+}
+
+function adjustPomTime(secs) {
+  pomodoroRemaining = Math.max(0, pomodoroRemaining + secs);
+  if (pomodoroRemaining > pomodoroTotal) pomodoroTotal = pomodoroRemaining;
+  updatePomodoroDisplay();
 }
 
 function updatePomodoroDisplay() {
@@ -1244,6 +1269,7 @@ function resetPomodoro() {
   pomodoroSubject = '';
   pomodoroKPs = '';
   pomodoroPaused = false;
+  try { document.body.style.overflow = ''; } catch (e) {}
   renderPomodoroConfig();
 }
 
@@ -1335,9 +1361,10 @@ window._openPomodoroHistory = function () {
     html += '<div style="display:flex;flex-direction:column;gap:8px">';
     for (var i = 0; i < sessions.length; i++) {
       var s = sessions[i];
-      html += '<div style="padding:10px;background:var(--md-surface-container-low);border-radius:8px;border:1px solid var(--md-outline-variant);font-size:13px">';
+      html += '<div style="padding:10px;background:var(--md-surface-container-low);border-radius:8px;border:1px solid var(--md-outline-variant);font-size:13px;position:relative">';
       html += '<div style="display:flex;justify-content:space-between"><span>' + (s.completed ? '✅' : '⏹') + ' ' + (s.plannedDuration || 0) + '分钟</span><span style="color:var(--md-on-surface-variant)">' + formatDate(s.startTime) + '</span></div>';
       if (s.context && s.context.subject) html += '<div style="color:var(--md-on-surface-variant);margin-top:4px">学科: ' + s.context.subject + '</div>';
+      html += '<button onclick="event.stopPropagation();if(confirm(\'确定删除这条番茄钟记录？\')){deletePomodoroSession(\'' + s.sessionId + '\');closeModal();showToast(\'已删除\',\'success\')}" style="position:absolute;top:8px;right:8px;background:none;border:none;font-size:16px;cursor:pointer;color:var(--md-on-surface-variant);padding:4px 8px;line-height:1">🗑</button>';
       html += '</div>';
     }
     html += '</div>';
@@ -1624,7 +1651,9 @@ function initCommandPalette() {
   ];
 
   function showPalette() {
-    var html = '<div class="glass-card" style="width:400px;max-width:90vw"><div style="margin-bottom:12px"><input class="input" id="paletteInput" placeholder="🔍 搜索命令..." autofocus></div><div style="max-height:300px;overflow-y:auto" id="paletteResults">';
+    var isMobile = window.innerWidth < 768;
+    var maxH = isMobile ? Math.min(window.innerHeight * 0.6, 280) : 300;
+    var html = '<div class="glass-card" style="width:400px;max-width:90vw"><div style="margin-bottom:12px"><input class="input" id="paletteInput" placeholder="🔍 搜索命令..." autofocus></div><div style="max-height:' + maxH + 'px;overflow-y:auto" id="paletteResults">';
     for (var i = 0; i < commands.length; i++) {
       html += '<div class="settings-item cmd-item" data-index="' + i + '" style="padding:10px 16px"><div class="settings-item-left" style="gap:12px"><span>' + commands[i].icon + '</span><span>' + commands[i].name + '</span></div></div>';
     }
@@ -1690,6 +1719,13 @@ function initCommandPalette() {
       }
     });
   }
+
+  document.addEventListener('click', function (e) {
+    if (!palette.classList.contains('active')) return;
+    if (palette.contains(e.target)) return;
+    if (searchTrigger && searchTrigger.contains(e.target)) return;
+    closePalette();
+  });
 }
 
 /* ================================================================

@@ -358,6 +358,13 @@ function savePomodoroSession(session) {
   saveLocal('pomodoroSessions', appData.pomodoroSessions);
 }
 
+function deletePomodoroSession(sessionId) {
+  appData.pomodoroSessions = (appData.pomodoroSessions || []).filter(function (s) {
+    return s.sessionId !== sessionId;
+  });
+  saveLocal('pomodoroSessions', appData.pomodoroSessions);
+}
+
 function loadReadingRecords() {
   var records = loadLocal('readingRecords') || [];
   appData.readingRecords = records;

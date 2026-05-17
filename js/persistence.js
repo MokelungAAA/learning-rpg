@@ -5,6 +5,12 @@
 
 var PERSISTENCE_KEY = 'lts-appData';
 var DATA_LOADED = false;
+var GITHUB_REPO = 'MokelungAAA/learning-rpg';
+var GITHUB_API_BASE = 'https://api.github.com/repos/' + GITHUB_REPO;
+
+function _getGithubToken() {
+  return localStorage.getItem('lts-gh-token') || '';
+}
 
 function quickLoadAppData() {
   var local = loadLocal('appData');
@@ -99,4 +105,25 @@ function mergeAppData(remote) {
     records: (appData.records || []).concat(newRecords),
     profile: profile
   };
+}
+
+function syncDataToGitHub() {
+  var token = _getGithubToken();
+  if (!token) { console.log('📤 未配置 GitHub Token，跳过同步'); return Promise.resolve(); }
+  var content = JSON.stringify(appData.records, null, 2);
+  var payload = {
+    message: 'data: auto-sync from app',
+    content: btoa(unescape(encodeURIComponent(content)))
+  };
+  return fetch(GITHUB_API_BASE + '/contents/data/data.json', {
+    method: 'GET',
+    headers: { 'Authorization': 'token ' + token, 'Accept': 'application/vnd.github.v3+json' }
+  }).then(function (r) { return r.json(); }).then(function (file) {
+    payload.sha = file.sha;
+    return fetch(GITHUB_API_BASE + '/contents/data/data.json', {
+      method: 'PUT',
+      headers: { 'Authorization': 'token ' + token, 'Accept': 'application/vnd.github.v3+json', 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+  }).then(function () { console.log('📤 数据已同步到 GitHub'); }).catch(function (e) { console.log('📤 GitHub 同步跳过:', e.message); });
 }
