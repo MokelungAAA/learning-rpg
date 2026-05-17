@@ -1,6 +1,6 @@
 {
   "version": "2.0",
-  "lastUpdated": "2026-05-17T10:20:26.000Z",
+  "lastUpdated": "2026-05-17T10:22:42.000Z",
   "learnerName": "墨澜",
   "records": [
     {
@@ -27,8 +27,8 @@
       "id": "rec-004",
       "timestamp": "2026-05-11T00:00:00.000Z",
       "subject": "生物",
-      "textbook": "解题觉醒·必修二·3",
-      "chapter": 0,
+      "textbook": "解题觉醒·必修二·3.1",
+      "chapter": 3,
       "score": 65,
       "duration": 46,
       "xp": 150
@@ -310,8 +310,8 @@
       "textbook": "天星·模拟卷",
       "chapter": 0,
       "score": 90,
-      "duration": 18,
-      "xp": 81
+      "duration": 42,
+      "xp": 150
     },
     {
       "id": "rec-033",
@@ -447,7 +447,7 @@
       "id": "rec-046",
       "timestamp": "2026-05-13T08:39:00.000Z",
       "subject": "生物",
-      "textbook": "生物学习",
+      "textbook": "必刷题合订本·必修二·3.1",
       "chapter": 3,
       "score": 0,
       "duration": 17,
