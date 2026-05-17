@@ -5,7 +5,11 @@
 (function () {
   'use strict';
 
+  var _launched = false;
+
   window._launchApp = function () {
+    if (_launched) return;
+    _launched = true;
     try {
       var lp = document.getElementById('launchPage');
       var mp = document.getElementById('mainPage');
@@ -14,12 +18,14 @@
       loadAllData();
     } catch (e) {
       console.error('Launch error:', e);
-      var lp2 = document.getElementById('launchPage');
-      var mp2 = document.getElementById('mainPage');
-      if (lp2) { lp2.classList.add('hidden'); }
-      if (mp2) { mp2.classList.add('visible'); }
-      if (typeof loadAllData === 'function') { loadAllData(); }
-      else { document.body.innerHTML = '<div style="padding:40px;text-align:center"><h2>⚠️ 加载失败</h2><p>请刷新页面重试</p></div>'; }
+      try {
+        var lp2 = document.getElementById('launchPage');
+        var mp2 = document.getElementById('mainPage');
+        if (lp2) { lp2.classList.add('hidden'); }
+        if (mp2) { mp2.classList.add('visible'); }
+        if (typeof loadAllData === 'function') { loadAllData(); }
+        else { document.getElementById('page-overview').innerHTML = '<div style="padding:40px;text-align:center"><h2>⚠️ 加载失败</h2><p>请刷新页面重试</p></div>'; }
+      } catch (ignore) {}
     }
   };
 
@@ -38,7 +44,8 @@
   function initLaunchPage() {
     var launchBtn = document.getElementById('launchBtn');
     if (!launchBtn) return;
-    launchBtn.addEventListener('click', function () {
+    launchBtn.addEventListener('click', function (e) {
+      e.stopImmediatePropagation();
       window._launchApp();
     });
     try {
@@ -82,6 +89,18 @@
     loadingOverlay.innerHTML = '<div class="loading-spinner"></div><div style="font-size:14px;color:var(--md-on-surface-variant)">加载数据中...</div>';
     document.body.appendChild(loadingOverlay);
 
+    var timeoutId = setTimeout(function () {
+      loadingOverlay.innerHTML = '<div style="text-align:center;color:var(--md-on-surface-variant)">加载超时，使用演示数据</div>';
+      setTimeout(function () {
+        try { initNavigation(); } catch (e) { console.error(e); }
+        try { renderFallbackOverview(); } catch (e) { console.error(e); }
+        try { renderSettings(); } catch (e) { console.error(e); }
+        try { initPomodoroFab(); } catch (e) { console.error(e); }
+        loadingOverlay.style.opacity = '0';
+        setTimeout(function () { try { if (loadingOverlay.parentNode) loadingOverlay.parentNode.removeChild(loadingOverlay); } catch (ignore) {} }, 400);
+      }, 1000);
+    }, 12000);
+
     loadAppData()
       .then(function () { return loadUserProfile(); })
       .then(function () { return loadSkillTree(); })
@@ -92,24 +111,26 @@
       .then(function () { return loadReadingRecords(); })
       .then(function () { return loadBookshelf(); })
       .then(function () {
-        initNavigation();
-        renderOverview();
-        renderSettings();
-        initPomodoroFab();
+        clearTimeout(timeoutId);
+        try { initNavigation(); } catch (e) { console.error(e); }
+        try { renderOverview(); } catch (e) { console.error('renderOverview error:', e); renderFallbackOverview(); }
+        try { renderSettings(); } catch (e) { console.error(e); }
+        try { initPomodoroFab(); } catch (e) { console.error(e); }
         loadingOverlay.style.opacity = '0';
         setTimeout(function () {
-          if (loadingOverlay.parentNode) loadingOverlay.parentNode.removeChild(loadingOverlay);
+          try { if (loadingOverlay.parentNode) loadingOverlay.parentNode.removeChild(loadingOverlay); } catch (ignore) {}
         }, 400);
       })
       .catch(function (err) {
+        clearTimeout(timeoutId);
         console.warn('Data load error:', err);
-        initNavigation();
-        renderOverview();
-        renderSettings();
-        initPomodoroFab();
+        try { initNavigation(); } catch (e) { console.error(e); }
+        try { renderOverview(); } catch (e) { console.error('renderOverview error:', e); renderFallbackOverview(); }
+        try { renderSettings(); } catch (e) { console.error(e); }
+        try { initPomodoroFab(); } catch (e) { console.error(e); }
         loadingOverlay.style.opacity = '0';
         setTimeout(function () {
-          if (loadingOverlay.parentNode) loadingOverlay.parentNode.removeChild(loadingOverlay);
+          try { if (loadingOverlay.parentNode) loadingOverlay.parentNode.removeChild(loadingOverlay); } catch (ignore) {}
         }, 400);
       });
   }
@@ -157,12 +178,17 @@
   }
 
   function onPageChange(page) {
-    switch (page) {
-      case 'overview': renderOverview(); break;
-      case 'skills': renderSkillTree(); break;
-      case 'review': renderReviewCenter(); break;
-      case 'log': renderLog(); break;
-      case 'settings': renderSettings(); break;
+    try {
+      switch (page) {
+        case 'overview': renderOverview(); break;
+        case 'skills': renderSkillTree(); break;
+        case 'review': renderReviewCenter(); break;
+        case 'log': renderLog(); break;
+        case 'settings': renderSettings(); break;
+      }
+    } catch (e) {
+      console.error('onPageChange error:', page, e);
+      if (page === 'overview') { renderFallbackOverview(); }
     }
   }
 
@@ -825,6 +851,29 @@
       });
     }
     setTimeout(function () { renderCalendarHeatmap(); renderOverviewCharts(); renderEfficiencyChart(); renderTimeHeatmap(); renderAchievementsOverview(); renderTextbooksOverview(); renderCoursesOverview(); }, 100);
+  }
+
+  function renderFallbackOverview() {
+    var container = document.getElementById('page-overview');
+    if (!container) return;
+    try {
+      var html = '<div style="padding:40px;text-align:center">';
+      html += '<h2 style="color:var(--md-on-surface)">📚 学习RPG · 认知操作系统</h2>';
+      html += '<p style="color:var(--md-on-surface-variant);margin:16px 0">数据加载中，请稍候或刷新页面重试</p>';
+      html += '<div class="subject-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:12px;margin-top:24px">';
+      var subjects = ['数学','语文','英语','物理','化学','生物','政治','历史','地理'];
+      var icons = ['📐','📖','🔤','⚡','🧪','🧬','⚖️','📜','🌍'];
+      for (var i = 0; i < subjects.length; i++) {
+        html += '<div style="padding:16px;background:var(--md-surface-container);border-radius:12px;text-align:center;cursor:pointer" onclick="if(window._launchApp)window._launchApp()">';
+        html += '<div style="font-size:28px">' + icons[i] + '</div>';
+        html += '<div style="font-size:13px;font-weight:600;color:var(--md-on-surface);margin-top:4px">' + subjects[i] + '</div>';
+        html += '</div>';
+      }
+      html += '</div></div>';
+      container.innerHTML = html;
+    } catch (e) {
+      container.innerHTML = '<div style="padding:40px;text-align:center"><h2>请刷新页面</h2><p style="color:var(--md-on-surface-variant)">页面渲染出错，请刷新后重试</p></div>';
+    }
   }
 
   function renderCalendarHeatmap() {
