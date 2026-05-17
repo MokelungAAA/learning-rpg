@@ -1,0 +1,707 @@
+{
+  "version": "2.0",
+  "lastUpdated": "2026-05-17T09:00:00.000Z",
+  "learnerName": "墨澜",
+  "records": [
+    {
+      "id": "rec-002",
+      "timestamp": "2026-05-10T04:27:00.000Z",
+      "subject": "英语",
+      "textbook": "期中考试反思",
+      "chapter": 0,
+      "score": 75,
+      "duration": 10,
+      "xp": 38
+    },
+    {
+      "id": "rec-003",
+      "timestamp": "2026-05-10T13:31:00.000Z",
+      "subject": "历史",
+      "textbook": "中外历史纲要下·第14-16章·填充图册",
+      "chapter": 0,
+      "score": 0,
+      "duration": 62,
+      "xp": 93
+    },
+    {
+      "id": "rec-004",
+      "timestamp": "2026-05-11T00:00:00.000Z",
+      "subject": "生物",
+      "textbook": "解题觉醒·必修二·3",
+      "chapter": 0,
+      "score": 65,
+      "duration": 46,
+      "xp": 150
+    },
+    {
+      "id": "rec-005",
+      "timestamp": "2026-05-11T01:01:00.000Z",
+      "subject": "语文",
+      "textbook": "应用文写作",
+      "chapter": 0,
+      "score": 0,
+      "duration": 52,
+      "xp": 0
+    },
+    {
+      "id": "rec-006",
+      "timestamp": "2026-05-11T02:08:00.000Z",
+      "subject": "生物",
+      "textbook": "必修二复习",
+      "chapter": 0,
+      "score": 0,
+      "duration": 12,
+      "xp": 0
+    },
+    {
+      "id": "rec-007",
+      "timestamp": "2026-05-11T02:35:00.000Z",
+      "subject": "数学",
+      "textbook": "解题反思",
+      "chapter": 0,
+      "score": 0,
+      "duration": 10,
+      "xp": 0
+    },
+    {
+      "id": "rec-008",
+      "timestamp": "2026-05-11T03:00:00.000Z",
+      "subject": "历史",
+      "textbook": "中外历史纲要下·填充图册",
+      "chapter": 0,
+      "score": 0,
+      "duration": 34,
+      "xp": 0
+    },
+    {
+      "id": "rec-009",
+      "timestamp": "2026-05-11T03:49:00.000Z",
+      "subject": "英语",
+      "textbook": "天星·试题调研·词汇",
+      "chapter": 0,
+      "score": 89,
+      "duration": 60,
+      "xp": 150
+    },
+    {
+      "id": "rec-010",
+      "timestamp": "2026-05-11T05:04:00.000Z",
+      "subject": "物理",
+      "textbook": "物理复习",
+      "chapter": 0,
+      "score": 0,
+      "duration": 20,
+      "xp": 0
+    },
+    {
+      "id": "rec-011",
+      "timestamp": "2026-05-11T05:39:00.000Z",
+      "subject": "语文",
+      "textbook": "高考解题觉醒·阅读模块",
+      "chapter": 0,
+      "score": 0,
+      "duration": 45,
+      "xp": 0
+    },
+    {
+      "id": "rec-012",
+      "timestamp": "2026-05-11T05:54:00.000Z",
+      "subject": "生物",
+      "textbook": "必修二复习",
+      "chapter": 0,
+      "score": 0,
+      "duration": 5,
+      "xp": 0
+    },
+    {
+      "id": "rec-013",
+      "timestamp": "2026-05-11T06:14:00.000Z",
+      "subject": "地理",
+      "textbook": "讲题",
+      "chapter": 0,
+      "score": 0,
+      "duration": 5,
+      "xp": 0
+    },
+    {
+      "id": "rec-014",
+      "timestamp": "2026-05-11T06:34:00.000Z",
+      "subject": "数学",
+      "textbook": "讲题",
+      "chapter": 0,
+      "score": 0,
+      "duration": 5,
+      "xp": 0
+    },
+    {
+      "id": "rec-015",
+      "timestamp": "2026-05-11T06:54:00.000Z",
+      "subject": "语文",
+      "textbook": "课堂讨论",
+      "chapter": 0,
+      "score": 0,
+      "duration": 5,
+      "xp": 0
+    },
+    {
+      "id": "rec-016",
+      "timestamp": "2026-05-12T00:00:00.000Z",
+      "subject": "语文",
+      "textbook": "高考解题觉醒·阅读模块",
+      "chapter": 0,
+      "score": 0,
+      "duration": 49,
+      "xp": 0
+    },
+    {
+      "id": "rec-017",
+      "timestamp": "2026-05-12T01:04:00.000Z",
+      "subject": "语文",
+      "textbook": "古诗词背诵",
+      "chapter": 0,
+      "score": 0,
+      "duration": 15,
+      "xp": 0
+    },
+    {
+      "id": "rec-018",
+      "timestamp": "2026-05-12T01:34:00.000Z",
+      "subject": "数学",
+      "textbook": "必修第一册",
+      "chapter": 0,
+      "score": 0,
+      "duration": 18,
+      "xp": 0
+    },
+    {
+      "id": "rec-019",
+      "timestamp": "2026-05-12T02:07:00.000Z",
+      "subject": "数学",
+      "textbook": "必修第一册·概率统计",
+      "chapter": 6,
+      "score": 0,
+      "duration": 5,
+      "xp": 0
+    },
+    {
+      "id": "rec-020",
+      "timestamp": "2026-05-12T02:27:00.000Z",
+      "subject": "生物",
+      "textbook": "必修二复习",
+      "chapter": 0,
+      "score": 0,
+      "duration": 9,
+      "xp": 0
+    },
+    {
+      "id": "rec-021",
+      "timestamp": "2026-05-12T02:51:00.000Z",
+      "subject": "英语",
+      "textbook": "天星·试题调研",
+      "chapter": 0,
+      "score": 85,
+      "duration": 49,
+      "xp": 150
+    },
+    {
+      "id": "rec-022",
+      "timestamp": "2026-05-12T03:06:00.000Z",
+      "subject": "历史",
+      "textbook": "中外历史纲要下·填充图册",
+      "chapter": 0,
+      "score": 0,
+      "duration": 40,
+      "xp": 0
+    },
+    {
+      "id": "rec-023",
+      "timestamp": "2026-05-12T04:01:00.000Z",
+      "subject": "英语",
+      "textbook": "词汇复习",
+      "chapter": 0,
+      "score": 0,
+      "duration": 11,
+      "xp": 0
+    },
+    {
+      "id": "rec-024",
+      "timestamp": "2026-05-12T04:27:00.000Z",
+      "subject": "英语",
+      "textbook": "期中复盘",
+      "chapter": 0,
+      "score": 0,
+      "duration": 10,
+      "xp": 0
+    },
+    {
+      "id": "rec-025",
+      "timestamp": "2026-05-12T04:52:00.000Z",
+      "subject": "政治",
+      "textbook": "期中试卷讲解",
+      "chapter": 0,
+      "score": 0,
+      "duration": 35,
+      "xp": 0
+    },
+    {
+      "id": "rec-026",
+      "timestamp": "2026-05-12T05:07:00.000Z",
+      "subject": "历史",
+      "textbook": "期中试卷讲解",
+      "chapter": 0,
+      "score": 0,
+      "duration": 49,
+      "xp": 0
+    },
+    {
+      "id": "rec-027",
+      "timestamp": "2026-05-12T05:22:00.000Z",
+      "subject": "政治",
+      "textbook": "必修第二册",
+      "chapter": 7,
+      "score": 0,
+      "duration": 6,
+      "xp": 0
+    },
+    {
+      "id": "rec-028",
+      "timestamp": "2026-05-12T05:43:00.000Z",
+      "subject": "数学",
+      "textbook": "必修第一册·6.1",
+      "chapter": 6,
+      "score": 0,
+      "duration": 4,
+      "xp": 0
+    },
+    {
+      "id": "rec-029",
+      "timestamp": "2026-05-12T06:02:00.000Z",
+      "subject": "生物",
+      "textbook": "解题觉醒·必修二·3.1",
+      "chapter": 3,
+      "score": 0,
+      "duration": 14,
+      "xp": 0
+    },
+    {
+      "id": "rec-030",
+      "timestamp": "2026-05-12T06:31:00.000Z",
+      "subject": "化学",
+      "textbook": "必刷题合订本·必修二·3.2",
+      "chapter": 3,
+      "score": 0,
+      "duration": 35,
+      "xp": 0
+    },
+    {
+      "id": "rec-031",
+      "timestamp": "2026-05-12T06:46:00.000Z",
+      "subject": "化学",
+      "textbook": "必刷题·必修二·3.2",
+      "chapter": 3,
+      "score": 0,
+      "duration": 16,
+      "xp": 0
+    },
+    {
+      "id": "rec-032",
+      "timestamp": "2026-05-12T07:17:00.000Z",
+      "subject": "英语",
+      "textbook": "天星·模拟卷",
+      "chapter": 0,
+      "score": 90,
+      "duration": 18,
+      "xp": 81
+    },
+    {
+      "id": "rec-033",
+      "timestamp": "2026-05-13T00:00:00.000Z",
+      "subject": "英语",
+      "textbook": "天星45套·应用文",
+      "chapter": 0,
+      "score": 67,
+      "duration": 27,
+      "xp": 90
+    },
+    {
+      "id": "rec-034",
+      "timestamp": "2026-05-13T00:42:00.000Z",
+      "subject": "物理",
+      "textbook": "必修第二册·机械能守恒",
+      "chapter": 0,
+      "score": 0,
+      "duration": 45,
+      "xp": 0
+    },
+    {
+      "id": "rec-035",
+      "timestamp": "2026-05-13T01:42:00.000Z",
+      "subject": "数学",
+      "textbook": "必修第一册·概率统计",
+      "chapter": 6,
+      "score": 0,
+      "duration": 45,
+      "xp": 0
+    },
+    {
+      "id": "rec-036",
+      "timestamp": "2026-05-13T01:57:00.000Z",
+      "subject": "生物",
+      "textbook": "必修二复习",
+      "chapter": 3,
+      "score": 0,
+      "duration": 5,
+      "xp": 0
+    },
+    {
+      "id": "rec-037",
+      "timestamp": "2026-05-13T02:17:00.000Z",
+      "subject": "生物",
+      "textbook": "必修二复习",
+      "chapter": 3,
+      "score": 0,
+      "duration": 14,
+      "xp": 0
+    },
+    {
+      "id": "rec-038",
+      "timestamp": "2026-05-13T02:46:00.000Z",
+      "subject": "生物",
+      "textbook": "解题觉醒·必修二·3.2",
+      "chapter": 3,
+      "score": 62,
+      "duration": 28,
+      "xp": 87
+    },
+    {
+      "id": "rec-039",
+      "timestamp": "2026-05-13T03:29:00.000Z",
+      "subject": "语文",
+      "textbook": "阅读理解",
+      "chapter": 0,
+      "score": 0,
+      "duration": 5,
+      "xp": 0
+    },
+    {
+      "id": "rec-040",
+      "timestamp": "2026-05-13T03:49:00.000Z",
+      "subject": "地理",
+      "textbook": "必修第二册·产业区位",
+      "chapter": 0,
+      "score": 0,
+      "duration": 45,
+      "xp": 0
+    },
+    {
+      "id": "rec-041",
+      "timestamp": "2026-05-13T04:49:00.000Z",
+      "subject": "语文",
+      "textbook": "作文修改",
+      "chapter": 0,
+      "score": 0,
+      "duration": 20,
+      "xp": 0
+    },
+    {
+      "id": "rec-042",
+      "timestamp": "2026-05-13T05:24:00.000Z",
+      "subject": "英语",
+      "textbook": "天星45套·客观题",
+      "chapter": 0,
+      "score": 86,
+      "duration": 50,
+      "xp": 150
+    },
+    {
+      "id": "rec-043",
+      "timestamp": "2026-05-13T06:29:00.000Z",
+      "subject": "地理",
+      "textbook": "必刷题·产业区位",
+      "chapter": 0,
+      "score": 0,
+      "duration": 16,
+      "xp": 0
+    },
+    {
+      "id": "rec-044",
+      "timestamp": "2026-05-13T07:00:00.000Z",
+      "subject": "生物",
+      "textbook": "解题觉醒·必修二·3.3",
+      "chapter": 3,
+      "score": 64,
+      "duration": 45,
+      "xp": 144
+    },
+    {
+      "id": "rec-045",
+      "timestamp": "2026-05-13T08:00:00.000Z",
+      "subject": "生物",
+      "textbook": "解题觉醒·必修二·3.3",
+      "chapter": 3,
+      "score": 83,
+      "duration": 24,
+      "xp": 100
+    },
+    {
+      "id": "rec-046",
+      "timestamp": "2026-05-13T08:39:00.000Z",
+      "subject": "生物",
+      "textbook": "生物学习",
+      "chapter": 3,
+      "score": 0,
+      "duration": 17,
+      "xp": 0
+    },
+    {
+      "id": "rec-047",
+      "timestamp": "2026-05-13T09:11:00.000Z",
+      "subject": "数学",
+      "textbook": "必刷题·必修第一册·6.2",
+      "chapter": 6,
+      "score": 82,
+      "duration": 18,
+      "xp": 74
+    },
+    {
+      "id": "rec-048",
+      "timestamp": "2026-05-13T09:44:00.000Z",
+      "subject": "语文",
+      "textbook": "高考解题觉醒",
+      "chapter": 0,
+      "score": 0,
+      "duration": 27,
+      "xp": 0
+    },
+    {
+      "id": "rec-049",
+      "timestamp": "2026-05-13T10:26:00.000Z",
+      "subject": "物理",
+      "textbook": "必修第二册·机械能守恒",
+      "chapter": 0,
+      "score": 75,
+      "duration": 37,
+      "xp": 139
+    },
+    {
+      "id": "rec-050",
+      "timestamp": "2026-05-14T00:00:00.000Z",
+      "subject": "英语",
+      "textbook": "应用文笔记",
+      "chapter": 0,
+      "score": 0,
+      "duration": 25,
+      "xp": 0
+    },
+    {
+      "id": "rec-051",
+      "timestamp": "2026-05-14T00:15:00.000Z",
+      "subject": "语文",
+      "textbook": "古诗词背诵",
+      "chapter": 0,
+      "score": 0,
+      "duration": 30,
+      "xp": 0
+    },
+    {
+      "id": "rec-052",
+      "timestamp": "2026-05-14T01:00:00.000Z",
+      "subject": "英语",
+      "textbook": "词汇复习",
+      "chapter": 0,
+      "score": 0,
+      "duration": 45,
+      "xp": 0
+    },
+    {
+      "id": "rec-053",
+      "timestamp": "2026-05-14T01:15:00.000Z",
+      "subject": "生物",
+      "textbook": "必修二复习",
+      "chapter": 3,
+      "score": 0,
+      "duration": 3,
+      "xp": 0
+    },
+    {
+      "id": "rec-054",
+      "timestamp": "2026-05-14T01:33:00.000Z",
+      "subject": "生物",
+      "textbook": "解题觉醒·必修二·3.4",
+      "chapter": 3,
+      "score": 100,
+      "duration": 8,
+      "xp": 40
+    },
+    {
+      "id": "rec-055",
+      "timestamp": "2026-05-14T01:56:00.000Z",
+      "subject": "数学",
+      "textbook": "必修第一册·6.4",
+      "chapter": 6,
+      "score": 0,
+      "duration": 50,
+      "xp": 0
+    },
+    {
+      "id": "rec-056",
+      "timestamp": "2026-05-14T03:01:00.000Z",
+      "subject": "政治",
+      "textbook": "必修第二册",
+      "chapter": 8,
+      "score": 0,
+      "duration": 30,
+      "xp": 0
+    },
+    {
+      "id": "rec-057",
+      "timestamp": "2026-05-14T03:46:00.000Z",
+      "subject": "英语",
+      "textbook": "天星·试题调研·词汇",
+      "chapter": 0,
+      "score": 41,
+      "duration": 107,
+      "xp": 150
+    },
+    {
+      "id": "rec-058",
+      "timestamp": "2026-05-14T05:48:00.000Z",
+      "subject": "语文",
+      "textbook": "古诗词背诵",
+      "chapter": 0,
+      "score": 0,
+      "duration": 10,
+      "xp": 0
+    },
+    {
+      "id": "rec-059",
+      "timestamp": "2026-05-14T06:13:00.000Z",
+      "subject": "数学",
+      "textbook": "必刷题·必修第一册·6.3",
+      "chapter": 6,
+      "score": 91,
+      "duration": 17,
+      "xp": 77
+    },
+    {
+      "id": "rec-060",
+      "timestamp": "2026-05-14T06:45:00.000Z",
+      "subject": "数学",
+      "textbook": "必刷题·必修第一册·6.4",
+      "chapter": 6,
+      "score": 75,
+      "duration": 32,
+      "xp": 120
+    },
+    {
+      "id": "rec-061",
+      "timestamp": "2026-05-14T07:32:00.000Z",
+      "subject": "物理",
+      "textbook": "必修第二册·8",
+      "chapter": 0,
+      "score": 0,
+      "duration": 17,
+      "xp": 0
+    },
+    {
+      "id": "rec-062",
+      "timestamp": "2026-05-14T08:04:00.000Z",
+      "subject": "物理",
+      "textbook": "解题觉醒·必修二·8.1专项",
+      "chapter": 8,
+      "score": 50,
+      "duration": 42,
+      "xp": 105
+    },
+    {
+      "id": "rec-063",
+      "timestamp": "2026-05-14T09:01:00.000Z",
+      "subject": "物理",
+      "textbook": "解题觉醒·必修二·8.1",
+      "chapter": 8,
+      "score": 75,
+      "duration": 51,
+      "xp": 150
+    },
+    {
+      "id": "rec-064",
+      "timestamp": "2026-05-15T00:00:00.000Z",
+      "subject": "英语",
+      "textbook": "词汇复习",
+      "chapter": 0,
+      "score": 0,
+      "duration": 58,
+      "xp": 0
+    },
+    {
+      "id": "rec-065",
+      "timestamp": "2026-05-15T00:15:00.000Z",
+      "subject": "数学",
+      "textbook": "必修第一册·6.4",
+      "chapter": 6,
+      "score": 0,
+      "duration": 47,
+      "xp": 0
+    },
+    {
+      "id": "rec-066",
+      "timestamp": "2026-05-15T00:30:00.000Z",
+      "subject": "物理",
+      "textbook": "必修第二册·机械能守恒",
+      "chapter": 0,
+      "score": 0,
+      "duration": 45,
+      "xp": 0
+    },
+    {
+      "id": "rec-067",
+      "timestamp": "2026-05-15T00:45:00.000Z",
+      "subject": "历史",
+      "textbook": "中外历史纲要下",
+      "chapter": 14,
+      "score": 0,
+      "duration": 43,
+      "xp": 0
+    },
+    {
+      "id": "rec-068",
+      "timestamp": "2026-05-15T01:00:00.000Z",
+      "subject": "语文",
+      "textbook": "古诗词背诵",
+      "chapter": 0,
+      "score": 0,
+      "duration": 6,
+      "xp": 0
+    },
+    {
+      "id": "rec-069",
+      "timestamp": "2026-05-15T01:21:00.000Z",
+      "subject": "语文",
+      "textbook": "古诗词背诵",
+      "chapter": 0,
+      "score": 0,
+      "duration": 8,
+      "xp": 0
+    },
+    {
+      "id": "rec-070",
+      "timestamp": "2026-05-15T01:44:00.000Z",
+      "subject": "语文",
+      "textbook": "古诗词背诵",
+      "chapter": 0,
+      "score": 0,
+      "duration": 6,
+      "xp": 0
+    },
+    {
+      "id": "rec-071",
+      "timestamp": "2026-05-17T00:00:00.000Z",
+      "subject": "数学",
+      "textbook": "必修第一册·概率统计",
+      "chapter": 0,
+      "score": 0,
+      "duration": 50,
+      "xp": 0
+    }
+  ]
+}
