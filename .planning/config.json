@@ -1,0 +1,20 @@
+{
+  "mode": "yolo",
+  "granularity": "standard",
+  "parallelization": true,
+  "commit_docs": false,
+  "model_profile": "balanced",
+  "workflow": {
+    "research": true,
+    "plan_check": true,
+    "verifier": true,
+    "nyquist_validation": true,
+    "auto_advance": true
+  },
+  "project": {
+    "code": "LTS",
+    "title": "学习RPG · 认知操作系统",
+    "type": "brownfield",
+    "base_path": "E:\\Htmls\\LTS Program"
+  }
+}
