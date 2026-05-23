@@ -11,6 +11,7 @@ import * as skillTree from './pages/skill-tree.js';
 import * as review from './pages/review.js';
 import * as logPage from './pages/log.js';
 import * as reading from './pages/reading.js';
+import * as about from './pages/about.js';
 
 const container = document.getElementById('page-container');
 
@@ -48,6 +49,7 @@ Router.register('#/data/skill-tree', () => handleRoute(skillTree, '#/data/skill-
 Router.register('#/data/review', () => handleRoute(review, '#/data/review'));
 Router.register('#/data/log', () => handleRoute(logPage, '#/data/log'));
 Router.register('#/data/reading', () => handleRoute(reading, '#/data/reading'));
+Router.register('#/about', () => handleRoute(about, '#/about'));
 
 // Render navbar
 Navbar.render(document.body);

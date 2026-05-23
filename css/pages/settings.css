@@ -1,0 +1,115 @@
+/* settings.css — 设置页样式 */
+.settings-header {
+  font-size: var(--fs-lg);
+  font-weight: 700;
+  margin-bottom: var(--sp-3);
+}
+.settings-section {
+  background: var(--color-surface);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--r-md);
+  padding: var(--sp-3);
+  margin-bottom: var(--sp-2);
+}
+.settings-section h3 {
+  font-size: var(--fs-sm);
+  color: var(--color-text-3);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: var(--sp-2);
+}
+.settings-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--sp-2) 0;
+  gap: var(--sp-2);
+}
+.settings-row + .settings-row {
+  border-top: 1px solid var(--color-surface-variant);
+}
+.settings-label {
+  font-size: var(--fs-sm);
+  color: var(--color-text-2);
+  flex-shrink: 0;
+  min-width: 60px;
+}
+.settings-value {
+  font-size: var(--fs-sm);
+  color: var(--color-text-3);
+  text-align: right;
+}
+.pill-group {
+  display: flex;
+  gap: var(--sp-1);
+}
+.pill {
+  padding: 6px 14px;
+  border: 1px solid var(--glass-border);
+  border-radius: var(--r-full);
+  background: transparent;
+  color: var(--color-text-2);
+  font-size: var(--fs-xs);
+  cursor: pointer;
+  transition: all var(--duration-fast) var(--ease);
+  white-space: nowrap;
+}
+.pill:hover {
+  background: var(--color-surface-variant);
+}
+.pill.active {
+  background: var(--color-accent);
+  color: #fff;
+  border-color: transparent;
+}
+.settings-select {
+  padding: 6px 12px;
+  border: 1px solid var(--glass-border);
+  border-radius: var(--r-sm);
+  background: var(--color-surface);
+  color: var(--color-text-1);
+  font-size: var(--fs-sm);
+}
+.settings-input {
+  padding: 6px 12px;
+  border: 1px solid var(--glass-border);
+  border-radius: var(--r-sm);
+  background: var(--color-surface);
+  color: var(--color-text-1);
+  font-size: var(--fs-sm);
+  width: 120px;
+  text-align: right;
+}
+.settings-btn {
+  padding: 6px 16px;
+  border: 1px solid var(--glass-border);
+  border-radius: var(--r-sm);
+  background: transparent;
+  color: var(--color-text-2);
+  font-size: var(--fs-sm);
+  cursor: pointer;
+  transition: all var(--duration-fast) var(--ease);
+}
+.settings-btn:hover {
+  background: var(--color-surface-variant);
+}
+.settings-btn-primary {
+  background: var(--color-accent);
+  color: #fff;
+  border-color: transparent;
+}
+.settings-about-link {
+  padding: 0;
+}
+.settings-nav-link {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--sp-3);
+  color: var(--color-text-1);
+  text-decoration: none;
+  font-size: var(--fs-sm);
+}
+.settings-arrow {
+  color: var(--color-text-3);
+}
