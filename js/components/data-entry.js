@@ -155,6 +155,16 @@ function renderModal() {
         </div>
         <div class="entry-row">
           <div class="entry-field entry-field-half">
+            <label class="entry-label">总题数</label>
+            <input type="number" id="entry-total-q" class="entry-input" min="0" placeholder="可选">
+          </div>
+          <div class="entry-field entry-field-half">
+            <label class="entry-label">正确题数</label>
+            <input type="number" id="entry-correct-q" class="entry-input" min="0" placeholder="可选">
+          </div>
+        </div>
+        <div class="entry-row">
+          <div class="entry-field entry-field-half">
             <label class="entry-label">做题时长</label>
             <input type="number" id="entry-practice-dur" class="entry-input" min="0" value="24" placeholder="自动">
           </div>
@@ -323,6 +333,9 @@ function bindEvents() {
     const practiceDur = parseInt(document.getElementById('entry-practice-dur').value, 10) || Math.round(duration * 0.8);
     const reviewDur = parseInt(document.getElementById('entry-review-dur').value, 10) || Math.round(duration * 0.2);
 
+    const totalQ = parseInt(document.getElementById('entry-total-q').value, 10) || 0;
+    const correctQ = parseInt(document.getElementById('entry-correct-q').value, 10) || 0;
+
     const record = {
       id: 'rec-' + Date.now() + '-' + Math.random().toString(36).slice(2, 6),
       timestamp: new Date().toISOString(),
@@ -337,7 +350,9 @@ function bindEvents() {
       reviewDuration: reviewDur,
       activityType: document.getElementById('entry-activity').value,
       notes: document.getElementById('entry-notes').value || '',
-      xp: 0, // 占位，下方用 calcXP 计算
+      totalQuestions: totalQ,
+      correctQuestions: correctQ,
+      xp: 0,
     };
     // XP Engine 2.0: 用完整公式替代简化公式
     const profile = Store.get(StorageKeys.USER_PROFILE) || {};
