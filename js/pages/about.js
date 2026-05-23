@@ -1,6 +1,13 @@
 // about.js — 关于页（版本信息+致谢+版本历史）
 // 纯静态页面，无 Store 读写，VERSION_HISTORY 手动维护
 const VERSION_HISTORY = [
+  { version: 'v0.78', date: '2026-05-24', desc: '技能树温度色+节点详情+热力图XP化对齐参考文档 §9/§12' },
+  { version: 'v0.77', date: '2026-05-24', desc: '阅读书籍状态+起止页+完成百分比对齐参考文档 §8' },
+  { version: 'v0.76', date: '2026-05-24', desc: '番茄钟FAB+专注分公式修正对齐参考文档 §7' },
+  { version: 'v0.75', date: '2026-05-24', desc: '搜索增强 — Levenshtein模糊匹配+键盘导航' },
+  { version: 'v0.74', date: '2026-05-24', desc: '命令面板 Ctrl+K — 快速导航+操作执行' },
+  { version: 'v0.73', date: '2026-05-24', desc: '成就页重构 — bug修复+5稀有度+进度条+解锁弹窗动画' },
+  { version: 'v0.72', date: '2026-05-24', desc: '成就系统扩充 — 59成就/5分类/5稀有度对齐参考文档 §11' },
   { version: 'v0.71', date: '2026-05-23', desc: '算法对齐 — 动量÷10修正+特长乘数+softCap下限+subjectDifficulty保护' },
   { version: 'v0.70', date: '2026-05-23', desc: '假性熟练检测对齐参考文档 §5.8' },
   { version: 'v0.69', date: '2026-05-23', desc: '提分潜力对齐参考文档 §5.7' },
@@ -60,7 +67,7 @@ export function render() {
       <div class="about-hero">
         <div class="about-logo">LTS</div>
         <div class="about-title">学习RPG · 认知操作系统</div>
-        <div class="about-version">v0.71</div>
+        <div class="about-version">v0.78</div>
         <div class="about-credit">Created by 墨澜 × Miku</div>
       </div>
       <div class="about-section">
