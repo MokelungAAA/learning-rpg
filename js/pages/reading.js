@@ -34,7 +34,33 @@ function fold(id, title, content) {
   </div>`;
 }
 
-// 书架视图：按书名聚合，显示阅读次数/总时长/页数/最近日期
+// 阅读热力图：最近169天，按阅读分钟数分5级
+function renderHeatmap(records) {
+  const dateMap = {};
+  for (const r of records) {
+    const d = r.timestamp ? r.timestamp.slice(0, 10) : '';
+    if (d) dateMap[d] = (dateMap[d] || 0) + (r.durationMinutes || 0);
+  }
+  const today = new Date();
+  const cells = [];
+  const dayNames = ['一', '二', '三', '四', '五', '六', '日'];
+  for (let i = 168; i >= 0; i--) {
+    const d = new Date(today);
+    d.setDate(d.getDate() - i);
+    const key = d.toISOString().slice(0, 10);
+    const val = dateMap[key] || 0;
+    const level = val === 0 ? 0 : val <= 15 ? 1 : val <= 30 ? 2 : val <= 60 ? 3 : 4;
+    const title = `${key}: ${val}分钟`;
+    cells.push(`<div class="heatmap-cell level-${level}" title="${title}"></div>`);
+  }
+  return `<div class="heatmap-section">
+    <div class="heatmap-labels">${dayNames.map(d => `<span class="heatmap-label">${d}</span>`).join('')}</div>
+    <div class="heatmap-grid">${cells.join('')}</div>
+    <div class="heatmap-legend"><span>少</span>${[0,1,2,3,4].map(l => `<div class="heatmap-cell level-${l}"></div>`).join('')}<span>多</span></div>
+  </div>`;
+}
+
+// 书架视图：按书名聚合，支持网格/列表切换
 function renderBookshelf(records) {
   const books = {};
   for (const r of records) {
@@ -53,7 +79,7 @@ function renderBookshelf(records) {
   if (entries.length === 0) return fold('bookshelf', '📚 书架', '<p class="pomo-empty">暂无阅读记录</p>');
 
   const statusMap = Object.fromEntries(BOOK_STATUSES.map(s => [s.value, s]));
-  const items = entries.map(b => {
+  const listItems = entries.map(b => {
     const date = b.lastDate ? new Date(b.lastDate).toLocaleDateString('zh-CN') : '';
     const st = statusMap[b.status] || statusMap.reading;
     const badge = `<span class="book-status-badge" style="color:${st.color}">${st.label}</span>`;
@@ -69,7 +95,22 @@ function renderBookshelf(records) {
       <div class="book-date">${date}</div>
     </div>`;
   }).join('');
-  return fold('bookshelf', `📚 书架 · ${entries.length}本`, `<div class="book-list">${items}</div>`);
+  const gridItems = entries.map(b => {
+    const st = statusMap[b.status] || statusMap.reading;
+    const pct = b.completion > 0 ? `${b.completion}%` : '';
+    return `<div class="book-grid-card">
+      <div class="book-grid-cover">📖</div>
+      <div class="book-grid-title">${b.title}</div>
+      <div class="book-grid-status" style="color:${st.color}">${st.label}</div>
+      ${pct ? `<div class="book-grid-pct">${pct}</div>` : ''}
+    </div>`;
+  }).join('');
+  const toggle = `<div class="book-view-toggle">
+    <button class="book-view-btn active" data-view="list">列表</button>
+    <button class="book-view-btn" data-view="grid">网格</button>
+  </div>`;
+  return fold('bookshelf', `📚 书架 · ${entries.length}本`,
+    `${toggle}<div class="book-list" id="book-list-view">${listItems}</div><div class="book-grid" id="book-grid-view" style="display:none">${gridItems}</div>`);
 }
 
 // 阅读记录列表（最多显示20条）+ 编辑/删除按钮
@@ -102,9 +143,12 @@ function renderRecordList(records) {
   return fold('records', `📝 阅读记录 · ${records.length}条`, `<div class="reading-list">${items}</div>`);
 }
 
-// 图表容器占位（月度柱状图+分类饼图，折叠展开时懒加载）
+// 图表容器占位（阅读热力图+月度柱状图+分类饼图，折叠展开时懒加载）
 function renderChartSection() {
-  return fold('reading-charts', '📈 阅读统计', '<div class="chart-container" id="reading-monthly-chart" style="height:220px"></div><div class="chart-container" id="reading-category-chart" style="height:220px;margin-top:var(--sp-2)"></div>');
+  return fold('reading-charts', '📈 阅读统计',
+    '<div id="reading-heatmap-container"></div>' +
+    '<div class="chart-container" id="reading-monthly-chart" style="height:220px;margin-top:var(--sp-2)"></div>' +
+    '<div class="chart-container" id="reading-category-chart" style="height:220px;margin-top:var(--sp-2)"></div>');
 }
 
 export function render() {
@@ -346,9 +390,14 @@ function deleteRecord(recordID) {
   });
 }
 
-// 异步初始化图表：月度阅读时长柱状图 + 分类饼图
-// 坑: 记录为空时需隐藏 loading spinner
+// 异步初始化图表：阅读热力图 + 月度柱状图 + 分类饼图
 async function initCharts() {
+  const records = getRecords();
+
+  // 阅读热力图（纯DOM，不依赖ECharts）
+  const heatmapEl = document.getElementById('reading-heatmap-container');
+  if (heatmapEl) heatmapEl.innerHTML = renderHeatmap(records);
+
   const monthlyEl = document.getElementById('reading-monthly-chart');
   const catEl = document.getElementById('reading-category-chart');
   if (monthlyEl) showChartLoading(monthlyEl);
@@ -356,7 +405,6 @@ async function initCharts() {
 
   const ec = await loadECharts();
   if (!ec) { if (monthlyEl) hideChartLoading(monthlyEl); if (catEl) hideChartLoading(catEl); return; }
-  const records = getRecords();
   if (records.length === 0) { if (monthlyEl) hideChartLoading(monthlyEl); if (catEl) hideChartLoading(catEl); return; }
 
   // 月度柱状图
@@ -370,7 +418,7 @@ async function initCharts() {
         const m = r.timestamp ? r.timestamp.slice(0, 7) : '';
         if (m) byMonth[m] = (byMonth[m] || 0) + (r.durationMinutes || 0);
       }
-      const months = Object.keys(byMonth).sort().slice(-6);
+      const months = Object.keys(byMonth).sort().slice(-12);
       chart.setOption({
         tooltip: { trigger: 'axis' },
         grid: { left: 40, right: 10, top: 10, bottom: 30 },
@@ -431,11 +479,24 @@ export function afterRender() {
   };
   foldHeaders.forEach(h => h.addEventListener('click', onFold));
 
+  // 书架网格/列表切换
+  const viewBtns = document.querySelectorAll('.book-view-btn');
+  const onViewToggle = (e) => {
+    const view = e.currentTarget.dataset.view;
+    viewBtns.forEach(b => b.classList.toggle('active', b.dataset.view === view));
+    const listView = document.getElementById('book-list-view');
+    const gridView = document.getElementById('book-grid-view');
+    if (listView) listView.style.display = view === 'list' ? '' : 'none';
+    if (gridView) gridView.style.display = view === 'grid' ? '' : 'none';
+  };
+  viewBtns.forEach(b => b.addEventListener('click', onViewToggle));
+
   return () => {
     addBtn.removeEventListener('click', onAdd);
     editBtns.forEach(b => b.removeEventListener('click', onEdit));
     deleteBtns.forEach(b => b.removeEventListener('click', onDelete));
     foldHeaders.forEach(h => h.removeEventListener('click', onFold));
+    viewBtns.forEach(b => b.removeEventListener('click', onViewToggle));
     chartInstances.forEach(c => disposeChart(c));
     chartInstances = [];
   };

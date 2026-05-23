@@ -198,3 +198,104 @@
   flex: 1;
   min-width: 0;
 }
+
+/* === 书架网格/列表切换 === */
+.book-view-toggle {
+  display: flex;
+  gap: var(--sp-1);
+  margin-bottom: var(--sp-2);
+}
+.book-view-btn {
+  padding: 4px 12px;
+  border: 1px solid var(--color-outline);
+  border-radius: var(--r-full);
+  background: transparent;
+  color: var(--color-text-2);
+  font-size: var(--fs-xs);
+  cursor: pointer;
+  transition: all var(--duration-fast) var(--ease);
+}
+.book-view-btn.active {
+  background: var(--color-accent);
+  color: var(--md-on-primary);
+  border-color: var(--color-accent);
+}
+
+/* === 书架网格视图 === */
+.book-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: var(--sp-2);
+}
+.book-grid-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: var(--sp-2);
+  border-radius: var(--r-md);
+  background: rgba(255, 255, 255, 0.4);
+  text-align: center;
+}
+[data-theme="dark"] .book-grid-card { background: rgba(255, 255, 255, 0.02); }
+.book-grid-cover { font-size: 36px; margin-bottom: var(--sp-1); }
+.book-grid-title {
+  font-size: var(--fs-xs);
+  font-weight: 600;
+  color: var(--color-text-1);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+.book-grid-status { font-size: 10px; margin-top: 2px; }
+.book-grid-pct { font-size: 10px; color: var(--color-text-3); margin-top: 2px; }
+
+/* === 阅读热力图 (复用主热力图样式) === */
+.heatmap-section {
+  margin-bottom: var(--sp-2);
+}
+.heatmap-grid {
+  display: grid;
+  grid-template-columns: repeat(25, 1fr);
+  gap: 2px;
+}
+.heatmap-cell {
+  aspect-ratio: 1;
+  border-radius: 2px;
+  min-width: 0;
+}
+.heatmap-cell.level-0 { background: var(--color-surface-variant); }
+.heatmap-cell.level-1 { background: #9be9a8; }
+.heatmap-cell.level-2 { background: #40c463; }
+.heatmap-cell.level-3 { background: #30a14e; }
+.heatmap-cell.level-4 { background: #216e39; }
+[data-theme="dark"] .heatmap-cell.level-0 { background: #2C2C2C; }
+[data-theme="dark"] .heatmap-cell.level-1 { background: #0e4429; }
+[data-theme="dark"] .heatmap-cell.level-2 { background: #006d32; }
+[data-theme="dark"] .heatmap-cell.level-3 { background: #26a641; }
+[data-theme="dark"] .heatmap-cell.level-4 { background: #39d353; }
+.heatmap-labels {
+  display: flex;
+  gap: 2px;
+  margin-bottom: 2px;
+}
+.heatmap-label {
+  font-size: 9px;
+  color: var(--color-text-3);
+  width: 0;
+  flex: 1;
+  text-align: center;
+}
+.heatmap-legend {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  margin-top: 4px;
+  font-size: 10px;
+  color: var(--color-text-3);
+  justify-content: flex-end;
+}
+.heatmap-legend .heatmap-cell {
+  width: 12px;
+  height: 12px;
+}
