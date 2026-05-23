@@ -1,0 +1,92 @@
+/* command-palette.css — Ctrl+K 命令面板样式 */
+
+.cmd-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  z-index: 10000;
+  display: flex;
+  justify-content: center;
+  padding-top: 15vh;
+  animation: cmd-fade-in 0.15s ease;
+}
+@keyframes cmd-fade-in { from { opacity: 0; } }
+
+.cmd-palette {
+  width: min(520px, 90vw);
+  max-height: 420px;
+  background: var(--color-surface);
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow-xl);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: cmd-slide-in 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+@keyframes cmd-slide-in { from { transform: translateY(-20px) scale(0.96); opacity: 0; } }
+
+.cmd-input-wrap {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  padding: var(--sp-3);
+  border-bottom: 1px solid var(--color-border);
+}
+.cmd-input-icon { font-size: 18px; flex-shrink: 0; }
+.cmd-input {
+  flex: 1;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-size: var(--fs-md);
+  color: var(--color-text-1);
+  font-family: inherit;
+}
+.cmd-input::placeholder { color: var(--color-text-3); }
+
+.cmd-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--sp-1) 0;
+}
+.cmd-group-label {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--color-text-3);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: var(--sp-2) var(--sp-3) var(--sp-1);
+}
+.cmd-item {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  padding: var(--sp-2) var(--sp-3);
+  cursor: pointer;
+  transition: background var(--duration-fast) var(--ease);
+}
+.cmd-item:hover,
+.cmd-item.active {
+  background: var(--color-surface-2);
+}
+.cmd-item-icon { font-size: 16px; width: 24px; text-align: center; flex-shrink: 0; }
+.cmd-item-label { font-size: var(--fs-sm); color: var(--color-text-1); }
+.cmd-empty {
+  text-align: center;
+  padding: var(--sp-4);
+  color: var(--color-text-3);
+  font-size: var(--fs-sm);
+}
+
+.cmd-hint {
+  display: flex;
+  justify-content: center;
+  gap: var(--sp-4);
+  padding: var(--sp-2);
+  border-top: 1px solid var(--color-border);
+  font-size: 10px;
+  color: var(--color-text-3);
+}
+
+/* 深色模式 */
+[data-theme="dark"] .cmd-overlay { background: rgba(0, 0, 0, 0.6); }

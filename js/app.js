@@ -108,6 +108,15 @@ if (!window.location.hash) {
   window.location.hash = '#/';
 }
 
+// 全局快捷键: Ctrl+K 打开命令面板
+document.addEventListener('keydown', async (e) => {
+  if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+    e.preventDefault();
+    const { openPalette } = await import('./components/command-palette.js');
+    openPalette();
+  }
+});
+
 // Register Service Worker for PWA
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('./sw.js').catch(() => {});
