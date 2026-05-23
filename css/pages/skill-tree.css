@@ -1,0 +1,228 @@
+/* skill-tree.css — 技能树页面样式 */
+
+.skill-tree-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--sp-3);
+}
+
+.skill-tree-controls {
+  display: flex;
+  gap: var(--sp-2);
+}
+
+.skill-filter-select {
+  padding: var(--sp-1) var(--sp-3);
+  border: 1px solid var(--color-outline);
+  border-radius: var(--r-full);
+  background: var(--color-surface);
+  color: var(--color-text-1);
+  font-size: var(--fs-sm);
+  cursor: pointer;
+  outline: none;
+}
+
+.skill-filter-select:focus {
+  border-color: var(--color-accent);
+}
+
+/* Talents */
+.talent-section {
+  margin-bottom: var(--sp-3);
+}
+
+.talent-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-1);
+}
+
+.talent-tag {
+  font-size: var(--fs-xs);
+  padding: var(--sp-1) var(--sp-2);
+  border: 1px solid;
+  border-radius: var(--r-full);
+  color: var(--color-text-2);
+  background: rgba(255, 255, 255, 0.5);
+}
+
+[data-theme="dark"] .talent-tag {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+/* Graph container */
+.skill-graph-container {
+  margin-bottom: var(--sp-4);
+  border-radius: var(--r-lg);
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.4);
+}
+
+[data-theme="dark"] .skill-graph-container {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.skill-radar-section {
+  margin-bottom: var(--sp-3);
+}
+
+/* Legend */
+.skill-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-2);
+  margin-bottom: var(--sp-3);
+  padding: var(--sp-2);
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: var(--fs-xs);
+  color: var(--color-text-3);
+}
+
+.legend-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+/* Detail Panel */
+.skill-detail-panel {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  max-height: 60vh;
+  overflow-y: auto;
+  background: var(--color-surface);
+  border-top: 1px solid var(--color-outline);
+  border-radius: var(--r-xl) var(--r-xl) 0 0;
+  padding: var(--sp-4);
+  z-index: 100;
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.15);
+  animation: slideUp 0.25s ease;
+}
+
+@keyframes slideUp {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
+.detail-close {
+  position: absolute;
+  top: var(--sp-2);
+  right: var(--sp-3);
+  background: none;
+  border: none;
+  font-size: 18px;
+  color: var(--color-text-3);
+  cursor: pointer;
+  padding: var(--sp-1);
+}
+
+.detail-header {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  margin-bottom: var(--sp-3);
+}
+
+.detail-subject-icon {
+  font-size: 28px;
+}
+
+.detail-skill-name {
+  font-size: var(--fs-lg);
+  font-weight: 700;
+  color: var(--color-text-1);
+}
+
+.detail-subject-name {
+  font-size: var(--fs-xs);
+  color: var(--color-text-3);
+}
+
+.detail-stats {
+  display: flex;
+  gap: var(--sp-3);
+  margin-bottom: var(--sp-3);
+}
+
+.detail-stat {
+  text-align: center;
+  flex: 1;
+}
+
+.detail-stat-value {
+  font-size: var(--fs-xl);
+  font-weight: 700;
+  color: var(--color-text-1);
+}
+
+.detail-stat-label {
+  font-size: var(--fs-xs);
+  color: var(--color-text-3);
+}
+
+.detail-desc {
+  font-size: var(--fs-sm);
+  color: var(--color-text-2);
+  margin-bottom: var(--sp-3);
+  padding-bottom: var(--sp-3);
+  border-bottom: 1px solid var(--color-outline);
+}
+
+.detail-kps-title {
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  color: var(--color-text-1);
+  margin-bottom: var(--sp-2);
+}
+
+.detail-kps {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-1);
+}
+
+.detail-kp {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--sp-1) var(--sp-2);
+  border-radius: var(--r-md);
+  background: var(--color-surface-variant);
+}
+
+.detail-kp-name {
+  font-size: var(--fs-sm);
+  color: var(--color-text-1);
+}
+
+.detail-kp-mastery {
+  font-size: var(--fs-sm);
+  font-weight: 600;
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+  .skill-tree-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--sp-2);
+  }
+
+  .skill-detail-panel {
+    max-height: 70vh;
+    padding: var(--sp-3);
+  }
+
+  .detail-stats {
+    gap: var(--sp-2);
+  }
+}

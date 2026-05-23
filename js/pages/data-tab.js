@@ -104,6 +104,47 @@ function renderCourseProgress(records) {
   return fold('courses', '🎓 网课进度', `<div class="course-list">${items}</div>`);
 }
 
+function renderWeakPoints(records) {
+  if (records.length === 0) return '';
+  const now = Date.now();
+  const subjectStats = {};
+  for (const s of SUBJECTS) {
+    const recs = records.filter(r => r.subject === s.id || r.subject === s.name);
+    const totalMin = recs.reduce((sum, r) => sum + (r.duration || 0), 0);
+    const avgScore = recs.length > 0 ? recs.reduce((a, r) => a + (r.score || 0), 0) / recs.length : 0;
+    const lastTimestamp = recs.filter(r => r.timestamp).map(r => new Date(r.timestamp).getTime()).sort((a, b) => b - a)[0] || 0;
+    const daysSince = lastTimestamp > 0 ? Math.floor((now - lastTimestamp) / 86400000) : 999;
+    subjectStats[s.id] = { name: s.name, count: recs.length, totalMin, avgScore, daysSince };
+  }
+
+  const weakPoints = [];
+  for (const [id, st] of Object.entries(subjectStats)) {
+    const reasons = [];
+    if (st.count === 0) reasons.push('无学习记录');
+    else {
+      if (st.avgScore < 60) reasons.push(`平均分仅 ${Math.round(st.avgScore)}`);
+      if (st.daysSince >= 7) reasons.push(`已 ${st.daysSince} 天未学习`);
+      if (st.totalMin < 30 && st.count > 0) reasons.push(`总时长仅 ${st.totalMin} 分钟`);
+    }
+    if (reasons.length > 0) weakPoints.push({ id, name: st.name, reasons, severity: st.count === 0 ? 2 : st.avgScore < 40 ? 2 : 1 });
+  }
+
+  weakPoints.sort((a, b) => b.severity - a.severity);
+  if (weakPoints.length === 0) {
+    return fold('weakpoints', '🔍 薄弱点识别', '<p style="color:var(--color-success);font-size:var(--fs-sm)">各科状态良好，继续保持！</p>');
+  }
+
+  const items = weakPoints.map(wp => {
+    const icon = getSubjectIcon(wp.id);
+    const borderColor = wp.severity >= 2 ? 'var(--color-error)' : 'var(--color-warning)';
+    return `<div class="weakpoint-item" style="border-left:3px solid ${borderColor}">
+      <div class="weakpoint-header">${icon} <span class="weakpoint-name">${wp.name}</span></div>
+      <div class="weakpoint-reasons">${wp.reasons.map(r => `<span class="weakpoint-tag">${r}</span>`).join('')}</div>
+    </div>`;
+  }).join('');
+  return fold('weakpoints', `🔍 薄弱点识别 · ${weakPoints.length}科待加强`, `<div class="weakpoint-list">${items}</div>`);
+}
+
 function renderChartsSection() {
   const charts = [
     ['chart-xp-trend', '📈 XP趋势折线图'],
@@ -123,8 +164,10 @@ export function render() {
   return `<div class="page-enter">
     <div class="data-page-header">📊 数据</div>
     ${renderSummary(profile, records)}
+    <a href="#/data/skill-tree" class="nav-link-card">🌳 技能树 — 查看学科能力图谱 →</a>
     ${renderAchievements(records, profile)}
     ${renderExamReflection(records)}
+    ${renderWeakPoints(records)}
     ${renderHeatmapSection(records)}
     ${renderTextbookProgress(records)}
     ${renderCourseProgress(records)}

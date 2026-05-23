@@ -749,6 +749,81 @@
   padding: var(--sp-2) 0;
 }
 
+/* === VIEW-12: Weak Points === */
+.weakpoint-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+}
+
+.weakpoint-item {
+  padding: var(--sp-2) var(--sp-3);
+  border-radius: var(--r-md);
+  background: rgba(255, 255, 255, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+[data-theme="dark"] .weakpoint-item {
+  background: rgba(30, 30, 30, 0.5);
+  border-color: rgba(255, 255, 255, 0.06);
+}
+
+.weakpoint-header {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-1);
+  font-weight: 600;
+  font-size: var(--fs-sm);
+  color: var(--color-text-1);
+  margin-bottom: var(--sp-1);
+}
+
+.weakpoint-name {
+  font-size: var(--fs-sm);
+}
+
+.weakpoint-reasons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-1);
+}
+
+.weakpoint-tag {
+  font-size: var(--fs-xs);
+  color: var(--color-text-3);
+  background: var(--color-surface-variant);
+  padding: 2px 8px;
+  border-radius: var(--r-full);
+}
+
+/* === Nav Link Card === */
+.nav-link-card {
+  display: block;
+  padding: var(--sp-3);
+  margin-bottom: var(--sp-3);
+  background: rgba(255, 255, 255, 0.72);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: var(--r-md);
+  font-size: var(--fs-sm);
+  font-weight: 500;
+  color: var(--color-accent);
+  text-decoration: none;
+  transition: all var(--duration-fast) var(--ease);
+}
+
+.nav-link-card:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+  border-color: var(--color-accent);
+}
+
+[data-theme="dark"] .nav-link-card {
+  background: rgba(30, 30, 30, 0.72);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
 /* === Data Tab === */
 .data-page-header {
   font-size: var(--fs-lg);
