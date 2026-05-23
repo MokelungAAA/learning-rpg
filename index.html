@@ -1,113 +1,21 @@
-﻿<!DOCTYPE html>
-<html lang="zh-CN" data-theme="light">
+<!DOCTYPE html>
+<html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no">
-  <meta name="theme-color" content="#6750A4">
-  <meta name="description" content="学习RPG · 认知操作系统 — 游戏化学习追踪系统">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>学习RPG · 认知操作系统</title>
-  <link rel="manifest" href="manifest.json">
-  <link rel="icon" href="icon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="css/theme.css">
-  <link rel="stylesheet" href="css/layout.css">
-  <link rel="stylesheet" href="css/components.css">
-  <link rel="stylesheet" href="css/pages.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎮</text></svg>">
+  <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="css/reset.css">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/glass.css">
+  <link rel="stylesheet" href="css/animations.css">
+  <link rel="stylesheet" href="css/dark-mode.css">
+  <link rel="stylesheet" href="css/responsive.css">
+  <link rel="stylesheet" href="css/components/navbar.css">
 </head>
 <body>
-
-  <div class="launch-page" id="launchPage">
-    <div class="launch-bg"></div>
-    <div class="launch-content">
-      <div class="launch-icon">📚</div>
-      <h1 class="launch-title">学习RPG</h1>
-      <p class="launch-subtitle">认知操作系统</p>
-      <div class="launch-progress">
-        <div class="launch-progress-bar">
-          <div class="launch-progress-fill" id="launchProgressFill"></div>
-        </div>
-        <div class="launch-progress-text">
-          <span id="launchCurrentXp">0</span> / <span id="launchNextXp">5000</span> XP
-        </div>
-      </div>
-      <button class="launch-btn" id="launchBtn">LAUNCH</button>
-    </div>
-  </div>
-
-  <div class="main-page" id="mainPage">
-    <div class="container">
-      <header class="header">
-        <div class="brand">
-          <div class="brand-icon">📚</div>
-          <div class="brand-text">
-            <h1>学习RPG · 认知操作系统</h1>
-            <p>v3.0</p>
-          </div>
-        </div>
-        <nav class="desktop-nav" id="desktopNav">
-          <button class="dnav-btn active" data-page="overview">总览</button>
-          <button class="dnav-btn" data-page="skills">技能树</button>
-          <button class="dnav-btn" data-page="review">复习</button>
-          <button class="dnav-btn" data-page="log">日志</button>
-          <button class="dnav-btn" data-page="settings">更多</button>
-        </nav>
-        <button class="search-trigger" id="searchTrigger" title="搜索 (Ctrl+K)">🔍</button>
-      </header>
-
-      <div class="page-content active" id="page-overview"></div>
-      <div class="page-content" id="page-skills"></div>
-      <div class="page-content" id="page-review"></div>
-      <div class="page-content" id="page-log"></div>
-      <div class="page-content" id="page-settings"></div>
-    </div>
-  </div>
-
-  <nav class="bottom-nav" id="bottomNav">
-    <button class="bn-btn active" data-page="overview">
-      <svg class="bn-icon" viewBox="0 0 24 24"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
-      <span>总览</span>
-    </button>
-    <button class="bn-btn" data-page="skills">
-      <svg class="bn-icon" viewBox="0 0 24 24"><circle cx="12" cy="4" r="2"/><circle cx="4" cy="20" r="2"/><circle cx="20" cy="16" r="2"/><path d="M12 6l-6 12M12 6l6 8M6 18l12-2"/></svg>
-      <span>技能树</span>
-    </button>
-    <button class="bn-btn" data-page="review">
-      <svg class="bn-icon" viewBox="0 0 24 24"><path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
-      <span>复习</span>
-    </button>
-    <button class="bn-btn" data-page="log">
-      <svg class="bn-icon" viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
-      <span>日志</span>
-    </button>
-    <button class="bn-btn" data-page="settings">
-      <svg class="bn-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
-      <span>更多</span>
-    </button>
-  </nav>
-
-  <button class="fab" id="pomodoroFab" title="番茄钟">
-    <svg viewBox="0 0 24 24" width="28" height="28"><path d="M12 2a9 9 0 00-9 9v1a1 1 0 002 0v-1a7 7 0 1114 0v1a1 1 0 002 0v-1a9 9 0 00-9-9z"/><path d="M12 6a1 1 0 00-1 1v5.586l-2.293 2.293a1 1 0 101.414 1.414l2.586-2.586A1 1 0 0013 13V7a1 1 0 00-1-1z"/></svg>
-  </button>
-
-  <div class="pom-panel" id="pomodoroPanel">
-    <div class="pom-panel-header">
-      <h3 style="font-size:18px;font-weight:600">🍅 番茄钟</h3>
-      <button class="btn-icon" onclick="closePomodoro()" style="background:transparent;border:none;font-size:20px;cursor:pointer;color:var(--md-on-surface-variant)">✕</button>
-    </div>
-    <div class="pom-panel-body" id="pomodoroBody"></div>
-  </div>
-  <div class="pom-backdrop" id="pomodoroBackdrop" onclick="closePomodoro()"></div>
-
-  <div class="modal-overlay" id="modalOverlay"></div>
-  <div class="modal-container" id="modalContainer"></div>
-  <div class="command-palette" id="commandPalette"></div>
-  <div class="toast-container" id="toastContainer"></div>
-
-  <script src="js/utils.js"></script>
-  <script src="js/algorithms.js"></script>
-  <script src="js/data.js"></script>
-  <script src="js/persistence.js"></script>
-  <script src="js/recorder.js"></script>
-  <script src="js/app.js"></script>
-  <script defer src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+  <div id="page-container"></div>
+  <script type="module" src="js/app.js"></script>
 </body>
 </html>

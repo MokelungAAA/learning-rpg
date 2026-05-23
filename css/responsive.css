@@ -1,0 +1,21 @@
+/* responsive.css — Breakpoints (mobile first) */
+/* Tablet */
+@media (min-width: 768px) {
+  :root {
+    --content-max-width: 720px;
+  }
+}
+
+/* Desktop */
+@media (min-width: 1024px) {
+  :root {
+    --content-max-width: 960px;
+  }
+}
+
+/* Large Desktop */
+@media (min-width: 1280px) {
+  :root {
+    --content-max-width: 1200px;
+  }
+}

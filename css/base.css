@@ -1,0 +1,18 @@
+/* base.css — Body and page container */
+body {
+  background: var(--color-bg);
+  color: var(--color-text-1);
+  min-height: 100vh;
+  transition: background var(--duration-normal) var(--ease),
+              color var(--duration-normal) var(--ease);
+}
+
+#page-container {
+  max-width: var(--content-max-width);
+  margin: 0 auto;
+  padding: var(--sp-3);
+  padding-bottom: calc(var(--nav-height) + var(--nav-bottom) * 2 + 16px);
+  min-height: 100vh;
+  transition: opacity var(--duration-normal) var(--ease),
+              transform var(--duration-normal) var(--ease);
+}

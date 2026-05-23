@@ -11,3 +11,10 @@ backups/
 # 系统文件
 Thumbs.db
 .DS_Store
+
+# 依赖
+node_modules/
+package-lock.json
+
+# 旧版本代码
+Legacy/
