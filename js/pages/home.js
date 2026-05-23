@@ -12,7 +12,7 @@ import {
   calcStreakDays, calcTodayXP, countUp
 } from '../utils/level.js';
 import { ACHIEVEMENTS } from '../data/achievements.js';
-import * as DataEntry from '../components/data-entry.js';
+
 
 const getRecords = () => Store.get(StorageKeys.STUDY_RECORDS) || [];
 const getProfile = () => Store.get(StorageKeys.USER_PROFILE) || {};
@@ -190,7 +190,7 @@ export function render() {
     ${renderPomodoroWidget()}
     ${renderRecommendations(records)}
     ${renderSubjectGrid(records)}
-    <p style="color:var(--color-text-3);margin-top:var(--sp-3);font-size:var(--fs-xs)">v0.90 · 开发者区</p>
+    <p style="color:var(--color-text-3);margin-top:var(--sp-3);font-size:var(--fs-xs)">v0.91 · 开发者区</p>
   </div>`;
 }
 
@@ -251,11 +251,6 @@ export function afterRender() {
   };
   EventBus.on('record:added', onRecordAdded);
 
-  // Navbar FAB "+" → 打开数据录入弹窗
-  // 坑: fab:click 是全局事件，需在清理时 off
-  const onFabClick = () => DataEntry.open();
-  EventBus.on('fab:click', onFabClick);
-
   return () => {
     themeBtn.removeEventListener('click', onThemeBtn);
     EventBus.off('theme:changed', onThemeChanged);
@@ -263,6 +258,5 @@ export function afterRender() {
     recBtns.forEach(b => b.removeEventListener('click', onRecClick));
     subjectCards.forEach(c => c.removeEventListener('click', onSubjectClick));
     EventBus.off('record:added', onRecordAdded);
-    EventBus.off('fab:click', onFabClick);
   };
 }

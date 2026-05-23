@@ -216,3 +216,115 @@
 .sidebar-fab:active {
   transform: scale(0.97);
 }
+
+/* === Sidebar Detail Panel === */
+.sidebar-detail {
+  display: none;
+  padding: var(--sp-2) 0;
+  margin: var(--sp-1) 0;
+  border-top: 1px solid var(--color-outline);
+  overflow-y: auto;
+  max-height: calc(100vh - 360px);
+}
+
+.sidebar-detail-title {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--color-text-3);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: var(--sp-1) var(--sp-2);
+  margin-top: var(--sp-1);
+}
+
+.sidebar-stats-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--sp-1);
+  padding: 0 var(--sp-1);
+}
+
+.sidebar-stat-box {
+  background: var(--color-surface-variant);
+  border-radius: var(--r-sm);
+  padding: var(--sp-2);
+  text-align: center;
+}
+
+.sidebar-stat-num {
+  font-size: var(--fs-lg);
+  font-weight: 700;
+  color: var(--color-text-1);
+  line-height: 1.2;
+}
+
+.sidebar-stat-lbl {
+  font-size: 10px;
+  color: var(--color-text-3);
+  margin-top: 2px;
+}
+
+.sidebar-stat-bar {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-1);
+  padding: 2px var(--sp-2);
+}
+
+.sidebar-stat-label {
+  font-size: 11px;
+  color: var(--color-text-2);
+  width: 48px;
+  flex-shrink: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sidebar-bar-track {
+  flex: 1;
+  height: 4px;
+  background: var(--color-surface-variant);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.sidebar-bar-fill {
+  height: 100%;
+  background: var(--color-accent);
+  border-radius: 2px;
+  transition: width 0.3s ease;
+}
+
+.sidebar-stat-value {
+  font-size: 10px;
+  color: var(--color-text-3);
+  width: 36px;
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.sidebar-recent-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 3px var(--sp-2);
+}
+
+.sidebar-recent-subj {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--color-text-1);
+}
+
+.sidebar-recent-meta {
+  font-size: 10px;
+  color: var(--color-text-3);
+}
+
+.sidebar-detail-empty {
+  font-size: var(--fs-xs);
+  color: var(--color-text-3);
+  text-align: center;
+  padding: var(--sp-2);
+}

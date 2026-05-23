@@ -42,6 +42,8 @@
 }
 .fold-body {
   padding: 0 var(--sp-3) var(--sp-3);
+  max-height: none;
+  overflow: visible;
 }
 .settings-row {
   display: flex;

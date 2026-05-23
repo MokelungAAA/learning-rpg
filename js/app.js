@@ -66,6 +66,18 @@ function handleRoute(page, path, params) {
   EventBus.emit('route:changed', path);
 }
 
+// 全局 FAB "+" 点击 → 打开数据录入弹窗（所有页面可用）
+EventBus.on('fab:click', async () => {
+  const { open } = await import('./components/data-entry.js');
+  open();
+});
+
+// 路由切换时自动关闭数据录入弹窗
+EventBus.on('route:changed', async () => {
+  const { close } = await import('./components/data-entry.js');
+  close();
+});
+
 // Register routes
 Router.register('#/', () => handleRoute(home, '#/'));
 Router.register('#/data', () => handleRoute(dataTab, '#/data'));
