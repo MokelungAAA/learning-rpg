@@ -1,5 +1,6 @@
-// sw.js — Service Worker for LTS PWA offline support
-const CACHE_NAME = 'lts-v1';
+// sw.js — Service Worker for LTS PWA (§13: Cache First + Background Update)
+// 策略: 缓存优先 + 后台静默更新 (stale-while-revalidate)
+const CACHE_NAME = 'lts-v2';
 const ASSETS = [
   './',
   './index.html',
@@ -16,6 +17,8 @@ const ASSETS = [
   './css/components/toast.css',
   './css/components/status-bar.css',
   './css/components/data-entry.css',
+  './css/components/command-palette.css',
+  './css/components/pomo-fab.css',
   './css/pages/home.css',
   './css/pages/data-tab.css',
   './css/pages/skill-tree.css',
@@ -55,12 +58,32 @@ self.addEventListener('activate', (e) => {
   );
 });
 
-// Fetch: cache-first for assets, network-first for API
+// §13.1: Stale-while-revalidate — 返回缓存同时后台更新
 self.addEventListener('fetch', (e) => {
   const url = new URL(e.request.url);
-  // Skip non-GET and external requests
   if (e.request.method !== 'GET' || url.origin !== location.origin) return;
   e.respondWith(
-    caches.match(e.request).then(cached => cached || fetch(e.request))
+    caches.open(CACHE_NAME).then(cache =>
+      cache.match(e.request).then(cached => {
+        const fetchPromise = fetch(e.request).then(response => {
+          if (response && response.status === 200) {
+            cache.put(e.request, response.clone());
+          }
+          return response;
+        }).catch(() => cached);
+        return cached || fetchPromise;
+      })
+    )
   );
+});
+
+// §13.3: 监听 sync 事件（离线重连后触发）
+self.addEventListener('sync', (e) => {
+  if (e.tag === 'sync-data') {
+    e.waitUntil(
+      self.clients.matchAll().then(clients => {
+        clients.forEach(client => client.postMessage({ type: 'SYNC_TRIGGERED' }));
+      })
+    );
+  }
 });

@@ -128,4 +128,31 @@ document.addEventListener('keydown', async (e) => {
 // Register Service Worker for PWA
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('./sw.js').catch(() => {});
+
+  // §13.3: 监听 SW 同步消息
+  navigator.serviceWorker.addEventListener('message', (e) => {
+    if (e.data?.type === 'SYNC_TRIGGERED') {
+      EventBus.emit('sync:triggered');
+    }
+  });
 }
+
+// §13.3: 离线重连 — 恢复网络时自动触发同步
+window.addEventListener('online', async () => {
+  try {
+    const { default: Toast } = await import('./components/toast.js');
+    Toast.show('网络已恢复，正在同步...', 'info');
+    if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+      const reg = await navigator.serviceWorker.ready;
+      if (reg.sync) reg.sync.register('sync-data');
+    }
+    EventBus.emit('sync:triggered');
+  } catch {}
+});
+
+window.addEventListener('offline', async () => {
+  try {
+    const { default: Toast } = await import('./components/toast.js');
+    Toast.show('已进入离线模式', 'warning');
+  } catch {}
+});
