@@ -127,7 +127,7 @@ export function render() {
     ${renderTimer(25)}
     ${renderComplete()}
     ${renderHistory()}
-    <p style="color:var(--color-text-3);margin-top:var(--sp-3);font-size:var(--fs-xs)">v0.10 · 番茄钟系统</p>
+    <p style="color:var(--color-text-3);margin-top:var(--sp-3);font-size:var(--fs-xs)">v0.17 · 番茄钟系统</p>
   </div>`;
 }
 

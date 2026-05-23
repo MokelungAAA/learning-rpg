@@ -95,7 +95,7 @@ export function render() {
     ${renderBookshelf(records)}
     ${renderRecordList(records)}
     ${renderChartSection()}
-    <p style="color:var(--color-text-3);margin-top:var(--sp-3);font-size:var(--fs-xs)">v1.0 · 阅读系统</p>
+    <p style="color:var(--color-text-3);margin-top:var(--sp-3);font-size:var(--fs-xs)">v0.18 · 阅读系统</p>
   </div>`;
 }
 

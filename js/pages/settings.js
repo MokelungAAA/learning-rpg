@@ -61,7 +61,7 @@ export function render() {
         <button class="pill${mode === 'system' ? ' active' : ''}" data-theme="system">跟随系统</button>
       </div>
     </div>
-    <p style="color:var(--color-text-3);margin-top:var(--sp-3)">v0.3 · 深色模式 + 状态栏</p>
+    <p style="color:var(--color-text-3);margin-top:var(--sp-3)">v0.05 · 深色模式 + 状态栏</p>
   </div>`;
 }
 
