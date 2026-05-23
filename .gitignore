@@ -18,3 +18,7 @@ package-lock.json
 
 # 旧版本代码
 Legacy/
+
+# Claude Code
+.claude/
+.playwright-mcp/

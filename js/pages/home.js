@@ -10,6 +10,7 @@ import {
   calcStreakDays, calcTodayXP
 } from '../utils/level.js';
 import { ACHIEVEMENTS } from '../data/achievements.js';
+import * as DataEntry from '../components/data-entry.js';
 
 const getRecords = () => Store.get(StorageKeys.STUDY_RECORDS) || [];
 const getProfile = () => Store.get(StorageKeys.USER_PROFILE) || {};
@@ -172,7 +173,8 @@ export function render() {
     ${renderPomodoroWidget()}
     ${renderRecommendations(records)}
     ${renderSubjectGrid(records)}
-    <p style="color:var(--color-text-3);margin-top:var(--sp-3);font-size:var(--fs-xs)">v0.6 · 复习中心</p>
+    <button class="entry-fab" id="entry-fab" title="录入学习记录">＋</button>
+    <p style="color:var(--color-text-3);margin-top:var(--sp-3);font-size:var(--fs-xs)">v0.7 · 数据录入</p>
   </div>`;
 }
 
@@ -209,11 +211,17 @@ export function afterRender() {
   };
   subjectCards.forEach(c => c.addEventListener('click', onSubjectClick));
 
+  // 数据录入 FAB
+  const fab = document.getElementById('entry-fab');
+  const onFabClick = () => DataEntry.open();
+  if (fab) fab.addEventListener('click', onFabClick);
+
   return () => {
     themeBtn.removeEventListener('click', onThemeBtn);
     EventBus.off('theme:changed', onThemeChanged);
     if (pomBtn) pomBtn.removeEventListener('click', onPomClick);
     recBtns.forEach(b => b.removeEventListener('click', onRecClick));
     subjectCards.forEach(c => c.removeEventListener('click', onSubjectClick));
+    if (fab) fab.removeEventListener('click', onFabClick);
   };
 }

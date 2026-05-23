@@ -44,7 +44,7 @@ function renderShadowQueue(queue) {
       </div>
       <div class="queue-item-right">
         <span class="queue-temp" style="color:${level.color}">${Math.round(q.temp)}°</span>
-        <span class="queue-hl">半衰期 ${q.halfLife}天</span>
+        <button class="queue-review-btn" data-kp="${q.kp}" data-subject="${q.subjectName}" data-skill="${q.skillId}">复习</button>
       </div>
     </div>`;
   }).join('');
@@ -98,6 +98,24 @@ function renderFalseMastery(falseItems) {
   return fold('false-mastery', `⚠️ 假性熟练检测 · ${falseItems.length}个`, `<div class="false-mastery-list">${items}</div>`);
 }
 
+// REV-08: 考试推荐触发
+function renderExamRecommend(queue) {
+  const urgent = queue.filter(q => q.temp < 40);
+  if (urgent.length === 0) return '';
+  const bySubject = {};
+  for (const q of urgent) {
+    (bySubject[q.subjectName] ||= []).push(q);
+  }
+  const items = Object.entries(bySubject).map(([name, kps]) => {
+    return `<div class="exam-rec-item">
+      <div class="exam-rec-subject">${name}</div>
+      <div class="exam-rec-detail">${kps.length}个知识点温度低于40°，建议安排一次单元测试</div>
+      <div class="exam-rec-kps">${kps.slice(0, 3).map(k => `<span class="exam-rec-tag">${k.kp}</span>`).join('')}${kps.length > 3 ? `<span class="exam-rec-tag">+${kps.length - 3}</span>` : ''}</div>
+    </div>`;
+  }).join('');
+  return fold('exam-rec', `📋 考试推荐 · ${Object.keys(bySubject).length}科`, `<div class="exam-rec-list">${items}</div>`);
+}
+
 export function render() {
   const records = getRecords();
   const profile = getProfile();
@@ -119,7 +137,8 @@ export function render() {
     ${renderShadowQueue(queue)}
     ${renderPotential(potentials)}
     ${renderFalseMastery(falseItems)}
-    <p style="color:var(--color-text-3);margin-top:var(--sp-3);font-size:var(--fs-xs)">v0.6 · 复习中心</p>
+    ${renderExamRecommend(queue)}
+    <p style="color:var(--color-text-3);margin-top:var(--sp-3);font-size:var(--fs-xs)">v0.7 · 复习中心</p>
   </div>`;
 }
 
@@ -171,8 +190,19 @@ export function afterRender() {
   };
   foldHeaders.forEach(h => h.addEventListener('click', onFoldClick));
 
+  // REV-06: 开始复习流程 — 跳转番茄钟并预填上下文
+  const reviewBtns = document.querySelectorAll('.queue-review-btn');
+  const onReviewClick = (e) => {
+    const { kp, subject, skill } = e.currentTarget.dataset;
+    // 存储复习上下文到 localStorage，番茄钟页面读取
+    Store.set('lts_review_context', { kp, subject, skill, startTime: Date.now() });
+    window.location.hash = '#/pomodoro';
+  };
+  reviewBtns.forEach(b => b.addEventListener('click', onReviewClick));
+
   return () => {
     foldHeaders.forEach(h => h.removeEventListener('click', onFoldClick));
+    reviewBtns.forEach(b => b.removeEventListener('click', onReviewClick));
     chartInstances.forEach(c => disposeChart(c));
     chartInstances = [];
   };

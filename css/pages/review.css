@@ -258,6 +258,70 @@
   margin-top: var(--sp-1);
 }
 
+/* === Review Button === */
+.queue-review-btn {
+  padding: var(--sp-1) var(--sp-2);
+  border: 1px solid var(--color-accent);
+  border-radius: var(--r-full);
+  background: transparent;
+  color: var(--color-accent);
+  font-size: var(--fs-xs);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--duration-fast) var(--ease);
+  white-space: nowrap;
+}
+
+.queue-review-btn:hover {
+  background: var(--color-accent);
+  color: #fff;
+}
+
+/* === Exam Recommendation === */
+.exam-rec-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+}
+
+.exam-rec-item {
+  padding: var(--sp-2) var(--sp-3);
+  border-radius: var(--r-md);
+  background: rgba(255, 255, 255, 0.4);
+  border-left: 3px solid var(--color-accent);
+}
+
+[data-theme="dark"] .exam-rec-item {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.exam-rec-subject {
+  font-weight: 600;
+  font-size: var(--fs-sm);
+  color: var(--color-text-1);
+}
+
+.exam-rec-detail {
+  font-size: var(--fs-xs);
+  color: var(--color-text-3);
+  margin-top: 2px;
+}
+
+.exam-rec-kps {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-1);
+  margin-top: var(--sp-1);
+}
+
+.exam-rec-tag {
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: var(--r-full);
+  background: var(--color-surface-variant);
+  color: var(--color-text-3);
+}
+
 /* === Responsive === */
 @media (max-width: 480px) {
   .review-header {
