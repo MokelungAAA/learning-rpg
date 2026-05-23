@@ -12,6 +12,8 @@ import * as review from './pages/review.js';
 import * as logPage from './pages/log.js';
 import * as reading from './pages/reading.js';
 import * as about from './pages/about.js';
+import * as search from './pages/search.js';
+import * as dataIO from './pages/data-io.js';
 
 const container = document.getElementById('page-container');
 
@@ -50,6 +52,8 @@ Router.register('#/data/review', () => handleRoute(review, '#/data/review'));
 Router.register('#/data/log', () => handleRoute(logPage, '#/data/log'));
 Router.register('#/data/reading', () => handleRoute(reading, '#/data/reading'));
 Router.register('#/about', () => handleRoute(about, '#/about'));
+Router.register('#/search', () => handleRoute(search, '#/search'));
+Router.register('#/data/export', () => handleRoute(dataIO, '#/data/export'));
 
 // Render navbar
 Navbar.render(document.body);

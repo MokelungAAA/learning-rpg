@@ -1,0 +1,50 @@
+/* search.css — 搜索页样式 */
+.search-page { max-width: 480px; margin: 0 auto; }
+.search-input-wrap {
+  display: flex; align-items: center; gap: 8px;
+  background: var(--color-surface); border: 1px solid var(--glass-border);
+  border-radius: var(--r-full); padding: 8px 16px; margin-bottom: var(--sp-2);
+}
+.search-input {
+  flex: 1; border: none; background: transparent; outline: none;
+  font-size: var(--fs-sm); color: var(--color-text-1);
+}
+.search-input::placeholder { color: var(--color-text-3); }
+.search-clear {
+  background: none; border: none; color: var(--color-text-3);
+  cursor: pointer; font-size: 16px; padding: 4px;
+}
+.search-history {
+  display: flex; align-items: center; gap: 8px;
+  flex-wrap: wrap; margin-bottom: var(--sp-3);
+}
+.search-history-label {
+  font-size: var(--fs-xs); color: var(--color-text-3);
+}
+.search-history-tag {
+  padding: 4px 12px; border-radius: var(--r-full);
+  background: var(--color-surface-variant); border: none;
+  font-size: var(--fs-xs); color: var(--color-text-2);
+  cursor: pointer; transition: background var(--duration-fast) var(--ease);
+}
+.search-history-tag:hover { background: var(--color-accent); color: #fff; }
+.search-results { margin-top: var(--sp-2); }
+.search-group { margin-bottom: var(--sp-3); }
+.search-group-label {
+  font-size: var(--fs-xs); color: var(--color-text-3);
+  text-transform: uppercase; letter-spacing: 0.05em;
+  margin-bottom: var(--sp-1); padding-left: 4px;
+}
+.search-result-item {
+  display: flex; align-items: center; gap: 12px;
+  padding: 10px 12px; border-radius: var(--r-sm);
+  text-decoration: none; color: var(--color-text-1);
+  transition: background var(--duration-fast) var(--ease);
+}
+.search-result-item:hover { background: var(--color-surface-variant); }
+.search-result-icon { font-size: 20px; flex-shrink: 0; width: 28px; text-align: center; }
+.search-result-text { flex: 1; min-width: 0; }
+.search-result-title { font-size: var(--fs-sm); font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.search-result-desc { font-size: var(--fs-xs); color: var(--color-text-3); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.search-more { font-size: var(--fs-xs); color: var(--color-text-3); padding: 4px 12px; }
+.search-empty { text-align: center; color: var(--color-text-3); font-size: var(--fs-sm); padding: var(--sp-4) 0; }

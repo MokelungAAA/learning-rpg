@@ -35,6 +35,7 @@ function renderStatusBar() {
   return `<div class="status-bar">
     <div class="status-left"><span class="status-dot offline"></span><span class="status-text">未同步</span></div>
     <div class="status-right">
+      <a href="#/search" class="status-btn" title="搜索">🔍</a>
       <button class="status-btn theme-toggle" title="切换主题">☀️</button>
     </div>
   </div>`;

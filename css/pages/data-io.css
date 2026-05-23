@@ -1,0 +1,25 @@
+/* data-io.css — 数据导入导出页 */
+.data-io-header { font-size: var(--fs-lg); font-weight: 700; margin-bottom: var(--sp-3); }
+.data-io-stats {
+  display: flex; gap: var(--sp-2); margin-bottom: var(--sp-3);
+}
+.data-io-stat {
+  flex: 1; background: var(--color-surface); border: 1px solid var(--glass-border);
+  border-radius: var(--r-md); padding: var(--sp-2); text-align: center;
+}
+.data-io-stat-value { font-size: var(--fs-xl); font-weight: 700; color: var(--color-accent); }
+.data-io-stat-label { font-size: var(--fs-xs); color: var(--color-text-3); }
+.data-io-section {
+  background: var(--color-surface); border: 1px solid var(--glass-border);
+  border-radius: var(--r-md); padding: var(--sp-3); margin-bottom: var(--sp-2);
+}
+.data-io-section h3 { font-size: var(--fs-sm); color: var(--color-text-3); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: var(--sp-2); }
+.data-io-actions { display: flex; flex-direction: column; gap: var(--sp-2); }
+.data-io-btn {
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  padding: 12px 16px; border: 1px solid var(--glass-border); border-radius: var(--r-sm);
+  background: var(--color-surface-variant); color: var(--color-text-1);
+  font-size: var(--fs-sm); cursor: pointer; transition: all var(--duration-fast) var(--ease);
+}
+.data-io-btn:hover { background: var(--color-accent); color: #fff; border-color: transparent; }
+.data-io-note { font-size: var(--fs-xs); color: var(--color-text-3); margin-top: var(--sp-2); }
