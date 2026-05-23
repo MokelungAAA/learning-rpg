@@ -4,7 +4,7 @@
 import Store from '../store.js';
 import { STORAGE_KEYS as StorageKeys } from '../config.js';
 import { ACHIEVEMENTS } from '../data/achievements.js';
-import { checkAchievement, loadUnlockedIds } from '../utils/achievements-check.js';
+import { checkAchievement, loadUnlockedIds, loadUnlockData } from '../utils/achievements-check.js';
 import { calcLevel } from '../utils/level.js';
 
 const RARITY_LABELS = { bronze: '青铜', silver: '白银', gold: '黄金', legendary: '传说', hidden: '隐藏' };
@@ -59,6 +59,8 @@ export function render() {
   const persistedIds = loadUnlockedIds();
   const liveUnlocked = ACHIEVEMENTS.filter(a => checkAchievement(a, records, profile)).map(a => a.id);
   const unlockedIds = new Set([...persistedIds, ...liveUnlocked]);
+  const unlockData = loadUnlockData();
+  const dateMap = Object.fromEntries(unlockData.filter(d => d.date).map(d => [d.id, d.date]));
 
   const sections = CATEGORY_ORDER.map(cat => {
     const items = ACHIEVEMENTS.filter(a => a.category === cat).map(a => {
@@ -68,6 +70,7 @@ export function render() {
       const displayDesc = isHidden ? '隐藏成就' : a.description;
       const icon = isHidden ? '🔮' : (isUnlocked ? a.icon : '🔒');
       const progress = isUnlocked ? null : calcProgress(a, records, profile);
+      const unlockDate = isUnlocked ? dateMap[a.id] : null;
 
       const progressBar = (progress !== null && progress < 100)
         ? `<div class="ach-progress-bar"><div class="ach-progress-fill" style="width:${progress}%"></div><span class="ach-progress-text">${progress}%</span></div>`
@@ -80,7 +83,7 @@ export function render() {
           <div class="ach-desc">${displayDesc}</div>
           <div class="ach-rarity">${RARITY_LABELS[a.rarity] || a.rarity}</div>
           ${progressBar}
-          ${isUnlocked && a.unlockDate ? `<div class="ach-date">${a.unlockDate}</div>` : ''}
+          ${unlockDate ? `<div class="ach-date">${unlockDate}</div>` : ''}
         </div>
       </div>`;
     }).join('');
@@ -123,9 +126,32 @@ function showUnlockToast(ach) {
   if (existing) existing.remove();
   const toast = document.createElement('div');
   toast.className = 'ach-unlock-toast';
-  toast.innerHTML = `<div class="ach-unlock-icon">${ach.icon}</div>
+  toast.innerHTML = `<div class="ach-unlock-icon">${ach.icon}<div class="ach-particles" id="ach-particles"></div></div>
     <div class="ach-unlock-text"><div class="ach-unlock-label">成就解锁！</div><div class="ach-unlock-name">${ach.name}</div></div>`;
   document.body.appendChild(toast);
-  requestAnimationFrame(() => toast.classList.add('show'));
-  setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.remove(), 400); }, 3000);
+  requestAnimationFrame(() => {
+    toast.classList.add('show');
+    spawnParticles(document.getElementById('ach-particles'));
+  });
+  setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.remove(), 500); }, 3000);
+}
+
+function spawnParticles(container) {
+  if (!container) return;
+  const colors = ['#FFD700', '#FFA500', '#FF6347', '#FFDAB9', '#FFF8DC'];
+  for (let i = 0; i < 12; i++) {
+    const p = document.createElement('div');
+    p.className = 'ach-particle';
+    const angle = (Math.PI * 2 / 12) * i;
+    const dist = 30 + Math.random() * 40;
+    const dx = Math.cos(angle) * dist;
+    const dy = Math.sin(angle) * dist;
+    p.style.background = colors[i % colors.length];
+    container.appendChild(p);
+    // Animate with WAAPI for reliable custom endpoints
+    p.animate([
+      { transform: 'translate(0,0) scale(1)', opacity: 1 },
+      { transform: `translate(${dx}px,${dy}px) scale(0)`, opacity: 0 }
+    ], { duration: 800, easing: 'cubic-bezier(0.25,0.46,0.45,0.94)', fill: 'forwards' });
+  }
 }

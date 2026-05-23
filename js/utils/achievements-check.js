@@ -106,28 +106,44 @@ export function checkAchievement(ach, records, profile) {
   }
 }
 
-// 加载已解锁成就 ID 集合
+// 加载已解锁成就数据（兼容旧格式：纯ID数组 → 对象数组）
 export function loadUnlockedIds() {
   const data = Store.get(StorageKeys.ACHIEVEMENTS) || [];
+  if (Array.isArray(data) && data.length > 0 && typeof data[0] === 'object') {
+    return new Set(data.map(d => d.id));
+  }
   return new Set(Array.isArray(data) ? data : []);
 }
 
-// 保存已解锁成就 ID 集合（转为数组存储）
-export function saveUnlockedIds(ids) {
-  Store.set(StorageKeys.ACHIEVEMENTS, [...ids]);
+// 加载完整解锁数据（含日期）
+export function loadUnlockData() {
+  const data = Store.get(StorageKeys.ACHIEVEMENTS) || [];
+  if (Array.isArray(data) && data.length > 0 && typeof data[0] === 'object') {
+    return data;
+  }
+  // 兼容旧格式：无日期
+  return (Array.isArray(data) ? data : []).map(id => ({ id, date: null }));
 }
 
-// 检测并持久化: 合并已解锁+新满足的成就
+// 保存解锁数据（含日期）
+export function saveUnlockData(entries) {
+  Store.set(StorageKeys.ACHIEVEMENTS, entries);
+}
+
+// 检测并持久化: 合并已解锁+新满足的成就（含解锁日期）
 export function checkAndPersist(records, profile, achievements) {
-  const unlocked = loadUnlockedIds();
+  const existing = loadUnlockData();
+  const unlockedIds = new Set(existing.map(d => d.id));
   const newlyUnlocked = [];
+  const today = new Date().toISOString().slice(0, 10);
   for (const ach of achievements) {
-    if (unlocked.has(ach.id)) continue;
+    if (unlockedIds.has(ach.id)) continue;
     if (checkAchievement(ach, records, profile)) {
-      unlocked.add(ach.id);
+      existing.push({ id: ach.id, date: today });
+      unlockedIds.add(ach.id);
       newlyUnlocked.push(ach);
     }
   }
-  if (newlyUnlocked.length > 0) saveUnlockedIds(unlocked);
-  return { unlocked, newlyUnlocked };
+  if (newlyUnlocked.length > 0) saveUnlockData(existing);
+  return { unlocked: unlockedIds, newlyUnlocked };
 }

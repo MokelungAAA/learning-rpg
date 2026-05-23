@@ -96,7 +96,7 @@ Navbar.render(document.body);
 
 // 成就解锁检测：新增记录时异步检查，弹 Toast 通知
 // 内部用 dynamic import 避免循环依赖
-EventBus.on('record:added', async () => {
+async function checkAchievements() {
   try {
     const { checkAndPersist } = await import('./utils/achievements-check.js');
     const { default: Toast } = await import('./components/toast.js');
@@ -109,7 +109,10 @@ EventBus.on('record:added', async () => {
       Toast.success(`🏆 成就解锁: ${ach.name}`);
     }
   } catch { /* achievement check optional */ }
-});
+}
+EventBus.on('record:added', checkAchievements);
+EventBus.on('reading:added', checkAchievements);
+EventBus.on('pomodoro:completed', checkAchievements);
 
 // Default route
 if (!window.location.hash) {

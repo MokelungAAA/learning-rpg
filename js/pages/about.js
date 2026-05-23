@@ -1,6 +1,7 @@
 // about.js — 关于页（版本信息+致谢+版本历史）
 // 纯静态页面，无 Store 读写，VERSION_HISTORY 手动维护
 const VERSION_HISTORY = [
+  { version: 'v0.83', date: '2026-05-24', desc: '成就系统打磨 — 解锁日期持久化+金粒子动画+全事件触发对齐参考文档 §11' },
   { version: 'v0.82', date: '2026-05-24', desc: '主题系统MD3迁移 — 颜色/圆角/阴影/动画/字体对齐参考文档 §14' },
   { version: 'v0.81', date: '2026-05-24', desc: '移除底部导航番茄钟Tab — FAB悬浮按钮已替代' },
   { version: 'v0.80', date: '2026-05-24', desc: 'PWA后台同步+离线重连对齐参考文档 §13' },
@@ -71,7 +72,7 @@ export function render() {
       <div class="about-hero">
         <div class="about-logo">LTS</div>
         <div class="about-title">学习RPG · 认知操作系统</div>
-        <div class="about-version">v0.82</div>
+        <div class="about-version">v0.83</div>
         <div class="about-credit">Created by 墨澜 × Miku</div>
       </div>
       <div class="about-section">
