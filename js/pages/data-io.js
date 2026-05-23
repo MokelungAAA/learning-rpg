@@ -110,7 +110,7 @@ export function render() {
       </div>
       <p class="data-io-note">导入会与现有数据合并，相同 ID 的记录不会重复</p>
     </div>
-    <p style="color:var(--color-text-3);margin-top:var(--sp-3);font-size:var(--fs-xs)">v0.63 · 画像自适应</p>
+    <p style="color:var(--color-text-3);margin-top:var(--sp-3);font-size:var(--fs-xs)">v0.64 · 成就持久化</p>
   </div>`;
 }
 

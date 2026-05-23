@@ -16,6 +16,7 @@ import * as search from './pages/search.js';
 import * as dataIO from './pages/data-io.js';
 import * as achievement from './pages/achievement.js';
 import * as subjectDetail from './pages/subject-detail.js';
+import { ACHIEVEMENTS } from './data/achievements.js';
 
 const container = document.getElementById('page-container');
 
@@ -82,6 +83,22 @@ Router.register('#/subject/:id', (params) => {
 
 // Render navbar
 Navbar.render(document.body);
+
+// 成就解锁检测: 每次新增记录时检查，Toast 通知新解锁
+EventBus.on('record:added', async () => {
+  try {
+    const { checkAndPersist } = await import('./utils/achievements-check.js');
+    const { default: Toast } = await import('./components/toast.js');
+    const Store = (await import('./store.js')).default;
+    const { StorageKeys } = await import('./config.js');
+    const records = Store.get(StorageKeys.STUDY_RECORDS) || [];
+    const profile = Store.get(StorageKeys.USER_PROFILE) || {};
+    const { newlyUnlocked } = checkAndPersist(records, profile, ACHIEVEMENTS);
+    for (const ach of newlyUnlocked) {
+      Toast.success(`🏆 成就解锁: ${ach.name}`);
+    }
+  } catch { /* achievement check optional */ }
+});
 
 // Default route
 if (!window.location.hash) {
