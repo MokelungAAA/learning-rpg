@@ -41,3 +41,11 @@ body {
 .page-back:hover {
   opacity: 0.7;
 }
+
+/* §14.3: 主题切换过渡动画 */
+.theme-transitioning,
+.theme-transitioning *,
+.theme-transitioning *::before,
+.theme-transitioning *::after {
+  transition: color 0.3s ease, background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease !important;
+}

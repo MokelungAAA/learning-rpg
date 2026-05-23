@@ -75,20 +75,21 @@ class Router {
     return { params };
   }
 
-  // 淡入淡出过渡动画，150ms 延迟
+  // §6.5: 页面过渡动画 — opacity 0→1 + translateY(8px), 0.25s ease
   animateTransition(callback) {
     if (!this.container) {
       callback();
       return;
     }
+    this.container.style.transition = 'opacity 0.25s ease, transform 0.25s ease';
     this.container.style.opacity = '0';
-    this.container.style.transform = 'translateY(10px)';
+    this.container.style.transform = 'translateY(8px)';
 
     setTimeout(() => {
       callback();
       this.container.style.opacity = '1';
       this.container.style.transform = 'translateY(0)';
-    }, 150);
+    }, 250);
   }
 }
 

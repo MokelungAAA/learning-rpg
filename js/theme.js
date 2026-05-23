@@ -58,10 +58,13 @@ class Theme {
   }
 
   // 应用主题：设置 data-theme 属性，CSS 变量自动响应
+  // §14.3: 添加 theme-transitioning 类实现 0.3s 过渡动画
   _apply() {
     const isDark = this._mode === 'dark' ||
       (this._mode === 'system' && this._mq.matches);
+    document.documentElement.classList.add('theme-transitioning');
     document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
+    setTimeout(() => document.documentElement.classList.remove('theme-transitioning'), 350);
   }
 }
 
