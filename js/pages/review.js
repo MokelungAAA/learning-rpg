@@ -130,7 +130,7 @@ export function render() {
   const tempStates = buildTempStates(records, profile);
   const { subjectAbility } = computeAll(); // v0.68: 获取学科评分
   const queue = calcShadowQueue(tempStates, subjectAbility);
-  const potentials = calcImprovementPotential(tempStates);
+  const potentials = calcImprovementPotential(tempStates, records); // v0.69: 传入 records
   const falseItems = detectFalseMastery(tempStates, records);
 
   return `<div class="page-enter">

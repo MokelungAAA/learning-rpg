@@ -138,10 +138,14 @@ export function knapsackRecommend(queue, timeBudget) {
 }
 
 // 提分潜力诊断: 找出最值得投入的技能
-// potential = (1 - mastery) × examWeight
+// v0.69 对齐参考文档 §5.7:
+//   potential = (1 - mastery) × examWeight × (1 - recentInvestment)
+//   recentInvestment = 近7天该技能学习时长 / 近7天总学习时长
+//   已充分投入的技能潜力打折，把时间留给被忽视的弱科
 // @param {Object} tempStates — buildTempStates 的输出
+// @param {Array} records — 学习记录（用于计算近期投入）
 // @returns {Array} Top 5 潜力技能（按 potential 降序）
-export function calcImprovementPotential(tempStates) {
+export function calcImprovementPotential(tempStates, records) {
   const skills = getAllSkills();
   const bySkill = {};
   for (const [key, st] of Object.entries(tempStates)) {
@@ -152,11 +156,31 @@ export function calcImprovementPotential(tempStates) {
   for (const s of skills) {
     if (bySkill[s.id]) bySkill[s.id].skillName = s.name;
   }
+
+  // v0.69: 计算近7天各技能的学习时长
+  const now = Date.now();
+  const weekAgo = now - 7 * 86400000;
+  const recentRecords = (records || []).filter(r => new Date(r.timestamp).getTime() >= weekAgo);
+  const totalRecentMin = recentRecords.reduce((s, r) => s + (r.duration || 0), 0);
+  // 按技能ID聚合近7天时长
+  const recentBySkill = {};
+  for (const r of recentRecords) {
+    if (!r.knowledgePoints || !r.subject) continue;
+    // 匹配到技能：通过 tempStates 反查 skillId
+    for (const [key, st] of Object.entries(tempStates)) {
+      if (st.subjectKey === r.subject && r.knowledgePoints.some(k => k.includes(st.kp) || st.kp.includes(k))) {
+        recentBySkill[st.skillId] = (recentBySkill[st.skillId] || 0) + (r.duration || 0);
+      }
+    }
+  }
+
   return Object.entries(bySkill)
     .filter(([, v]) => v.count > 0)
     .map(([id, v]) => {
       const mastery = v.temps.reduce((a, b) => a + b, 0) / v.temps.length / 100;
-      const potential = (1 - mastery) * (v.weight || 0.1);
+      // recentInvestment: 近7天该技能占比，已投入越多潜力越低
+      const recentInvestment = totalRecentMin > 0 ? (recentBySkill[id] || 0) / totalRecentMin : 0;
+      const potential = (1 - mastery) * (v.weight || 0.1) * (1 - recentInvestment);
       return { skillId: id, skillName: v.skillName, subjectName: v.subjectName, mastery: Math.round(mastery * 100), potential: Math.round(potential * 1000) / 1000 };
     })
     .sort((a, b) => b.potential - a.potential)
