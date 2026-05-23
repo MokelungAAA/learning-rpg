@@ -244,7 +244,7 @@ function stopTimer() {
 }
 
 // 完成处理：保存会话 + 自动生成学习记录 + 音效通知
-// 坑: completed 判断用 elapsed >= planned*0.9（允许10%提前结束）
+// 提前结束按比例扣分：完成度<90%时 focusScore *= 完成比例
 function completeSession() {
   clearInterval(timer);
   isRunning = false;
@@ -253,10 +253,18 @@ function completeSession() {
 
   const preset = getCurrentPreset();
   const ctx = getReviewContext();
+  const plannedSeconds = plannedDuration * 60;
+  const completionRatio = Math.min(1, elapsed / plannedSeconds);
+
+  // 提前结束扣分：完成度<90%时按比例缩减专注分
+  if (currentPhase === 'focus' && completionRatio < 0.9) {
+    focusScore = Math.round(focusScore * completionRatio);
+  }
+
   const session = {
     sessionId: 'pom-' + Date.now(),
     startTime, plannedDuration, endTime: Date.now(),
-    completed: elapsed >= plannedDuration * 60 * 0.9,
+    completed: completionRatio >= 0.9,
     focusScore, backgroundPeriods, elapsed,
     phase: currentPhase, round: currentRound,
     isReview: !!(ctx && currentPhase === 'focus'),
@@ -429,4 +437,10 @@ export function afterRender() {
     clearInterval(timer);
     document.removeEventListener('visibilitychange', onVisibilityChange);
   };
+}
+
+// 快速启动：供 FAB 长按调用，直接开始 25 分钟专注
+export function quickStart() {
+  const preset = getCurrentPreset();
+  startTimer(preset.work, 'focus');
 }

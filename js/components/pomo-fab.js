@@ -17,8 +17,21 @@ class PomoFab {
     this.el = document.createElement('button');
     this.el.className = 'pomo-fab';
     this.el.innerHTML = `<span class="pomo-fab-icon">🍅</span><svg class="pomo-fab-ring" viewBox="0 0 56 56"><circle cx="28" cy="28" r="25" /></svg>`;
+
+    // 长按500ms → 快速启动25分钟番茄钟，短按 → 跳转番茄钟页
+    let pressTimer = null;
+    let isLongPress = false;
+    this.el.addEventListener('pointerdown', () => {
+      isLongPress = false;
+      pressTimer = setTimeout(() => {
+        isLongPress = true;
+        this.quickStart();
+      }, 500);
+    });
+    this.el.addEventListener('pointerup', () => { clearTimeout(pressTimer); });
+    this.el.addEventListener('pointerleave', () => { clearTimeout(pressTimer); });
     this.el.addEventListener('click', () => {
-      window.location.hash = '#/pomodoro';
+      if (!isLongPress) window.location.hash = '#/pomodoro';
     });
     document.body.appendChild(this.el);
 
@@ -42,6 +55,18 @@ class PomoFab {
     const progress = Math.max(0, Math.min(1, remainSeconds / total));
     const offset = 157 * (1 - progress);
     circle.style.strokeDashoffset = offset;
+  }
+
+  // 长按快捷启动：直接跳转番茄钟页并触发快速开始
+  async quickStart() {
+    window.location.hash = '#/pomodoro';
+    // 等页面渲染完成后触发快速开始
+    setTimeout(async () => {
+      try {
+        const pomodoro = await import('../pages/pomodoro.js');
+        if (pomodoro.quickStart) pomodoro.quickStart();
+      } catch {}
+    }, 500);
   }
 }
 
