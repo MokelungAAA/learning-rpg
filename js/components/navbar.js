@@ -18,19 +18,19 @@ class Navbar {
     EventBus.on('route:changed', (hash) => this.setActive(hash));
   }
 
-  // 构建移动端底部导航：首页→数据→番茄钟→设置→+
+  // 构建移动端底部导航：首页→数据→设置→+
   renderBottomNav(container) {
     this.el = document.createElement('nav');
     this.el.className = 'bottom-nav';
     this.el.id = 'bottom-nav';
 
-    // 按指定顺序渲染 tab：home, data, pomodoro, settings
-    const order = ['home', 'data', 'pomodoro', 'settings'];
+    // 按指定顺序渲染 tab：home, data, settings
+    const order = ['home', 'data', 'settings'];
     for (const id of order) {
       const tab = NAV_TABS.find(t => t.id === id);
       if (!tab) continue;
       const btn = document.createElement('button');
-      btn.className = 'nav-tab' + (id === 'pomodoro' ? ' nav-tab-pomo' : '');
+      btn.className = 'nav-tab';
       btn.dataset.tab = tab.id;
       btn.innerHTML = `<span class="nav-icon">${tab.icon}</span><span class="nav-label">${tab.label}</span>`;
       btn.addEventListener('click', () => { window.location.hash = tab.hash; });

@@ -67,6 +67,5 @@ export const ACHIEVEMENT_CONDITION_TYPES = [
 export const NAV_TABS = [
   { id: 'home',     label: '首页', icon: '🏠', hash: '#/' },
   { id: 'data',     label: '数据', icon: '📊', hash: '#/data' },
-  { id: 'pomodoro', label: '番茄钟', icon: '🍅', hash: '#/pomodoro' },
   { id: 'settings', label: '设置', icon: '⚙️', hash: '#/settings' },
 ];

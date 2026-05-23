@@ -216,15 +216,3 @@
 .sidebar-fab:active {
   transform: scale(0.97);
 }
-
-/* 番茄钟独立入口：在 FAB 右侧，样式稍弱 */
-.nav-tab-pomo {
-  opacity: 0.7;
-  width: 48px;
-}
-.nav-tab-pomo:hover {
-  opacity: 1;
-}
-.nav-tab-pomo.active {
-  opacity: 1;
-}
