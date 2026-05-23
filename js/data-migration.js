@@ -75,13 +75,14 @@ export function migrateRecordsXP(Store, StorageKeys, calcXP) {
   if (profile._xpMigrated) return;
 
   const today = new Date().toISOString().slice(0, 10);
+  const talentSet = profile._talentSubjects ? new Set(profile._talentSubjects) : null;
   let runningTotal = 0;
   for (let i = 0; i < records.length; i++) {
     const r = records[i];
     const last10 = records.slice(Math.max(0, i - 9), i + 1).map(rec => rec.score || 0);
     profile._runtimeTotalXP = runningTotal;
     const todayXP = records.filter(rec => rec.timestamp && rec.timestamp.slice(0, 10) === today && records.indexOf(rec) < i).reduce((s, rec) => s + (rec.xp || 0), 0);
-    r.xp = calcXP(r, profile, todayXP, last10);
+    r.xp = calcXP(r, profile, todayXP, last10, talentSet);
     runningTotal += r.xp;
   }
   Store.set(StorageKeys.STUDY_RECORDS, records);

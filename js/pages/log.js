@@ -255,7 +255,8 @@ function openEditModal(recordId) {
     const today = new Date().toISOString().slice(0, 10);
     const todayXP = records.filter(r => r.timestamp && r.timestamp.slice(0, 10) === today).reduce((s, r) => s + (r.xp || 0), 0);
     profile._runtimeTotalXP = records.reduce((s, r) => s + (r.xp || 0), 0);
-    records[idx].xp = calcXP(records[idx], profile, todayXP, last10);
+    const talentSet = profile._talentSubjects ? new Set(profile._talentSubjects) : null;
+    records[idx].xp = calcXP(records[idx], profile, todayXP, last10, talentSet);
     saveRecords(records);
     overlay.remove();
     Toast.show('记录已更新', 'success');

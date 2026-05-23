@@ -167,5 +167,9 @@ export function computeAll() {
   const skillMastery = aggregateSkillMastery(knowledgeStates, tempStates);
   const subjectAbility = aggregateSubjectAbility(skillMastery, knowledgeStates, tempStates);
   const talents = detectTalents(subjectAbility);
+  // 持久化特长学科到 profile，供 calcXP 的 talentMultiplier 使用
+  const strengthSubjects = talents.filter(t => t.type === 'strength').map(t => t.subjectKey);
+  profile._talentSubjects = strengthSubjects;
+  Store.set(StorageKeys.USER_PROFILE, profile);
   return { knowledgeStates, skillMastery, subjectAbility, talents };
 }

@@ -346,7 +346,8 @@ function bindEvents() {
     const today = new Date().toISOString().slice(0, 10);
     const todayXP = allRecs.filter(r => r.timestamp && r.timestamp.slice(0, 10) === today).reduce((s, r) => s + (r.xp || 0), 0);
     profile._runtimeTotalXP = allRecs.reduce((s, r) => s + (r.xp || 0), 0);
-    record.xp = calcXP(record, profile, todayXP, last10);
+    const talentSet = profile._talentSubjects ? new Set(profile._talentSubjects) : null;
+    record.xp = calcXP(record, profile, todayXP, last10, talentSet);
 
     const records = Store.get(StorageKeys.STUDY_RECORDS) || [];
     records.push(record);

@@ -147,8 +147,9 @@ export function regressionSlope(values) {
 //   profile — 用户画像（需含 xpBasePerMinute, subjectModifiers, activityWeights, decayRateForXP 等）
 //   todayXP — 今日已获取 XP（用于软上限计算）
 //   last10Scores — 最近 10 条记录的正确率数组（用于动量计算）
+//   talentSubjects — 特长学科 Set（可选，有特长时 qual ×1.1）
 // 易错点: subjectModifiers 用拉丁语 key（logos/physis），不是英文 key（math/physics）
-export function calcXP(record, profile, todayXP = 0, last10Scores = []) {
+export function calcXP(record, profile, todayXP = 0, last10Scores = [], talentSubjects = null) {
   const xppm = profile.xpBasePerMinute || 2.0;
   const score = record.score || 0;
   const practiceDur = record.practiceDuration || (record.duration || 0) * 0.8;
@@ -163,33 +164,36 @@ export function calcXP(record, profile, todayXP = 0, last10Scores = []) {
   const reviewRatio = profile.baseReviewRatio || 0.20;
   const E = PE * (1 - reviewRatio) + CE * reviewRatio * 1.3;
 
-  // 学科难度 = sqrt(1 / subjectModifiers[subject])
+  // 学科难度 = sqrt(1 / subjectModifiers[subject])，subjectMod 下限 0.5 防止极端值
   const modifiers = profile.subjectModifiers || {};
-  const subjectMod = modifiers[record.subject] || 1.0;
+  const subjectMod = Math.max(0.5, modifiers[record.subject] || 1.0);
   const difficulty = Math.sqrt(1 / subjectMod);
 
-  // 进步动量: tanh(slope) × 0.3，记录 <3 条时为 0
+  // 进步动量: tanh(slope / 10) × 0.3，记录 <3 条时为 0
+  // §5.6: slope 除以 10 压缩尺度，防止 tanh 过早饱和
   const momentum = last10Scores.length >= 3
-    ? Math.tanh(regressionSlope(last10Scores)) * 0.3
+    ? Math.tanh(regressionSlope(last10Scores) / 10) * 0.3
     : 0;
 
   // 活动类型权重
   const weights = profile.activityWeights || {};
   const activityWeight = weights[record.activityType] || 1.0;
 
-  // qual = E × difficulty × (1 + momentum) × activityWeight
-  const qual = E * difficulty * (1 + momentum) * activityWeight;
+  // qual = E × difficulty × (1 + momentum) × activityWeight × talentMultiplier
+  // §5.4: 特长学科 XP 额外 ×1.1
+  const talentMultiplier = (talentSubjects && talentSubjects.has(record.subject)) ? 1.1 : 1.0;
+  const qual = E * difficulty * (1 + momentum) * activityWeight * talentMultiplier;
 
   // 边际递减: decay = 1 / (1 + totalXP × decayRate)
   const totalXP = profile._runtimeTotalXP || 0;
   const decayRate = profile.decayRateForXP || 0.00005;
   const decay = 1 / (1 + totalXP * decayRate);
 
-  // 软上限: 超过每日限额后 XP 递减
+  // 软上限: 超过每日限额后 XP 递减，最低 0.1（不会完全归零）
   const limit = profile.dailyXPLimit || 500;
   const softness = profile.dailyXPLimitSoftness || 0.5;
   const softCap = todayXP >= limit
-    ? 1 - (1 - softness) * (todayXP - limit) / limit
+    ? Math.max(0.1, 1 - (1 - softness) * (todayXP - limit) / limit)
     : 1;
 
   return Math.max(1, Math.min(500, Math.round(rawXP * qual * decay * softCap)));
