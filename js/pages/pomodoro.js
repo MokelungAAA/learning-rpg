@@ -123,6 +123,7 @@ function renderHistory() {
 
 export function render() {
   return `<div class="page-enter">
+    <a href="#/" class="page-back">← 返回首页</a>
     ${renderConfig()}
     ${renderTimer(25)}
     ${renderComplete()}

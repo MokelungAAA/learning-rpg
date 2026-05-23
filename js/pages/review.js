@@ -125,6 +125,7 @@ export function render() {
   const falseItems = detectFalseMastery(tempStates, records);
 
   return `<div class="page-enter">
+    <a href="#/data" class="page-back">← 返回数据</a>
     <div class="review-header">
       <div class="section-title">📝 复习中心</div>
       <div class="review-summary">

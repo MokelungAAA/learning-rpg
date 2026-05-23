@@ -145,6 +145,7 @@ export function render() {
   currentPage = 1;
 
   return `<div class="page-enter">
+    <a href="#/data" class="page-back">← 返回数据</a>
     <div class="log-header">
       <div class="section-title">📋 学习日志</div>
     </div>

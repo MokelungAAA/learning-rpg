@@ -68,6 +68,7 @@ function renderLegend() {
 export function render() {
   const { subjectAbility, talents } = computeAll();
   return `<div class="page-enter">
+    <a href="#/data" class="page-back">← 返回数据</a>
     <div class="skill-tree-header">
       <div class="section-title">🌳 技能树</div>
       ${renderSubjectSelector()}

@@ -88,6 +88,7 @@ function renderChartSection() {
 export function render() {
   const records = getRecords();
   return `<div class="page-enter">
+    <a href="#/data" class="page-back">← 返回数据</a>
     <div class="reading-header">
       <div class="section-title">📖 阅读记录</div>
       <button class="reading-add-btn" id="reading-add">+ 记录阅读</button>
