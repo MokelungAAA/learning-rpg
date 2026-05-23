@@ -194,8 +194,7 @@ async function initForceGraph(skillMastery, filterSubject, tempStates) {
   });
 }
 
-// 显示技能详情面板：掌握度/等级/记录数/知识点列表
-// 坑: 知识点掌握度从 window._knowledgeStates 读取（afterRender 设置）
+// 显示技能详情面板：温度/掌握度/等级/记录数/半衰期/累计XP/最近复习/知识点列表
 function showSkillDetail(nodeData, skillMastery) {
   const panel = document.getElementById('skill-detail');
   const content = document.getElementById('detail-content');
@@ -206,7 +205,42 @@ function showSkillDetail(nodeData, skillMastery) {
   if (!skill) return;
 
   const m = skillMastery[skill.id] || {};
-  const kps = skill.kps.map(kp => {
+  const records = (window._skillRecords || []).filter(r => {
+    // 匹配该技能的知识点
+    const kps = skill.kps || [];
+    return r.skillId === skill.id || kps.some(kp => (r.knowledgePoints || []).includes(kp));
+  });
+
+  // 计算累计XP和最近复习时间
+  const totalXP = records.reduce((s, r) => s + (r.xp || 0), 0);
+  const lastReview = records.length > 0
+    ? records.sort((a, b) => (b.timestamp || '').localeCompare(a.timestamp || ''))[0].timestamp
+    : null;
+  const lastReviewStr = lastReview ? new Date(lastReview).toLocaleDateString('zh-CN') : '无';
+
+  // 计算平均半衰期
+  const tempStates = window._tempStates || {};
+  const kps = skill.kps || [];
+  const halfLives = kps.map(kp => {
+    const key = `${skill.id}::${kp}`;
+    return tempStates[key]?.halfLife || 0;
+  }).filter(h => h > 0);
+  const avgHalfLife = halfLives.length > 0
+    ? (halfLives.reduce((s, h) => s + h, 0) / halfLives.length).toFixed(1)
+    : '-';
+
+  // 最近10条记录的XP趋势（迷你图）
+  const recentXP = records.sort((a, b) => (a.timestamp || '').localeCompare(b.timestamp || ''))
+    .slice(-10).map(r => r.xp || 0);
+  const sparkline = recentXP.length > 1
+    ? `<div class="detail-sparkline">${recentXP.map((v, i) => {
+        const max = Math.max(...recentXP, 1);
+        const h = Math.round((v / max) * 24);
+        return `<div class="spark-bar" style="height:${h}px" title="${v}XP"></div>`;
+      }).join('')}</div>`
+    : '';
+
+  const kpList = skill.kps.map(kp => {
     const key = `${skill.id}::${kp}`;
     const ks = (window._knowledgeStates || {})[key];
     return `<div class="detail-kp">
@@ -229,15 +263,21 @@ function showSkillDetail(nodeData, skillMastery) {
       <div class="detail-stat"><div class="detail-stat-value">${getMasteryLevel(m.avgMastery || 0)}</div><div class="detail-stat-label">等级</div></div>
       <div class="detail-stat"><div class="detail-stat-value">${m.count || 0}</div><div class="detail-stat-label">记录数</div></div>
     </div>
+    <div class="detail-stats detail-stats-secondary">
+      <div class="detail-stat"><div class="detail-stat-value">${avgHalfLife}天</div><div class="detail-stat-label">半衰期</div></div>
+      <div class="detail-stat"><div class="detail-stat-value">${totalXP}</div><div class="detail-stat-label">累计XP</div></div>
+      <div class="detail-stat"><div class="detail-stat-value">${lastReviewStr}</div><div class="detail-stat-label">最近复习</div></div>
+    </div>
+    ${sparkline}
     <div class="detail-desc">${skill.desc}</div>
     <div class="detail-kps-title">知识点 (${skill.kps.length})</div>
-    <div class="detail-kps">${kps}</div>
+    <div class="detail-kps">${kpList}</div>
   `;
   panel.style.display = 'block';
 }
 
-// 异步初始化学科能力雷达图（polygon 形状，max=100）
-async function initRadarChart(subjectAbility) {
+// 异步初始化学科能力雷达图（circle 形状，max=100，点击学科可下钻）
+async function initRadarChart(subjectAbility, onSubjectClick) {
   const ec = await loadECharts();
   if (!ec) return;
   const el = document.getElementById('skill-radar-chart');
@@ -247,6 +287,7 @@ async function initRadarChart(subjectAbility) {
   chartInstances.push(chart);
 
   const entries = Object.entries(subjectAbility);
+  const subjectKeys = entries.map(([k]) => k);
   const indicators = entries.map(([, v]) => ({ name: v.name, max: 100 }));
   const values = entries.map(([, v]) => v.mastery);
 
@@ -268,6 +309,16 @@ async function initRadarChart(subjectAbility) {
       }],
     }],
   });
+
+  // 点击雷达图坐标轴名称 → 筛选到该学科
+  if (onSubjectClick) {
+    chart.on('click', (params) => {
+      if (params.componentType === 'radar' && params.name) {
+        const idx = indicators.findIndex(ind => ind.name === params.name);
+        if (idx >= 0) onSubjectClick(subjectKeys[idx]);
+      }
+    });
+  }
 }
 
 // afterRender: 初始化图表 + 学科筛选 + 详情面板关闭
@@ -277,14 +328,23 @@ export function afterRender() {
   const { knowledgeStates, skillMastery, subjectAbility, talents } = computeAll();
   window._knowledgeStates = knowledgeStates;
 
-  // 构建温度状态用于节点着色
+  // 构建温度状态用于节点着色 + 详情面板
   const records = Store.get(StorageKeys.STUDY_RECORDS) || [];
   const profile = Store.get(StorageKeys.USER_PROFILE) || {};
   const tempStates = buildTempStates(records, profile);
+  window._tempStates = tempStates;
+  window._skillRecords = records;
 
   let currentFilter = 'all';
   initForceGraph(skillMastery, currentFilter, tempStates);
-  initRadarChart(subjectAbility);
+  initRadarChart(subjectAbility, (subjectKey) => {
+    // 雷达图点击学科 → 切换筛选
+    currentFilter = subjectKey;
+    if (select) select.value = subjectKey;
+    const old = chartInstances[0];
+    if (old) { disposeChart(old); chartInstances.shift(); }
+    initForceGraph(skillMastery, currentFilter, tempStates);
+  });
 
   // 学科筛选
   const select = document.getElementById('skill-subject-filter');
@@ -310,5 +370,7 @@ export function afterRender() {
     chartInstances.forEach(c => disposeChart(c));
     chartInstances = [];
     window._knowledgeStates = null;
+    window._tempStates = null;
+    window._skillRecords = null;
   };
 }

@@ -209,6 +209,38 @@
   font-weight: 600;
 }
 
+/* 次要统计行（半衰期/累计XP/最近复习） */
+.detail-stats-secondary {
+  margin-top: calc(-1 * var(--sp-2));
+  padding-bottom: var(--sp-2);
+  border-bottom: 1px solid var(--color-outline);
+}
+.detail-stats-secondary .detail-stat-value {
+  font-size: var(--fs-sm);
+  font-weight: 600;
+}
+
+/* XP趋势迷你图 */
+.detail-sparkline {
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+  height: 28px;
+  margin-bottom: var(--sp-2);
+  padding: var(--sp-1) 0;
+}
+.spark-bar {
+  flex: 1;
+  min-width: 4px;
+  background: var(--color-accent);
+  border-radius: 2px 2px 0 0;
+  opacity: 0.7;
+  transition: opacity var(--duration-fast) var(--ease);
+}
+.spark-bar:hover {
+  opacity: 1;
+}
+
 /* Responsive */
 @media (max-width: 480px) {
   .skill-tree-header {
