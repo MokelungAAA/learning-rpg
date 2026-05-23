@@ -2,12 +2,16 @@
 import Router from './router.js';
 import Navbar from './components/navbar.js';
 import EventBus from './event-bus.js';
+import Theme from './theme.js';
 import * as home from './pages/home.js';
 import * as dataTab from './pages/data-tab.js';
 import * as pomodoro from './pages/pomodoro.js';
 import * as settings from './pages/settings.js';
 
 const container = document.getElementById('page-container');
+
+// Theme must init before any render (FOUC already handled by inline script)
+Theme.init();
 
 // Init data engine (non-blocking, failure won't break the app)
 (async () => {
@@ -22,23 +26,20 @@ const container = document.getElementById('page-container');
 // Init router
 Router.init(container);
 
+// afterRender lifecycle pattern
+let cleanupCurrent = null;
+function handleRoute(page, path) {
+  if (cleanupCurrent) cleanupCurrent();
+  container.innerHTML = page.render();
+  cleanupCurrent = page.afterRender ? page.afterRender() : null;
+  EventBus.emit('route:changed', path);
+}
+
 // Register routes
-Router.register('#/', () => {
-  container.innerHTML = home.render();
-  EventBus.emit('route:changed', '#/');
-});
-Router.register('#/data', () => {
-  container.innerHTML = dataTab.render();
-  EventBus.emit('route:changed', '#/data');
-});
-Router.register('#/pomodoro', () => {
-  container.innerHTML = pomodoro.render();
-  EventBus.emit('route:changed', '#/pomodoro');
-});
-Router.register('#/settings', () => {
-  container.innerHTML = settings.render();
-  EventBus.emit('route:changed', '#/settings');
-});
+Router.register('#/', () => handleRoute(home, '#/'));
+Router.register('#/data', () => handleRoute(dataTab, '#/data'));
+Router.register('#/pomodoro', () => handleRoute(pomodoro, '#/pomodoro'));
+Router.register('#/settings', () => handleRoute(settings, '#/settings'));
 
 // Render navbar
 Navbar.render(document.body);

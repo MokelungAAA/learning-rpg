@@ -4,6 +4,14 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>学习RPG · 认知操作系统</title>
+  <script>
+    try {
+      var s = JSON.parse(localStorage.getItem('lts_settings') || '{}');
+      var mode = s.themeMode || 'system';
+      var dark = mode === 'dark' || (mode === 'system' && matchMedia('(prefers-color-scheme: dark)').matches);
+      document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+    } catch(e) {}
+  </script>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎮</text></svg>">
   <link rel="stylesheet" href="css/variables.css">
   <link rel="stylesheet" href="css/reset.css">
@@ -15,6 +23,7 @@
   <link rel="stylesheet" href="css/components/navbar.css">
   <link rel="stylesheet" href="css/components/bottom-sheet.css">
   <link rel="stylesheet" href="css/components/toast.css">
+  <link rel="stylesheet" href="css/components/status-bar.css">
 </head>
 <body>
   <div id="page-container"></div>
