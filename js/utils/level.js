@@ -27,6 +27,17 @@ export function calcLevel(totalXP) {
   return Math.floor(Math.log(totalXP / 100 + 1) / Math.log(1.5)) + 1;
 }
 
+// 学科等级: 基于该学科累计学习时长(分钟)计算
+// @param {number} totalMinutes — 该学科累计学习分钟数
+// @param {number} avgScore — 该学科平均正确率(可选, 用于加成)
+// @returns {number} 等级（最低1级）
+export function calcSubjectLevel(totalMinutes, avgScore) {
+  if (totalMinutes < 10) return 1;
+  const base = Math.floor(Math.log(totalMinutes / 60 + 1) / Math.log(1.5)) + 1;
+  const bonus = (avgScore || 0) >= 85 ? 1 : 0;
+  return Math.min(10, base + bonus);
+}
+
 // 计算当前等级内的XP进度（用于进度条显示）
 // @param {number} totalXP — 累计总XP
 // @returns {{level, xpInLevel, xpNeeded, percent}} 等级+进度信息
