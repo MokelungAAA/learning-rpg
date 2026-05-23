@@ -40,6 +40,14 @@ Theme.init();
     }
     // 重算所有记录 XP（XP Engine 2.0 迁移）
     migrateRecordsXP(Store, StorageKeys, calcXP);
+    // 每日首次打开时运行画像自适应
+    const today = new Date().toISOString().slice(0, 10);
+    const lastAdapt = localStorage.getItem('lts_last_adapt_date');
+    if (lastAdapt !== today) {
+      const { adaptProfile } = await import('./utils/profile-adapt.js');
+      adaptProfile();
+      localStorage.setItem('lts_last_adapt_date', today);
+    }
   } catch { /* data engine optional */ }
 })();
 
