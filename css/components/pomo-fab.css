@@ -1,0 +1,61 @@
+/* pomo-fab.css — 番茄钟悬浮按钮（§7.3: 56px, 底部右侧, pulse动画, 环形进度） */
+
+.pomo-fab {
+  position: fixed;
+  bottom: 90px;
+  right: 20px;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  border: none;
+  background: var(--color-accent);
+  color: #fff;
+  font-size: 24px;
+  cursor: pointer;
+  z-index: 900;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  transition: transform var(--duration-fast) var(--ease), box-shadow var(--duration-fast) var(--ease);
+  animation: pomo-pulse 2s ease-in-out infinite;
+}
+.pomo-fab:hover {
+  transform: scale(1.08);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+}
+.pomo-fab:active { transform: scale(0.95); }
+
+@keyframes pomo-pulse {
+  0%, 100% { box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2); }
+  50% { box-shadow: 0 4px 20px rgba(37, 99, 235, 0.4); }
+}
+
+.pomo-fab-icon { position: relative; z-index: 2; }
+
+/* 环形进度（计时中显示） */
+.pomo-fab-ring {
+  position: absolute;
+  inset: -3px;
+  width: 62px;
+  height: 62px;
+  transform: rotate(-90deg);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+.pomo-fab-ring circle {
+  fill: none;
+  stroke: #fff;
+  stroke-width: 3;
+  stroke-dasharray: 157;
+  stroke-dashoffset: 157;
+  stroke-linecap: round;
+  transition: stroke-dashoffset 1s linear;
+}
+.pomo-fab.timing .pomo-fab-ring { opacity: 1; }
+.pomo-fab.timing { animation: none; }
+
+/* 桌面端隐藏（侧边栏有入口） */
+@media (min-width: 1024px) {
+  .pomo-fab { display: none; }
+}

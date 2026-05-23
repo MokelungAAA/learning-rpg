@@ -196,20 +196,26 @@ function startTimer(minutes, phase) {
     const remaining = totalSeconds - elapsed;
     timeDisplay.textContent = fmt(remaining);
     ring.setAttribute('stroke-dashoffset', circumference * (1 - elapsed / totalSeconds));
-    if (phase === 'focus') focusDisplay.textContent = focusScore;
+    if (phase === 'focus') {
+      focusDisplay.textContent = focusScore;
+      EventBus.emit('pomo:tick', remaining);
+    }
   }, 1000);
 
-  if (phase === 'focus') document.addEventListener('visibilitychange', onVisibilityChange);
+  if (phase === 'focus') {
+    document.addEventListener('visibilitychange', onVisibilityChange);
+    EventBus.emit('pomo:started');
+  }
 }
 
-// 页面切后台时记录离屏时长，>30秒扣专注度
+// 页面切后台时记录离屏时长，>10秒扣10分 (§7.5)
 function onVisibilityChange() {
   if (!isRunning || currentPhase !== 'focus') return;
   if (document.hidden) { bgStart = Date.now(); }
   else if (bgStart > 0) {
     const bgDuration = Date.now() - bgStart;
     backgroundPeriods.push({ start: bgStart, end: Date.now(), duration: bgDuration });
-    if (bgDuration > 30000) focusScore = Math.max(0, focusScore - Math.min(20, Math.round(bgDuration / 10000)));
+    if (bgDuration > 10000) focusScore = Math.max(0, focusScore - 10);
     bgStart = 0;
   }
 }
@@ -223,6 +229,7 @@ function pauseTimer() {
     document.getElementById('pomo-label').textContent = currentPhase === 'focus' ? '专注中' : (currentPhase === 'longBreak' ? '长休息' : '短休息');
   } else {
     isPaused = true;
+    if (currentPhase === 'focus') focusScore = Math.max(0, focusScore - 5); // §7.5: 手动暂停扣5分
     document.getElementById('pomo-pause').textContent = '▶ 继续';
     document.getElementById('pomo-label').textContent = '已暂停';
   }
@@ -242,6 +249,7 @@ function completeSession() {
   clearInterval(timer);
   isRunning = false;
   document.removeEventListener('visibilitychange', onVisibilityChange);
+  EventBus.emit('pomo:stopped');
 
   const preset = getCurrentPreset();
   const ctx = getReviewContext();
@@ -331,11 +339,12 @@ function autoSaveRecord() {
     subject,
     textbook: '',
     knowledgePoints: ctx?.kp ? [ctx.kp] : [],
-    score: Math.round(focusScore * 0.8),
+    score: focusScore,
     duration,
     practiceDuration: isReview ? Math.round(duration * 0.3) : Math.round(duration * 0.8),
     reviewDuration: isReview ? Math.round(duration * 0.7) : Math.round(duration * 0.2),
     activityType: isReview ? 'review' : 'practice',
+    source: 'pomodoro',
     notes: `番茄钟第${currentRound}轮 · 专注度${focusScore}%${isReview ? ' · 复习' : ''}`,
     xp: 0, // 占位，下方用 calcXP 计算
   };

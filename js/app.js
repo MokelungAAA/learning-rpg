@@ -86,6 +86,14 @@ Router.register('#/subject/:id', (params) => {
 // Render navbar
 Navbar.render(document.body);
 
+// 番茄钟 FAB（始终可见, 移动端底部右侧）
+(async () => {
+  try {
+    const { default: PomoFab } = await import('./components/pomo-fab.js');
+    PomoFab.render();
+  } catch {}
+})();
+
 // 成就解锁检测：新增记录时异步检查，弹 Toast 通知
 // 内部用 dynamic import 避免循环依赖
 EventBus.on('record:added', async () => {
