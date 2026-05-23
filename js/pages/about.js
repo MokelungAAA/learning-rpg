@@ -1,6 +1,7 @@
 // about.js — 关于页（版本信息+致谢+版本历史）
 // 纯静态页面，无 Store 读写，VERSION_HISTORY 手动维护
 const VERSION_HISTORY = [
+  { version: 'v0.86', date: '2026-05-24', desc: '统计增强 — XP趋势7/30/90切换+热力图记录列表对齐参考文档 §12' },
   { version: 'v0.85', date: '2026-05-24', desc: '技能树详情扩充 — 半衰期/XP/迷你图+雷达下钻对齐参考文档 §9' },
   { version: 'v0.84', date: '2026-05-24', desc: '阅读系统增强 — 热力图+网格视图+12月图表对齐参考文档 §8' },
   { version: 'v0.83', date: '2026-05-24', desc: '成就系统打磨 — 解锁日期持久化+金粒子动画+全事件触发对齐参考文档 §11' },
@@ -74,7 +75,7 @@ export function render() {
       <div class="about-hero">
         <div class="about-logo">LTS</div>
         <div class="about-title">学习RPG · 认知操作系统</div>
-        <div class="about-version">v0.85</div>
+        <div class="about-version">v0.86</div>
         <div class="about-credit">Created by 墨澜 × Miku</div>
       </div>
       <div class="about-section">

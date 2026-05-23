@@ -159,17 +159,23 @@ function renderWeakPoints(records) {
   return fold('weakpoints', `🔍 薄弱点识别 · ${weakPoints.length}科待加强`, `<div class="weakpoint-list">${items}</div>`);
 }
 
-// 6个图表容器占位，实际图表在折叠展开时懒加载
+// 6个图表容器占位，XP趋势带7/30/90天切换
 function renderChartsSection() {
+  const xpToggle = `<div class="chart-period-toggle">
+    <button class="period-btn active" data-days="7">7天</button>
+    <button class="period-btn" data-days="30">30天</button>
+    <button class="period-btn" data-days="90">90天</button>
+  </div>`;
   const charts = [
-    ['chart-xp-trend', '📈 XP趋势折线图'],
-    ['chart-subject-duration', '📊 学科时长柱状图'],
-    ['chart-efficiency', '⏱️ 学习效率散点图'],
-    ['chart-timeslot', '🗓️ 时段热力图'],
-    ['chart-score-trend', '📉 得分率趋势'],
-    ['chart-io-ratio', '⚖️ 输入输出比例'],
-  ].map(([id, title]) => `<div class="chart-block">
+    ['chart-xp-trend', '📈 XP趋势折线图', xpToggle],
+    ['chart-subject-duration', '📊 学科时长柱状图', ''],
+    ['chart-efficiency', '⏱️ 学习效率散点图', ''],
+    ['chart-timeslot', '🗓️ 时段热力图', ''],
+    ['chart-score-trend', '📉 得分率趋势', ''],
+    ['chart-io-ratio', '⚖️ 输入输出比例', ''],
+  ].map(([id, title, extra]) => `<div class="chart-block">
     <div class="chart-title">${title}</div>
+    ${extra}
     <div class="chart-container" id="${id}"></div>
   </div>`).join('');
   return fold('charts', '📈 数据图表', charts);
@@ -201,29 +207,31 @@ export function render() {
 let charts = [];
 const disposeAllCharts = () => { charts.forEach(c => disposeChart(c)); charts = []; };
 
+// 当前XP趋势周期，默认30天
+let xpTrendDays = 30;
+
 // 异步加载 ECharts 并初始化 6 个图表
-// 坑: loadECharts 失败时需隐藏 loading spinner
-async function initCharts(records) {
+async function initCharts(records, xpDays) {
+  const period = xpDays || xpTrendDays;
   const chartIds = ['chart-xp-trend', 'chart-subject-duration', 'chart-efficiency', 'chart-timeslot', 'chart-score-trend', 'chart-io-ratio'];
-  // Show loading on all chart containers
   chartIds.forEach(id => { const el = document.getElementById(id); if (el) showChartLoading(el); });
 
   const ec = await loadECharts();
   if (!ec) { chartIds.forEach(id => { const el = document.getElementById(id); if (el) hideChartLoading(el); }); return; }
 
-  for (const [id, fn] of [
-    ['chart-xp-trend', renderXPTrendChart],
-    ['chart-subject-duration', renderSubjectDurationChart],
-    ['chart-efficiency', renderEfficiencyChart],
-    ['chart-timeslot', renderTimeSlotChart],
-    ['chart-score-trend', renderScoreTrendChart],
-    ['chart-io-ratio', renderIORatioChart],
+  for (const [id, fn, arg] of [
+    ['chart-xp-trend', renderXPTrendChart, period],
+    ['chart-subject-duration', renderSubjectDurationChart, undefined],
+    ['chart-efficiency', renderEfficiencyChart, undefined],
+    ['chart-timeslot', renderTimeSlotChart, undefined],
+    ['chart-score-trend', renderScoreTrendChart, undefined],
+    ['chart-io-ratio', renderIORatioChart, undefined],
   ]) {
     const el = document.getElementById(id);
     if (!el) continue;
     hideChartLoading(el);
     const chart = initChart(el);
-    if (chart) { fn(chart, records); charts.push(chart); }
+    if (chart) { fn(chart, records, arg); charts.push(chart); }
   }
 }
 
@@ -242,8 +250,20 @@ export function afterRender() {
   };
   foldHeaders.forEach(h => h.addEventListener('click', onFoldClick));
 
-  // 热力图单元格点击 → 弹出当日学习详情
-  // 坑: popup 用 setTimeout 3秒自动消失，再次点击先移除旧 popup
+  // XP趋势 7/30/90天切换
+  const periodBtns = document.querySelectorAll('.period-btn');
+  const onPeriodToggle = (e) => {
+    const btn = e.currentTarget;
+    const days = parseInt(btn.dataset.days, 10);
+    periodBtns.forEach(b => b.classList.toggle('active', b === btn));
+    xpTrendDays = days;
+    // 重绘XP趋势图
+    const xpChart = charts[0];
+    if (xpChart) renderXPTrendChart(xpChart, records, days);
+  };
+  periodBtns.forEach(b => b.addEventListener('click', onPeriodToggle));
+
+  // 热力图单元格点击 → 弹出当日学习详情+记录列表
   const heatmapGrid = document.querySelector('.heatmap-grid');
   let heatmapPopup = null;
   const onHeatmapClick = (e) => {
@@ -251,25 +271,29 @@ export function afterRender() {
     if (!cell) return;
     if (heatmapPopup) { heatmapPopup.remove(); heatmapPopup = null; }
     const date = cell.dataset.date;
-    const minutes = parseInt(cell.dataset.minutes, 10) || 0;
+    const xp = parseInt(cell.dataset.xp, 10) || 0;
     const dayRecords = records.filter(r => r.timestamp && new Date(r.timestamp).toISOString().slice(0, 10) === date);
-    const subjects = [...new Set(dayRecords.map(r => r.subject))].join('、') || '无';
+    const totalMin = dayRecords.reduce((s, r) => s + (r.duration || 0), 0);
+    const recordList = dayRecords.slice(0, 5).map(r => {
+      const icon = getSubjectIcon(SUBJECTS.find(s => s.name === r.subject || s.id === r.subject)?.id || '');
+      return `<div class="heatmap-record">${icon} ${r.subject} · ${r.score || 0}分 · ${r.duration || 0}分 · ${r.xp || 0}XP</div>`;
+    }).join('');
     const popup = document.createElement('div');
     popup.className = 'heatmap-popup';
     popup.innerHTML = `<div class="heatmap-popup-title">${date}</div>
-      <div class="heatmap-popup-row">学习 ${minutes} 分钟</div>
-      <div class="heatmap-popup-row">${dayRecords.length} 条记录</div>
-      <div class="heatmap-popup-row">学科：${subjects}</div>`;
+      <div class="heatmap-popup-row">${totalMin} 分钟 · ${xp} XP · ${dayRecords.length} 条</div>
+      ${recordList}${dayRecords.length > 5 ? `<div class="heatmap-popup-more">还有 ${dayRecords.length - 5} 条...</div>` : ''}`;
     cell.style.position = 'relative';
     cell.appendChild(popup);
     heatmapPopup = popup;
-    setTimeout(() => { if (heatmapPopup === popup) { popup.remove(); heatmapPopup = null; } }, 3000);
+    setTimeout(() => { if (heatmapPopup === popup) { popup.remove(); heatmapPopup = null; } }, 5000);
   };
   if (heatmapGrid) heatmapGrid.addEventListener('click', onHeatmapClick);
 
   return () => {
     foldHeaders.forEach(h => h.removeEventListener('click', onFoldClick));
     if (heatmapGrid) heatmapGrid.removeEventListener('click', onHeatmapClick);
+    periodBtns.forEach(b => b.removeEventListener('click', onPeriodToggle));
     disposeAllCharts();
   };
 }

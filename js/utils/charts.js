@@ -96,14 +96,14 @@ export function hideChartLoading(container) {
 // 30天XP趋势折线图（VIEW-10）
 // @param {Object} chart — echarts 实例
 // @param {Array} records — 学习记录（需含 timestamp, xp）
-export function renderXPTrendChart(chart, records) {
+export function renderXPTrendChart(chart, records, periodDays = 30) {
   if (!chart) return;
   const theme = getChartTheme();
   const today = new Date();
   const days = [];
   const xpData = [];
 
-  for (let i = 29; i >= 0; i--) {
+  for (let i = periodDays - 1; i >= 0; i--) {
     const d = new Date(today);
     d.setDate(d.getDate() - i);
     const key = d.toISOString().slice(0, 10);
