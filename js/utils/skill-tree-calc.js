@@ -83,20 +83,53 @@ export function aggregateSkillMastery(knowledgeStates, tempStates) {
   return result;
 }
 
-// 将技能掌握度聚合到学科级别（加权平均）
+// 将技能掌握度聚合到学科级别
+// v0.67 对齐参考文档 §5.3: S = B^0.3 × D^0.4 × E^0.3
+//   B (广度) = 已学KP数 / 该学科总KP数
+//   D (深度) = 该学科所有KP的平均温度 / 100
+//   E (效率) = 该学科所有记录的平均正确率 / 100
 // @param {Object} skillMastery — aggregateSkillMastery 的输出
+// @param {Object} knowledgeStates — buildKnowledgeStates 的输出（含正确率）
+// @param {Object} tempStates — buildTempStates 的输出（含温度）
 // @returns {Object} {subjectKey → {mastery, totalMin, count, ...}}
-export function aggregateSubjectAbility(skillMastery) {
+export function aggregateSubjectAbility(skillMastery, knowledgeStates, tempStates) {
   const result = {};
   for (const [subjKey, subj] of Object.entries(SKILL_TREE.subjects)) {
     const skills = Object.entries(subj.skills).map(([id]) => skillMastery[id]).filter(Boolean);
-    const totalWeight = skills.reduce((s, sk) => s + sk.weight, 0) || 1;
-    const weightedMastery = skills.reduce((s, sk) => s + sk.avgMastery * sk.weight, 0) / totalWeight;
     const totalMin = skills.reduce((s, sk) => s + sk.totalMin, 0);
     const count = skills.reduce((s, sk) => s + sk.count, 0);
+
+    // v0.67: 三因子公式 S = B^0.3 × D^0.4 × E^0.3
+    let mastery = 0;
+    if (knowledgeStates && tempStates) {
+      // 收集该学科下所有 KP
+      const subjKps = Object.values(knowledgeStates).filter(k => k.subjectKey === subjKey);
+      const totalKps = subjKps.length;
+      const learnedKps = subjKps.filter(k => k.count > 0).length;
+      // B: 广度 — 已学KP占比
+      const B = totalKps > 0 ? learnedKps / totalKps : 0;
+      // D: 深度 — 平均温度/100
+      const temps = subjKps
+        .map(k => tempStates[`${k.skillId}::${k.kp}`])
+        .filter(Boolean)
+        .map(st => st.temp);
+      const avgTemp = temps.length > 0 ? temps.reduce((a, b) => a + b, 0) / temps.length : 0;
+      const D = avgTemp / 100;
+      // E: 效率 — 平均正确率/100
+      const scores = subjKps.filter(k => k.count > 0).map(k => k.avgScore);
+      const avgScore = scores.length > 0 ? scores.reduce((a, b) => a + b, 0) / scores.length : 0;
+      const E = avgScore / 100;
+      // S = B^0.3 × D^0.4 × E^0.3，映射到 0-100
+      mastery = Math.round(Math.pow(B, 0.3) * Math.pow(Math.max(0.01, D), 0.4) * Math.pow(Math.max(0.01, E), 0.3) * 100);
+    } else {
+      // 兜底: 无温度数据时用加权平均
+      const totalWeight = skills.reduce((s, sk) => s + sk.weight, 0) || 1;
+      mastery = Math.round(skills.reduce((s, sk) => s + sk.avgMastery * sk.weight, 0) / totalWeight);
+    }
+
     result[subjKey] = {
       name: subj.name, subjectId: subj.subjectId,
-      mastery: Math.round(weightedMastery), totalMin, count,
+      mastery: Math.min(100, mastery), totalMin, count,
       skillCount: skills.length,
     };
   }
@@ -124,14 +157,15 @@ export function detectTalents(subjectAbility) {
 
 // 一键计算: records → knowledgeStates → skillMastery → subjectAbility → talents
 // v0.66: 构建 tempStates 传入 aggregateSkillMastery 用于温度加权
+// v0.67: 传递 knowledgeStates + tempStates 到 aggregateSubjectAbility
 // @returns {{knowledgeStates, skillMastery, subjectAbility, talents}}
 export function computeAll() {
   const records = getRecords();
   const profile = Store.get(StorageKeys.USER_PROFILE) || {};
   const knowledgeStates = buildKnowledgeStates(records);
-  const tempStates = buildTempStates(records, profile); // v0.66: 复用温度计算
+  const tempStates = buildTempStates(records, profile);
   const skillMastery = aggregateSkillMastery(knowledgeStates, tempStates);
-  const subjectAbility = aggregateSubjectAbility(skillMastery);
+  const subjectAbility = aggregateSubjectAbility(skillMastery, knowledgeStates, tempStates);
   const talents = detectTalents(subjectAbility);
   return { knowledgeStates, skillMastery, subjectAbility, talents };
 }
