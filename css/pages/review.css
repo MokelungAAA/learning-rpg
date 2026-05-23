@@ -1,0 +1,272 @@
+/* review.css — 复习中心样式 */
+
+.review-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--sp-3);
+}
+
+.review-summary {
+  display: flex;
+  gap: var(--sp-3);
+}
+
+.review-stat {
+  font-size: var(--fs-sm);
+  color: var(--color-text-2);
+}
+
+.review-stat b {
+  color: var(--color-accent);
+}
+
+.chart-note {
+  font-size: var(--fs-xs);
+  color: var(--color-text-3);
+  margin-top: var(--sp-2);
+  text-align: center;
+}
+
+.empty-hint {
+  font-size: var(--fs-sm);
+  color: var(--color-text-3);
+  padding: var(--sp-2) 0;
+}
+
+/* === Shadow Queue === */
+.queue-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.queue-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--sp-2) var(--sp-3);
+  background: rgba(255, 255, 255, 0.4);
+  border-radius: var(--r-md);
+  transition: background var(--duration-fast) var(--ease);
+}
+
+[data-theme="dark"] .queue-item {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.queue-item:hover {
+  background: rgba(255, 255, 255, 0.6);
+}
+
+[data-theme="dark"] .queue-item:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.queue-item.urgent-high {
+  border-left: 3px solid #e74c3c;
+}
+
+.queue-item.urgent-mid {
+  border-left: 3px solid #e67e22;
+}
+
+.queue-item-left {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  min-width: 0;
+}
+
+.queue-temp-icon {
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+.queue-kp-name {
+  font-size: var(--fs-sm);
+  font-weight: 500;
+  color: var(--color-text-1);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.queue-meta {
+  font-size: var(--fs-xs);
+  color: var(--color-text-3);
+}
+
+.queue-item-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  flex-shrink: 0;
+  gap: 2px;
+}
+
+.queue-temp {
+  font-size: var(--fs-lg);
+  font-weight: 700;
+}
+
+.queue-hl {
+  font-size: var(--fs-xs);
+  color: var(--color-text-3);
+}
+
+/* === Smart Recommendations === */
+.rec-review-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+}
+
+.rec-review-header {
+  font-size: var(--fs-sm);
+  color: var(--color-text-2);
+  margin-bottom: var(--sp-1);
+}
+
+.rec-review-item {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  padding: var(--sp-2);
+  border-radius: var(--r-md);
+  background: rgba(255, 255, 255, 0.4);
+}
+
+[data-theme="dark"] .rec-review-item {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.rec-review-icon {
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+.rec-review-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.rec-review-name {
+  font-size: var(--fs-sm);
+  font-weight: 500;
+  color: var(--color-text-1);
+}
+
+.rec-review-meta {
+  font-size: var(--fs-xs);
+  color: var(--color-text-3);
+}
+
+.rec-review-temp {
+  font-size: var(--fs-lg);
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+/* === Improvement Potential === */
+.potential-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+}
+
+.potential-item {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  padding: var(--sp-2);
+}
+
+.potential-rank {
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  color: var(--color-accent);
+  width: 28px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.potential-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.potential-name {
+  font-size: var(--fs-sm);
+  font-weight: 500;
+  color: var(--color-text-1);
+}
+
+.potential-meta {
+  font-size: var(--fs-xs);
+  color: var(--color-text-3);
+}
+
+.potential-bar-wrap {
+  width: 60px;
+  height: 6px;
+  background: var(--color-surface-variant);
+  border-radius: var(--r-full);
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.potential-bar {
+  height: 100%;
+  background: var(--color-accent-gradient);
+  border-radius: var(--r-full);
+}
+
+/* === False Mastery === */
+.false-mastery-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+}
+
+.false-mastery-item {
+  padding: var(--sp-2) var(--sp-3);
+  border-radius: var(--r-md);
+  background: rgba(255, 255, 255, 0.4);
+  border-left: 3px solid var(--color-warning);
+}
+
+[data-theme="dark"] .false-mastery-item {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.false-mastery-header {
+  font-weight: 600;
+  font-size: var(--fs-sm);
+  color: var(--color-text-1);
+}
+
+.false-mastery-detail {
+  font-size: var(--fs-xs);
+  color: var(--color-text-3);
+  margin-top: 2px;
+}
+
+.false-mastery-reason {
+  font-size: var(--fs-xs);
+  color: var(--color-warning);
+  margin-top: var(--sp-1);
+}
+
+/* === Responsive === */
+@media (max-width: 480px) {
+  .review-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--sp-1);
+  }
+
+  .queue-kp-name {
+    max-width: 150px;
+  }
+}

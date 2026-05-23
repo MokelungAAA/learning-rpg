@@ -1,0 +1,179 @@
+// review.js — 复习中心：遗忘曲线 + 阴影队列 + 智能推荐
+import Store from '../store.js';
+import { SUBJECTS, STORAGE_KEYS as StorageKeys } from '../config.js';
+import { buildTempStates, calcShadowQueue, knapsackRecommend, calcImprovementPotential, detectFalseMastery, calcForgettingCurvePoints, getTempLevel } from '../utils/review-calc.js';
+import { loadECharts, initChart, disposeChart } from '../utils/charts.js';
+
+const getRecords = () => Store.get(StorageKeys.STUDY_RECORDS) || [];
+const getProfile = () => Store.get(StorageKeys.USER_PROFILE) || {};
+
+let chartInstances = [];
+
+function fold(id, title, content) {
+  return `<div class="fold-section">
+    <div class="fold-header" data-fold="${id}">
+      <span>${title}</span>
+      <span class="fold-arrow">▾</span>
+    </div>
+    <div class="fold-body" id="fold-${id}">
+      <div class="fold-content">${content}</div>
+    </div>
+  </div>`;
+}
+
+// 遗忘曲线图表容器
+function renderForgettingCurveSection() {
+  return fold('forgetting', '📉 遗忘曲线', '<div class="chart-container" id="forgetting-curve-chart" style="height:250px"></div><p class="chart-note">基于艾宾浩斯遗忘曲线 — 温度降至80%时为最佳复习时机</p>');
+}
+
+// 阴影队列
+function renderShadowQueue(queue) {
+  if (queue.length === 0) {
+    return fold('shadow-queue', '🌙 待复习知识点', '<p class="empty-hint">暂无待复习知识点，继续保持学习节奏！</p>');
+  }
+  const items = queue.slice(0, 20).map(q => {
+    const level = getTempLevel(q.temp);
+    const urgencyClass = q.temp < 20 ? 'urgent-high' : q.temp < 40 ? 'urgent-mid' : '';
+    return `<div class="queue-item ${urgencyClass}">
+      <div class="queue-item-left">
+        <span class="queue-temp-icon">${level.icon}</span>
+        <div>
+          <div class="queue-kp-name">${q.kp}</div>
+          <div class="queue-meta">${q.subjectName} · 上次 ${q.lastDays < 1 ? '今天' : Math.round(q.lastDays) + '天前'}</div>
+        </div>
+      </div>
+      <div class="queue-item-right">
+        <span class="queue-temp" style="color:${level.color}">${Math.round(q.temp)}°</span>
+        <span class="queue-hl">半衰期 ${q.halfLife}天</span>
+      </div>
+    </div>`;
+  }).join('');
+  return fold('shadow-queue', `🌙 待复习知识点 · ${queue.length}个`, `<div class="queue-list">${items}</div>`);
+}
+
+// 智能推荐（背包算法）
+function renderRecommendations(queue) {
+  const budget = 60; // 60分钟预算
+  const recommended = knapsackRecommend(queue, budget);
+  if (recommended.length === 0) {
+    return fold('recommend', '🎯 智能复习推荐', '<p class="empty-hint">暂无推荐，记录更多学习数据后将为你智能推荐</p>');
+  }
+  const totalCost = recommended.reduce((s, r) => s + r.cost, 0);
+  const items = recommended.map(r => {
+    const level = getTempLevel(r.temp);
+    return `<div class="rec-review-item">
+      <span class="rec-review-icon">${level.icon}</span>
+      <div class="rec-review-info">
+        <div class="rec-review-name">${r.kp}</div>
+        <div class="rec-review-meta">${r.subjectName} · 约${r.cost}分钟</div>
+      </div>
+      <span class="rec-review-temp" style="color:${level.color}">${Math.round(r.temp)}°</span>
+    </div>`;
+  }).join('');
+  return fold('recommend', `🎯 智能复习推荐 · ${budget}分钟预算`, `<div class="rec-review-list"><div class="rec-review-header">推荐 ${recommended.length} 个知识点，预计 ${totalCost} 分钟</div>${items}</div>`);
+}
+
+// 提分潜力诊断
+function renderPotential(potentials) {
+  if (potentials.length === 0) return '';
+  const items = potentials.map((p, i) => `<div class="potential-item">
+    <span class="potential-rank">#${i + 1}</span>
+    <div class="potential-info">
+      <div class="potential-name">${p.skillName}</div>
+      <div class="potential-meta">${p.subjectName} · 掌握度 ${p.mastery}%</div>
+    </div>
+    <div class="potential-bar-wrap"><div class="potential-bar" style="width:${Math.min(100, p.potential * 10)}%"></div></div>
+  </div>`).join('');
+  return fold('potential', '📈 提分潜力诊断', `<div class="potential-list">${items}</div>`);
+}
+
+// 假性熟练检测
+function renderFalseMastery(falseItems) {
+  if (falseItems.length === 0) return '';
+  const items = falseItems.map(f => `<div class="false-mastery-item">
+    <div class="false-mastery-header">⚠️ ${f.kp}</div>
+    <div class="false-mastery-detail">${f.subjectName} · 正确率 ${f.highScoreRate}% · 温度 ${Math.round(f.temp)}°</div>
+    <div class="false-mastery-reason">${f.reason}</div>
+  </div>`).join('');
+  return fold('false-mastery', `⚠️ 假性熟练检测 · ${falseItems.length}个`, `<div class="false-mastery-list">${items}</div>`);
+}
+
+export function render() {
+  const records = getRecords();
+  const profile = getProfile();
+  const tempStates = buildTempStates(records, profile);
+  const queue = calcShadowQueue(tempStates);
+  const potentials = calcImprovementPotential(tempStates);
+  const falseItems = detectFalseMastery(tempStates, records);
+
+  return `<div class="page-enter">
+    <div class="review-header">
+      <div class="section-title">📝 复习中心</div>
+      <div class="review-summary">
+        <span class="review-stat">待复习 <b>${queue.length}</b></span>
+        <span class="review-stat">紧急 <b>${queue.filter(q => q.temp < 40).length}</b></span>
+      </div>
+    </div>
+    ${renderForgettingCurveSection()}
+    ${renderRecommendations(queue)}
+    ${renderShadowQueue(queue)}
+    ${renderPotential(potentials)}
+    ${renderFalseMastery(falseItems)}
+    <p style="color:var(--color-text-3);margin-top:var(--sp-3);font-size:var(--fs-xs)">v0.6 · 复习中心</p>
+  </div>`;
+}
+
+async function initForgettingCurveChart() {
+  const ec = await loadECharts();
+  if (!ec) return;
+  const el = document.getElementById('forgetting-curve-chart');
+  if (!el) return;
+  const chart = initChart(el);
+  if (!chart) return;
+  chartInstances.push(chart);
+
+  // 默认半衰期3天的遗忘曲线
+  const points = calcForgettingCurvePoints(3, 80);
+  const days = points.map(p => p.day);
+  const retentions = points.map(p => p.retention);
+
+  chart.setOption({
+    tooltip: { trigger: 'axis', formatter: (params) => `第 ${params[0].axisValue} 天<br/>保留率: ${params[0].value}%` },
+    grid: { left: 40, right: 20, top: 20, bottom: 30 },
+    xAxis: { type: 'category', data: days, name: '天数', axisLabel: { fontSize: 11 } },
+    yAxis: { type: 'value', min: 0, max: 100, name: '保留率%', axisLabel: { fontSize: 11 } },
+    series: [
+      {
+        type: 'line', data: retentions, smooth: true,
+        lineStyle: { color: '#62A0EA', width: 2 },
+        areaStyle: { color: 'rgba(98,160,234,0.1)' },
+        markLine: {
+          data: [{ yAxis: 80, name: '复习阈值' }],
+          lineStyle: { color: '#FF8C00', type: 'dashed' },
+          label: { formatter: '80% 阈值', fontSize: 11 },
+        },
+      },
+    ],
+  });
+}
+
+export function afterRender() {
+  initForgettingCurveChart();
+
+  // 折叠面板交互
+  const foldHeaders = document.querySelectorAll('.fold-header');
+  const onFoldClick = (e) => {
+    const { fold: foldId } = e.currentTarget.dataset;
+    const body = document.getElementById(`fold-${foldId}`);
+    const arrow = e.currentTarget.querySelector('.fold-arrow');
+    if (body) body.classList.toggle('open');
+    if (arrow) arrow.classList.toggle('open');
+  };
+  foldHeaders.forEach(h => h.addEventListener('click', onFoldClick));
+
+  return () => {
+    foldHeaders.forEach(h => h.removeEventListener('click', onFoldClick));
+    chartInstances.forEach(c => disposeChart(c));
+    chartInstances = [];
+  };
+}

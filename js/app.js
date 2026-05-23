@@ -8,6 +8,7 @@ import * as dataTab from './pages/data-tab.js';
 import * as pomodoro from './pages/pomodoro.js';
 import * as settings from './pages/settings.js';
 import * as skillTree from './pages/skill-tree.js';
+import * as review from './pages/review.js';
 
 const container = document.getElementById('page-container');
 
@@ -42,6 +43,7 @@ Router.register('#/data', () => handleRoute(dataTab, '#/data'));
 Router.register('#/pomodoro', () => handleRoute(pomodoro, '#/pomodoro'));
 Router.register('#/settings', () => handleRoute(settings, '#/settings'));
 Router.register('#/data/skill-tree', () => handleRoute(skillTree, '#/data/skill-tree'));
+Router.register('#/data/review', () => handleRoute(review, '#/data/review'));
 
 // Render navbar
 Navbar.render(document.body);

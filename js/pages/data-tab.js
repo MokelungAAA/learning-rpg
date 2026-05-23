@@ -165,6 +165,7 @@ export function render() {
     <div class="data-page-header">📊 数据</div>
     ${renderSummary(profile, records)}
     <a href="#/data/skill-tree" class="nav-link-card">🌳 技能树 — 查看学科能力图谱 →</a>
+    <a href="#/data/review" class="nav-link-card">📝 复习中心 — 遗忘曲线与智能推荐 →</a>
     ${renderAchievements(records, profile)}
     ${renderExamReflection(records)}
     ${renderWeakPoints(records)}
