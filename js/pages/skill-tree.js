@@ -5,7 +5,7 @@ import Store from '../store.js';
 import { SUBJECTS, STORAGE_KEYS as StorageKeys } from '../config.js';
 import { SKILL_TREE, getAllSkills } from '../data/skill-tree.js';
 import { computeAll } from '../utils/skill-tree-calc.js';
-import { buildTempStates } from '../utils/review-calc.js';
+import { buildTempStates, getTempLevel } from '../utils/review-calc.js';
 import { loadECharts, initChart, disposeChart } from '../utils/charts.js';
 import { getSubjectIcon } from '../utils/level.js';
 
@@ -70,13 +70,15 @@ function renderSkillDetailPanel() {
   </div>`;
 }
 
+// §9.2: 温度图例（6级：炙热→冻结）
 function renderLegend() {
   const levels = [
-    { label: '精通 80%+', color: '#239a3b' },
-    { label: '熟练 60-79%', color: '#7bc96f' },
-    { label: '入门 40-59%', color: '#e6a817' },
-    { label: '初学 20-39%', color: '#e67e22' },
-    { label: '未学 <20%', color: '#e74c3c' },
+    { label: '炙热 ≥80°', color: '#FF4500', icon: '🔥' },
+    { label: '温热 60-79°', color: '#FF8C00', icon: '🟠' },
+    { label: '温暖 40-59°', color: '#FFD700', icon: '🟡' },
+    { label: '正常 20-39°', color: '#62A0EA', icon: '🟢' },
+    { label: '微凉 1-19°', color: '#1A5FB4', icon: '🔵' },
+    { label: '冻结 0°', color: '#6B7280', icon: '⚫' },
   ];
   return `<div class="skill-legend">${levels.map(l =>
     `<span class="legend-item"><span class="legend-dot" style="background:${l.color}"></span>${l.label}</span>`
@@ -98,6 +100,10 @@ export function render() {
     <div class="skill-radar-section">
       <div class="section-title">📊 学科能力雷达</div>
       <div class="chart-container" id="skill-radar-chart" style="height:300px"></div>
+    </div>
+    <div class="skill-radar-section" id="sub-radar-section" style="display:none">
+      <div class="section-title" id="sub-radar-title">📊 子技能雷达</div>
+      <div class="chart-container" id="sub-radar-chart" style="height:280px"></div>
     </div>
     ${renderLegend()}
     ${renderSkillDetailPanel()}
@@ -321,6 +327,59 @@ async function initRadarChart(subjectAbility, onSubjectClick) {
   }
 }
 
+// §9.3: 初始化子技能雷达图（点击主雷达学科后显示该学科的技能详情）
+async function initSubRadarChart(subjectKey, skillMastery, subjectAbility) {
+  const ec = await loadECharts();
+  if (!ec) return;
+  const section = document.getElementById('sub-radar-section');
+  const el = document.getElementById('sub-radar-chart');
+  const titleEl = document.getElementById('sub-radar-title');
+  if (!el || !section) return;
+
+  const subj = SKILL_TREE.subjects[subjectKey];
+  if (!subj) return;
+
+  section.style.display = 'block';
+  titleEl.textContent = `📊 ${subj.name} · 子技能雷达`;
+
+  // 清理旧实例
+  const existingIdx = chartInstances.findIndex(c => c.getDom() === el);
+  if (existingIdx >= 0) { disposeChart(chartInstances[existingIdx]); chartInstances.splice(existingIdx, 1); }
+
+  const chart = initChart(el);
+  if (!chart) return;
+  chartInstances.push(chart);
+
+  const skillIds = Object.keys(subj.skills);
+  const indicators = skillIds.map(id => {
+    const sk = subj.skills[id];
+    return { name: sk.name, max: 100 };
+  });
+  const values = skillIds.map(id => {
+    const m = skillMastery[id];
+    return m ? m.avgMastery : 0;
+  });
+
+  chart.setOption({
+    tooltip: {},
+    radar: {
+      indicator: indicators,
+      shape: 'circle',
+      splitNumber: 4,
+      axisName: { fontSize: 11 },
+    },
+    series: [{
+      type: 'radar',
+      data: [{
+        value: values,
+        name: subj.name,
+        areaStyle: { opacity: 0.25 },
+        lineStyle: { width: 2 },
+      }],
+    }],
+  });
+}
+
 // afterRender: 初始化图表 + 学科筛选 + 详情面板关闭
 // 坑: window._knowledgeStates 用于详情面板读取知识点掌握度
 // 切换学科时需先 dispose 旧图再重建
@@ -338,12 +397,13 @@ export function afterRender() {
   let currentFilter = 'all';
   initForceGraph(skillMastery, currentFilter, tempStates);
   initRadarChart(subjectAbility, (subjectKey) => {
-    // 雷达图点击学科 → 切换筛选
+    // 雷达图点击学科 → 切换筛选 + 显示子技能雷达
     currentFilter = subjectKey;
     if (select) select.value = subjectKey;
     const old = chartInstances[0];
     if (old) { disposeChart(old); chartInstances.shift(); }
     initForceGraph(skillMastery, currentFilter, tempStates);
+    initSubRadarChart(subjectKey, skillMastery, subjectAbility);
   });
 
   // 学科筛选
