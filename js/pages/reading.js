@@ -13,6 +13,12 @@ const saveRecords = (r) => Store.set(StorageKeys.READING_RECORDS, r);
 // 阅读分类和格式常量
 const CATEGORIES = ['文学小说','历史','哲学','科普/科学','技术/编程','心理学','社会学','经济学','传记','个人成长','教材/教辅','其他'];
 const FORMATS = [{ value: 'paper', label: '纸质书' }, { value: 'ebook', label: '电子书' }, { value: 'audio', label: '有声书' }];
+const BOOK_STATUSES = [
+  { value: 'reading', label: '📖 当前阅读', color: '#3B82F6' },
+  { value: 'finished', label: '✅ 已完成', color: '#10B981' },
+  { value: 'paused', label: '⏸ 暂停', color: '#F59E0B' },
+  { value: 'abandoned', label: '❌ 放弃', color: '#EF4444' },
+];
 
 let chartInstances = [];
 
@@ -33,23 +39,32 @@ function renderBookshelf(records) {
   const books = {};
   for (const r of records) {
     const key = r.bookTitle;
-    if (!books[key]) books[key] = { title: key, author: r.author || '', category: r.category || '', sessions: 0, totalMin: 0, pages: 0, lastDate: '', format: r.format || 'paper' };
+    if (!books[key]) books[key] = { title: key, author: r.author || '', category: r.category || '', sessions: 0, totalMin: 0, pages: 0, lastDate: '', format: r.format || 'paper', status: 'reading', completion: 0 };
     books[key].sessions++;
     books[key].totalMin += r.durationMinutes || 0;
     books[key].pages += r.pagesRead || 0;
-    if (r.timestamp > books[key].lastDate) books[key].lastDate = r.timestamp;
+    if (r.timestamp > books[key].lastDate) {
+      books[key].lastDate = r.timestamp;
+      if (r.status) books[key].status = r.status;
+      if (r.completion) books[key].completion = r.completion;
+    }
   }
   const entries = Object.values(books).sort((a, b) => b.lastDate.localeCompare(a.lastDate));
   if (entries.length === 0) return fold('bookshelf', '📚 书架', '<p class="pomo-empty">暂无阅读记录</p>');
 
+  const statusMap = Object.fromEntries(BOOK_STATUSES.map(s => [s.value, s]));
   const items = entries.map(b => {
     const date = b.lastDate ? new Date(b.lastDate).toLocaleDateString('zh-CN') : '';
+    const st = statusMap[b.status] || statusMap.reading;
+    const badge = `<span class="book-status-badge" style="color:${st.color}">${st.label}</span>`;
+    const pct = b.completion > 0 ? `<div class="book-completion"><div class="book-completion-fill" style="width:${b.completion}%"></div></div>` : '';
     return `<div class="book-card">
       <div class="book-cover">📖</div>
       <div class="book-info">
-        <div class="book-title">${b.title}</div>
+        <div class="book-title">${b.title} ${badge}</div>
         <div class="book-meta">${b.author ? b.author + ' · ' : ''}${b.category}</div>
         <div class="book-stats">${b.sessions}次 · ${b.totalMin}分钟${b.pages > 0 ? ' · ' + b.pages + '页' : ''}</div>
+        ${pct}
       </div>
       <div class="book-date">${date}</div>
     </div>`;
@@ -112,6 +127,7 @@ export function render() {
 function openAddModal() {
   const catOpts = CATEGORIES.map(c => `<option value="${c}">${c}</option>`).join('');
   const fmtOpts = FORMATS.map(f => `<option value="${f.value}">${f.label}</option>`).join('');
+  const statusOpts = BOOK_STATUSES.map(s => `<option value="${s.value}">${s.label}</option>`).join('');
 
   const overlay = document.createElement('div');
   overlay.className = 'entry-overlay';
@@ -142,8 +158,22 @@ function openAddModal() {
           <input type="number" id="rd-duration" class="entry-input" min="1" value="30" required>
         </div>
         <div class="entry-field entry-field-half">
-          <label class="entry-label">页数</label>
-          <input type="number" id="rd-pages" class="entry-input" min="0" placeholder="0">
+          <label class="entry-label">状态</label>
+          <select id="rd-status" class="entry-select">${statusOpts}</select>
+        </div>
+      </div>
+      <div class="entry-row">
+        <div class="entry-field entry-third">
+          <label class="entry-label">起始页</label>
+          <input type="number" id="rd-page-start" class="entry-input" min="0" placeholder="0">
+        </div>
+        <div class="entry-field entry-third">
+          <label class="entry-label">结束页</label>
+          <input type="number" id="rd-page-end" class="entry-input" min="0" placeholder="0">
+        </div>
+        <div class="entry-field entry-third">
+          <label class="entry-label">完成%</label>
+          <input type="number" id="rd-completion" class="entry-input" min="0" max="100" placeholder="0">
         </div>
       </div>
       <div class="entry-row">
@@ -180,12 +210,19 @@ function openAddModal() {
       bookTitle: document.getElementById('rd-title').value,
       author: document.getElementById('rd-author').value || '',
       category: document.getElementById('rd-category').value,
+      status: document.getElementById('rd-status')?.value || 'reading',
       durationMinutes: parseInt(document.getElementById('rd-duration').value, 10) || 30,
-      pagesRead: parseInt(document.getElementById('rd-pages').value, 10) || 0,
+      pageStart: parseInt(document.getElementById('rd-page-start')?.value, 10) || 0,
+      pageEnd: parseInt(document.getElementById('rd-page-end')?.value, 10) || 0,
+      completion: parseInt(document.getElementById('rd-completion')?.value, 10) || 0,
       format: document.getElementById('rd-format').value,
       rating: parseInt(document.getElementById('rd-rating').value, 10) || 0,
       notes: document.getElementById('rd-notes').value || '',
     };
+    // 如果填写了起止页但没填完成百分比，自动计算
+    if (record.pageStart > 0 && record.pageEnd > 0 && record.completion === 0) {
+      record.completion = Math.min(100, Math.round((record.pageEnd - record.pageStart) / Math.max(1, record.pageEnd) * 100));
+    }
     const records = getRecords();
     records.push(record);
     saveRecords(records);
