@@ -1,8 +1,8 @@
 # STATE — 学习RPG · 认知操作系统
 
 **Project:** LTS
-**Phase:** 1 (Complete)
-**Version:** 0.18
+**Phase:** 2 (In Progress)
+**Version:** 0.20
 **Last Updated:** 2026-05-23
 
 ---
