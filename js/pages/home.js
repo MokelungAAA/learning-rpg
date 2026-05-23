@@ -1,44 +1,219 @@
-// home.js — Home page with status bar
+// home.js — 首页：Hero Stats + 嵌入式番茄钟 + 智能推荐 + 学科卡片
 import EventBus from '../event-bus.js';
 import Theme from '../theme.js';
+import Store from '../store.js';
+import { SUBJECTS, STORAGE_KEYS as StorageKeys } from '../config.js';
+import { checkAchievement } from '../utils/achievements-check.js';
+import {
+  calcLevel, calcLevelProgress, getLevelTitle,
+  getSubjectIcon, formatNumber, getDayStatus,
+  calcStreakDays, calcTodayXP
+} from '../utils/level.js';
+import { ACHIEVEMENTS } from '../data/achievements.js';
+
+const getRecords = () => Store.get(StorageKeys.STUDY_RECORDS) || [];
+const getProfile = () => Store.get(StorageKeys.USER_PROFILE) || {};
+
+function calcSubjectStats(records) {
+  const map = {};
+  for (const s of SUBJECTS) {
+    const recs = records.filter(r => r.subject === s.id || r.subject === s.name);
+    const xp = recs.reduce((sum, r) => sum + (r.xp || 0), 0);
+    const totalDur = recs.reduce((sum, r) => sum + (r.duration || 0), 0);
+    const avgScore = recs.length > 0
+      ? recs.reduce((a, r) => a + (r.score || 0), 0) / recs.length : 0;
+    const score = recs.length > 0
+      ? Math.round(avgScore * 0.6 + Math.min(100, recs.length * 5) * 0.4) : 0;
+    map[s.id] = { xp, count: recs.length, score, totalDur };
+  }
+  return map;
+}
+
+// 4.2 同步状态
+function renderStatusBar() {
+  return `<div class="status-bar">
+    <div class="status-left"><span class="status-dot offline"></span><span class="status-text">未同步</span></div>
+    <div class="status-right">
+      <button class="status-btn theme-toggle" title="切换主题">☀️</button>
+    </div>
+  </div>`;
+}
+
+// 4.3 Hero Stats
+function renderHeroStats(profile, records) {
+  const totalXP = profile.totalXP || 0;
+  const todayXP = calcTodayXP(records);
+  const streakDays = calcStreakDays(records);
+  const day = getDayStatus();
+  const { level, xpInLevel, xpNeeded, percent } = calcLevelProgress(totalXP);
+  const title = getLevelTitle(level);
+  return `
+    <div class="hero-stats">
+      <div class="hero-level-card">
+        <div class="hero-level-value">Lv${level}</div>
+        <div class="hero-level-title">${title.cn}</div>
+        <div class="hero-level-subtitle">${title.name}</div>
+      </div>
+      <div class="stat-card"><div class="stat-card-icon">⚡</div>
+        <div class="stat-card-value" style="color:var(--color-success)">+${todayXP}</div>
+        <div class="stat-card-label">今日XP</div></div>
+      <div class="stat-card"><div class="stat-card-icon">🔥</div>
+        <div class="stat-card-value" style="color:var(--color-warning)">${streakDays}天</div>
+        <div class="stat-card-label">连续学习</div></div>
+      <div class="stat-card"><div class="stat-card-icon">${day.icon}</div>
+        <div class="stat-card-value" style="color:${day.color}">${day.text}</div>
+        <div class="stat-card-label">每日状态</div></div>
+      <div class="stat-card"><div class="stat-card-icon">🏆</div>
+        <div class="stat-card-value">${formatNumber(totalXP)}</div>
+        <div class="stat-card-label">总XP</div></div>
+    </div>
+    <div class="level-progress">
+      <div class="progress-header">
+        <span class="progress-label">总等级进度</span>
+        <span class="progress-value">${formatNumber(xpInLevel)} / ${formatNumber(xpNeeded)} XP</span>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" style="width:${percent}%"></div></div>
+    </div>`;
+}
+
+// 4.4 嵌入式番茄钟
+function renderPomodoroWidget() {
+  return `
+    <div class="pomodoro-widget">
+      <div class="pomodoro-header">🍅 番茄钟</div>
+      <div class="pomodoro-timer">
+        <div class="pomodoro-time" id="pomodoro-display">25:00</div>
+        <button class="pomodoro-btn" id="pomodoro-start">▶ 开始</button>
+      </div>
+      <div class="pomodoro-stats" id="pomodoro-stats">今日: 0个 · 0m</div>
+    </div>`;
+}
+
+// 4.5 智能推荐
+function renderRecommendations(records) {
+  const recentSubjects = {};
+  for (const r of records) {
+    if (!r.timestamp) continue;
+    const day = new Date(r.timestamp).toISOString().slice(0, 10);
+    if (!recentSubjects[r.subject] || day > recentSubjects[r.subject].lastDay) {
+      recentSubjects[r.subject] = { lastDay: day, count: 0 };
+    }
+    recentSubjects[r.subject].count++;
+  }
+
+  const allSubjects = SUBJECTS.map(s => s.name);
+  const neglected = allSubjects.filter(s => !recentSubjects[s]);
+  const daysSince = (dateStr) => {
+    const d = new Date(dateStr);
+    return Math.floor((Date.now() - d.getTime()) / 86400000);
+  };
+
+  const stale = Object.entries(recentSubjects)
+    .map(([name, data]) => ({ name, days: daysSince(data.lastDay), count: data.count }))
+    .filter(s => s.days >= 2)
+    .sort((a, b) => b.days - a.days);
+
+  let content = '';
+  if (stale.length > 0) {
+    const s = stale[0];
+    content += `<div class="rec-item">
+      <span class="rec-icon">⏰</span>
+      <div class="rec-text">
+        <div class="rec-title">待复习: ${s.name}</div>
+        <div class="rec-desc">已 ${s.days} 天未接触</div>
+      </div>
+      <button class="rec-action" data-subject="${s.name}">开始 →</button>
+    </div>`;
+  }
+  if (neglected.length > 0) {
+    content += `<div class="rec-item">
+      <span class="rec-icon">📖</span>
+      <div class="rec-text">
+        <div class="rec-title">建议学习: ${neglected[0]}</div>
+        <div class="rec-desc">尚无学习记录</div>
+      </div>
+      <button class="rec-action" data-subject="${neglected[0]}">开始 →</button>
+    </div>`;
+  }
+  if (!content) {
+    content = `<div class="rec-empty">暂无推荐，记录学习数据后将为你智能推荐</div>`;
+  }
+
+  return `<div class="recommendations">
+    <div class="rec-header">📋 智能推荐</div>
+    ${content}
+  </div>`;
+}
+
+// 4.6 学科卡片网格
+function renderSubjectGrid(records) {
+  const stats = calcSubjectStats(records);
+  const sorted = [...SUBJECTS].sort((a, b) => (stats[b.id]?.score || 0) - (stats[a.id]?.score || 0));
+  const cards = sorted.map(s => {
+    const st = stats[s.id] || { xp: 0, count: 0, score: 0, totalDur: 0 };
+    const t = getLevelTitle(Math.floor(st.score / 15) + 1);
+    return `<div class="subject-card" data-subject="${s.id}">
+      <div class="subject-card-icon">${getSubjectIcon(s.id)}</div>
+      <div class="subject-card-name">${s.name}</div>
+      <div class="subject-card-level">${t.cn}</div>
+      <div class="subject-card-progress"><div class="progress-bar"><div class="progress-fill" style="width:${st.score}%"></div></div></div>
+      <div class="subject-card-meta"><span>⭐${st.xp}XP</span><span>${st.count}条</span></div>
+    </div>`;
+  }).join('');
+  return `<div class="section-title">📊 学科等级</div><div class="subject-grid">${cards}</div>`;
+}
 
 export function render() {
+  const profile = getProfile();
+  const records = getRecords();
   return `<div class="page-enter">
-    <div class="status-bar">
-      <div class="status-left">
-        <span class="status-dot offline"></span>
-        <span class="status-text">未同步</span>
-      </div>
-      <div class="status-right">
-        <button class="status-btn theme-toggle" title="切换主题">☀️</button>
-      </div>
-    </div>
-    <h2>首页</h2>
-    <p style="color:var(--color-text-3);margin-top:var(--sp-3)">v0.3 · 深色模式 + 状态栏</p>
+    ${renderStatusBar()}
+    ${renderHeroStats(profile, records)}
+    ${renderPomodoroWidget()}
+    ${renderRecommendations(records)}
+    ${renderSubjectGrid(records)}
+    <p style="color:var(--color-text-3);margin-top:var(--sp-3);font-size:var(--fs-xs)">v0.4 · 首页布局</p>
   </div>`;
 }
 
 export function afterRender() {
   const themeBtn = document.querySelector('.theme-toggle');
-
-  // Update theme button icon
   function updateThemeIcon() {
-    const mode = Theme.getTheme();
-    themeBtn.textContent = mode === 'dark' ? '🌙' : mode === 'light' ? '☀️' : '💻';
+    const m = Theme.getTheme();
+    themeBtn.textContent = m === 'dark' ? '🌙' : m === 'light' ? '☀️' : '💻';
   }
   updateThemeIcon();
-
-  const onThemeBtn = () => {
-    Theme.toggle();
-    updateThemeIcon();
-  };
+  const onThemeBtn = () => { Theme.toggle(); updateThemeIcon(); };
   themeBtn.addEventListener('click', onThemeBtn);
-
   const onThemeChanged = () => updateThemeIcon();
   EventBus.on('theme:changed', onThemeChanged);
+
+  // 番茄钟按钮 → 全屏页面
+  const pomBtn = document.getElementById('pomodoro-start');
+  const onPomClick = () => { window.location.hash = '#/pomodoro'; };
+  if (pomBtn) pomBtn.addEventListener('click', onPomClick);
+
+  // 智能推荐按钮
+  const recBtns = document.querySelectorAll('.rec-action');
+  const onRecClick = (e) => {
+    const subj = e.currentTarget.dataset.subject;
+    window.location.hash = '#/pomodoro';
+  };
+  recBtns.forEach(b => b.addEventListener('click', onRecClick));
+
+  // 学科卡片点击
+  const subjectCards = document.querySelectorAll('.subject-card');
+  const onSubjectClick = (e) => {
+    const id = e.currentTarget.dataset.subject;
+    window.location.hash = `#/subject/${id}`;
+  };
+  subjectCards.forEach(c => c.addEventListener('click', onSubjectClick));
 
   return () => {
     themeBtn.removeEventListener('click', onThemeBtn);
     EventBus.off('theme:changed', onThemeChanged);
+    if (pomBtn) pomBtn.removeEventListener('click', onPomClick);
+    recBtns.forEach(b => b.removeEventListener('click', onRecClick));
+    subjectCards.forEach(c => c.removeEventListener('click', onSubjectClick));
   };
 }
