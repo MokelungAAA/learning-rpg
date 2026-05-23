@@ -1,4 +1,7 @@
 // subjects.js — 学科数据（教材/章节/知识点层级）
+// 层级: subject > textbook > chapter > section > knowledgePoints
+// 注意: 学科 id 用英文(physics/math等),
+//       与 skill-tree.js 的拉丁代号不同
 export const SUBJECTS_DATA = {
   physics: {
     id: 'physics',
@@ -184,10 +187,13 @@ export const SUBJECTS_DATA = {
   },
 };
 
+// 按英文 id 查学科, 不存在返回 null
 export function getSubjectById(id) {
   return SUBJECTS_DATA[id] || null;
 }
 
+// 递归收集某学科下所有知识点 id 数组
+// subjectId 为英文 id (如 'math')
 export function getAllKnowledgePoints(subjectId) {
   const subject = SUBJECTS_DATA[subjectId];
   if (!subject) return [];

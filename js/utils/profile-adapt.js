@@ -1,13 +1,18 @@
 // profile-adapt.js — 用户画像 EMA 自适应（参考文档 §5.9）
 // 每日首次打开时自动校准：学科能力、学科修正系数、全局半衰期、XP参数
 // EMA (Exponential Moving Average) = 指数移动平均，新数据权重 α，旧数据权重 (1-α)
+// 调用入口: adaptProfile()，由 app.js 每日首次打开时触发
 
 import Store from '../store.js';
 import { STORAGE_KEYS as StorageKeys } from '../config.js';
 import { buildTempStates } from './review-calc.js';
 
-// 学科能力值更新: subjectAbility = avgTemp × 0.5 + avgAccuracy × 0.5
-// 注意: subjectAbility 用英文 key（math/physics），不是拉丁语 key
+// 学科能力值更新: newValue = avgTemp×0.5 + avgAccuracy×0.5
+// 注意: subjectAbility 存储用英文 key（math/physics）
+// @param {Object} profile — 用户画像（会被直接修改）
+// @param {string} subjectKey — 学科拉丁语 key（logos/physis）
+// @param {number} avgTemp — 该学科平均温度
+// @param {number} avgAccuracy — 该学科平均正确率
 const SUBJECT_ID_MAP = {
   logos: 'math', mythos: 'chinese', lingua: 'english',
   physis: 'physics', khemeia: 'chemistry', zoe: 'biology',
@@ -23,9 +28,12 @@ function updateSubjectAbility(profile, subjectKey, avgTemp, avgAccuracy) {
   profile.subjectAbility[subjectId] = Math.round((0.7 * old + 0.3 * newValue) * 10) / 10;
 }
 
-// 学科修正系数更新: subjectModifiers = 0.7 × old + 0.3 × (avgHalfLife / globalBaseHalfLife)
+// 学科修正系数更新: 0.7×old + 0.3×(avgHalfLife/base)
 // clamp [0.5, 2.0] 防止极端值
 // 注意: subjectModifiers 用拉丁语 key（logos/physis）
+// @param {Object} profile — 用户画像
+// @param {string} subjectKey — 学科拉丁语 key
+// @param {number} avgHalfLife — 该学科平均半衰期
 function updateSubjectModifier(profile, subjectKey, avgHalfLife) {
   const base = profile.globalBaseHalfLife || 3.0;
   const ratio = avgHalfLife / base;
@@ -36,8 +44,10 @@ function updateSubjectModifier(profile, subjectKey, avgHalfLife) {
   ));
 }
 
-// 全局半衰期更新: globalBaseHalfLife = 0.8 × old + 0.2 × median(allHalfLives)
+// 全局半衰期更新: 0.8×old + 0.2×median(allHalfLives)
 // clamp [1.0, 15.0]
+// @param {Object} profile — 用户画像
+// @param {Array} allHalfLives — 所有知识点的半衰期数组
 function updateGlobalHalfLife(profile, allHalfLives) {
   if (allHalfLives.length === 0) return;
   const sorted = [...allHalfLives].sort((a, b) => a - b);
@@ -49,7 +59,9 @@ function updateGlobalHalfLife(profile, allHalfLives) {
   ));
 }
 
-// XP 参数自动校准: 每 7 天检查一次，如果 avgXpPerMinute 偏离 2.0 超过 20% 则调整
+// XP 参数自动校准: 每7天检查，偏离目标20%则调整
+// @param {Object} profile — 用户画像
+// @param {Array} recentRecords — 近期学习记录
 function autoCalibrateXP(profile, recentRecords) {
   const lastCalibration = profile._lastXPCalibration || 0;
   const daysSince = (Date.now() - lastCalibration) / 86400000;
@@ -70,7 +82,9 @@ function autoCalibrateXP(profile, recentRecords) {
   profile._lastXPCalibration = Date.now();
 }
 
-// 编排函数: 在每日首次打开时调用
+// 编排函数: 每日首次打开时调用，自动校准用户画像
+// 流程: 构建温度→按学科聚合→更新能力/修正/半衰期→XP校准→保存
+// @returns {void} 直接修改 localStorage 中的 USER_PROFILE
 export function adaptProfile() {
   const profile = Store.get(StorageKeys.USER_PROFILE);
   const records = Store.get(StorageKeys.STUDY_RECORDS) || [];

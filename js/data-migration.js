@@ -1,4 +1,6 @@
-// data-migration.js — 数据迁移系统
+// data-migration.js — 数据版本迁移系统
+// 按版本号顺序执行迁移函数，跳过已完成的版本
+// 迁移对象直接修改 data（mutable），注意引用问题
 const migrations = {
   1: (data) => {
     data.version = 1;
@@ -45,6 +47,8 @@ const migrations = {
 
 const LATEST_VERSION = Object.keys(migrations).map(Number).sort((a, b) => b - a)[0] || 1;
 
+// 执行所有待运行的迁移，返回迁移后的数据
+// data: 用户画像对象，必须有 version 字段
 export function migrate(data) {
   if (!data || typeof data !== 'object') return data;
   let current = data.version || 0;
@@ -55,12 +59,14 @@ export function migrate(data) {
   return data;
 }
 
+// 返回当前最新数据版本号
 export function getDataVersion() {
   return LATEST_VERSION;
 }
 
-// 迁移 v4: 重算所有学习记录的 XP（用 XP Engine 2.0）
-// 需要在 profile 迁移完成后调用，因为 calcXP 需要 profile 参数
+// 重算所有记录的 XP（XP Engine 2.0 迁移）
+// 必须在 profile migrate 之后调用
+// 用 _xpMigrated 标记防止重复执行
 export function migrateRecordsXP(Store, StorageKeys, calcXP) {
   const records = Store.get(StorageKeys.STUDY_RECORDS) || [];
   if (!records.length) return;

@@ -1,4 +1,7 @@
 // subject-detail.js — 学科详情页：概览+教材/复习/日志/图表 4折叠卡片
+// 读取: STUDY_RECORDS（按 subjectId 过滤）
+// 写入: 无（纯展示）
+// 路由: #/subject/{id}，params.id 由 router 传入
 import Store from '../store.js';
 import { SUBJECTS, STORAGE_KEYS as StorageKeys } from '../config.js';
 import { SUBJECTS_DATA } from '../data/subjects.js';
@@ -20,6 +23,7 @@ function fold(id, title, content) {
   </div>`;
 }
 
+// 温度 → 图标/颜色/标签（6级：炙热→冻结）
 function getTempLevel(temp) {
   if (temp >= 90) return { icon: '🔥', color: '#FF4444', label: '炙热' };
   if (temp >= 70) return { icon: '☀️', color: '#FF8C00', label: '温热' };
@@ -29,6 +33,8 @@ function getTempLevel(temp) {
   return { icon: '🧊', color: '#D3D3D3', label: '冻结' };
 }
 
+// 聚合学科统计：总时长/XP/平均分/本周时长/温度/掌握度
+// 坑: subject 可能是 id 或 name，需两种都匹配
 function calcSubjectOverview(subjectId, records) {
   const recs = records.filter(r => r.subject === subjectId || r.subject === SUBJECTS.find(s => s.id === subjectId)?.name);
   const totalMin = recs.reduce((s, r) => s + (r.duration || 0), 0);
@@ -41,6 +47,7 @@ function calcSubjectOverview(subjectId, records) {
   return { totalMin, totalXP, avgScore, weekMin, temp, mastery, count: recs.length, recs };
 }
 
+// 学科概览卡片：总学习时长/温度/掌握度/本周时长
 function renderOverview(subjectId) {
   const records = getRecords();
   const subj = SUBJECTS.find(s => s.id === subjectId);
@@ -76,6 +83,8 @@ function renderOverview(subjectId) {
   </div>`;
 }
 
+// 教材进度折叠卡：按教材名前4字匹配记录计算覆盖率
+// 坑: 匹配逻辑与 data-tab.js 相同，教材名太短会误匹配
 function renderTextbooksCard(subjectId) {
   const data = SUBJECTS_DATA[subjectId];
   if (!data || !data.textbooks) return fold('textbooks', '📖 教材/知识点', '<p class="empty-hint">暂无教材数据</p>');
@@ -96,6 +105,7 @@ function renderTextbooksCard(subjectId) {
   return fold('textbooks', `📖 教材/知识点 · ${data.textbooks.length}本`, `<div class="tb-list">${items}</div>`);
 }
 
+// 待复习折叠卡：筛选 >3天且得分<70 的记录（最多10条）
 function renderReviewCard(subjectId) {
   const records = getRecords();
   const subj = SUBJECTS.find(s => s.id === subjectId);
@@ -123,6 +133,7 @@ function renderReviewCard(subjectId) {
   return fold('review', `🔄 待复习 · ${oldRecs.length}项`, `<div class="review-list">${items}</div>`);
 }
 
+// 学习日志折叠卡：最近10条记录（按时间倒序）
 function renderLogCard(subjectId) {
   const records = getRecords();
   const subj = SUBJECTS.find(s => s.id === subjectId);
@@ -148,6 +159,7 @@ function renderLogCard(subjectId) {
   return fold('log', `📋 学习日志 · ${recs.length}条`, `<div class="log-list">${items}</div>`);
 }
 
+// 图表容器占位（每日时长+得分率趋势，折叠展开时懒加载）
 function renderChartCard(subjectId) {
   return fold('charts', '📈 数据图表', `
     <div class="chart-container" id="subject-duration-chart" style="height:200px"></div>
@@ -155,6 +167,8 @@ function renderChartCard(subjectId) {
   `);
 }
 
+// 异步初始化学科图表：最近14天时长柱状图 + 得分率趋势折线图
+// 坑: 只显示有 score>0 的记录，需先 filter 再排序取最近20条
 async function initSubjectCharts(subjectId) {
   const ec = await loadECharts();
   if (!ec) return;
@@ -235,6 +249,8 @@ export function render(params) {
   </div>`;
 }
 
+// afterRender: 折叠面板 + 图表懒加载（首次展开 charts 折叠时初始化）
+// 坑: chartsInited 标志防止重复初始化，setTimeout 100ms 等 DOM 渲染
 export function afterRender(params) {
   const subjectId = params?.id || 'math';
 

@@ -1,9 +1,12 @@
 // data-io.js — 数据导入导出页
+// 导出: JSON(全量备份) / CSV(学习记录)
+// 导入: JSON(合并去重，相同id不重复)
 import Store from '../store.js';
 import { STORAGE_KEYS as StorageKeys } from '../config.js';
 import EventBus from '../event-bus.js';
 import Toast from '../components/toast.js';
 
+// 导入导出涉及的 localStorage key 列表
 const KEYS = [
   StorageKeys.USER_PROFILE, StorageKeys.STUDY_RECORDS,
   StorageKeys.POMODORO_SESSIONS, StorageKeys.READING_RECORDS,
@@ -11,6 +14,7 @@ const KEYS = [
   StorageKeys.SETTINGS, StorageKeys.SYNC_META,
 ];
 
+// 导出全量 JSON 备份（创建 Blob → 临时链接 → 自动下载）
 function exportJSON() {
   const data = { version: '1.0', exportTime: new Date().toISOString() };
   for (const key of KEYS) {
@@ -27,6 +31,8 @@ function exportJSON() {
   Toast.show('JSON 导出成功', 'success');
 }
 
+// 导出学习记录为 CSV（带 BOM 头，Excel 兼容）
+// 坑: 数组字段用分号分隔，含逗号/引号的值需转义
 function exportCSV() {
   const records = Store.get(StorageKeys.STUDY_RECORDS) || [];
   if (records.length === 0) { Toast.show('暂无学习记录', 'info'); return; }
@@ -50,6 +56,8 @@ function exportCSV() {
   Toast.show('CSV 导出成功', 'success');
 }
 
+// 导入 JSON 备份：数组类数据按 id 去重合并，对象类直接覆盖
+// 坑: 合并逻辑假设数组项都有 id 字段，否则全部追加
 function importJSON(file) {
   const reader = new FileReader();
   reader.onload = (e) => {
@@ -114,6 +122,8 @@ export function render() {
   </div>`;
 }
 
+// afterRender: 导出按钮 + 文件选择导入事件绑定
+// 坑: importInput 的 change 事件无法在返回的清理函数中可靠移除
 export function afterRender() {
   const exportJsonBtn = document.getElementById('export-json');
   const exportCsvBtn = document.getElementById('export-csv');

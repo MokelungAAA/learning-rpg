@@ -1,10 +1,14 @@
-// log.js — 日志管理页（LOG-01~05：列表+筛选+搜索+编辑+删除）
+// log.js — 日志管理页（列表+筛选+搜索+编辑+删除）
+// 读取: STUDY_RECORDS, USER_PROFILE
+// 写入: STUDY_RECORDS（编辑/删除时）
+// 坑: 模块级 filteredRecords/currentPage 状态，页面切换需重置
 import Store from '../store.js';
 import { SUBJECTS, STORAGE_KEYS as StorageKeys } from '../config.js';
 import EventBus from '../event-bus.js';
 import Toast from '../components/toast.js';
 import { getSubjectIcon, calcXP } from '../utils/level.js';
 
+// 分页参数 + 模块级筛选结果缓存
 const PAGE_SIZE = 20;
 let currentPage = 1;
 let filteredRecords = [];
@@ -17,6 +21,7 @@ function saveRecords(records) {
   Store.set(StorageKeys.STUDY_RECORDS, records);
 }
 
+// subject id/name 双向查找（记录中两种格式混用）
 function getSubjectName(id) {
   const s = SUBJECTS.find(s => s.id === id || s.name === id);
   return s ? s.name : id;
@@ -27,7 +32,8 @@ function getSubjectId(name) {
   return s ? s.id : name;
 }
 
-// LOG-02: 筛选
+// 多条件筛选：学科/类型/日期范围/全文搜索
+// 坑: dateTo 需 +86400000（包含当天）
 function filterRecords(records, filters) {
   let result = [...records];
   if (filters.subject) {
@@ -55,7 +61,7 @@ function filterRecords(records, filters) {
   return result.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
 }
 
-// LOG-03: 高亮匹配
+// 搜索结果高亮：用 <mark> 包裹第一个匹配子串
 function highlightText(text, query) {
   if (!query || !text) return text || '';
   const q = query.toLowerCase();
@@ -64,6 +70,7 @@ function highlightText(text, query) {
   return text.slice(0, idx) + '<mark>' + text.slice(idx, idx + q.length) + '</mark>' + text.slice(idx + q.length);
 }
 
+// 筛选 UI：搜索框 + 学科/类型下拉 + 日期范围
 function renderFilters() {
   const subjectOpts = SUBJECTS.map(s => `<option value="${s.id}">${s.name}</option>`).join('');
   return `<div class="log-filters">
@@ -89,6 +96,8 @@ function renderFilters() {
   </div>`;
 }
 
+// 单条记录卡片：学科图标+高亮匹配+编辑/删除按钮
+// query 用于搜索高亮
 function renderRecordItem(record, query) {
   const date = record.timestamp ? new Date(record.timestamp).toLocaleDateString('zh-CN') : '';
   const time = record.timestamp ? new Date(record.timestamp).toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' }) : '';
@@ -121,6 +130,7 @@ function renderRecordItem(record, query) {
   </div>`;
 }
 
+// 渲染分页列表 + 更新筛选摘要 + 控制"加载更多"按钮
 function renderList() {
   const query = document.getElementById('log-search')?.value || '';
   const start = 0;
@@ -156,7 +166,9 @@ export function render() {
   </div>`;
 }
 
-// LOG-04: 编辑弹窗
+// 编辑弹窗：动态创建 overlay，修改后重算 XP 并保存
+// 坑: XP 用 calcXP 重算，需构造 profile._runtimeTotalXP
+// 坑: overlay 挂在 document.body 上，不是页面容器内
 function openEditModal(recordId) {
   const records = getRecords();
   const record = records.find(r => r.id === recordId);
@@ -252,7 +264,7 @@ function openEditModal(recordId) {
   });
 }
 
-// LOG-05: 删除确认
+// 删除确认弹窗：不可撤销，删除后触发 record:deleted 事件
 function confirmDelete(recordId) {
   const overlay = document.createElement('div');
   overlay.className = 'entry-overlay';
@@ -287,6 +299,7 @@ function confirmDelete(recordId) {
   });
 }
 
+// 重新读取记录 + 应用当前筛选条件 + 重置到第1页
 function applyFilters() {
   const records = getRecords();
   const subject = document.getElementById('log-filter-subject')?.value || '';
@@ -299,6 +312,8 @@ function applyFilters() {
   renderList();
 }
 
+// afterRender: 筛选事件 + 搜索防抖(300ms) + 分页 + 编辑/删除委托
+// 支持 URL 参数 ?q= 预填搜索（从搜索页跳转时使用）
 export function afterRender() {
   // Read ?q= from hash for search pre-fill
   const hashParts = window.location.hash.split('?');
@@ -333,7 +348,7 @@ export function afterRender() {
   const onLoadMore = () => { currentPage++; renderList(); };
   loadMore.addEventListener('click', onLoadMore);
 
-  // 委托：编辑/删除按钮
+  // 事件委托：编辑/删除按钮（列表动态渲染，不能直接绑）
   const list = document.getElementById('log-list');
   const onListClick = (e) => {
     const editBtn = e.target.closest('.log-edit-btn');

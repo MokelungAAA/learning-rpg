@@ -1,4 +1,7 @@
 // skill-tree.js — 三层技能体系（9科42技能）
+// 顶层 key 是拉丁代号(logos/mythos/lingua等),
+//   与 subjects.js 的英文 id 不同!
+// 每个 skill 含 weight(权重) 和 kps(知识点名称数组)
 export const SKILL_TREE = {
   version: '1.0.0',
   subjects: {
@@ -92,7 +95,8 @@ export const SKILL_TREE = {
   },
 };
 
-// 获取所有技能的扁平列表
+// 展平所有学科的技能为一维数组
+// 返回项附带 subjectKey/subjectId 方便跨表关联
 export function getAllSkills() {
   const list = [];
   for (const [subjKey, subj] of Object.entries(SKILL_TREE.subjects)) {
@@ -103,7 +107,8 @@ export function getAllSkills() {
   return list;
 }
 
-// 获取学科下的所有技能
+// 按拉丁代号获取某学科下所有技能
+// subjectKey 用 'logos' 而非 'math'
 export function getSkillsBySubject(subjectKey) {
   const subj = SKILL_TREE.subjects[subjectKey];
   if (!subj) return [];

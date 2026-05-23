@@ -1,4 +1,6 @@
-// reading.js — 阅读记录页（READ-01：弹窗+列表+筛选+书架+图表）
+// reading.js — 阅读记录页（弹窗录入+书架+记录列表+图表）
+// 读取: READING_RECORDS
+// 写入: READING_RECORDS（增/改/删）
 import Store from '../store.js';
 import { STORAGE_KEYS as StorageKeys } from '../config.js';
 import EventBus from '../event-bus.js';
@@ -8,6 +10,7 @@ import { loadECharts, initChart, showChartLoading, hideChartLoading, disposeChar
 const getRecords = () => Store.get(StorageKeys.READING_RECORDS) || [];
 const saveRecords = (r) => Store.set(StorageKeys.READING_RECORDS, r);
 
+// 阅读分类和格式常量
 const CATEGORIES = ['文学小说','历史','哲学','科普/科学','技术/编程','心理学','社会学','经济学','传记','个人成长','教材/教辅','其他'];
 const FORMATS = [{ value: 'paper', label: '纸质书' }, { value: 'ebook', label: '电子书' }, { value: 'audio', label: '有声书' }];
 
@@ -25,7 +28,7 @@ function fold(id, title, content) {
   </div>`;
 }
 
-// 书架视图
+// 书架视图：按书名聚合，显示阅读次数/总时长/页数/最近日期
 function renderBookshelf(records) {
   const books = {};
   for (const r of records) {
@@ -54,7 +57,7 @@ function renderBookshelf(records) {
   return fold('bookshelf', `📚 书架 · ${entries.length}本`, `<div class="book-list">${items}</div>`);
 }
 
-// 阅读记录列表
+// 阅读记录列表（最多显示20条）+ 编辑/删除按钮
 function renderRecordList(records) {
   if (records.length === 0) return '';
   const items = records.slice(0, 20).map(r => {
@@ -84,7 +87,7 @@ function renderRecordList(records) {
   return fold('records', `📝 阅读记录 · ${records.length}条`, `<div class="reading-list">${items}</div>`);
 }
 
-// 月度图表
+// 图表容器占位（月度柱状图+分类饼图，折叠展开时懒加载）
 function renderChartSection() {
   return fold('reading-charts', '📈 阅读统计', '<div class="chart-container" id="reading-monthly-chart" style="height:220px"></div><div class="chart-container" id="reading-category-chart" style="height:220px;margin-top:var(--sp-2)"></div>');
 }
@@ -104,7 +107,8 @@ export function render() {
   </div>`;
 }
 
-// 录入弹窗
+// 新增阅读记录弹窗：动态创建 overlay，提交后 reload 整页
+// 坑: overlay 挂 body 上，提交后 window.location.reload() 刷新
 function openAddModal() {
   const catOpts = CATEGORIES.map(c => `<option value="${c}">${c}</option>`).join('');
   const fmtOpts = FORMATS.map(f => `<option value="${f.value}">${f.label}</option>`).join('');
@@ -192,7 +196,7 @@ function openAddModal() {
   });
 }
 
-// 编辑弹窗
+// 编辑阅读记录弹窗：回填表单，提交后原地更新并 reload
 function openEditModal(recordID) {
   const records = getRecords();
   const r = records.find(rec => rec.recordID === recordID);
@@ -276,7 +280,7 @@ function openEditModal(recordID) {
   });
 }
 
-// 删除确认
+// 删除确认弹窗：不可撤销，删除后 reload
 function deleteRecord(recordID) {
   const records = getRecords();
   const r = records.find(rec => rec.recordID === recordID);
@@ -305,6 +309,8 @@ function deleteRecord(recordID) {
   });
 }
 
+// 异步初始化图表：月度阅读时长柱状图 + 分类饼图
+// 坑: 记录为空时需隐藏 loading spinner
 async function initCharts() {
   const monthlyEl = document.getElementById('reading-monthly-chart');
   const catEl = document.getElementById('reading-category-chart');
@@ -361,6 +367,8 @@ async function initCharts() {
   }
 }
 
+// afterRender: 新增按钮 + 编辑/删除按钮 + 折叠面板 + 图表懒加载
+// 返回清理函数，dispose 所有 ECharts 实例
 export function afterRender() {
   const addBtn = document.getElementById('reading-add');
   const onAdd = () => openAddModal();

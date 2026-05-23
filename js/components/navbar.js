@@ -1,14 +1,16 @@
-// navbar.js — Navigation: bottom bar (mobile) + sidebar (desktop)
+// navbar.js — 导航组件：移动端底部栏 + 桌面端侧边栏
+// 导出单例，监听 route:changed 事件自动高亮
 import { NAV_TABS } from '../config.js';
 import EventBus from '../event-bus.js';
 
 class Navbar {
   constructor() {
-    this.el = null;
-    this.sidebar = null;
+    this.el = null;       // 底部导航 DOM
+    this.sidebar = null;  // 侧边栏 DOM
     this.activeTab = 'home';
   }
 
+  // 渲染两种导航，绑定路由监听
   render(container) {
     this.renderBottomNav(container);
     this.renderSidebar(container);
@@ -16,6 +18,7 @@ class Navbar {
     EventBus.on('route:changed', (hash) => this.setActive(hash));
   }
 
+  // 构建移动端底部导航：主tab + FAB按钮 + 番茄钟浮动按钮
   renderBottomNav(container) {
     this.el = document.createElement('nav');
     this.el.className = 'bottom-nav';
@@ -56,6 +59,7 @@ class Navbar {
     container.appendChild(this.el);
   }
 
+  // 构建桌面端侧边栏：品牌 + 全部tab + 新记录按钮
   renderSidebar(container) {
     this.sidebar = document.createElement('nav');
     this.sidebar.className = 'sidebar-nav';
@@ -96,6 +100,7 @@ class Navbar {
     container.appendChild(this.sidebar);
   }
 
+  // 根据当前路由hash高亮对应tab，底部栏和侧边栏同步
   setActive(hash) {
     // Bottom nav
     if (this.el) {

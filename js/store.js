@@ -1,4 +1,6 @@
-// store.js — Memory cache + localStorage
+// store.js — localStorage 封装 + 内存缓存
+// 单例模式，避免重复读 localStorage
+// 注意：set() 会触发 'data:changed' 事件
 import EventBus from './event-bus.js';
 
 class Store {
@@ -6,6 +8,8 @@ class Store {
     this.cache = new Map();
   }
 
+  // 读取：缓存优先，miss 时从 localStorage JSON.parse
+  // 返回 null 表示不存在或解析失败
   get(key) {
     if (this.cache.has(key)) {
       return this.cache.get(key);
@@ -21,6 +25,8 @@ class Store {
     }
   }
 
+  // 写入：同时更新缓存和 localStorage
+  // 自动 JSON.stringify，会触发 data:changed 事件
   set(key, value) {
     try {
       this.cache.set(key, value);
@@ -31,16 +37,19 @@ class Store {
     }
   }
 
+  // 删除：同时清理缓存和 localStorage
   remove(key) {
     this.cache.delete(key);
     localStorage.removeItem(key);
   }
 
+  // 检查 key 是否存在（缓存或 localStorage）
   has(key) {
     if (this.cache.has(key)) return true;
     return localStorage.getItem(key) !== null;
   }
 
+  // 按前缀扫描 localStorage，返回 { key: value } 对象
   getAll(prefix = '') {
     const result = {};
     for (let i = 0; i < localStorage.length; i++) {
@@ -52,6 +61,7 @@ class Store {
     return result;
   }
 
+  // 清空全部数据（缓存 + localStorage），慎用
   clear() {
     this.cache.clear();
     localStorage.clear();

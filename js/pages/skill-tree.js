@@ -1,4 +1,6 @@
 // skill-tree.js — 技能树页面：力导向图 + 雷达图 + 详情面板
+// 读取: STUDY_RECORDS, USER_PROFILE → computeAll() 计算掌握度
+// 写入: 无（纯展示）
 import Store from '../store.js';
 import { SUBJECTS, STORAGE_KEYS as StorageKeys } from '../config.js';
 import { SKILL_TREE, getAllSkills } from '../data/skill-tree.js';
@@ -6,8 +8,10 @@ import { computeAll } from '../utils/skill-tree-calc.js';
 import { loadECharts, initChart, disposeChart } from '../utils/charts.js';
 import { getSubjectIcon } from '../utils/level.js';
 
+// 模块级 ECharts 实例数组，afterRender 清理时统一 dispose
 let chartInstances = [];
 
+// 掌握度 → 颜色（绿→红渐变）
 function getMasteryColor(mastery) {
   if (mastery >= 80) return '#239a3b';
   if (mastery >= 60) return '#7bc96f';
@@ -16,6 +20,7 @@ function getMasteryColor(mastery) {
   return '#e74c3c';
 }
 
+// 掌握度 → 等级标签（精通/熟练/入门/初学/未学）
 function getMasteryLevel(mastery) {
   if (mastery >= 80) return '精通';
   if (mastery >= 60) return '熟练';
@@ -24,6 +29,7 @@ function getMasteryLevel(mastery) {
   return '未学';
 }
 
+// 学科筛选下拉框（全部/单科）
 function renderSubjectSelector() {
   const options = [
     { key: 'all', label: '全部学科' },
@@ -35,6 +41,7 @@ function renderSubjectSelector() {
   </div>`;
 }
 
+// 特长/薄弱标签列表（strength=绿/warning=黄）
 function renderTalents(talents) {
   if (talents.length === 0) return '';
   const items = talents.map(t => {
@@ -45,6 +52,7 @@ function renderTalents(talents) {
   return `<div class="talent-section"><div class="section-title">🎯 特长与薄弱</div><div class="talent-tags">${items}</div></div>`;
 }
 
+// 技能详情浮层容器（初始隐藏，点击节点显示）
 function renderSkillDetailPanel() {
   return `<div class="skill-detail-panel" id="skill-detail" style="display:none">
     <button class="detail-close" id="detail-close">✕</button>
@@ -87,7 +95,9 @@ export function render() {
   </div>`;
 }
 
-// 构建力导向图数据
+// 构建力导向图节点/连线/分类数据
+// filterSubject='all' 时显示全部学科
+// 坑: 连线只在同科目相邻技能间生成
 function buildForceGraphData(skillMastery, filterSubject) {
   const nodes = [];
   const links = [];
@@ -126,6 +136,8 @@ function buildForceGraphData(skillMastery, filterSubject) {
   return { nodes, links, categories };
 }
 
+// 异步初始化力导向图（ECharts graph + force 布局）
+// 点击节点 → showSkillDetail 打开详情面板
 async function initForceGraph(skillMastery, filterSubject) {
   const ec = await loadECharts();
   if (!ec) return;
@@ -165,6 +177,8 @@ async function initForceGraph(skillMastery, filterSubject) {
   });
 }
 
+// 显示技能详情面板：掌握度/等级/记录数/知识点列表
+// 坑: 知识点掌握度从 window._knowledgeStates 读取（afterRender 设置）
 function showSkillDetail(nodeData, skillMastery) {
   const panel = document.getElementById('skill-detail');
   const content = document.getElementById('detail-content');
@@ -204,6 +218,7 @@ function showSkillDetail(nodeData, skillMastery) {
   panel.style.display = 'block';
 }
 
+// 异步初始化学科能力雷达图（polygon 形状，max=100）
 async function initRadarChart(subjectAbility) {
   const ec = await loadECharts();
   if (!ec) return;
@@ -237,6 +252,9 @@ async function initRadarChart(subjectAbility) {
   });
 }
 
+// afterRender: 初始化图表 + 学科筛选 + 详情面板关闭
+// 坑: window._knowledgeStates 用于详情面板读取知识点掌握度
+// 切换学科时需先 dispose 旧图再重建
 export function afterRender() {
   const { knowledgeStates, skillMastery, subjectAbility, talents } = computeAll();
   window._knowledgeStates = knowledgeStates;

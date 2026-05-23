@@ -1,9 +1,16 @@
-// charts.js — ECharts 图表配置与渲染
+// charts.js — ECharts 图表配置与渲染（VIEW-10~16）
+// 功能: 动态加载 ECharts 5.4.3，提供 6 种图表的配置与渲染
+// 图表: XP趋势/学科时长/效率散点/时段热力/得分趋势/输入输出比例
+// 主题: 自动适配 light/dark 模式，读取 data-theme 属性
+// 易错点: CDN 加载失败时返回 null，需调用方做空值判断
+
 import { SUBJECTS } from '../config.js';
 
 let echartsLoaded = false;
 let echartsLib = null;
 
+// 动态加载 ECharts（CDN），已加载则直接返回缓存
+// @returns {Promise<Object|null>} echarts 实例，加载失败返回 null
 export async function loadECharts() {
   if (echartsLoaded) return echartsLib;
   return new Promise((resolve) => {
@@ -25,10 +32,13 @@ export async function loadECharts() {
   });
 }
 
+// 检测当前是否为暗色主题
 function isDark() {
   return document.documentElement.getAttribute('data-theme') === 'dark';
 }
 
+// 获取当前主题的图表配色方案（自动适配 light/dark）
+// @returns {{textColor, subTextColor, gridColor, bgColor, accent, ...}}
 function getChartTheme() {
   const dark = isDark();
   return {
@@ -44,6 +54,9 @@ function getChartTheme() {
   };
 }
 
+// 获取学科对应的图表颜色（英文 key: math/physics 等）
+// @param {string} id — 学科英文ID
+// @returns {string} 十六进制颜色值
 function getSubjectColor(id) {
   const colors = {
     math: '#2563eb', chinese: '#dc2626', english: '#16a34a',
@@ -53,12 +66,17 @@ function getSubjectColor(id) {
   return colors[id] || '#6b7280';
 }
 
+// 初始化 ECharts 实例（canvas 渲染器）
+// @param {HTMLElement} container — 图表容器 DOM 元素
+// @returns {Object|null} echarts 实例，未加载返回 null
 export function initChart(container) {
   if (!echartsLib) return null;
   const chart = echartsLib.init(container, null, { renderer: 'canvas' });
   return chart;
 }
 
+// 显示图表加载动画（防止重复添加）
+// @param {HTMLElement} container — 图表容器
 export function showChartLoading(container) {
   if (!container || container.querySelector('.chart-loading')) return;
   const loader = document.createElement('div');
@@ -67,13 +85,17 @@ export function showChartLoading(container) {
   container.appendChild(loader);
 }
 
+// 隐藏图表加载动画
+// @param {HTMLElement} container — 图表容器
 export function hideChartLoading(container) {
   if (!container) return;
   const loader = container.querySelector('.chart-loading');
   if (loader) loader.remove();
 }
 
-// VIEW-10: 30天XP趋势折线图
+// 30天XP趋势折线图（VIEW-10）
+// @param {Object} chart — echarts 实例
+// @param {Array} records — 学习记录（需含 timestamp, xp）
 export function renderXPTrendChart(chart, records) {
   if (!chart) return;
   const theme = getChartTheme();
@@ -119,7 +141,9 @@ export function renderXPTrendChart(chart, records) {
   });
 }
 
-// VIEW-11: 学科时长柱状图
+// 学科时长柱状图（VIEW-11），按学习时长降序排列
+// @param {Object} chart — echarts 实例
+// @param {Array} records — 学习记录（需含 subject, duration）
 export function renderSubjectDurationChart(chart, records) {
   if (!chart) return;
   const theme = getChartTheme();
@@ -156,7 +180,9 @@ export function renderSubjectDurationChart(chart, records) {
   });
 }
 
-// VIEW-13: 效率散点图 (时长 vs 正确率)
+// 效率散点图（VIEW-13）: X=时长, Y=正确率
+// @param {Object} chart — echarts 实例
+// @param {Array} records — 学习记录（需含 duration, score, subject）
 export function renderEfficiencyChart(chart, records) {
   if (!chart) return;
   const theme = getChartTheme();
@@ -195,7 +221,10 @@ export function renderEfficiencyChart(chart, records) {
   });
 }
 
-// VIEW-14: 时段热力图 (星期 × 6时段)
+// 时段热力图（VIEW-14）: 星期×6时段的学习分布
+// @param {Object} chart — echarts 实例
+// @param {Array} records — 学习记录（需含 timestamp, duration）
+// 易错点: 星期计算 (getDay()+6)%7 使周一=0
 export function renderTimeSlotChart(chart, records) {
   if (!chart) return;
   const theme = getChartTheme();
@@ -259,7 +288,10 @@ export function renderTimeSlotChart(chart, records) {
   });
 }
 
-// VIEW-15: 得分率趋势折线图 (最近30天)
+// 30天得分率趋势折线图（VIEW-15），含及格线标注
+// @param {Object} chart — echarts 实例
+// @param {Array} records — 学习记录（需含 timestamp, score）
+// 易错点: 无数据的天显示 null，connectNulls 保持连线
 export function renderScoreTrendChart(chart, records) {
   if (!chart) return;
   const theme = getChartTheme();
@@ -314,7 +346,10 @@ export function renderScoreTrendChart(chart, records) {
   });
 }
 
-// VIEW-16: 输入输出比例环形图 (练习 vs 订正 vs 阅读 vs 网课)
+// 输入输出比例环形图（VIEW-16）: 练习/订正/阅读/网课
+// @param {Object} chart — echarts 实例
+// @param {Array} records — 学习记录（需含 activityType, duration）
+// 易错点: activityType 缺失时默认归类为 practice
 export function renderIORatioChart(chart, records) {
   if (!chart) return;
   const theme = getChartTheme();
@@ -356,6 +391,8 @@ export function renderIORatioChart(chart, records) {
   });
 }
 
+// 销毁 ECharts 实例，释放内存
+// @param {Object} chart — echarts 实例
 export function disposeChart(chart) {
   try { if (chart && chart.dispose) chart.dispose(); } catch {}
 }

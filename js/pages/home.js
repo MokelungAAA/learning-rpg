@@ -1,4 +1,6 @@
 // home.js — 首页：Hero Stats + 嵌入式番茄钟 + 智能推荐 + 学科卡片
+// 读取: STUDY_RECORDS, USER_PROFILE, POMODORO_SESSIONS
+// 写入: 无（只读展示页，数据变更通过其他页面）
 import EventBus from '../event-bus.js';
 import Theme from '../theme.js';
 import Store from '../store.js';
@@ -15,6 +17,8 @@ import * as DataEntry from '../components/data-entry.js';
 const getRecords = () => Store.get(StorageKeys.STUDY_RECORDS) || [];
 const getProfile = () => Store.get(StorageKeys.USER_PROFILE) || {};
 
+// 按学科聚合 XP/条数/综合分/总时长
+// score = 平均分*0.6 + 条数因子*0.4
 function calcSubjectStats(records) {
   const map = {};
   for (const s of SUBJECTS) {
@@ -30,7 +34,7 @@ function calcSubjectStats(records) {
   return map;
 }
 
-// 4.2 同步状态
+// 4.2 顶部状态栏：同步状态 + 搜索入口 + 主题切换
 function renderStatusBar() {
   return `<div class="status-bar">
     <div class="status-left"><span class="status-dot offline"></span><span class="status-text">未同步</span></div>
@@ -41,7 +45,8 @@ function renderStatusBar() {
   </div>`;
 }
 
-// 4.3 Hero Stats
+// 4.3 Hero Stats：等级卡+今日XP+连续天数+总XP+进度条
+// profile/records 由 render() 传入，避免重复读 Store
 function renderHeroStats(profile, records) {
   const totalXP = records.reduce((s, r) => s + (r.xp || 0), 0);
   const todayXP = calcTodayXP(records);
@@ -78,7 +83,8 @@ function renderHeroStats(profile, records) {
     </div>`;
 }
 
-// 4.4 嵌入式番茄钟
+// 4.4 嵌入式番茄钟 widget：今日统计 + 跳转按钮
+// 按钮只做导航，实际计时在 pomodoro.js
 function renderPomodoroWidget() {
   const sessions = Store.get(StorageKeys.POMODORO_SESSIONS) || [];
   const today = new Date().toISOString().slice(0, 10);
@@ -99,7 +105,8 @@ function renderPomodoroWidget() {
     </div>`;
 }
 
-// 4.5 智能推荐
+// 4.5 智能推荐：找出>=2天未碰的学科和从未学过的学科
+// 坑: subject 用 name 匹配（非 id），需与 SUBJECTS.name 对齐
 function renderRecommendations(records) {
   const recentSubjects = {};
   for (const r of records) {
@@ -155,7 +162,8 @@ function renderRecommendations(records) {
   </div>`;
 }
 
-// 4.6 学科卡片网格
+// 4.6 学科卡片网格：按综合分降序排列
+// 点击卡片跳转 #/subject/{id} 详情页
 function renderSubjectGrid(records) {
   const stats = calcSubjectStats(records);
   const sorted = [...SUBJECTS].sort((a, b) => (stats[b.id]?.score || 0) - (stats[a.id]?.score || 0));
@@ -186,6 +194,8 @@ export function render() {
   </div>`;
 }
 
+// afterRender: 数字动画 + 主题/番茄钟/推荐/学科事件绑定
+// 返回清理函数，防止页面切换后内存泄漏
 export function afterRender() {
   // 数字滚动动画
   const profile = getProfile();
@@ -234,13 +244,15 @@ export function afterRender() {
   };
   subjectCards.forEach(c => c.addEventListener('click', onSubjectClick));
 
-  // ENTRY-06: 记录保存后刷新页面
+  // ENTRY-06: 记录保存后整页刷新以更新所有统计
+  // 坑: 用 reload 而非局部更新，因为多组件依赖同一批数据
   const onRecordAdded = () => {
     window.location.reload();
   };
   EventBus.on('record:added', onRecordAdded);
 
-  // Navbar FAB "+" → 数据录入
+  // Navbar FAB "+" → 打开数据录入弹窗
+  // 坑: fab:click 是全局事件，需在清理时 off
   const onFabClick = () => DataEntry.open();
   EventBus.on('fab:click', onFabClick);
 

@@ -1,4 +1,6 @@
-// search.js — 全局搜索页（学科/教材/知识点/记录/成就/功能）
+// search.js — 全局搜索页（学科/教材/知识点/记录/成就/功能页面）
+// 读取: STUDY_RECORDS, USER_PROFILE, SEARCH_HISTORY
+// 写入: SEARCH_HISTORY（搜索时自动保存，最多5条）
 import Store from '../store.js';
 import { SUBJECTS, STORAGE_KEYS as StorageKeys } from '../config.js';
 import { SUBJECTS_DATA } from '../data/subjects.js';
@@ -7,9 +9,11 @@ import { getAllSkills } from '../data/skill-tree.js';
 import { getSubjectIcon } from '../utils/level.js';
 import { checkAchievement } from '../utils/achievements-check.js';
 
+// 搜索历史管理（最多5条，存 localStorage）
 const MAX_HISTORY = 5;
 const getHistory = () => { try { return JSON.parse(localStorage.getItem(StorageKeys.SEARCH_HISTORY) || '[]'); } catch { return []; } };
 const saveHistory = (h) => localStorage.setItem(StorageKeys.SEARCH_HISTORY, JSON.stringify(h.slice(0, MAX_HISTORY)));
+// 添加到历史（去重后放首位）
 function addToHistory(query) {
   if (!query || query.length < 1) return;
   const history = getHistory().filter(h => h !== query);
@@ -17,14 +21,18 @@ function addToHistory(query) {
   saveHistory(history);
 }
 
-// 拼音首字母简拼映射
+// 拼音首字母简拼映射（支持输入 sx 匹配"数学"）
 const PINYIN_MAP = { '数学': 'sx', '语文': 'yw', '英语': 'yy', '物理': 'wl', '化学': 'hx', '生物': 'sw', '政治': 'zz', '历史': 'ls', '地理': 'dl' };
 
+// 拼音首字母匹配（仅支持9个学科名）
 function matchPinyin(text, query) {
   const pinyin = PINYIN_MAP[text];
   return pinyin && pinyin.includes(query.toLowerCase());
 }
 
+// 全文搜索：遍历学科/教材/知识点/技能树/记录/成就/功能页
+// 坑: 成就只搜已解锁的，避免泄露隐藏成就条件
+// 坑: 记录搜索拼接多字段为一个大字符串
 function searchAll(query) {
   if (!query || query.length < 1) return [];
   const q = query.toLowerCase();
@@ -118,6 +126,7 @@ function searchAll(query) {
   });
 }
 
+// 搜索历史标签 + 清除按钮
 function renderHistory() {
   const history = getHistory();
   if (history.length === 0) return '';
@@ -125,6 +134,7 @@ function renderHistory() {
   return `<div class="search-history"><div class="search-history-top"><span class="search-history-label">🕐 最近搜索</span><button class="search-history-clear" id="history-clear">清除</button></div><div class="search-history-tags">${items}</div></div>`;
 }
 
+// 搜索结果分组渲染（每组最多8条，超出显示"还有N条"）
 function renderResults(results) {
   if (results.length === 0) return '<div class="search-empty">无搜索结果</div>';
   const grouped = {};
@@ -158,6 +168,7 @@ export function render() {
   </div>`;
 }
 
+// afterRender: 输入防抖(200ms) + 历史标签 + 清除按钮 + 结果点击保存历史
 export function afterRender() {
   const input = document.getElementById('search-input');
   const clearBtn = document.getElementById('search-clear');

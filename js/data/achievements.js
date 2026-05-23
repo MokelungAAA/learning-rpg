@@ -1,4 +1,8 @@
 // achievements.js — 成就定义列表
+// condition 结构: { type, operator, value }
+//   type 对应统计字段(pomodoro_count/level/streak_days等)
+// rarity 等级: common < rare < epic
+// category 分类: progress / exploration / score / easter
 export const ACHIEVEMENTS = [
   // === 进度类 (progress) ===
   {
@@ -189,10 +193,12 @@ export const ACHIEVEMENTS = [
   },
 ];
 
+// 按 id 精确查找单个成就
 export function getAchievementById(id) {
   return ACHIEVEMENTS.find(a => a.id === id) || null;
 }
 
+// 按分类筛选成就列表
 export function getAchievementsByCategory(category) {
   return ACHIEVEMENTS.filter(a => a.category === category);
 }

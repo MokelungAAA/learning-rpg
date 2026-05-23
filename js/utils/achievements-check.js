@@ -1,12 +1,19 @@
 // achievements-check.js — 成就解锁检测 + 持久化
 // 功能: 检测 11 种成就条件，持久化已解锁状态，支持 Toast 通知新解锁
 // 易错点: 成就一旦解锁就永久保持，即使条件后来不再满足（如连续天数中断）
+// 条件类型: record_count/streak_days/total_minutes/unique_subjects/level/
+//           max_score_rate/study_at_night/study_at_dawn/pomodoro_count/
+//           reading_count/review_count/fast_pomodoro
 
 import { calcLevel, calcStreakDays } from './level.js';
 import Store from '../store.js';
 import { STORAGE_KEYS as StorageKeys } from '../config.js';
 
 // 检测单个成就是否满足条件
+// @param {Object} ach — 成就定义（需含 id, condition.type, condition.value）
+// @param {Array} records — 学习记录
+// @param {Object} profile — 用户画像（需含 totalXP）
+// @returns {boolean} 是否满足解锁条件
 export function checkAchievement(ach, records, profile) {
   const c = ach.condition;
   switch (c.type) {
@@ -43,17 +50,23 @@ export function checkAchievement(ach, records, profile) {
 }
 
 // 加载已解锁成就 ID 集合
+// @returns {Set<string>} 已解锁成就ID的集合
 export function loadUnlockedIds() {
   const data = Store.get(StorageKeys.ACHIEVEMENTS) || [];
   return new Set(Array.isArray(data) ? data : []);
 }
 
-// 保存已解锁成就 ID 集合
+// 保存已解锁成就 ID 集合（转为数组存储）
+// @param {Set<string>} ids — 已解锁成就ID集合
 export function saveUnlockedIds(ids) {
   Store.set(StorageKeys.ACHIEVEMENTS, [...ids]);
 }
 
-// 检测并持久化: 合并已解锁 + 新满足的成就，返回新解锁列表
+// 检测并持久化: 合并已解锁+新满足的成就
+// @param {Array} records — 学习记录
+// @param {Object} profile — 用户画像
+// @param {Array} achievements — 全部成就定义列表
+// @returns {{unlocked: Set, newlyUnlocked: Array}} 新解锁的成就
 export function checkAndPersist(records, profile, achievements) {
   const unlocked = loadUnlockedIds();
   const newlyUnlocked = [];

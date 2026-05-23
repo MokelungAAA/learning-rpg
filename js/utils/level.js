@@ -1,4 +1,6 @@
 // level.js — XP/等级计算工具 + XP Engine 2.0
+// 功能: 等级公式、XP进度、连续天数、今日XP、数字动画、回归斜率、XP引擎
+// 易错点: 等级公式为 log₁.₅，subject key 用英文（math/physics）
 
 const LEVEL_TITLES = [
   { cn: '初学者',   name: 'Beginner' },
@@ -17,11 +19,17 @@ const SUBJECT_ICONS = {
   politics: '⚖️', history: '📜', geography: '🌍',
 };
 
+// 根据总XP计算等级，公式: floor(log₁.₅(xp/100+1)) + 1
+// @param {number} totalXP — 累计总XP
+// @returns {number} 等级（最低1级）
 export function calcLevel(totalXP) {
   if (totalXP < 100) return 1;
   return Math.floor(Math.log(totalXP / 100 + 1) / Math.log(1.5)) + 1;
 }
 
+// 计算当前等级内的XP进度（用于进度条显示）
+// @param {number} totalXP — 累计总XP
+// @returns {{level, xpInLevel, xpNeeded, percent}} 等级+进度信息
 export function calcLevelProgress(totalXP) {
   const level = calcLevel(totalXP);
   const currentLevelXP = Math.floor(100 * (Math.pow(1.5, level - 1) - 1));
@@ -32,21 +40,32 @@ export function calcLevelProgress(totalXP) {
   return { level, xpInLevel, xpNeeded, percent };
 }
 
+// 获取等级对应的中文称号（8级封顶：初学者→传说）
+// @param {number} level — 当前等级
+// @returns {{cn, name}} 中英文称号对象
 export function getLevelTitle(level) {
   const idx = Math.min(level - 1, LEVEL_TITLES.length - 1);
   return LEVEL_TITLES[Math.max(0, idx)];
 }
 
+// 获取学科图标（英文 key: math/physics/chemistry 等）
+// @param {string} subjectId — 学科英文ID
+// @returns {string} emoji图标，未知学科返回📚
 export function getSubjectIcon(subjectId) {
   return SUBJECT_ICONS[subjectId] || '📚';
 }
 
+// 数字格式化：>=1万显示"万"，>=1千显示"k"
+// @param {number} n — 数字
+// @returns {string} 格式化后的字符串
 export function formatNumber(n) {
   if (n >= 10000) return (n / 10000).toFixed(1) + '万';
   if (n >= 1000) return (n / 1000).toFixed(1) + 'k';
   return String(n);
 }
 
+// 根据当前小时返回时段状态（早起/上午/午间/下午/晚间/深夜）
+// @returns {{icon, text, color}} 时段图标+文字+主题色变量
 export function getDayStatus() {
   const h = new Date().getHours();
   if (h >= 5 && h < 8) return { icon: '🌅', text: '早起', color: 'var(--color-warning)' };
@@ -57,6 +76,9 @@ export function getDayStatus() {
   return { icon: '🦉', text: '深夜', color: 'var(--color-text-3)' };
 }
 
+// 计算连续学习天数（从今天往前数，中断即停）
+// @param {Array} records — 学习记录数组（需含 timestamp）
+// @returns {number} 连续天数，无记录返回0
 export function calcStreakDays(records) {
   if (!records || !records.length) return 0;
   const days = new Set();
@@ -73,6 +95,9 @@ export function calcStreakDays(records) {
   return streak;
 }
 
+// 计算今日已获取XP总和（用于XP软上限判断）
+// @param {Array} records — 学习记录数组（需含 timestamp, xp）
+// @returns {number} 今日XP总和
 export function calcTodayXP(records) {
   if (!records || !records.length) return 0;
   const today = new Date().toISOString().slice(0, 10);

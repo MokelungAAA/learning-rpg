@@ -1,4 +1,9 @@
-// review-calc.js — 复习中心算法（REV-01~08 核心计算）
+// review-calc.js — 复习中心核心算法
+// 功能: 温度衰减模型、动态半衰期、阴影队列、背包推荐、
+//       提分潜力诊断、假性熟练检测、遗忘曲线数据
+// 算法: T(t) = T_peak × 2^(-t/halfLife)
+// 易错点: subjectModifiers 用拉丁语 key（logos/physis）
+
 import Store from '../store.js';
 import { STORAGE_KEYS as StorageKeys, SUBJECTS } from '../config.js';
 import { getAllSkills } from '../data/skill-tree.js';
@@ -6,12 +11,18 @@ import { getAllSkills } from '../data/skill-tree.js';
 const getRecords = () => Store.get(StorageKeys.STUDY_RECORDS) || [];
 const getProfile = () => Store.get(StorageKeys.USER_PROFILE) || {};
 
-// 温度模型：T(t) = T_peak × 2^(-t / t_half)
+// 温度衰减公式: T(t) = T_peak × 2^(-t/halfLife)
+// @param {number} T_peak — 峰值温度（0-100）
+// @param {number} daysSince — 距上次学习天数
+// @param {number} halfLife — 半衰期（天）
+// @returns {number} 当前温度值
 export function calcTemp(T_peak, daysSince, halfLife) {
   return T_peak * Math.pow(2, -daysSince / halfLife);
 }
 
-// 温度等级映射
+// 温度→等级映射（6级：冻结/微凉/正常/温暖/温热/炙热）
+// @param {number} temp — 温度值（0-100）
+// @returns {{name, color, icon, level}} 等级信息
 export function getTempLevel(temp) {
   if (temp >= 80) return { name: '炙热', color: '#FF4500', icon: '🔥', level: 5 };
   if (temp >= 60) return { name: '温热', color: '#FF8C00', icon: '🟠', level: 4 };
@@ -21,7 +32,12 @@ export function getTempLevel(temp) {
   return { name: '冻结', color: '#6B7280', icon: '⚫', level: 0 };
 }
 
-// 动态半衰期：t_half = t_base × f_subject × f_accuracy × f_streak
+// 动态半衰期: base × f_subject × f_accuracy × f_streak
+// @param {Object} profile — 用户画像（需含 globalBaseHalfLife, subjectModifiers）
+// @param {string} subject — 学科拉丁语 key（logos/physis 等）
+// @param {number} accuracy — 正确率（0-100）
+// @param {number} streak — 连续学习次数
+// @returns {number} 半衰期，clamp [0.5, 30] 天
 export function calcHalfLife(profile, subject, accuracy, streak) {
   const base = profile.globalBaseHalfLife || 3;
   const fSubject = (profile.subjectModifiers || {})[subject] || 1.0;
@@ -30,7 +46,11 @@ export function calcHalfLife(profile, subject, accuracy, streak) {
   return Math.max(0.5, Math.min(30, base * fSubject * fAccuracy * fStreak));
 }
 
-// 构建知识点温度状态
+// 构建所有知识点的温度状态（核心数据结构）
+// @param {Array} records — 学习记录数组
+// @param {Object} profile — 用户画像
+// @returns {Object} {skillId::kp → {temp, halfLife, lastDays, count, ...}}
+// 易错点: kp 匹配用双向 includes，可能误匹配子串
 export function buildTempStates(records, profile) {
   const now = Date.now();
   const states = {};
@@ -58,7 +78,11 @@ export function buildTempStates(records, profile) {
   return states;
 }
 
-// 阴影队列：urgency = (80 - temp) × examWeight / max(1, lastDays)
+// 阴影队列: 按优先级排序待复习知识点
+// urgency = (80-temp) × examWeight / max(1, lastDays)
+// priority = urgency × count × ln(1+lastDays)
+// @param {Object} tempStates — buildTempStates 的输出
+// @returns {Array} 按 priority 降序排列的队列
 export function calcShadowQueue(tempStates) {
   const queue = Object.values(tempStates)
     .filter(s => s.count > 0 && s.temp < 80)
@@ -71,7 +95,12 @@ export function calcShadowQueue(tempStates) {
   return queue;
 }
 
-// 背包推荐：0/1 Knapsack
+// 0/1背包推荐: 在时间预算内选择最优复习组合
+// cost = max(5, 15 - temp/10)，温度越低耗时越长
+// @param {Array} queue — 阴影队列
+// @param {number} timeBudget — 可用复习时间（分钟）
+// @returns {Array} 被选中的知识点列表
+// 易错点: 时间预算为整数分钟，DP数组大小 = items × budget
 export function knapsackRecommend(queue, timeBudget) {
   const items = queue.map(q => ({
     ...q,
@@ -101,7 +130,10 @@ export function knapsackRecommend(queue, timeBudget) {
   return selected.reverse();
 }
 
-// 提分潜力诊断
+// 提分潜力诊断: 找出最值得投入的技能
+// potential = (1 - mastery) × examWeight
+// @param {Object} tempStates — buildTempStates 的输出
+// @returns {Array} Top 5 潜力技能（按 potential 降序）
 export function calcImprovementPotential(tempStates) {
   const skills = getAllSkills();
   const bySkill = {};
@@ -124,7 +156,11 @@ export function calcImprovementPotential(tempStates) {
     .slice(0, 5);
 }
 
-// 假性熟练检测
+// 假性熟练检测: 高正确率(>=70%)但温度低(<40)的知识点
+// 特征: 练习次数>=3，可能是短期记忆而非真正掌握
+// @param {Object} tempStates — 温度状态
+// @param {Array} records — 学习记录
+// @returns {Array} 可疑知识点（按温度升序）
 export function detectFalseMastery(tempStates, records) {
   const results = [];
   for (const [key, st] of Object.entries(tempStates)) {
@@ -138,7 +174,10 @@ export function detectFalseMastery(tempStates, records) {
   return results.sort((a, b) => a.temp - b.temp);
 }
 
-// 遗忘曲线数据点（用于图表）
+// 生成遗忘曲线数据点（用于 ECharts 渲染）
+// @param {number} halfLife — 半衰期（天）
+// @param {number} T_peak — 峰值温度
+// @returns {Array} [{day, retention}, ...]，最多 halfLife×4 天
 export function calcForgettingCurvePoints(halfLife, T_peak) {
   const points = [];
   const maxDays = Math.ceil(halfLife * 4);

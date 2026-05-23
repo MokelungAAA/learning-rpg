@@ -1,4 +1,6 @@
 // data-tab.js — 数据Tab：概览摘要 + 图表/成就/热力图/进度
+// 读取: STUDY_RECORDS, USER_PROFILE
+// 写入: 无（纯展示页）
 import Store from '../store.js';
 import { SUBJECTS, STORAGE_KEYS as StorageKeys } from '../config.js';
 import { ACHIEVEMENTS } from '../data/achievements.js';
@@ -16,6 +18,8 @@ import {
 const getRecords = () => Store.get(StorageKeys.STUDY_RECORDS) || [];
 const getProfile = () => Store.get(StorageKeys.USER_PROFILE) || {};
 
+// 可折叠区块通用模板
+// id: 用于折叠 body 的 DOM id（fold-{id}）
 function fold(id, title, content) {
   return `<div class="fold-section">
     <div class="fold-header" data-fold="${id}">
@@ -28,6 +32,7 @@ function fold(id, title, content) {
   </div>`;
 }
 
+// 概览摘要卡片：总时长/总XP/覆盖学科/本周XP
 function renderSummary(profile, records) {
   const totalMin = records.reduce((s, r) => s + (r.duration || 0), 0);
   const totalXP = records.reduce((s, r) => s + (r.xp || 0), 0);
@@ -42,6 +47,7 @@ function renderSummary(profile, records) {
   </div>`;
 }
 
+// 最近 3 个已解锁成就 + 全部成就链接
 function renderAchievements(records, profile) {
   const unlocked = ACHIEVEMENTS.filter(a => checkAchievement(a, records, profile));
   const recent = unlocked.slice(-3).reverse();
@@ -55,6 +61,7 @@ function renderAchievements(records, profile) {
   return fold('achievements', `🏆 成就 · ${unlocked.length}/${ACHIEVEMENTS.length}`, `<div class="achievement-list">${badges}</div><a href="#/achievement" class="ach-view-all">查看全部成就 →</a>`);
 }
 
+// 考试反思卡片：筛选 textbook 含"反思/考试"的记录
 function renderExamReflection(records) {
   const reflections = records.filter(r => r.textbook && (r.textbook.includes('反思') || r.textbook.includes('考试'))).slice(-5).reverse();
   if (reflections.length === 0) return '';
@@ -68,10 +75,13 @@ function renderExamReflection(records) {
   return fold('reflections', '📝 考试反思', `<div class="reflection-list">${cards}</div>`);
 }
 
+// 学习日历热力图（最近169天）
 function renderHeatmapSection(records) {
   return fold('heatmap', '📅 学习日历 · 最近169天', renderHeatmap(records));
 }
 
+// 教材进度：按教材名前4字匹配记录，计算覆盖率%
+// 坑: 匹配用 slice(0,4)，教材名太短会误匹配
 function renderTextbookProgress(records) {
   const progress = [];
   for (const [sid, data] of Object.entries(SUBJECTS_DATA)) {
@@ -92,6 +102,7 @@ function renderTextbookProgress(records) {
   return fold('textbooks', '📚 教材进度', `<div class="progress-map-list">${items}</div>`);
 }
 
+// 网课进度：筛选 textbook 含"网课/课程/课"的记录
 function renderCourseProgress(records) {
   const courses = records.filter(r => r.textbook && (r.textbook.includes('网课') || r.textbook.includes('课程') || r.textbook.includes('课')));
   if (courses.length === 0) return '';
@@ -105,6 +116,8 @@ function renderCourseProgress(records) {
   return fold('courses', '🎓 网课进度', `<div class="course-list">${items}</div>`);
 }
 
+// 薄弱点识别：平均分<60 / 超7天未学 / 总时长<30分
+// severity 2=严重（无记录或极低分），1=一般
 function renderWeakPoints(records) {
   if (records.length === 0) return '';
   const now = Date.now();
@@ -146,6 +159,7 @@ function renderWeakPoints(records) {
   return fold('weakpoints', `🔍 薄弱点识别 · ${weakPoints.length}科待加强`, `<div class="weakpoint-list">${items}</div>`);
 }
 
+// 6个图表容器占位，实际图表在折叠展开时懒加载
 function renderChartsSection() {
   const charts = [
     ['chart-xp-trend', '📈 XP趋势折线图'],
@@ -183,9 +197,12 @@ export function render() {
   </div>`;
 }
 
+// charts 模块级数组，afterRender 清理时统一 dispose
 let charts = [];
 const disposeAllCharts = () => { charts.forEach(c => disposeChart(c)); charts = []; };
 
+// 异步加载 ECharts 并初始化 6 个图表
+// 坑: loadECharts 失败时需隐藏 loading spinner
 async function initCharts(records) {
   const chartIds = ['chart-xp-trend', 'chart-subject-duration', 'chart-efficiency', 'chart-timeslot', 'chart-score-trend', 'chart-io-ratio'];
   // Show loading on all chart containers
@@ -210,6 +227,8 @@ async function initCharts(records) {
   }
 }
 
+// afterRender: 折叠面板交互 + 热力图点击弹窗 + 图表懒加载
+// 返回清理函数，dispose 所有 ECharts 实例
 export function afterRender() {
   const records = getRecords();
   const foldHeaders = document.querySelectorAll('.fold-header');
@@ -223,7 +242,8 @@ export function afterRender() {
   };
   foldHeaders.forEach(h => h.addEventListener('click', onFoldClick));
 
-  // Heatmap cell click → show day detail
+  // 热力图单元格点击 → 弹出当日学习详情
+  // 坑: popup 用 setTimeout 3秒自动消失，再次点击先移除旧 popup
   const heatmapGrid = document.querySelector('.heatmap-grid');
   let heatmapPopup = null;
   const onHeatmapClick = (e) => {

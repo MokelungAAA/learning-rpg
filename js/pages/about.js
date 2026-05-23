@@ -1,4 +1,5 @@
-// about.js — 关于页（版本信息+致谢+历史）
+// about.js — 关于页（版本信息+致谢+版本历史）
+// 纯静态页面，无 Store 读写，VERSION_HISTORY 手动维护
 const VERSION_HISTORY = [
   { version: 'v0.64', date: '2026-05-23', desc: '成就持久化 — 解锁状态持久化+Toast通知+全局注释补充' },
   { version: 'v0.63', date: '2026-05-23', desc: '画像自适应 — EMA更新+学科能力+修正系数+半衰期+XP校准' },
@@ -86,6 +87,7 @@ export function render() {
   </div>`;
 }
 
+// afterRender: 版本历史折叠/展开切换
 export function afterRender() {
   const toggle = document.getElementById('history-toggle');
   const history = document.getElementById('about-history');

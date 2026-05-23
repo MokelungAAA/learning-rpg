@@ -1,4 +1,6 @@
 // review.js — 复习中心：遗忘曲线 + 阴影队列 + 智能推荐
+// 读取: STUDY_RECORDS, USER_PROFILE → buildTempStates 计算温度状态
+// 写入: lts_review_context（复习按钮点击时写入，番茄钟读取）
 import Store from '../store.js';
 import { SUBJECTS, STORAGE_KEYS as StorageKeys } from '../config.js';
 import { buildTempStates, calcShadowQueue, knapsackRecommend, calcImprovementPotential, detectFalseMastery, calcForgettingCurvePoints, getTempLevel } from '../utils/review-calc.js';
@@ -7,8 +9,10 @@ import { loadECharts, initChart, disposeChart } from '../utils/charts.js';
 const getRecords = () => Store.get(StorageKeys.STUDY_RECORDS) || [];
 const getProfile = () => Store.get(StorageKeys.USER_PROFILE) || {};
 
+// 模块级 ECharts 实例，afterRender 清理时 dispose
 let chartInstances = [];
 
+// 可折叠区块通用模板（与 data-tab.js 同结构）
 function fold(id, title, content) {
   return `<div class="fold-section">
     <div class="fold-header" data-fold="${id}">
@@ -21,12 +25,13 @@ function fold(id, title, content) {
   </div>`;
 }
 
-// 遗忘曲线图表容器
+// 遗忘曲线图表容器（ECharts 在 afterRender 异步初始化）
 function renderForgettingCurveSection() {
   return fold('forgetting', '📉 遗忘曲线', '<div class="chart-container" id="forgetting-curve-chart" style="height:250px"></div><p class="chart-note">基于艾宾浩斯遗忘曲线 — 温度降至80%时为最佳复习时机</p>');
 }
 
-// 阴影队列
+// 阴影队列：待复习知识点列表（按温度排序，最多显示20个）
+// 点击"复习"→ 跳转番茄钟并写入 lts_review_context
 function renderShadowQueue(queue) {
   if (queue.length === 0) {
     return fold('shadow-queue', '🌙 待复习知识点', '<p class="empty-hint">暂无待复习知识点，继续保持学习节奏！</p>');
@@ -51,7 +56,8 @@ function renderShadowQueue(queue) {
   return fold('shadow-queue', `🌙 待复习知识点 · ${queue.length}个`, `<div class="queue-list">${items}</div>`);
 }
 
-// 智能推荐（背包算法）
+// 智能推荐：背包算法在60分钟预算内选最优知识点组合
+// 坑: budget 硬编码60分钟，暂未做用户可配置
 function renderRecommendations(queue) {
   const budget = 60; // 60分钟预算
   const recommended = knapsackRecommend(queue, budget);
@@ -73,7 +79,7 @@ function renderRecommendations(queue) {
   return fold('recommend', `🎯 智能复习推荐 · ${budget}分钟预算`, `<div class="rec-review-list"><div class="rec-review-header">推荐 ${recommended.length} 个知识点，预计 ${totalCost} 分钟</div>${items}</div>`);
 }
 
-// 提分潜力诊断
+// 提分潜力诊断：按潜力值排序的技能列表
 function renderPotential(potentials) {
   if (potentials.length === 0) return '';
   const items = potentials.map((p, i) => `<div class="potential-item">
@@ -87,7 +93,7 @@ function renderPotential(potentials) {
   return fold('potential', '📈 提分潜力诊断', `<div class="potential-list">${items}</div>`);
 }
 
-// 假性熟练检测
+// 假性熟练检测：高正确率但温度高的知识点（可能只是短期记忆）
 function renderFalseMastery(falseItems) {
   if (falseItems.length === 0) return '';
   const items = falseItems.map(f => `<div class="false-mastery-item">
@@ -98,7 +104,7 @@ function renderFalseMastery(falseItems) {
   return fold('false-mastery', `⚠️ 假性熟练检测 · ${falseItems.length}个`, `<div class="false-mastery-list">${items}</div>`);
 }
 
-// REV-08: 考试推荐触发
+// 考试推荐：温度<40的知识点按学科分组，建议安排单元测试
 function renderExamRecommend(queue) {
   const urgent = queue.filter(q => q.temp < 40);
   if (urgent.length === 0) return '';
@@ -143,6 +149,7 @@ export function render() {
   </div>`;
 }
 
+// 异步初始化遗忘曲线图表（半衰期3天，80%阈值线）
 async function initForgettingCurveChart() {
   const ec = await loadECharts();
   if (!ec) return;
@@ -177,6 +184,8 @@ async function initForgettingCurveChart() {
   });
 }
 
+// afterRender: 遗忘曲线初始化 + 折叠面板 + 复习按钮跳转番茄钟
+// 坑: 复习按钮写 localStorage 供番茄钟读取（非 EventBus）
 export function afterRender() {
   initForgettingCurveChart();
 

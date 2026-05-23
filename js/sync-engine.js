@@ -1,26 +1,32 @@
 // sync-engine.js — GitHub Contents API 同步引擎
+// 单例模式，通过 Personal Access Token 认证
+// 数据以 JSON 文件存储在仓库的 data/ 目录下
 import Storage from './store.js';
 import EventBus from './event-bus.js';
 import { STORAGE_KEYS as StorageKeys } from './config.js';
 
 class SyncEngine {
   constructor() {
-    this.token = null;
-    this.owner = null;
-    this.repo = null;
-    this.isSyncing = false;
+    this.token = null;  // GitHub PAT
+    this.owner = null;  // 仓库所有者
+    this.repo = null;   // 仓库名
+    this.isSyncing = false; // 防止并发同步
   }
 
+  // 配置 GitHub 认证信息，三者缺一不可
   configure(token, owner, repo) {
     this.token = token;
     this.owner = owner;
     this.repo = repo;
   }
 
+  // 检查是否已配置（token + owner + repo 都存在）
   get isConfigured() {
     return !!(this.token && this.owner && this.repo);
   }
 
+  // 上传数据到 GitHub：PUT data/{key}.json
+  // 需要先获取文件 SHA（用于更新已有文件）
   async upload(key, data) {
     const path = `data/${key}.json`;
     const content = btoa(unescape(encodeURIComponent(JSON.stringify(data, null, 2))));
@@ -46,6 +52,7 @@ class SyncEngine {
     return response.json();
   }
 
+  // 从 GitHub 下载数据，404 返回 null
   async download(key) {
     const path = `data/${key}.json`;
     const response = await fetch(
@@ -61,6 +68,8 @@ class SyncEngine {
     return JSON.parse(decoded);
   }
 
+  // 获取文件 SHA（用于 GitHub API 的更新操作）
+  // 文件不存在时返回 undefined
   async getFileSha(path) {
     try {
       const response = await fetch(
@@ -75,6 +84,8 @@ class SyncEngine {
     return undefined;
   }
 
+  // 全量双向同步：遍历所有 STORAGE_KEYS
+  // 策略：remote 为空→上传，local 为空→下载，都有→合并
   async fullSync() {
     if (this.isSyncing) return;
     this.isSyncing = true;
@@ -106,6 +117,8 @@ class SyncEngine {
     }
   }
 
+  // 合并策略：数组按 id 去重（local 优先），
+  // 对象按 updatedAt 取新值
   mergeData(key, local, remote) {
     if (Array.isArray(local) && Array.isArray(remote)) {
       const map = new Map();

@@ -1,4 +1,5 @@
-// app.js — Application entry point
+// app.js — 应用入口：路由注册、数据迁移、成就检测
+// 注意：Theme.init() 必须在首屏渲染前调用
 import Router from './router.js';
 import Navbar from './components/navbar.js';
 import EventBus from './event-bus.js';
@@ -55,7 +56,8 @@ Theme.init();
 // Init router
 Router.init(container);
 
-// afterRender lifecycle pattern
+// 路由切换：销毁旧页面 → 渲染新页面 → 执行 afterRender
+// 返回值 cleanup 函数在下次路由切换时自动调用
 let cleanupCurrent = null;
 function handleRoute(page, path, params) {
   if (cleanupCurrent) { try { cleanupCurrent(); } catch {} }
@@ -84,7 +86,8 @@ Router.register('#/subject/:id', (params) => {
 // Render navbar
 Navbar.render(document.body);
 
-// 成就解锁检测: 每次新增记录时检查，Toast 通知新解锁
+// 成就解锁检测：新增记录时异步检查，弹 Toast 通知
+// 内部用 dynamic import 避免循环依赖
 EventBus.on('record:added', async () => {
   try {
     const { checkAndPersist } = await import('./utils/achievements-check.js');

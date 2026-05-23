@@ -1,11 +1,18 @@
-// skill-tree-calc.js — 技能树数据计算（SKILL-01~04）
+// skill-tree-calc.js — 技能树数据计算
+// 功能: 知识点状态构建、技能掌握度聚合、学科能力聚合、特长检测
+// 数据流: records → knowledgeStates → skillMastery → subjectAbility → talents
+// 易错点: kp 匹配用双向 includes，可能误匹配子串
+
 import Store from '../store.js';
 import { STORAGE_KEYS as StorageKeys, SUBJECTS } from '../config.js';
 import { SKILL_TREE, getAllSkills } from '../data/skill-tree.js';
 
 const getRecords = () => Store.get(StorageKeys.STUDY_RECORDS) || [];
 
-// SKILL-01: 知识点数据构建
+// 构建所有知识点的学习状态
+// mastery = avgScore×0.7 + min(100, count×10)×0.3
+// @param {Array} records — 学习记录（需含 knowledgePoints, duration, score）
+// @returns {Object} {skillId::kp → {count, totalMin, avgScore, mastery, ...}}
 export function buildKnowledgeStates(records) {
   const states = {};
   const allSkills = getAllSkills();
@@ -29,7 +36,9 @@ export function buildKnowledgeStates(records) {
   return states;
 }
 
-// SKILL-02: 技能聚合
+// 将知识点状态聚合到技能级别（取平均掌握度）
+// @param {Object} knowledgeStates — buildKnowledgeStates 的输出
+// @returns {Object} {skillId → {avgMastery, count, totalMin, ...}}
 export function aggregateSkillMastery(knowledgeStates) {
   const allSkills = getAllSkills();
   const result = {};
@@ -48,7 +57,9 @@ export function aggregateSkillMastery(knowledgeStates) {
   return result;
 }
 
-// SKILL-03: 学科聚合
+// 将技能掌握度聚合到学科级别（加权平均）
+// @param {Object} skillMastery — aggregateSkillMastery 的输出
+// @returns {Object} {subjectKey → {mastery, totalMin, count, ...}}
 export function aggregateSubjectAbility(skillMastery) {
   const result = {};
   for (const [subjKey, subj] of Object.entries(SKILL_TREE.subjects)) {
@@ -66,7 +77,10 @@ export function aggregateSubjectAbility(skillMastery) {
   return result;
 }
 
-// SKILL-04: 特长检测
+// 特长/短板检测: mastery >= 均值+15 且 >=50 为特长，
+// mastery <= 均值-15 为短板
+// @param {Object} subjectAbility — aggregateSubjectAbility 的输出
+// @returns {Array} [{subjectKey, name, mastery, type:'strength'|'weakness'}]
 export function detectTalents(subjectAbility) {
   const entries = Object.entries(subjectAbility).filter(([, v]) => v.count > 0);
   if (entries.length === 0) return [];
@@ -82,7 +96,8 @@ export function detectTalents(subjectAbility) {
   return talents.sort((a, b) => b.mastery - a.mastery);
 }
 
-// 一键计算全部
+// 一键计算: records → knowledgeStates → skillMastery → subjectAbility → talents
+// @returns {{knowledgeStates, skillMastery, subjectAbility, talents}}
 export function computeAll() {
   const records = getRecords();
   const knowledgeStates = buildKnowledgeStates(records);

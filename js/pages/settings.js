@@ -1,4 +1,6 @@
 // settings.js — 设置页（5区块：外观/同步/番茄钟/个人信息/关于）
+// 读取: SETTINGS, USER_PROFILE, SYNC_META, lts_sync_config
+// 写入: SETTINGS, USER_PROFILE, lts_sync_config
 import Theme from '../theme.js';
 import Store from '../store.js';
 import { STORAGE_KEYS as StorageKeys, POMODORO_PRESETS } from '../config.js';
@@ -12,16 +14,18 @@ const FONT_SIZES = [
   { key: 'large', label: '大', scale: 1.125 },
 ];
 
+// 获取设置对象，不存在时返回空对象
 function getSettings() {
   return Store.get(StorageKeys.SETTINGS) || {};
 }
 
+// 合并写入设置（patch 覆盖 current 同名字段）
 function saveSettings(patch) {
   const current = getSettings();
   Store.set(StorageKeys.SETTINGS, { ...current, ...patch });
 }
 
-// 16.1 外观区块
+// 外观区块：主题切换（浅色/深色/跟随系统）+ 字号
 function renderAppearance() {
   const mode = Theme.getTheme();
   const fontSize = getSettings().fontSize || 'normal';
@@ -40,7 +44,8 @@ function renderAppearance() {
   </div>`;
 }
 
-// 16.1 同步区块
+// 同步区块：GitHub Token 配置 + 立即同步按钮
+// 坑: 同步配置存 lts_sync_config（非 SETTINGS 内）
 function renderSync() {
   const meta = Store.get(StorageKeys.SYNC_META) || {};
   const syncCfg = Store.get('lts_sync_config') || {};
@@ -70,7 +75,7 @@ function renderSync() {
   </div>`;
 }
 
-// 16.1 番茄钟区块
+// 番茄钟区块：默认预设 + 提示音/振动开关
 function renderPomodoroSettings() {
   const settings = getSettings();
   const currentPreset = settings.pomodoroPreset || 'classic';
@@ -87,7 +92,7 @@ function renderPomodoroSettings() {
   </div>`;
 }
 
-// 16.1 个人信息区块
+// 个人信息区块：昵称 + 年级选择
 function renderProfile() {
   const profile = Store.get(StorageKeys.USER_PROFILE) || {};
   const nickname = profile.nickname || '墨澜';
@@ -103,7 +108,7 @@ function renderProfile() {
   </div>`;
 }
 
-// 16.1 关于区块
+// 关于区块：跳转 #/about 的导航链接
 function renderAboutLink() {
   return `<div class="settings-section settings-about-link">
     <a href="#/about" class="settings-nav-link"><span>ℹ️ 关于</span><span class="settings-arrow">→</span></a>
@@ -122,6 +127,8 @@ export function render() {
   </div>`;
 }
 
+// afterRender: 所有设置项事件绑定 + 同步弹窗 + 字号恢复
+// 坑: onToggle 是工厂函数，清理时需重新调用才能拿到同一引用
 export function afterRender() {
   // 主题切换
   const themePills = document.querySelectorAll('.theme-pills .pill');
@@ -162,7 +169,7 @@ export function afterRender() {
   if (soundBtn) soundBtn.addEventListener('click', onToggle('pomodoroSound', soundBtn));
   if (vibBtn) vibBtn.addEventListener('click', onToggle('pomodoroVibration', vibBtn));
 
-  // 个人信息保存（debounce）
+  // 个人信息保存（500ms debounce，避免每次按键写 Store）
   const nicknameInput = document.getElementById('profile-nickname');
   const gradeSelect = document.getElementById('profile-grade');
   let profileTimer = null;
@@ -219,7 +226,7 @@ export function afterRender() {
   if (syncSave) syncSave.addEventListener('click', saveSyncConfig);
   if (syncNowBtn) syncNowBtn.addEventListener('click', doSync);
 
-  // 恢复已保存的同步配置到引擎
+  // 恢复已保存的同步配置到引擎（页面加载时执行一次）
   const savedCfg = Store.get('lts_sync_config') || {};
   if (savedCfg.token) SyncEngine.configure(savedCfg.token, savedCfg.owner, savedCfg.repo);
 

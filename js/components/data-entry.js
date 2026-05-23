@@ -1,4 +1,6 @@
-// data-entry.js — 数据录入弹窗（ENTRY-01~06：UI + 联动 + 搜索 + 自动推断 + 全链路）
+// data-entry.js — 数据录入弹窗组件
+// 功能：学科四级联动 + 知识点搜索 + 时长推断 + XP计算
+// 注意：模块级状态 isOpen/currentSubject，关闭时需清理DOM
 import Store from '../store.js';
 import { SUBJECTS, STORAGE_KEYS as StorageKeys } from '../config.js';
 import { SUBJECTS_DATA, getSubjectById } from '../data/subjects.js';
@@ -7,12 +9,13 @@ import EventBus from '../event-bus.js';
 import Toast from './toast.js';
 import { calcXP } from '../utils/level.js';
 
-let isOpen = false;
-let currentSubject = '';
-let currentTextbook = '';
+let isOpen = false;        // 防止重复打开
+let currentSubject = '';   // 当前选中学科id
+let currentTextbook = '';  // 当前选中教材id
 
 // ENTRY-03: 倒排索引 — 构建所有知识点的搜索索引
 let kpIndex = [];
+// 遍历全部学科→教材→章节→小节→知识点，扁平化到kpIndex
 function buildKPIndex() {
   kpIndex = [];
   for (const [sid, data] of Object.entries(SUBJECTS_DATA)) {
@@ -29,7 +32,9 @@ function buildKPIndex() {
   }
 }
 
-// 5级匹配：精确 > 前缀 > 子串 > 模糊(字符集) > 拼音首字母
+// 5级匹配搜索知识点，返回最多10条
+// @param {string} query - 搜索关键词
+// @returns {Array} 匹配结果，按优先级排序
 function searchKP(query) {
   if (!query) return [];
   const q = query.toLowerCase();
@@ -44,6 +49,7 @@ function searchKP(query) {
   return [...exact, ...prefix, ...substring, ...fuzzy].slice(0, 10);
 }
 
+// 逐字符匹配，query中每个字符需在name中按序出现
 function isFuzzyMatch(name, query) {
   let qi = 0;
   for (let i = 0; i < name.length && qi < query.length; i++) {
@@ -52,6 +58,7 @@ function isFuzzyMatch(name, query) {
   return qi === query.length;
 }
 
+// 以下5个函数：生成级联select的option HTML
 function getSubjectOptions() {
   return SUBJECTS.map(s => `<option value="${s.id}">${s.name}</option>`).join('');
 }
@@ -92,6 +99,7 @@ function getKPOptions(subjectId, textbookId, chapterId, sectionId) {
   return sec.knowledgePoints || [];
 }
 
+// 生成完整弹窗HTML，内部调用buildKPIndex初始化搜索索引
 function renderModal() {
   buildKPIndex();
   return `<div class="entry-overlay" id="entry-overlay">
@@ -174,6 +182,7 @@ function renderModal() {
   </div>`;
 }
 
+// 打开弹窗，插入DOM并绑定事件，isOpen防重入
 export function open() {
   if (isOpen) return;
   isOpen = true;
@@ -181,6 +190,7 @@ export function open() {
   bindEvents();
 }
 
+// 关闭弹窗，移除DOM元素释放内存
 export function close() {
   if (!isOpen) return;
   isOpen = false;
@@ -188,6 +198,8 @@ export function close() {
   if (overlay) overlay.remove();
 }
 
+// 绑定所有事件：级联select、搜索防抖、时长推断、表单提交
+// 注意：搜索点击结果用setTimeout链式等待级联渲染完成
 function bindEvents() {
   const overlay = document.getElementById('entry-overlay');
   const closeBtn = document.getElementById('entry-close');

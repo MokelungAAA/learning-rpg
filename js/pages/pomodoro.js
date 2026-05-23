@@ -1,4 +1,7 @@
 // pomodoro.js — 番茄钟系统（配置+计时+休息+自动录入+历史）
+// 读取: SETTINGS, POMODORO_SESSIONS, STUDY_RECORDS, USER_PROFILE
+// 写入: POMODORO_SESSIONS, STUDY_RECORDS（专注完成后自动录入）
+// 坑: 模块级状态变量（isRunning等），页面切换需清理 timer
 import Store from '../store.js';
 import { SUBJECTS, STORAGE_KEYS as StorageKeys, POMODORO_PRESETS } from '../config.js';
 import EventBus from '../event-bus.js';
@@ -6,7 +9,7 @@ import Toast from '../components/toast.js';
 import { playFocusStart, playFocusEnd, playBreakEnd, playLongBreakEnd, sendNotification } from '../utils/sound.js';
 import { calcXP } from '../utils/level.js';
 
-// 状态
+// 模块级状态（非 Store），页面切换需在清理函数中 reset
 let timer = null;
 let startTime = 0;
 let plannedDuration = 0;
@@ -21,17 +24,20 @@ let totalRounds = 4;
 let currentPhase = 'focus'; // 'focus' | 'shortBreak' | 'longBreak'
 let selectedSubject = '';
 
+// 从 review.js 传入的复习上下文（知识点/学科/技能ID）
 const getReviewContext = () => { try { return JSON.parse(localStorage.getItem('lts_review_context') || 'null'); } catch { return null; } };
 const getSettings = () => Store.get(StorageKeys.SETTINGS) || {};
+// 秒数 → MM:SS 格式化
 const fmt = (s) => `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`;
 
-// 获取当前预设
+// 根据 settings.pomodoroPreset 查找预设配置
 function getCurrentPreset() {
   const settings = getSettings();
   return POMODORO_PRESETS.find(p => p.id === (settings.pomodoroPreset || 'classic')) || POMODORO_PRESETS[0];
 }
 
-// 配置界面
+// 配置界面：预设按钮+自定义时长+学科选择
+// ctx 来自 review.js 的复习上下文（可选）
 function renderConfig() {
   const ctx = getReviewContext();
   const preset = getCurrentPreset();
@@ -64,7 +70,8 @@ function renderConfig() {
   </div>`;
 }
 
-// 计时界面
+// 计时界面：SVG 环形进度 + 时间显示 + 暂停/停止按钮
+// 坑: 初始 display:none，startTimer 时才显示
 function renderTimer() {
   const circumference = 2 * Math.PI * 90;
   return `<div class="pomo-timer-page" id="pomo-timer" style="display:none">
@@ -89,7 +96,8 @@ function renderTimer() {
   </div>`;
 }
 
-// 完成界面（无评分，自动生成记录）
+// 完成界面：统计+下一轮/重新开始按钮
+// 无手动评分，专注完成后自动生成学习记录
 function renderComplete() {
   return `<div class="pomo-complete" id="pomo-complete" style="display:none">
     <div class="pomo-complete-icon">🎉</div>
@@ -102,7 +110,7 @@ function renderComplete() {
   </div>`;
 }
 
-// 历史面板
+// 历史面板：最近10条会话 + 统计摘要
 function renderHistory() {
   const sessions = Store.get(StorageKeys.POMODORO_SESSIONS) || [];
   const completed = sessions.filter(s => s.completed && s.phase === 'focus');
@@ -143,7 +151,9 @@ export function render() {
   </div>`;
 }
 
-// 启动计时
+// 启动计时器：设置 interval + SVG 环形进度 + 专注度跟踪
+// phase: 'focus' | 'shortBreak' | 'longBreak'
+// 坑: visibilitychange 监听仅 focus 阶段添加，需在 complete/stop 时移除
 function startTimer(minutes, phase) {
   currentPhase = phase;
   plannedDuration = minutes;
@@ -192,6 +202,7 @@ function startTimer(minutes, phase) {
   if (phase === 'focus') document.addEventListener('visibilitychange', onVisibilityChange);
 }
 
+// 页面切后台时记录离屏时长，>30秒扣专注度
 function onVisibilityChange() {
   if (!isRunning || currentPhase !== 'focus') return;
   if (document.hidden) { bgStart = Date.now(); }
@@ -203,6 +214,7 @@ function onVisibilityChange() {
   }
 }
 
+// 暂停/继续切换：暂停时停止 elapsed 累加
 function pauseTimer() {
   if (isPaused) {
     startTime = Date.now() - elapsed * 1000;
@@ -216,6 +228,7 @@ function pauseTimer() {
   }
 }
 
+// 强制停止：clearInterval + 移除 visibilitychange + 触发完成
 function stopTimer() {
   clearInterval(timer);
   isRunning = false;
@@ -223,7 +236,8 @@ function stopTimer() {
   completeSession();
 }
 
-// 完成处理
+// 完成处理：保存会话 + 自动生成学习记录 + 音效通知
+// 坑: completed 判断用 elapsed >= planned*0.9（允许10%提前结束）
 function completeSession() {
   clearInterval(timer);
   isRunning = false;
@@ -303,7 +317,9 @@ function completeSession() {
   EventBus.emit('pomodoro:completed', session);
 }
 
-// 自动生成学习记录
+// 专注完成后自动生成学习记录并存入 STUDY_RECORDS
+// 有复习上下文时 activityType='review'，否则='practice'
+// 坑: XP 用 calcXP 公式计算，需构造 profile._runtimeTotalXP
 function autoSaveRecord() {
   const ctx = getReviewContext();
   const subject = selectedSubject || ctx?.subject || '';
@@ -338,6 +354,8 @@ function autoSaveRecord() {
   Toast.show(`${isReview ? '复习' : '学习'}记录已自动保存 · ${duration}分钟`, 'success');
 }
 
+// afterRender: 预设按钮+开始/暂停/停止/下一轮/重开事件绑定
+// 返回清理函数：clearInterval + 移除 visibilitychange
 export function afterRender() {
   const preset = getCurrentPreset();
   totalRounds = preset.rounds;

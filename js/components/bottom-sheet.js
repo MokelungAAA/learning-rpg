@@ -1,10 +1,15 @@
 // bottom-sheet.js — 底部面板组件
+// 支持触摸/鼠标拖拽关闭，backdrop点击关闭
+// 注意：close()有300ms动画延迟才真正移除DOM
 class BottomSheet {
   constructor() {
     this.element = null;
     this.isOpen = false;
   }
 
+  // 打开面板，已打开则先关闭再重建
+  // @param {string} content - 内容HTML
+  // @param {Object} options - { onOpen: (sheet) => {} }
   open(content, options = {}) {
     if (this.isOpen) this.close();
 
@@ -34,6 +39,7 @@ class BottomSheet {
     if (options.onOpen) options.onOpen(this);
   }
 
+  // 关闭面板，先移除动画类，300ms后移除DOM
   close() {
     if (!this.isOpen || !this.element) return;
 
@@ -48,6 +54,8 @@ class BottomSheet {
     this.isOpen = false;
   }
 
+  // 初始化拖拽关闭：handle区域向下拖>100px则关闭
+  // 同时绑定touch和mouse事件，注意mousemove/mouseup绑在document上
   initDrag() {
     const handle = this.element.querySelector('.bottom-sheet__handle');
     const content = this.element.querySelector('.bottom-sheet__content');

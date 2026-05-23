@@ -1,4 +1,6 @@
 // defaults.js — 默认数据模板
+// 注意 subjectAbility 用英文 key (math)，
+// subjectModifiers 用拉丁 key (logos)，不要混用
 export const DEFAULT_USER_PROFILE = {
   version: 3,
   updatedAt: Date.now(),
@@ -54,12 +56,14 @@ export const DEFAULT_USER_PROFILE = {
   },
 };
 
+// 空数据模板，用于 DataEngine.init() 填充缺失 key
 export const EMPTY_STUDY_RECORDS = [];
 export const EMPTY_POMODORO_SESSIONS = [];
 export const EMPTY_READING_RECORDS = [];
 export const EMPTY_KNOWLEDGE_STATE = {};
 export const EMPTY_ACHIEVEMENTS = [];
 
+// 深拷贝默认画像，避免共享引用被意外修改
 export function getDefaultProfile() {
   return JSON.parse(JSON.stringify(DEFAULT_USER_PROFILE));
 }

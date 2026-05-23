@@ -1,4 +1,6 @@
 // achievement.js — 成就浏览页（全部成就列表 + 解锁状态）
+// 读取: STUDY_RECORDS, USER_PROFILE, ACHIEVEMENTS（持久化）
+// 解锁逻辑: 持久化ID + 实时检测取并集（防止已解锁成就因数据变化消失）
 import Store from '../store.js';
 import { STORAGE_KEYS as StorageKeys } from '../config.js';
 import { ACHIEVEMENTS } from '../data/achievements.js';
@@ -45,6 +47,7 @@ export function render() {
   </div>`;
 }
 
+// 无交互事件，返回空清理函数
 export function afterRender() {
   return () => {};
 }
