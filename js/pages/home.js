@@ -7,7 +7,7 @@ import Store from '../store.js';
 import { SUBJECTS, STORAGE_KEYS as StorageKeys } from '../config.js';
 import { checkAchievement } from '../utils/achievements-check.js';
 import {
-  calcLevel, calcLevelProgress, getLevelTitle,
+  calcLevel, calcLevelProgress, getLevelTitle, getSubjectLevelTitle,
   getSubjectIcon, formatNumber, getDayStatus,
   calcStreakDays, calcTodayXP, countUp
 } from '../utils/level.js';
@@ -169,11 +169,11 @@ function renderSubjectGrid(records) {
   const sorted = [...SUBJECTS].sort((a, b) => (stats[b.id]?.score || 0) - (stats[a.id]?.score || 0));
   const cards = sorted.map(s => {
     const st = stats[s.id] || { xp: 0, count: 0, score: 0, totalDur: 0 };
-    const t = getLevelTitle(Math.floor(st.score / 15) + 1);
+    const t = getSubjectLevelTitle(st.score);
     return `<div class="subject-card card-enter" data-subject="${s.id}">
       <div class="subject-card-icon">${getSubjectIcon(s.id)}</div>
       <div class="subject-card-name">${s.name}</div>
-      <div class="subject-card-level">${t.cn}</div>
+      <div class="subject-card-level" style="color:${t.color}">${t.cn} ${t.ja}</div>
       <div class="subject-card-progress"><div class="progress-bar"><div class="progress-fill" style="width:${st.score}%"></div></div></div>
       <div class="subject-card-meta"><span>⭐${st.xp}XP</span><span>${st.count}条</span></div>
     </div>`;
@@ -190,7 +190,7 @@ export function render() {
     ${renderPomodoroWidget()}
     ${renderRecommendations(records)}
     ${renderSubjectGrid(records)}
-    <p style="color:var(--color-text-3);margin-top:var(--sp-3);font-size:var(--fs-xs)">v0.91 · 开发者区</p>
+    <p style="color:var(--color-text-3);margin-top:var(--sp-3);font-size:var(--fs-xs)">v0.92 · 开发者区</p>
   </div>`;
 }
 

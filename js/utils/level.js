@@ -13,6 +13,17 @@ const LEVEL_TITLES = [
   { cn: '传说',     name: 'Legend' },
 ];
 
+// §5.3 学科等级称号体系（日语）：按正确率分数范围映射
+const SUBJECT_LEVEL_TITLES = [
+  { min: 0,  max: 9,   ja: '見習い',   reading: 'Minarai',    cn: '见习',   color: '#9CA3AF' },
+  { min: 10, max: 19,  ja: '初心者',   reading: 'Shoshinsha', cn: '初心者', color: '#6B7280' },
+  { min: 20, max: 39,  ja: '学徒',     reading: 'Gakuto',     cn: '学徒',   color: '#3B82F6' },
+  { min: 40, max: 59,  ja: '熟練者',   reading: 'Jukurensha', cn: '熟练者', color: '#10B981' },
+  { min: 60, max: 79,  ja: '達人',     reading: 'Tatsujin',   cn: '达人',   color: '#F59E0B' },
+  { min: 80, max: 94,  ja: '名人',     reading: 'Meijin',     cn: '名人',   color: '#EF4444' },
+  { min: 95, max: 100, ja: '伝説',     reading: 'Densetsu',   cn: '传说',   color: '#8B5CF6' },
+];
+
 const SUBJECT_ICONS = {
   math: '📐', chinese: '📖', english: '🔤',
   physics: '⚡', chemistry: '🧪', biology: '🧬',
@@ -59,6 +70,16 @@ export function getLevelTitle(level) {
   return LEVEL_TITLES[Math.max(0, idx)];
 }
 
+// §5.3 获取学科等级称号（日语体系，按正确率分数范围）
+// @param {number} avgScore — 学科平均正确率 (0-100)
+// @returns {{ja, reading, cn, color}} 日文+读音+中文+颜色
+export function getSubjectLevelTitle(avgScore) {
+  for (const t of SUBJECT_LEVEL_TITLES) {
+    if (avgScore >= t.min && avgScore <= t.max) return t;
+  }
+  return SUBJECT_LEVEL_TITLES[0];
+}
+
 // 获取学科图标（英文 key: math/physics/chemistry 等）
 // @param {string} subjectId — 学科英文ID
 // @returns {string} emoji图标，未知学科返回📚
@@ -75,16 +96,14 @@ export function formatNumber(n) {
   return String(n);
 }
 
-// 根据当前小时返回时段状态（早起/上午/午间/下午/晚间/深夜）
-// @returns {{icon, text, color}} 时段图标+文字+主题色变量
+// §4.3 每日状态：根据周几判断（非时段）
+// 周一至周五 → 📖 平日，周六 → 🎯 周末，周日 → 📝 复盘日
+// @returns {{icon, text, color}} 状态图标+文字+主题色变量
 export function getDayStatus() {
-  const h = new Date().getHours();
-  if (h >= 5 && h < 8) return { icon: '🌅', text: '早起', color: 'var(--color-warning)' };
-  if (h >= 8 && h < 12) return { icon: '☀️', text: '上午', color: 'var(--color-success)' };
-  if (h >= 12 && h < 14) return { icon: '🌤️', text: '午间', color: 'var(--color-warning)' };
-  if (h >= 14 && h < 18) return { icon: '📖', text: '下午', color: 'var(--color-accent)' };
-  if (h >= 18 && h < 22) return { icon: '🌙', text: '晚间', color: 'var(--color-accent)' };
-  return { icon: '🦉', text: '深夜', color: 'var(--color-text-3)' };
+  const day = new Date().getDay(); // 0=Sun, 1=Mon, ..., 6=Sat
+  if (day === 0) return { icon: '📝', text: '复盘日', color: 'var(--color-accent)' };
+  if (day === 6) return { icon: '🎯', text: '周末', color: 'var(--color-success)' };
+  return { icon: '📖', text: '平日', color: 'var(--color-accent)' };
 }
 
 // 计算连续学习天数（从今天往前数，中断即停）

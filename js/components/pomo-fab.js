@@ -10,6 +10,7 @@ class PomoFab {
     this.progressEl = null;
     this.timer = null;
     this.isActive = false;
+    this.totalSeconds = 1500; // 默认25分钟，pomo:started 时更新
   }
 
   render() {
@@ -36,7 +37,10 @@ class PomoFab {
     document.body.appendChild(this.el);
 
     // 监听番茄钟状态
-    EventBus.on('pomo:started', () => this.setActive(true));
+    EventBus.on('pomo:started', (data) => {
+      this.totalSeconds = data?.totalSeconds || 1500;
+      this.setActive(true);
+    });
     EventBus.on('pomo:stopped', () => this.setActive(false));
     EventBus.on('pomo:tick', (remain) => this.updateProgress(remain));
   }
@@ -50,9 +54,8 @@ class PomoFab {
     if (!this.el) return;
     const circle = this.el.querySelector('circle');
     if (!circle) return;
-    // 25min = 1500s, 环形周长 = 2π×25 ≈ 157
-    const total = 1500;
-    const progress = Math.max(0, Math.min(1, remainSeconds / total));
+    // 环形周长 = 2π×25 ≈ 157
+    const progress = Math.max(0, Math.min(1, remainSeconds / this.totalSeconds));
     const offset = 157 * (1 - progress);
     circle.style.strokeDashoffset = offset;
   }

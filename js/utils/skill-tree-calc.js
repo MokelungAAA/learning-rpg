@@ -138,15 +138,38 @@ export function aggregateSubjectAbility(skillMastery, knowledgeStates, tempState
 
 // 特长/短板检测: mastery >= 均值+15 且 >=50 为特长，
 // mastery <= 均值-15 为短板
+// §5.10: 特长还需 halfLife > 学科平均半衰期×1.2
 // @param {Object} subjectAbility — aggregateSubjectAbility 的输出
+// @param {Object} tempStates — buildTempStates 的输出（含半衰期数据）
 // @returns {Array} [{subjectKey, name, mastery, type:'strength'|'weakness'}]
-export function detectTalents(subjectAbility) {
+export function detectTalents(subjectAbility, tempStates) {
   const entries = Object.entries(subjectAbility).filter(([, v]) => v.count > 0);
   if (entries.length === 0) return [];
   const avgMastery = entries.reduce((s, [, v]) => s + v.mastery, 0) / entries.length;
+
+  // 计算各学科平均半衰期
+  const subjectAvgHL = {};
+  if (tempStates) {
+    for (const [key, val] of entries) {
+      const hlValues = Object.values(tempStates)
+        .filter(st => st.subjectKey === key && st.halfLife > 0)
+        .map(st => st.halfLife);
+      subjectAvgHL[key] = hlValues.length > 0
+        ? hlValues.reduce((a, b) => a + b, 0) / hlValues.length
+        : 0;
+    }
+  }
+  const globalAvgHL = Object.values(subjectAvgHL).filter(v => v > 0);
+  const avgHalfLife = globalAvgHL.length > 0
+    ? globalAvgHL.reduce((a, b) => a + b, 0) / globalAvgHL.length
+    : 0;
+
   const talents = [];
   for (const [key, val] of entries) {
     if (val.mastery >= avgMastery + 15 && val.mastery >= 50) {
+      // §5.10: 特长还需半衰期 > 平均×1.2
+      const hl = subjectAvgHL[key] || 0;
+      if (avgHalfLife > 0 && hl <= avgHalfLife * 1.2) continue;
       talents.push({ subjectKey: key, name: val.name, mastery: val.mastery, type: 'strength' });
     } else if (val.mastery <= avgMastery - 15 && val.count > 0) {
       talents.push({ subjectKey: key, name: val.name, mastery: val.mastery, type: 'weakness' });
@@ -166,7 +189,7 @@ export function computeAll() {
   const tempStates = buildTempStates(records, profile);
   const skillMastery = aggregateSkillMastery(knowledgeStates, tempStates);
   const subjectAbility = aggregateSubjectAbility(skillMastery, knowledgeStates, tempStates);
-  const talents = detectTalents(subjectAbility);
+  const talents = detectTalents(subjectAbility, tempStates);
   // 持久化特长学科到 profile，供 calcXP 的 talentMultiplier 使用
   const strengthSubjects = talents.filter(t => t.type === 'strength').map(t => t.subjectKey);
   profile._talentSubjects = strengthSubjects;

@@ -147,7 +147,7 @@ export function render() {
     ${renderTimer()}
     ${renderComplete()}
     ${renderHistory()}
-    <p style="color:var(--color-text-3);margin-top:var(--sp-3);font-size:var(--fs-xs)">v0.91 · 开发者区</p>
+    <p style="color:var(--color-text-3);margin-top:var(--sp-3);font-size:var(--fs-xs)">v0.92 · 开发者区</p>
   </div>`;
 }
 
@@ -204,7 +204,7 @@ function startTimer(minutes, phase) {
 
   if (phase === 'focus') {
     document.addEventListener('visibilitychange', onVisibilityChange);
-    EventBus.emit('pomo:started');
+    EventBus.emit('pomo:started', { totalSeconds });
   }
 }
 
