@@ -5,13 +5,23 @@ import Store from '../store.js';
 import { SUBJECTS, STORAGE_KEYS as StorageKeys } from '../config.js';
 import { SKILL_TREE, getAllSkills } from '../data/skill-tree.js';
 import { computeAll } from '../utils/skill-tree-calc.js';
+import { buildTempStates } from '../utils/review-calc.js';
 import { loadECharts, initChart, disposeChart } from '../utils/charts.js';
 import { getSubjectIcon } from '../utils/level.js';
 
 // 模块级 ECharts 实例数组，afterRender 清理时统一 dispose
 let chartInstances = [];
 
-// 掌握度 → 颜色（绿→红渐变）
+// 温度 → 颜色（§9.2: 力导向图节点用温度色）
+function getTempColor(temp) {
+  if (temp >= 80) return '#FF4500';
+  if (temp >= 60) return '#FF8C00';
+  if (temp >= 40) return '#FFD700';
+  if (temp >= 20) return '#62A0EA';
+  if (temp >= 1)  return '#1A5FB4';
+  return '#6B7280';
+}
+// 掌握度 → 颜色（详情面板用）
 function getMasteryColor(mastery) {
   if (mastery >= 80) return '#239a3b';
   if (mastery >= 60) return '#7bc96f';
@@ -95,10 +105,9 @@ export function render() {
   </div>`;
 }
 
-// 构建力导向图节点/连线/分类数据
+// 构建力导向图节点/连线/分类数据（§9.2: 节点颜色=温度等级色）
 // filterSubject='all' 时显示全部学科
-// 坑: 连线只在同科目相邻技能间生成
-function buildForceGraphData(skillMastery, filterSubject) {
+function buildForceGraphData(skillMastery, filterSubject, tempStates) {
   const nodes = [];
   const links = [];
   const allSkills = getAllSkills();
@@ -106,17 +115,25 @@ function buildForceGraphData(skillMastery, filterSubject) {
   for (const skill of allSkills) {
     if (filterSubject !== 'all' && skill.subjectKey !== filterSubject) continue;
     const m = skillMastery[skill.id] || { avgMastery: 0, count: 0 };
+    // 计算该技能知识点的平均温度
+    const kps = skill.kps || [];
+    let avgTemp = 0;
+    if (tempStates && kps.length > 0) {
+      const temps = kps.map(kp => { const key = `${skill.id}::${kp}`; return tempStates[key]?.temp || 0; });
+      avgTemp = temps.reduce((s, t) => s + t, 0) / temps.length;
+    }
     nodes.push({
       id: skill.id,
       name: skill.name,
       symbolSize: Math.max(20, 8 + m.avgMastery * 0.5),
-      itemStyle: { color: getMasteryColor(m.avgMastery) },
+      itemStyle: { color: getTempColor(avgTemp) },
       category: skill.subjectKey,
       value: m.avgMastery,
       subjectName: skill.subjectName,
       desc: skill.desc,
       count: m.count,
       mastery: m.avgMastery,
+      temp: Math.round(avgTemp),
     });
   }
 
@@ -138,7 +155,7 @@ function buildForceGraphData(skillMastery, filterSubject) {
 
 // 异步初始化力导向图（ECharts graph + force 布局）
 // 点击节点 → showSkillDetail 打开详情面板
-async function initForceGraph(skillMastery, filterSubject) {
+async function initForceGraph(skillMastery, filterSubject, tempStates) {
   const ec = await loadECharts();
   if (!ec) return;
   const el = document.getElementById('skill-force-graph');
@@ -147,13 +164,13 @@ async function initForceGraph(skillMastery, filterSubject) {
   if (!chart) return;
   chartInstances.push(chart);
 
-  const data = buildForceGraphData(skillMastery, filterSubject);
+  const data = buildForceGraphData(skillMastery, filterSubject, tempStates);
   chart.setOption({
     tooltip: {
       formatter: (p) => {
         if (p.dataType !== 'node') return '';
         const d = p.data;
-        return `<b>${d.name}</b><br/>学科: ${d.subjectName}<br/>掌握度: ${d.mastery}%<br/>记录: ${d.count}条<br/><span style="color:#999;font-size:12px">${d.desc}</span>`;
+        return `<b>${d.name}</b><br/>学科: ${d.subjectName}<br/>温度: ${d.temp || 0}°<br/>掌握度: ${d.mastery}%<br/>记录: ${d.count}条`;
       },
     },
     series: [{
@@ -164,7 +181,7 @@ async function initForceGraph(skillMastery, filterSubject) {
       categories: data.categories,
       roam: true,
       draggable: true,
-      force: { repulsion: 300, edgeLength: [80, 160], gravity: 0.1 },
+      force: { repulsion: 200, edgeLength: [80, 160], gravity: 0.1 },
       label: { show: true, fontSize: 11, position: 'bottom' },
       lineStyle: { color: '#ccc', curveness: 0.1 },
       emphasis: { focus: 'adjacency', lineStyle: { width: 3 } },
@@ -207,6 +224,7 @@ function showSkillDetail(nodeData, skillMastery) {
       </div>
     </div>
     <div class="detail-stats">
+      <div class="detail-stat"><div class="detail-stat-value" style="color:${getTempColor(nodeData.temp || 0)}">${nodeData.temp || 0}°</div><div class="detail-stat-label">温度</div></div>
       <div class="detail-stat"><div class="detail-stat-value" style="color:${getMasteryColor(m.avgMastery || 0)}">${m.avgMastery || 0}%</div><div class="detail-stat-label">掌握度</div></div>
       <div class="detail-stat"><div class="detail-stat-value">${getMasteryLevel(m.avgMastery || 0)}</div><div class="detail-stat-label">等级</div></div>
       <div class="detail-stat"><div class="detail-stat-value">${m.count || 0}</div><div class="detail-stat-label">记录数</div></div>
@@ -236,7 +254,7 @@ async function initRadarChart(subjectAbility) {
     tooltip: {},
     radar: {
       indicator: indicators,
-      shape: 'polygon',
+      shape: 'circle',
       splitNumber: 5,
       axisName: { fontSize: 12 },
     },
@@ -259,18 +277,22 @@ export function afterRender() {
   const { knowledgeStates, skillMastery, subjectAbility, talents } = computeAll();
   window._knowledgeStates = knowledgeStates;
 
+  // 构建温度状态用于节点着色
+  const records = Store.get(StorageKeys.STUDY_RECORDS) || [];
+  const profile = Store.get(StorageKeys.USER_PROFILE) || {};
+  const tempStates = buildTempStates(records, profile);
+
   let currentFilter = 'all';
-  initForceGraph(skillMastery, currentFilter);
+  initForceGraph(skillMastery, currentFilter, tempStates);
   initRadarChart(subjectAbility);
 
   // 学科筛选
   const select = document.getElementById('skill-subject-filter');
   const onSelect = () => {
     currentFilter = select.value;
-    // 重建力导向图
     const old = chartInstances[0];
     if (old) { disposeChart(old); chartInstances.shift(); }
-    initForceGraph(skillMastery, currentFilter);
+    initForceGraph(skillMastery, currentFilter, tempStates);
   };
   if (select) select.addEventListener('change', onSelect);
 

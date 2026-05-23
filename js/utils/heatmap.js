@@ -1,34 +1,32 @@
 // heatmap.js — 学习日历热力图渲染（GitHub 贡献图风格）
-// 功能: 将学习记录按日聚合，生成 24 周（168天+今天）的热力图 HTML
-// 热力等级: 0=无学习, 1=<30min, 2=<60min, 3=<120min, 4=<240min, 5=240min+
+// §12.1: 热力等级基于每日 XP（0/1-25/26-50/51-100/100+）
 // 易错点: 日期对齐到周日（周起始），月份标签只在周日列显示
 
 const HEATMAP_DAYS = 169;
 const WEEKDAY_LABELS = ['', '一', '', '三', '', '五', ''];
 
-// 将记录按日期聚合为 {YYYY-MM-DD → 总分钟数}
-// @param {Array} records — 学习记录（需含 timestamp, duration）
-// @returns {Object} 日期到分钟数的映射
+// 将记录按日期聚合为 {YYYY-MM-DD → 总 XP}
+// @param {Array} records — 学习记录（需含 timestamp, xp）
+// @returns {Object} 日期到 XP 的映射
 function buildDateMap(records) {
   const map = {};
   for (const r of records) {
     if (!r.timestamp) continue;
     const day = new Date(r.timestamp).toISOString().slice(0, 10);
-    map[day] = (map[day] || 0) + (r.duration || 0);
+    map[day] = (map[day] || 0) + (r.xp || 0);
   }
   return map;
 }
 
-// 分钟数→热力等级（0-5，对应 CSS class level-0 ~ level-5）
-// @param {number} minutes — 学习分钟数
+// XP→热力等级（§12.1: 0/1-25/26-50/51-100/100+，对应 CSS class level-0 ~ level-4）
+// @param {number} xp — 当日 XP
 // @returns {number} 热力等级
-function getHeatLevel(minutes) {
-  if (minutes <= 0) return 0;
-  if (minutes < 30) return 1;
-  if (minutes < 60) return 2;
-  if (minutes < 120) return 3;
-  if (minutes < 240) return 4;
-  return 5;
+function getHeatLevel(xp) {
+  if (xp <= 0) return 0;
+  if (xp <= 25) return 1;
+  if (xp <= 50) return 2;
+  if (xp <= 100) return 3;
+  return 4;
 }
 
 // 日期→月份标签（如"5月"）
@@ -59,8 +57,8 @@ export function renderHeatmap(records) {
 
   while (currentDate <= today) {
     const key = currentDate.toISOString().slice(0, 10);
-    const minutes = dateMap[key] || 0;
-    const level = getHeatLevel(minutes);
+    const xp = dateMap[key] || 0;
+    const level = getHeatLevel(xp);
     const month = currentDate.getMonth();
 
     if (currentDate.getDay() === 0 && month !== lastMonth) {
@@ -68,7 +66,7 @@ export function renderHeatmap(records) {
       lastMonth = month;
     }
 
-    cells.push(`<div class="heatmap-cell level-${level}" data-date="${key}" data-minutes="${minutes}" title="${key}: ${minutes}分钟"></div>`);
+    cells.push(`<div class="heatmap-cell level-${level}" data-date="${key}" data-xp="${xp}" title="${key}: ${xp} XP"></div>`);
     currentDate.setDate(currentDate.getDate() + 1);
   }
 
@@ -89,7 +87,6 @@ export function renderHeatmap(records) {
       <div class="heatmap-cell level-2"></div>
       <div class="heatmap-cell level-3"></div>
       <div class="heatmap-cell level-4"></div>
-      <div class="heatmap-cell level-5"></div>
       <span class="heatmap-legend-label">多</span>
     </div>`;
 }
