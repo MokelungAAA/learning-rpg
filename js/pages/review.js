@@ -1,9 +1,11 @@
 // review.js — 复习中心：遗忘曲线 + 阴影队列 + 智能推荐
 // 读取: STUDY_RECORDS, USER_PROFILE → buildTempStates 计算温度状态
 // 写入: lts_review_context（复习按钮点击时写入，番茄钟读取）
+// v0.68: 引入 subjectAbility 用于阴影队列优先级计算
 import Store from '../store.js';
 import { SUBJECTS, STORAGE_KEYS as StorageKeys } from '../config.js';
 import { buildTempStates, calcShadowQueue, knapsackRecommend, calcImprovementPotential, detectFalseMastery, calcForgettingCurvePoints, getTempLevel } from '../utils/review-calc.js';
+import { computeAll } from '../utils/skill-tree-calc.js';
 import { loadECharts, initChart, disposeChart } from '../utils/charts.js';
 
 const getRecords = () => Store.get(StorageKeys.STUDY_RECORDS) || [];
@@ -126,7 +128,8 @@ export function render() {
   const records = getRecords();
   const profile = getProfile();
   const tempStates = buildTempStates(records, profile);
-  const queue = calcShadowQueue(tempStates);
+  const { subjectAbility } = computeAll(); // v0.68: 获取学科评分
+  const queue = calcShadowQueue(tempStates, subjectAbility);
   const potentials = calcImprovementPotential(tempStates);
   const falseItems = detectFalseMastery(tempStates, records);
 
@@ -145,7 +148,7 @@ export function render() {
     ${renderPotential(potentials)}
     ${renderFalseMastery(falseItems)}
     ${renderExamRecommend(queue)}
-    <p style="color:var(--color-text-3);margin-top:var(--sp-3);font-size:var(--fs-xs)">v0.65 · 开发者区</p>
+    <p style="color:var(--color-text-3);margin-top:var(--sp-3);font-size:var(--fs-xs)">v0.68 · 开发者区</p>
   </div>`;
 }
 

@@ -79,16 +79,23 @@ export function buildTempStates(records, profile) {
 }
 
 // 阴影队列: 按优先级排序待复习知识点
-// urgency = (80-temp) × examWeight / max(1, lastDays)
-// priority = urgency × count × ln(1+lastDays)
+// v0.68 对齐参考文档 §5.5:
+//   urgency = (80-temp) × examWeight / max(1, lastDays)
+//   priority = urgency × subjectLevel × ln(1+lastDays)
+//   subjectLevel = 学科综合评分 / 100（来自 aggregateSubjectAbility）
 // @param {Object} tempStates — buildTempStates 的输出
+// @param {Object} [subjectAbility] — 学科能力（可选，缺省时降级为 count）
 // @returns {Array} 按 priority 降序排列的队列
-export function calcShadowQueue(tempStates) {
+export function calcShadowQueue(tempStates, subjectAbility) {
   const queue = Object.values(tempStates)
     .filter(s => s.count > 0 && s.temp < 80)
     .map(s => {
       const urgency = (80 - s.temp) * (s.examWeight || 0.1) / Math.max(1, s.lastDays);
-      const priority = urgency * Math.max(1, s.count) * Math.log(1 + s.lastDays);
+      // v0.68: 用学科评分替代 count，学科越强优先级越低（把时间留给弱科）
+      const subjLevel = subjectAbility
+        ? ((subjectAbility[s.subjectKey]?.mastery || 0) / 100)
+        : Math.max(1, s.count);
+      const priority = urgency * subjLevel * Math.log(1 + s.lastDays);
       return { ...s, urgency: Math.round(urgency * 100) / 100, priority: Math.round(priority * 100) / 100 };
     })
     .sort((a, b) => b.priority - a.priority);
