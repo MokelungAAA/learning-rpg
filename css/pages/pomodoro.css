@@ -1,0 +1,322 @@
+/* pomodoro.css — 番茄钟系统样式 */
+
+/* === Config === */
+.pomo-config {
+  text-align: center;
+  padding: var(--sp-4) 0;
+}
+
+.pomo-config-header {
+  font-size: var(--fs-2xl);
+  font-weight: 700;
+  color: var(--color-text-1);
+  margin-bottom: var(--sp-3);
+}
+
+.pomo-review-context {
+  font-size: var(--fs-sm);
+  color: var(--color-accent);
+  margin-bottom: var(--sp-3);
+  padding: var(--sp-2);
+  border-radius: var(--r-md);
+  background: rgba(255, 255, 255, 0.4);
+}
+
+[data-theme="dark"] .pomo-review-context {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.pomo-presets {
+  display: flex;
+  justify-content: center;
+  gap: var(--sp-2);
+  margin-bottom: var(--sp-4);
+  flex-wrap: wrap;
+}
+
+.pomo-preset-btn {
+  padding: var(--sp-2) var(--sp-3);
+  border: 1px solid var(--color-outline);
+  border-radius: var(--r-full);
+  background: var(--color-surface);
+  color: var(--color-text-2);
+  font-size: var(--fs-sm);
+  cursor: pointer;
+  transition: all var(--duration-fast) var(--ease);
+}
+
+.pomo-preset-btn:hover {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+}
+
+.pomo-custom,
+.pomo-subject-select {
+  margin-bottom: var(--sp-3);
+}
+
+.pomo-label {
+  font-size: var(--fs-sm);
+  color: var(--color-text-3);
+  margin-bottom: var(--sp-1);
+}
+
+.pomo-custom-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-1);
+}
+
+.pomo-input {
+  width: 80px;
+  padding: var(--sp-2);
+  border: 1px solid var(--color-outline);
+  border-radius: var(--r-md);
+  background: var(--color-surface);
+  color: var(--color-text-1);
+  font-size: var(--fs-xl);
+  font-weight: 700;
+  text-align: center;
+  outline: none;
+}
+
+.pomo-input:focus {
+  border-color: var(--color-accent);
+}
+
+.pomo-unit {
+  font-size: var(--fs-sm);
+  color: var(--color-text-3);
+}
+
+.pomo-select {
+  padding: var(--sp-2) var(--sp-3);
+  border: 1px solid var(--color-outline);
+  border-radius: var(--r-full);
+  background: var(--color-surface);
+  color: var(--color-text-1);
+  font-size: var(--fs-sm);
+  outline: none;
+}
+
+.pomo-start-btn {
+  padding: var(--sp-3) var(--sp-6);
+  border: none;
+  border-radius: var(--r-full);
+  background: var(--color-accent-gradient);
+  color: #fff;
+  font-size: var(--fs-lg);
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform var(--duration-fast) var(--ease);
+}
+
+.pomo-start-btn:active {
+  transform: scale(0.96);
+}
+
+/* === Timer === */
+.pomo-timer-page {
+  text-align: center;
+  padding: var(--sp-4) 0;
+}
+
+.pomo-timer-ring {
+  position: relative;
+  width: 220px;
+  height: 220px;
+  margin: 0 auto var(--sp-4);
+}
+
+.pomo-svg {
+  width: 100%;
+  height: 100%;
+}
+
+.pomo-ring-progress {
+  transition: stroke-dashoffset 1s linear;
+}
+
+.pomo-timer-center {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.pomo-time-display {
+  font-size: var(--fs-4xl);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text-1);
+}
+
+.pomo-timer-label {
+  font-size: var(--fs-sm);
+  color: var(--color-text-3);
+}
+
+.pomo-timer-controls {
+  display: flex;
+  justify-content: center;
+  gap: var(--sp-3);
+  margin-bottom: var(--sp-3);
+}
+
+.pomo-ctrl-btn {
+  padding: var(--sp-2) var(--sp-5);
+  border: 1px solid var(--color-outline);
+  border-radius: var(--r-full);
+  background: var(--color-surface);
+  color: var(--color-text-1);
+  font-size: var(--fs-sm);
+  cursor: pointer;
+  transition: all var(--duration-fast) var(--ease);
+}
+
+.pomo-ctrl-btn:hover {
+  border-color: var(--color-accent);
+}
+
+.pomo-stop-btn {
+  border-color: #e74c3c;
+  color: #e74c3c;
+}
+
+.pomo-focus-score {
+  font-size: var(--fs-sm);
+  color: var(--color-text-3);
+}
+
+/* === Complete === */
+.pomo-complete {
+  text-align: center;
+  padding: var(--sp-4) 0;
+}
+
+.pomo-complete-icon {
+  font-size: 48px;
+  margin-bottom: var(--sp-2);
+}
+
+.pomo-complete-title {
+  font-size: var(--fs-xl);
+  font-weight: 700;
+  color: var(--color-text-1);
+  margin-bottom: var(--sp-3);
+}
+
+.pomo-complete-stats {
+  display: flex;
+  justify-content: center;
+  gap: var(--sp-4);
+  font-size: var(--fs-sm);
+  color: var(--color-text-2);
+  margin-bottom: var(--sp-4);
+}
+
+.pomo-rating {
+  margin-bottom: var(--sp-4);
+}
+
+.pomo-stars {
+  display: flex;
+  justify-content: center;
+  gap: var(--sp-1);
+}
+
+.pomo-star {
+  background: none;
+  border: none;
+  font-size: 28px;
+  cursor: pointer;
+  transition: transform var(--duration-fast) var(--ease);
+}
+
+.pomo-star:active {
+  transform: scale(1.2);
+}
+
+.pomo-complete-actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+  align-items: center;
+}
+
+.pomo-action-btn {
+  padding: var(--sp-3) var(--sp-5);
+  border: none;
+  border-radius: var(--r-full);
+  background: var(--color-accent-gradient);
+  color: #fff;
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  cursor: pointer;
+  min-width: 200px;
+}
+
+.pomo-action-btn.pomo-secondary {
+  background: var(--color-surface-variant);
+  color: var(--color-text-2);
+}
+
+/* === History === */
+.pomo-history {
+  margin-top: var(--sp-4);
+  padding-top: var(--sp-4);
+  border-top: 1px solid var(--color-outline);
+}
+
+.pomo-history-header {
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  color: var(--color-text-2);
+  margin-bottom: var(--sp-2);
+}
+
+.pomo-history-stats {
+  display: flex;
+  gap: var(--sp-3);
+  font-size: var(--fs-sm);
+  color: var(--color-text-3);
+  margin-bottom: var(--sp-3);
+}
+
+.pomo-history-stats b {
+  color: var(--color-accent);
+}
+
+.pomo-history-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-1);
+}
+
+.pomo-history-item {
+  display: flex;
+  gap: var(--sp-3);
+  font-size: var(--fs-xs);
+  color: var(--color-text-3);
+  padding: var(--sp-1) 0;
+}
+
+.pomo-empty {
+  font-size: var(--fs-xs);
+  color: var(--color-text-3);
+}
+
+/* === Responsive === */
+@media (max-width: 480px) {
+  .pomo-timer-ring {
+    width: 180px;
+    height: 180px;
+  }
+
+  .pomo-time-display {
+    font-size: var(--fs-3xl);
+  }
+}
