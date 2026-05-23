@@ -23,7 +23,7 @@
 | ARCH-07 | utils.js — 日期格式化、UUID v4、深拷贝、debounce/throttle | 1 | [ ] |
 | ARCH-08 | data.js — localStorage 安全读写、缓存管理 | 1 | [ ] |
 | ARCH-09 | 启动页 — Logo + 系统名 + 进度条 + LAUNCH 按钮 + 渐隐动画 | 1 | [ ] |
-| ARCH-10 | 底部导航栏 — 5 Tab，SVG 图标，fixed 定位 | 1 | [ ] |
+| ARCH-10 | 底部导航栏 — 4 Tab + 1个叠加按钮，SVG 图标，悬浮定位 | 1 | [ ] |
 | ARCH-11 | 桌面端顶部导航栏 — Pill 按钮组，≥768px 显示，双向同步 | 1 | [ ] |
 | ARCH-12 | 页面路由系统 — switchPage()，fadeInUp 动画，URL hash 同步 | 1 | [ ] |
 | ARCH-13 | Header 组件 — 品牌标识 + 版本号，响应式 | 1 | [ ] |

@@ -3,7 +3,6 @@
 export const ROUTES = {
   '#/':               'home',
   '#/data':           'data-tab',
-  '#/data/charts':    'data-charts',
   '#/data/log':       'data-log',
   '#/data/review':    'data-review',
   '#/data/reading':   'data-reading',
@@ -11,9 +10,10 @@ export const ROUTES = {
   '#/pomodoro':       'pomodoro-fullscreen',
   '#/settings':       'settings',
   '#/about':          'about',
-  '#/achievement':    'achievement',
   '#/subject/:id':    'subject-detail',
+  '#/data/export':    'data-io',
   '#/search':         'search',
+  '#/achievement':    'achievement',
 };
 
 export const STORAGE_KEYS = {
@@ -58,5 +58,6 @@ export const ACHIEVEMENT_CONDITION_TYPES = [
 export const NAV_TABS = [
   { id: 'home',     label: '首页', icon: '🏠', hash: '#/' },
   { id: 'data',     label: '数据', icon: '📊', hash: '#/data' },
+  { id: 'pomodoro', label: '番茄钟', icon: '🍅', hash: '#/pomodoro' },
   { id: 'settings', label: '设置', icon: '⚙️', hash: '#/settings' },
 ];

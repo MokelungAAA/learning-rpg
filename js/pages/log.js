@@ -152,7 +152,7 @@ export function render() {
     ${renderFilters()}
     <div id="log-list" class="log-list"></div>
     <button id="log-load-more" class="log-load-more" style="display:none">加载更多</button>
-    <p style="color:var(--color-text-3);margin-top:var(--sp-3);font-size:var(--fs-xs)">v0.16 · 日志管理</p>
+    <p style="color:var(--color-text-3);margin-top:var(--sp-3);font-size:var(--fs-xs)">v0.58 · 新增图表</p>
   </div>`;
 }
 
@@ -161,6 +161,16 @@ function openEditModal(recordId) {
   const records = getRecords();
   const record = records.find(r => r.id === recordId);
   if (!record) return;
+
+  const subjectOpts = SUBJECTS.map(s =>
+    `<option value="${s.id}"${(record.subject === s.id || record.subject === s.name) ? ' selected' : ''}>${s.name}</option>`
+  ).join('');
+  const activityOpts = [
+    { value: 'practice', label: '做题' },
+    { value: 'review', label: '订正' },
+    { value: 'reading', label: '阅读' },
+    { value: 'video', label: '网课' },
+  ].map(a => `<option value="${a.value}"${record.activityType === a.value ? ' selected' : ''}>${a.label}</option>`).join('');
 
   const overlay = document.createElement('div');
   overlay.className = 'entry-overlay';
@@ -173,6 +183,20 @@ function openEditModal(recordId) {
     <form id="edit-form" class="entry-form">
       <div class="entry-row">
         <div class="entry-field entry-field-half">
+          <label class="entry-label">学科</label>
+          <select id="edit-subject" class="entry-select">${subjectOpts}</select>
+        </div>
+        <div class="entry-field entry-field-half">
+          <label class="entry-label">类型</label>
+          <select id="edit-activity" class="entry-select">${activityOpts}</select>
+        </div>
+      </div>
+      <div class="entry-field">
+        <label class="entry-label">教材</label>
+        <input type="text" id="edit-textbook" class="entry-input" value="${record.textbook || ''}" placeholder="教材名">
+      </div>
+      <div class="entry-row">
+        <div class="entry-field entry-field-half">
           <label class="entry-label">得分</label>
           <input type="number" id="edit-score" class="entry-input" min="0" max="100" value="${record.score || 0}">
         </div>
@@ -180,6 +204,10 @@ function openEditModal(recordId) {
           <label class="entry-label">时长 (分钟)</label>
           <input type="number" id="edit-duration" class="entry-input" min="1" value="${record.duration || 30}">
         </div>
+      </div>
+      <div class="entry-field">
+        <label class="entry-label">知识点（逗号分隔）</label>
+        <input type="text" id="edit-kps" class="entry-input" value="${(record.knowledgePoints || []).join(', ')}" placeholder="知识点1, 知识点2">
       </div>
       <div class="entry-field">
         <label class="entry-label">备注</label>
@@ -196,15 +224,17 @@ function openEditModal(recordId) {
 
   document.getElementById('edit-form').addEventListener('submit', (e) => {
     e.preventDefault();
-    const score = parseInt(document.getElementById('edit-score').value, 10) || 0;
-    const duration = parseInt(document.getElementById('edit-duration').value, 10) || 30;
-    const notes = document.getElementById('edit-notes').value;
-
     const idx = records.findIndex(r => r.id === recordId);
     if (idx === -1) return;
+    const duration = parseInt(document.getElementById('edit-duration').value, 10) || 30;
+    const score = parseInt(document.getElementById('edit-score').value, 10) || 0;
+    records[idx].subject = document.getElementById('edit-subject').value;
+    records[idx].activityType = document.getElementById('edit-activity').value;
+    records[idx].textbook = document.getElementById('edit-textbook').value || '';
     records[idx].score = score;
     records[idx].duration = duration;
-    records[idx].notes = notes;
+    records[idx].knowledgePoints = document.getElementById('edit-kps').value.split(',').map(s => s.trim()).filter(Boolean);
+    records[idx].notes = document.getElementById('edit-notes').value;
     records[idx].practiceDuration = Math.round(duration * 0.8);
     records[idx].reviewDuration = Math.round(duration * 0.2);
     records[idx].xp = Math.max(1, Math.round(score * duration / 20));
@@ -264,6 +294,11 @@ function applyFilters() {
 }
 
 export function afterRender() {
+  // Read ?q= from hash for search pre-fill
+  const hashParts = window.location.hash.split('?');
+  const params = hashParts[1] ? new URLSearchParams(hashParts[1]) : null;
+  const prefillQuery = params?.get('q') || '';
+
   renderList();
 
   // 筛选事件
@@ -273,6 +308,12 @@ export function afterRender() {
   const dateFrom = document.getElementById('log-filter-from');
   const dateTo = document.getElementById('log-filter-to');
   const loadMore = document.getElementById('log-load-more');
+
+  // Pre-fill search from URL param
+  if (prefillQuery && searchInput) {
+    searchInput.value = prefillQuery;
+    applyFilters();
+  }
 
   let searchTimer = null;
   const onSearch = () => { clearTimeout(searchTimer); searchTimer = setTimeout(applyFilters, 300); };

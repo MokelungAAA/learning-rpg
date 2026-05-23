@@ -3,6 +3,7 @@ import Store from '../store.js';
 import { SUBJECTS, STORAGE_KEYS as StorageKeys, POMODORO_PRESETS } from '../config.js';
 import EventBus from '../event-bus.js';
 import Toast from '../components/toast.js';
+import { playFocusStart, playFocusEnd, playBreakEnd, playLongBreakEnd, sendNotification } from '../utils/sound.js';
 
 // 状态
 let timer = null;
@@ -137,7 +138,7 @@ export function render() {
     ${renderTimer()}
     ${renderComplete()}
     ${renderHistory()}
-    <p style="color:var(--color-text-3);margin-top:var(--sp-3);font-size:var(--fs-xs)">v1.3 · 番茄钟系统</p>
+    <p style="color:var(--color-text-3);margin-top:var(--sp-3);font-size:var(--fs-xs)">v0.58 · 新增图表</p>
   </div>`;
 }
 
@@ -164,10 +165,11 @@ function startTimer(minutes, phase) {
   const label = document.getElementById('pomo-label');
   const roundDisplay = document.getElementById('pomo-round-display');
 
-  // 设置颜色和标签
+  // 设置颜色和标签 + 音效
   if (phase === 'focus') {
     ring.setAttribute('stroke', 'var(--color-accent)');
     label.textContent = '专注中';
+    playFocusStart();
   } else {
     ring.setAttribute('stroke', 'var(--color-success)');
     label.textContent = phase === 'longBreak' ? '长休息' : '短休息';
@@ -227,12 +229,14 @@ function completeSession() {
   document.removeEventListener('visibilitychange', onVisibilityChange);
 
   const preset = getCurrentPreset();
+  const ctx = getReviewContext();
   const session = {
     sessionId: 'pom-' + Date.now(),
     startTime, plannedDuration, endTime: Date.now(),
     completed: elapsed >= plannedDuration * 60 * 0.9,
     focusScore, backgroundPeriods, elapsed,
     phase: currentPhase, round: currentRound,
+    isReview: !!(ctx && currentPhase === 'focus'),
   };
 
   // 保存会话
@@ -246,6 +250,18 @@ function completeSession() {
   }
 
   localStorage.removeItem('lts_review_context');
+
+  // 音效 + 通知
+  if (currentPhase === 'focus') {
+    playFocusEnd();
+    sendNotification('🍅 专注完成！', `专注 ${Math.round(elapsed / 60)} 分钟，专注度 ${focusScore}%`);
+  } else if (currentPhase === 'longBreak') {
+    playLongBreakEnd();
+    sendNotification('☕ 长休息结束', '准备开始新一轮专注');
+  } else {
+    playBreakEnd();
+    sendNotification('☕ 短休息结束', '准备开始下一轮专注');
+  }
 
   // 显示完成/休息界面
   document.getElementById('pomo-timer').style.display = 'none';
@@ -291,6 +307,7 @@ function autoSaveRecord() {
   const ctx = getReviewContext();
   const subject = selectedSubject || ctx?.subject || '';
   const duration = Math.round(elapsed / 60);
+  const isReview = !!ctx;
   const record = {
     id: 'rec-' + Date.now() + '-' + Math.random().toString(36).slice(2, 6),
     timestamp: new Date().toISOString(),
@@ -299,17 +316,17 @@ function autoSaveRecord() {
     knowledgePoints: ctx?.kp ? [ctx.kp] : [],
     score: Math.round(focusScore * 0.8),
     duration,
-    practiceDuration: Math.round(duration * 0.8),
-    reviewDuration: Math.round(duration * 0.2),
-    activityType: 'practice',
-    notes: `番茄钟第${currentRound}轮 · 专注度${focusScore}%`,
+    practiceDuration: isReview ? Math.round(duration * 0.3) : Math.round(duration * 0.8),
+    reviewDuration: isReview ? Math.round(duration * 0.7) : Math.round(duration * 0.2),
+    activityType: isReview ? 'review' : 'practice',
+    notes: `番茄钟第${currentRound}轮 · 专注度${focusScore}%${isReview ? ' · 复习' : ''}`,
     xp: Math.max(1, Math.round(focusScore * duration / 20)),
   };
   const records = Store.get(StorageKeys.STUDY_RECORDS) || [];
   records.push(record);
   Store.set(StorageKeys.STUDY_RECORDS, records);
   EventBus.emit('record:added', record);
-  Toast.show(`学习记录已自动保存 · ${duration}分钟`, 'success');
+  Toast.show(`${isReview ? '复习' : '学习'}记录已自动保存 · ${duration}分钟`, 'success');
 }
 
 export function afterRender() {

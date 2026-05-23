@@ -14,6 +14,8 @@ import * as reading from './pages/reading.js';
 import * as about from './pages/about.js';
 import * as search from './pages/search.js';
 import * as dataIO from './pages/data-io.js';
+import * as achievement from './pages/achievement.js';
+import * as subjectDetail from './pages/subject-detail.js';
 
 const container = document.getElementById('page-container');
 
@@ -35,10 +37,10 @@ Router.init(container);
 
 // afterRender lifecycle pattern
 let cleanupCurrent = null;
-function handleRoute(page, path) {
-  if (cleanupCurrent) cleanupCurrent();
-  container.innerHTML = page.render();
-  cleanupCurrent = page.afterRender ? page.afterRender() : null;
+function handleRoute(page, path, params) {
+  if (cleanupCurrent) { try { cleanupCurrent(); } catch {} }
+  container.innerHTML = page.render(params);
+  cleanupCurrent = page.afterRender ? page.afterRender(params) : null;
   EventBus.emit('route:changed', path);
 }
 
@@ -54,6 +56,10 @@ Router.register('#/data/reading', () => handleRoute(reading, '#/data/reading'));
 Router.register('#/about', () => handleRoute(about, '#/about'));
 Router.register('#/search', () => handleRoute(search, '#/search'));
 Router.register('#/data/export', () => handleRoute(dataIO, '#/data/export'));
+Router.register('#/achievement', () => handleRoute(achievement, '#/achievement'));
+Router.register('#/subject/:id', (params) => {
+  handleRoute(subjectDetail, '#/subject/' + params.id, params);
+});
 
 // Render navbar
 Navbar.render(document.body);
@@ -61,4 +67,9 @@ Navbar.render(document.body);
 // Default route
 if (!window.location.hash) {
   window.location.hash = '#/';
+}
+
+// Register Service Worker for PWA
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('./sw.js').catch(() => {});
 }

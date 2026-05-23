@@ -5,10 +5,17 @@ import { SUBJECTS_DATA } from '../data/subjects.js';
 import { ACHIEVEMENTS } from '../data/achievements.js';
 import { getAllSkills } from '../data/skill-tree.js';
 import { getSubjectIcon } from '../utils/level.js';
+import { checkAchievement } from '../utils/achievements-check.js';
 
-const MAX_HISTORY = 3;
+const MAX_HISTORY = 5;
 const getHistory = () => { try { return JSON.parse(localStorage.getItem(StorageKeys.SEARCH_HISTORY) || '[]'); } catch { return []; } };
 const saveHistory = (h) => localStorage.setItem(StorageKeys.SEARCH_HISTORY, JSON.stringify(h.slice(0, MAX_HISTORY)));
+function addToHistory(query) {
+  if (!query || query.length < 1) return;
+  const history = getHistory().filter(h => h !== query);
+  history.unshift(query);
+  saveHistory(history);
+}
 
 // 拼音首字母简拼映射
 const PINYIN_MAP = { '数学': 'sx', '语文': 'yw', '英语': 'yy', '物理': 'wl', '化学': 'hx', '生物': 'sw', '政治': 'zz', '历史': 'ls', '地理': 'dl' };
@@ -35,19 +42,19 @@ function searchAll(query) {
     if (!data.textbooks) continue;
     for (const tb of data.textbooks) {
       if (tb.name.toLowerCase().includes(q)) {
-        results.push({ type: 'textbook', icon: '📚', title: tb.name, desc: data.name, hash: '#/data' });
+        results.push({ type: 'textbook', icon: '📚', title: tb.name, desc: data.name, hash: `#/data/log?q=${encodeURIComponent(tb.name.slice(0, 6))}` });
       }
       for (const ch of (tb.chapters || [])) {
         if (ch.name.toLowerCase().includes(q)) {
-          results.push({ type: 'chapter', icon: '📖', title: ch.name, desc: tb.name, hash: '#/data' });
+          results.push({ type: 'chapter', icon: '📖', title: ch.name, desc: tb.name, hash: `#/data/log?q=${encodeURIComponent(ch.name.slice(0, 6))}` });
         }
         for (const sec of (ch.sections || [])) {
           if (sec.name.toLowerCase().includes(q)) {
-            results.push({ type: 'section', icon: '📝', title: sec.name, desc: ch.name, hash: '#/data' });
+            results.push({ type: 'section', icon: '📝', title: sec.name, desc: ch.name, hash: `#/data/log?q=${encodeURIComponent(sec.name.slice(0, 6))}` });
           }
           for (const kp of (sec.knowledgePoints || [])) {
             if (kp.toLowerCase().includes(q)) {
-              results.push({ type: 'kp', icon: '💡', title: kp, desc: sec.name, hash: '#/data/review' });
+              results.push({ type: 'kp', icon: '💡', title: kp, desc: sec.name, hash: `#/data/log?q=${encodeURIComponent(kp)}` });
             }
           }
         }
@@ -75,10 +82,12 @@ function searchAll(query) {
     }
   }
 
-  // 搜索成就
+  // 搜索成就（只搜已解锁的，避免泄露隐藏成就条件）
+  const profile = Store.get(StorageKeys.USER_PROFILE) || {};
   for (const a of ACHIEVEMENTS) {
+    if (!checkAchievement(a, records, profile)) continue;
     if (a.name.toLowerCase().includes(q) || a.description.toLowerCase().includes(q)) {
-      results.push({ type: 'achievement', icon: a.icon, title: a.name, desc: a.description, hash: '#/data' });
+      results.push({ type: 'achievement', icon: a.icon, title: a.name, desc: a.description, hash: '#/achievement' });
     }
   }
 
@@ -113,7 +122,7 @@ function renderHistory() {
   const history = getHistory();
   if (history.length === 0) return '';
   const items = history.map(h => `<button class="search-history-tag" data-query="${h}">${h}</button>`).join('');
-  return `<div class="search-history"><span class="search-history-label">最近搜索</span>${items}</div>`;
+  return `<div class="search-history"><div class="search-history-top"><span class="search-history-label">🕐 最近搜索</span><button class="search-history-clear" id="history-clear">清除</button></div><div class="search-history-tags">${items}</div></div>`;
 }
 
 function renderResults(results) {
@@ -145,7 +154,7 @@ export function render() {
       ${renderHistory()}
       <div id="search-results" class="search-results"></div>
     </div>
-    <p style="color:var(--color-text-3);margin-top:var(--sp-3);font-size:var(--fs-xs)">v1.4 · 全局搜索</p>
+    <p style="color:var(--color-text-3);margin-top:var(--sp-3);font-size:var(--fs-xs)">v0.58 · 新增图表</p>
   </div>`;
 }
 
@@ -167,9 +176,7 @@ export function afterRender() {
   const onClear = () => { input.value = ''; clearBtn.style.display = 'none'; resultsEl.innerHTML = ''; input.focus(); };
   const onKeydown = (e) => {
     if (e.key === 'Enter' && input.value.trim()) {
-      const history = getHistory().filter(h => h !== input.value.trim());
-      history.unshift(input.value.trim());
-      saveHistory(history);
+      addToHistory(input.value.trim());
     }
   };
 
@@ -181,14 +188,33 @@ export function afterRender() {
   const historyTags = document.querySelectorAll('.search-history-tag');
   const onTag = (e) => {
     input.value = e.currentTarget.dataset.query;
+    addToHistory(e.currentTarget.dataset.query);
     doSearch();
   };
   historyTags.forEach(t => t.addEventListener('click', onTag));
+
+  // 清除历史
+  const historyClearBtn = document.getElementById('history-clear');
+  const onClearHistory = () => {
+    saveHistory([]);
+    const historyEl = document.querySelector('.search-history');
+    if (historyEl) historyEl.remove();
+  };
+  if (historyClearBtn) historyClearBtn.addEventListener('click', onClearHistory);
+
+  // 点击搜索结果时保存历史
+  const onResultClick = (e) => {
+    const link = e.target.closest('.search-result-item');
+    if (link && input.value.trim()) addToHistory(input.value.trim());
+  };
+  resultsEl.addEventListener('click', onResultClick);
 
   return () => {
     input.removeEventListener('input', onInput);
     clearBtn.removeEventListener('click', onClear);
     input.removeEventListener('keydown', onKeydown);
     historyTags.forEach(t => t.removeEventListener('click', onTag));
+    if (historyClearBtn) historyClearBtn.removeEventListener('click', onClearHistory);
+    resultsEl.removeEventListener('click', onResultClick);
   };
 }

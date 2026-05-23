@@ -1,0 +1,185 @@
+/* subject-detail.css — 学科详情页样式 */
+
+.subject-detail-header {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  margin-bottom: var(--sp-4);
+}
+
+.subject-detail-icon {
+  font-size: 2.5rem;
+  line-height: 1;
+}
+
+.subject-detail-title {
+  font-size: var(--fs-2xl);
+  font-weight: 700;
+  color: var(--color-text-1);
+}
+
+/* 概览区 */
+.subject-overview {
+  background: var(--color-surface);
+  border-radius: var(--r-md);
+  padding: var(--sp-3);
+  margin-bottom: var(--sp-3);
+  box-shadow: var(--shadow-sm);
+}
+
+.subject-overview-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--sp-2);
+  margin-bottom: var(--sp-3);
+}
+
+.subject-overview-stat {
+  text-align: center;
+}
+
+.subject-ov-value {
+  font-size: var(--fs-lg);
+  font-weight: 600;
+  color: var(--color-text-1);
+}
+
+.subject-ov-label {
+  font-size: var(--fs-xs);
+  color: var(--color-text-3);
+  margin-top: 2px;
+}
+
+.subject-overview-bar {
+  margin-top: var(--sp-1);
+}
+
+/* 教材列表 */
+.tb-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+}
+
+.tb-item {
+  background: var(--color-surface-variant);
+  border-radius: var(--r-sm);
+  padding: var(--sp-2) var(--sp-3);
+}
+
+.tb-item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 4px;
+}
+
+.tb-item-name {
+  font-size: var(--fs-sm);
+  font-weight: 500;
+  color: var(--color-text-1);
+}
+
+.tb-item-pct {
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  color: var(--color-accent);
+}
+
+.tb-item-chapters {
+  font-size: var(--fs-xs);
+  color: var(--color-text-3);
+  margin-bottom: var(--sp-1);
+}
+
+/* 复习列表 */
+.review-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+}
+
+.review-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--sp-2) var(--sp-3);
+  background: var(--color-surface-variant);
+  border-radius: var(--r-sm);
+}
+
+.review-item-kp {
+  font-size: var(--fs-sm);
+  color: var(--color-text-1);
+  font-weight: 500;
+}
+
+.review-item-meta {
+  font-size: var(--fs-xs);
+  color: var(--color-text-3);
+}
+
+/* 日志列表 */
+.log-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-1);
+}
+
+.log-item {
+  padding: var(--sp-2) var(--sp-3);
+  background: var(--color-surface-variant);
+  border-radius: var(--r-sm);
+}
+
+.log-item-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.log-item-dur {
+  font-size: var(--fs-sm);
+  font-weight: 500;
+  color: var(--color-text-1);
+}
+
+.log-item-score {
+  font-size: var(--fs-sm);
+  color: var(--color-accent);
+}
+
+.log-item-date {
+  font-size: var(--fs-xs);
+  color: var(--color-text-3);
+}
+
+.log-item-kps {
+  font-size: var(--fs-xs);
+  color: var(--color-text-2);
+  margin-top: 4px;
+}
+
+/* 空状态提示 */
+.empty-hint {
+  color: var(--color-text-3);
+  font-size: var(--fs-sm);
+  text-align: center;
+  padding: var(--sp-3) 0;
+}
+
+/* 响应式 */
+@media (max-width: 480px) {
+  .subject-overview-row {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--sp-3);
+  }
+
+  .subject-detail-icon {
+    font-size: 2rem;
+  }
+
+  .subject-detail-title {
+    font-size: var(--fs-xl);
+  }
+}

@@ -1,19 +1,38 @@
 // about.js — 关于页（版本信息+致谢+历史）
 const VERSION_HISTORY = [
+  { version: 'v0.58', date: '2026-05-23', desc: '新增图表 — 得分率趋势+输入输出比例+导航栏L型布局' },
+  { version: 'v0.57', date: '2026-05-23', desc: '导航栏重构 — 4Tab+番茄钟独立入口+分隔线' },
+  { version: 'v0.57', date: '2026-05-23', desc: 'CSS变量统一 — 缺失变量补全+深色模式对齐+搜索成就过滤' },
+  { version: 'v0.57', date: '2026-05-23', desc: 'PWA支持 — manifest+service-worker+离线缓存' },
+  { version: 'v0.57', date: '2026-05-23', desc: '搜索历史增强 — 5条历史+点击结果保存+清除按钮' },
+  { version: 'v0.57', date: '2026-05-23', desc: '番茄钟音效+振动+通知 — Web Audio API音效+系统通知' },
+  { version: 'v0.57', date: '2026-05-23', desc: '微交互动画 — 卡片hover+按钮反馈+进度条过渡+数字滚动' },
+  { version: 'v0.51', date: '2026-05-23', desc: '学科详情页 — 独立路由+概览+教材/复习/日志/图表折叠卡片' },
+  { version: 'v0.50', date: '2026-05-23', desc: '最终打磨 — 版本号统一+集成测试+路由修复' },
+  { version: 'v0.49', date: '2026-05-23', desc: 'CSS架构优化 — data-tab.css从home.css分离' },
+  { version: 'v0.48', date: '2026-05-23', desc: 'ECharts图表加载指示器 — 异步加载时显示spinner' },
+  { version: 'v0.47', date: '2026-05-23', desc: '搜索结果深度链接 — 记录/教材/知识点跳转带筛选' },
+  { version: 'v0.46', date: '2026-05-23', desc: '热力图点击交互 — 点击日期查看当日学习详情' },
+  { version: 'v0.45', date: '2026-05-23', desc: '成就浏览页 — 全部成就列表+解锁状态+稀有度' },
+  { version: 'v0.44', date: '2026-05-23', desc: '日志编辑弹窗扩展 — 学科/教材/知识点/类型可编辑' },
+  { version: 'v0.43', date: '2026-05-23', desc: '阅读记录编辑/删除' },
+  { version: 'v0.42', date: '2026-05-23', desc: '同步配置UI + 复习记录追踪' },
+  { version: 'v0.41', date: '2026-05-23', desc: '成就系统修复 + 学科跳转 + 番茄钟widget + 版本号修正' },
+  { version: 'v1.3', date: '2026-05-23', desc: '搜索系统 + 数据导入导出 + 番茄钟修复' },
+  { version: 'v0.21', date: '2026-05-23', desc: '子页面返回按钮' },
   { version: 'v0.20', date: '2026-05-23', desc: '设置页完善 + 关于页' },
-  { version: 'v0.18', date: '2026-05-23', desc: '阅读记录系统 — 书架+列表+图表+录入' },
-  { version: 'v0.17', date: '2026-05-23', desc: '番茄钟系统 — 配置+计时+评分+追踪+历史' },
-  { version: 'v0.16', date: '2026-05-23', desc: '日志管理 — 列表+筛选+搜索+编辑+删除' },
-  { version: 'v0.15', date: '2026-05-23', desc: '数据录入 — 搜索+时间推断+全链路联动' },
-  { version: 'v0.14', date: '2026-05-23', desc: '复习中心完成 + 数据录入弹窗' },
-  { version: 'v0.13', date: '2026-05-23', desc: '复习中心 — 遗忘曲线+阴影队列+智能推荐' },
-  { version: 'v0.12', date: '2026-05-23', desc: '技能树系统 — 力导向图+雷达图+薄弱点识别' },
-  { version: 'v0.11', date: '2026-05-23', desc: '概览页渲染 — 首页布局+数据Tab' },
-  { version: 'v0.05', date: '2026-05-23', desc: '深色模式切换 + 首页状态栏' },
-  { version: 'v0.04', date: '2026-05-23', desc: '版本号修复' },
-  { version: 'v0.03', date: '2026-05-23', desc: 'DataEngine 动态导入容错' },
-  { version: 'v0.02', date: '2026-05-23', desc: '组件库 + 数据引擎' },
-  { version: 'v0.01', date: '2026-05-23', desc: '重写基础架构 — 模块化文件结构' },
+  { version: 'v0.19', date: '2026-05-23', desc: '版本号统一更新为新方案' },
+  { version: 'v1.0', date: '2026-05-23', desc: '阅读记录系统 — 书架+列表+图表+录入' },
+  { version: 'v0.10', date: '2026-05-23', desc: '番茄钟系统 — 配置+计时+评分+追踪+历史' },
+  { version: 'v0.9', date: '2026-05-23', desc: '日志管理 — 列表+筛选+搜索+编辑+删除' },
+  { version: 'v0.8', date: '2026-05-23', desc: '数据录入 — 搜索+时间推断+全链路联动' },
+  { version: 'v0.7', date: '2026-05-23', desc: '复习中心完成 + 数据录入弹窗' },
+  { version: 'v0.6', date: '2026-05-23', desc: '复习中心 — 遗忘曲线+阴影队列+智能推荐' },
+  { version: 'v0.5', date: '2026-05-23', desc: '技能树系统 — 力导向图+雷达图+薄弱点识别' },
+  { version: 'v0.4', date: '2026-05-23', desc: '概览页渲染 — 首页布局+数据Tab' },
+  { version: 'v0.3', date: '2026-05-23', desc: '深色模式切换 + 首页状态栏' },
+  { version: 'v0.2', date: '2026-05-23', desc: '组件库 + 数据引擎' },
+  { version: 'v0.1', date: '2026-05-23', desc: '重写基础架构 — 模块化文件结构' },
 ];
 
 export function render() {
@@ -27,7 +46,7 @@ export function render() {
       <div class="about-hero">
         <div class="about-logo">LTS</div>
         <div class="about-title">学习RPG · 认知操作系统</div>
-        <div class="about-version">v0.20</div>
+        <div class="about-version">v0.58</div>
         <div class="about-credit">Created by 墨澜 × Miku</div>
       </div>
       <div class="about-section">

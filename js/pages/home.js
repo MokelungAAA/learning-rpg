@@ -7,7 +7,7 @@ import { checkAchievement } from '../utils/achievements-check.js';
 import {
   calcLevel, calcLevelProgress, getLevelTitle,
   getSubjectIcon, formatNumber, getDayStatus,
-  calcStreakDays, calcTodayXP
+  calcStreakDays, calcTodayXP, countUp
 } from '../utils/level.js';
 import { ACHIEVEMENTS } from '../data/achievements.js';
 import * as DataEntry from '../components/data-entry.js';
@@ -56,17 +56,17 @@ function renderHeroStats(profile, records) {
         <div class="hero-level-title">${title.cn}</div>
         <div class="hero-level-subtitle">${title.name}</div>
       </div>
-      <div class="stat-card"><div class="stat-card-icon">⚡</div>
-        <div class="stat-card-value" style="color:var(--color-success)">+${todayXP}</div>
+      <div class="stat-card card-enter"><div class="stat-card-icon">⚡</div>
+        <div class="stat-card-value" id="stat-today-xp" style="color:var(--color-success)">+${todayXP}</div>
         <div class="stat-card-label">今日XP</div></div>
-      <div class="stat-card"><div class="stat-card-icon">🔥</div>
-        <div class="stat-card-value" style="color:var(--color-warning)">${streakDays}天</div>
+      <div class="stat-card card-enter"><div class="stat-card-icon">🔥</div>
+        <div class="stat-card-value" id="stat-streak" style="color:var(--color-warning)">${streakDays}天</div>
         <div class="stat-card-label">连续学习</div></div>
-      <div class="stat-card"><div class="stat-card-icon">${day.icon}</div>
+      <div class="stat-card card-enter"><div class="stat-card-icon">${day.icon}</div>
         <div class="stat-card-value" style="color:${day.color}">${day.text}</div>
         <div class="stat-card-label">每日状态</div></div>
-      <div class="stat-card"><div class="stat-card-icon">🏆</div>
-        <div class="stat-card-value">${formatNumber(totalXP)}</div>
+      <div class="stat-card card-enter"><div class="stat-card-icon">🏆</div>
+        <div class="stat-card-value" id="stat-total-xp">${formatNumber(totalXP)}</div>
         <div class="stat-card-label">总XP</div></div>
     </div>
     <div class="level-progress">
@@ -80,6 +80,14 @@ function renderHeroStats(profile, records) {
 
 // 4.4 嵌入式番茄钟
 function renderPomodoroWidget() {
+  const sessions = Store.get(StorageKeys.POMODORO_SESSIONS) || [];
+  const today = new Date().toISOString().slice(0, 10);
+  const todaySessions = sessions.filter(s =>
+    s.completed && s.phase === 'focus' &&
+    s.startTime && new Date(s.startTime).toISOString().slice(0, 10) === today
+  );
+  const count = todaySessions.length;
+  const minutes = todaySessions.reduce((s, r) => s + (r.plannedDuration || 0), 0);
   return `
     <div class="pomodoro-widget">
       <div class="pomodoro-header">🍅 番茄钟</div>
@@ -87,7 +95,7 @@ function renderPomodoroWidget() {
         <div class="pomodoro-time" id="pomodoro-display">25:00</div>
         <button class="pomodoro-btn" id="pomodoro-start">▶ 开始</button>
       </div>
-      <div class="pomodoro-stats" id="pomodoro-stats">今日: 0个 · 0m</div>
+      <div class="pomodoro-stats" id="pomodoro-stats">今日: ${count}个 · ${minutes}m</div>
     </div>`;
 }
 
@@ -154,7 +162,7 @@ function renderSubjectGrid(records) {
   const cards = sorted.map(s => {
     const st = stats[s.id] || { xp: 0, count: 0, score: 0, totalDur: 0 };
     const t = getLevelTitle(Math.floor(st.score / 15) + 1);
-    return `<div class="subject-card" data-subject="${s.id}">
+    return `<div class="subject-card card-enter" data-subject="${s.id}">
       <div class="subject-card-icon">${getSubjectIcon(s.id)}</div>
       <div class="subject-card-name">${s.name}</div>
       <div class="subject-card-level">${t.cn}</div>
@@ -174,12 +182,26 @@ export function render() {
     ${renderPomodoroWidget()}
     ${renderRecommendations(records)}
     ${renderSubjectGrid(records)}
-    <button class="entry-fab" id="entry-fab" title="录入学习记录">＋</button>
-    <p style="color:var(--color-text-3);margin-top:var(--sp-3);font-size:var(--fs-xs)">v0.20 · 设置页完善</p>
+    <p style="color:var(--color-text-3);margin-top:var(--sp-3);font-size:var(--fs-xs)">v0.58 · 新增图表</p>
   </div>`;
 }
 
 export function afterRender() {
+  // 数字滚动动画
+  const profile = getProfile();
+  const records = getRecords();
+  const totalXP = profile.totalXP || 0;
+  const todayXP = calcTodayXP(records);
+  const streakDays = calcStreakDays(records);
+  setTimeout(() => {
+    const todayEl = document.getElementById('stat-today-xp');
+    const streakEl = document.getElementById('stat-streak');
+    const totalEl = document.getElementById('stat-total-xp');
+    if (todayEl) { countUp(todayEl, todayXP, 600); todayEl.textContent = '+' + todayXP; }
+    if (streakEl) { countUp(streakEl, streakDays, 600); }
+    if (totalEl) { countUp(totalEl, totalXP, 800); }
+  }, 200);
+
   const themeBtn = document.querySelector('.theme-toggle');
   function updateThemeIcon() {
     const m = Theme.getTheme();
@@ -212,16 +234,15 @@ export function afterRender() {
   };
   subjectCards.forEach(c => c.addEventListener('click', onSubjectClick));
 
-  // 数据录入 FAB
-  const fab = document.getElementById('entry-fab');
-  const onFabClick = () => DataEntry.open();
-  if (fab) fab.addEventListener('click', onFabClick);
-
   // ENTRY-06: 记录保存后刷新页面
   const onRecordAdded = () => {
     window.location.reload();
   };
   EventBus.on('record:added', onRecordAdded);
+
+  // Navbar FAB "+" → 数据录入
+  const onFabClick = () => DataEntry.open();
+  EventBus.on('fab:click', onFabClick);
 
   return () => {
     themeBtn.removeEventListener('click', onThemeBtn);
@@ -229,7 +250,7 @@ export function afterRender() {
     if (pomBtn) pomBtn.removeEventListener('click', onPomClick);
     recBtns.forEach(b => b.removeEventListener('click', onRecClick));
     subjectCards.forEach(c => c.removeEventListener('click', onSubjectClick));
-    if (fab) fab.removeEventListener('click', onFabClick);
     EventBus.off('record:added', onRecordAdded);
+    EventBus.off('fab:click', onFabClick);
   };
 }

@@ -7,9 +7,10 @@ import { checkAchievement } from '../utils/achievements-check.js';
 import { getSubjectIcon, formatNumber } from '../utils/level.js';
 import { renderHeatmap } from '../utils/heatmap.js';
 import {
-  loadECharts, initChart,
+  loadECharts, initChart, showChartLoading, hideChartLoading,
   renderXPTrendChart, renderSubjectDurationChart,
-  renderEfficiencyChart, renderTimeSlotChart, disposeChart
+  renderEfficiencyChart, renderTimeSlotChart,
+  renderScoreTrendChart, renderIORatioChart, disposeChart
 } from '../utils/charts.js';
 
 const getRecords = () => Store.get(StorageKeys.STUDY_RECORDS) || [];
@@ -45,13 +46,13 @@ function renderAchievements(records, profile) {
   const unlocked = ACHIEVEMENTS.filter(a => checkAchievement(a, records, profile));
   const recent = unlocked.slice(-3).reverse();
   if (recent.length === 0) {
-    return fold('achievements', '🏆 成就', '<p style="color:var(--color-text-3);font-size:var(--fs-sm)">记录学习数据来解锁成就</p>');
+    return fold('achievements', '🏆 成就', '<p style="color:var(--color-text-3);font-size:var(--fs-sm)">记录学习数据来解锁成就</p><a href="#/achievement" class="ach-view-all">查看全部成就 →</a>');
   }
   const badges = recent.map(a => `<div class="achievement-badge ${a.rarity}">
     <div class="achievement-icon">${a.icon}</div>
     <div class="achievement-info"><div class="achievement-name">${a.name}</div><div class="achievement-desc">${a.description}</div></div>
   </div>`).join('');
-  return fold('achievements', `🏆 成就 · ${unlocked.length}/${ACHIEVEMENTS.length}`, `<div class="achievement-list">${badges}</div>`);
+  return fold('achievements', `🏆 成就 · ${unlocked.length}/${ACHIEVEMENTS.length}`, `<div class="achievement-list">${badges}</div><a href="#/achievement" class="ach-view-all">查看全部成就 →</a>`);
 }
 
 function renderExamReflection(records) {
@@ -151,6 +152,8 @@ function renderChartsSection() {
     ['chart-subject-duration', '📊 学科时长柱状图'],
     ['chart-efficiency', '⏱️ 学习效率散点图'],
     ['chart-timeslot', '🗓️ 时段热力图'],
+    ['chart-score-trend', '📉 得分率趋势'],
+    ['chart-io-ratio', '⚖️ 输入输出比例'],
   ].map(([id, title]) => `<div class="chart-block">
     <div class="chart-title">${title}</div>
     <div class="chart-container" id="${id}"></div>
@@ -184,16 +187,24 @@ let charts = [];
 const disposeAllCharts = () => { charts.forEach(c => disposeChart(c)); charts = []; };
 
 async function initCharts(records) {
+  const chartIds = ['chart-xp-trend', 'chart-subject-duration', 'chart-efficiency', 'chart-timeslot', 'chart-score-trend', 'chart-io-ratio'];
+  // Show loading on all chart containers
+  chartIds.forEach(id => { const el = document.getElementById(id); if (el) showChartLoading(el); });
+
   const ec = await loadECharts();
-  if (!ec) return;
+  if (!ec) { chartIds.forEach(id => { const el = document.getElementById(id); if (el) hideChartLoading(el); }); return; }
+
   for (const [id, fn] of [
     ['chart-xp-trend', renderXPTrendChart],
     ['chart-subject-duration', renderSubjectDurationChart],
     ['chart-efficiency', renderEfficiencyChart],
     ['chart-timeslot', renderTimeSlotChart],
+    ['chart-score-trend', renderScoreTrendChart],
+    ['chart-io-ratio', renderIORatioChart],
   ]) {
     const el = document.getElementById(id);
     if (!el) continue;
+    hideChartLoading(el);
     const chart = initChart(el);
     if (chart) { fn(chart, records); charts.push(chart); }
   }
@@ -211,5 +222,34 @@ export function afterRender() {
     if (foldId === 'charts' && body?.classList.contains('open') && charts.length === 0) initCharts(records);
   };
   foldHeaders.forEach(h => h.addEventListener('click', onFoldClick));
-  return () => { foldHeaders.forEach(h => h.removeEventListener('click', onFoldClick)); disposeAllCharts(); };
+
+  // Heatmap cell click → show day detail
+  const heatmapGrid = document.querySelector('.heatmap-grid');
+  let heatmapPopup = null;
+  const onHeatmapClick = (e) => {
+    const cell = e.target.closest('.heatmap-cell');
+    if (!cell) return;
+    if (heatmapPopup) { heatmapPopup.remove(); heatmapPopup = null; }
+    const date = cell.dataset.date;
+    const minutes = parseInt(cell.dataset.minutes, 10) || 0;
+    const dayRecords = records.filter(r => r.timestamp && new Date(r.timestamp).toISOString().slice(0, 10) === date);
+    const subjects = [...new Set(dayRecords.map(r => r.subject))].join('、') || '无';
+    const popup = document.createElement('div');
+    popup.className = 'heatmap-popup';
+    popup.innerHTML = `<div class="heatmap-popup-title">${date}</div>
+      <div class="heatmap-popup-row">学习 ${minutes} 分钟</div>
+      <div class="heatmap-popup-row">${dayRecords.length} 条记录</div>
+      <div class="heatmap-popup-row">学科：${subjects}</div>`;
+    cell.style.position = 'relative';
+    cell.appendChild(popup);
+    heatmapPopup = popup;
+    setTimeout(() => { if (heatmapPopup === popup) { popup.remove(); heatmapPopup = null; } }, 3000);
+  };
+  if (heatmapGrid) heatmapGrid.addEventListener('click', onHeatmapClick);
+
+  return () => {
+    foldHeaders.forEach(h => h.removeEventListener('click', onFoldClick));
+    if (heatmapGrid) heatmapGrid.removeEventListener('click', onHeatmapClick);
+    disposeAllCharts();
+  };
 }

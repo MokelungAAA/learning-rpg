@@ -4,6 +4,7 @@ import Store from '../store.js';
 import { STORAGE_KEYS as StorageKeys, POMODORO_PRESETS } from '../config.js';
 import EventBus from '../event-bus.js';
 import Toast from '../components/toast.js';
+import SyncEngine from '../sync-engine.js';
 
 const FONT_SIZES = [
   { key: 'small', label: '小', scale: 0.875 },
@@ -42,13 +43,30 @@ function renderAppearance() {
 // 16.1 同步区块
 function renderSync() {
   const meta = Store.get(StorageKeys.SYNC_META) || {};
-  const connected = !!meta.lastSync;
-  const statusText = connected ? `上次同步: ${new Date(meta.lastSync).toLocaleString('zh-CN')}` : '未配置';
+  const syncCfg = Store.get('lts_sync_config') || {};
+  const configured = !!(syncCfg.token && syncCfg.owner && syncCfg.repo);
+  const statusText = configured
+    ? (meta.lastSync ? `上次同步: ${new Date(meta.lastSync).toLocaleString('zh-CN')}` : '已配置，未同步')
+    : '未配置';
   return `<div class="settings-section">
     <h3>☁️ 数据同步</h3>
     <div class="settings-row"><span class="settings-label">状态</span><span class="settings-value">${statusText}</span></div>
+    <div class="settings-row"><span class="settings-label">仓库</span><span class="settings-value">${configured ? syncCfg.owner + '/' + syncCfg.repo : '—'}</span></div>
     <div class="settings-row"><span class="settings-label">GitHub Token</span><button class="settings-btn" id="sync-config-btn">配置</button></div>
-    <div class="settings-row"><button class="settings-btn settings-btn-primary" id="sync-now-btn">立即同步</button></div>
+    <div class="settings-row"><button class="settings-btn settings-btn-primary" id="sync-now-btn"${configured ? '' : ' disabled'}>立即同步</button></div>
+  </div>
+  <div class="sync-config-modal" id="sync-config-modal" style="display:none">
+    <div class="sync-modal-backdrop" id="sync-modal-backdrop"></div>
+    <div class="sync-modal-content">
+      <div class="sync-modal-header">☁️ 同步配置</div>
+      <div class="sync-modal-row"><label>GitHub Token</label><input type="password" id="sync-token" class="settings-input" placeholder="ghp_xxxx" value="${syncCfg.token || ''}"></div>
+      <div class="sync-modal-row"><label>仓库所有者</label><input type="text" id="sync-owner" class="settings-input" placeholder="用户名" value="${syncCfg.owner || ''}"></div>
+      <div class="sync-modal-row"><label>仓库名</label><input type="text" id="sync-repo" class="settings-input" placeholder="lts-data" value="${syncCfg.repo || ''}"></div>
+      <div class="sync-modal-actions">
+        <button class="settings-btn" id="sync-modal-cancel">取消</button>
+        <button class="settings-btn settings-btn-primary" id="sync-modal-save">保存</button>
+      </div>
+    </div>
   </div>`;
 }
 
@@ -100,7 +118,7 @@ export function render() {
     ${renderPomodoroSettings()}
     ${renderProfile()}
     ${renderAboutLink()}
-    <p style="color:var(--color-text-3);margin-top:var(--sp-3);font-size:var(--fs-xs)">v0.20 · 设置页完善</p>
+    <p style="color:var(--color-text-3);margin-top:var(--sp-3);font-size:var(--fs-xs)">v0.58 · 新增图表</p>
   </div>`;
 }
 
@@ -160,9 +178,50 @@ export function afterRender() {
   if (nicknameInput) nicknameInput.addEventListener('input', saveProfile);
   if (gradeSelect) gradeSelect.addEventListener('change', saveProfile);
 
-  // 同步按钮
-  const syncBtn = document.getElementById('sync-now-btn');
-  if (syncBtn) syncBtn.addEventListener('click', () => Toast.show('同步功能开发中', 'info'));
+  // 同步配置弹窗
+  const syncConfigBtn = document.getElementById('sync-config-btn');
+  const syncModal = document.getElementById('sync-config-modal');
+  const syncBackdrop = document.getElementById('sync-modal-backdrop');
+  const syncCancel = document.getElementById('sync-modal-cancel');
+  const syncSave = document.getElementById('sync-modal-save');
+  const syncNowBtn = document.getElementById('sync-now-btn');
+
+  const openSyncModal = () => { if (syncModal) syncModal.style.display = 'flex'; };
+  const closeSyncModal = () => { if (syncModal) syncModal.style.display = 'none'; };
+  const saveSyncConfig = () => {
+    const token = document.getElementById('sync-token')?.value?.trim();
+    const owner = document.getElementById('sync-owner')?.value?.trim();
+    const repo = document.getElementById('sync-repo')?.value?.trim();
+    if (!token || !owner || !repo) { Toast.show('请填写完整配置', 'warn'); return; }
+    Store.set('lts_sync_config', { token, owner, repo });
+    SyncEngine.configure(token, owner, repo);
+    Toast.show('同步配置已保存', 'success');
+    closeSyncModal();
+    window.location.reload();
+  };
+  const doSync = async () => {
+    const cfg = Store.get('lts_sync_config') || {};
+    if (!cfg.token || !cfg.owner || !cfg.repo) { Toast.show('请先配置同步', 'warn'); return; }
+    SyncEngine.configure(cfg.token, cfg.owner, cfg.repo);
+    Toast.show('开始同步...', 'info');
+    try {
+      await SyncEngine.fullSync();
+      Toast.show('同步完成', 'success');
+      window.location.reload();
+    } catch (e) {
+      Toast.show('同步失败: ' + e.message, 'error');
+    }
+  };
+
+  if (syncConfigBtn) syncConfigBtn.addEventListener('click', openSyncModal);
+  if (syncBackdrop) syncBackdrop.addEventListener('click', closeSyncModal);
+  if (syncCancel) syncCancel.addEventListener('click', closeSyncModal);
+  if (syncSave) syncSave.addEventListener('click', saveSyncConfig);
+  if (syncNowBtn) syncNowBtn.addEventListener('click', doSync);
+
+  // 恢复已保存的同步配置到引擎
+  const savedCfg = Store.get('lts_sync_config') || {};
+  if (savedCfg.token) SyncEngine.configure(savedCfg.token, savedCfg.owner, savedCfg.repo);
 
   // 应用已保存的字号
   const savedSize = (getSettings().fontSize || 'normal');
@@ -177,6 +236,10 @@ export function afterRender() {
     if (vibBtn) vibBtn.removeEventListener('click', onToggle('pomodoroVibration', vibBtn));
     if (nicknameInput) nicknameInput.removeEventListener('input', saveProfile);
     if (gradeSelect) gradeSelect.removeEventListener('change', saveProfile);
-    if (syncBtn) syncBtn.removeEventListener('click', () => {});
+    if (syncConfigBtn) syncConfigBtn.removeEventListener('click', openSyncModal);
+    if (syncBackdrop) syncBackdrop.removeEventListener('click', closeSyncModal);
+    if (syncCancel) syncCancel.removeEventListener('click', closeSyncModal);
+    if (syncSave) syncSave.removeEventListener('click', saveSyncConfig);
+    if (syncNowBtn) syncNowBtn.removeEventListener('click', doSync);
   };
 }

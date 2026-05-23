@@ -145,3 +145,32 @@
   overflow: hidden;
   text-overflow: ellipsis;
 }
+.reading-item {
+  position: relative;
+}
+.reading-item-actions {
+  display: flex;
+  gap: var(--sp-1);
+  position: absolute;
+  top: var(--sp-2);
+  right: var(--sp-2);
+  opacity: 0;
+  transition: opacity var(--duration-fast) var(--ease);
+}
+.reading-item:hover .reading-item-actions {
+  opacity: 1;
+}
+.reading-edit-btn,
+.reading-delete-btn {
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-size: 14px;
+  padding: 2px;
+  border-radius: var(--r-sm);
+  transition: background var(--duration-fast) var(--ease);
+}
+.reading-edit-btn:hover,
+.reading-delete-btn:hover {
+  background: var(--color-surface-variant);
+}

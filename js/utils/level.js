@@ -82,3 +82,18 @@ export function calcTodayXP(records) {
   }
   return xp;
 }
+
+// 数字滚动动画（countUp）
+export function countUp(el, target, duration = 600) {
+  if (!el || target === 0) { if (el) el.textContent = '0'; return; }
+  const start = performance.now();
+  const initial = 0;
+  const step = (now) => {
+    const progress = Math.min((now - start) / duration, 1);
+    const eased = 1 - Math.pow(1 - progress, 3); // ease-out cubic
+    const current = Math.round(initial + (target - initial) * eased);
+    el.textContent = formatNumber(current);
+    if (progress < 1) requestAnimationFrame(step);
+  };
+  requestAnimationFrame(step);
+}

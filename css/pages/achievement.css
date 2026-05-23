@@ -1,0 +1,132 @@
+/* achievement.css — 成就浏览页样式 */
+
+.ach-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--sp-3);
+}
+
+.ach-progress {
+  font-size: var(--fs-sm);
+  color: var(--color-text-3);
+}
+
+.ach-section {
+  margin-bottom: var(--sp-4);
+}
+
+.ach-section-title {
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  color: var(--color-text-2);
+  margin-bottom: var(--sp-2);
+  padding-left: var(--sp-1);
+}
+
+.ach-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: var(--sp-2);
+}
+
+.ach-card {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  padding: var(--sp-2) var(--sp-3);
+  border-radius: var(--r-md);
+  background: rgba(255, 255, 255, 0.4);
+  transition: transform var(--duration-fast) var(--ease);
+}
+
+.ach-card:hover {
+  transform: translateY(-1px);
+}
+
+[data-theme="dark"] .ach-card {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.ach-card.locked {
+  opacity: 0.5;
+}
+
+.ach-card.locked .ach-name,
+.ach-card.locked .ach-desc {
+  color: var(--color-text-3);
+}
+
+.ach-icon {
+  font-size: 28px;
+  flex-shrink: 0;
+  width: 40px;
+  text-align: center;
+}
+
+.ach-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.ach-name {
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  color: var(--color-text-1);
+}
+
+.ach-desc {
+  font-size: var(--fs-xs);
+  color: var(--color-text-3);
+  margin-top: 2px;
+}
+
+.ach-rarity {
+  font-size: 10px;
+  padding: 1px 6px;
+  border-radius: var(--r-full);
+  margin-top: var(--sp-1);
+  display: inline-block;
+}
+
+/* Rarity colors */
+.ach-card.common .ach-rarity {
+  background: rgba(158, 158, 158, 0.15);
+  color: #9e9e9e;
+}
+
+.ach-card.rare .ach-rarity {
+  background: rgba(66, 165, 245, 0.15);
+  color: #42a5f5;
+}
+
+.ach-card.epic .ach-rarity {
+  background: rgba(171, 71, 188, 0.15);
+  color: #ab47bc;
+}
+
+.ach-card.legendary .ach-rarity {
+  background: rgba(255, 183, 77, 0.15);
+  color: #ffb74d;
+}
+
+/* View all link */
+.ach-view-all {
+  display: block;
+  text-align: center;
+  font-size: var(--fs-sm);
+  color: var(--color-accent);
+  margin-top: var(--sp-2);
+  text-decoration: none;
+}
+
+.ach-view-all:hover {
+  text-decoration: underline;
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+  .ach-grid {
+    grid-template-columns: 1fr;
+  }
+}

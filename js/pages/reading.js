@@ -3,7 +3,7 @@ import Store from '../store.js';
 import { STORAGE_KEYS as StorageKeys } from '../config.js';
 import EventBus from '../event-bus.js';
 import Toast from '../components/toast.js';
-import { loadECharts, initChart, disposeChart } from '../utils/charts.js';
+import { loadECharts, initChart, showChartLoading, hideChartLoading, disposeChart } from '../utils/charts.js';
 
 const getRecords = () => Store.get(StorageKeys.READING_RECORDS) || [];
 const saveRecords = (r) => Store.set(StorageKeys.READING_RECORDS, r);
@@ -60,7 +60,7 @@ function renderRecordList(records) {
   const items = records.slice(0, 20).map(r => {
     const date = r.timestamp ? new Date(r.timestamp).toLocaleDateString('zh-CN') : '';
     const rating = r.rating ? '⭐'.repeat(r.rating) : '';
-    return `<div class="reading-item">
+    return `<div class="reading-item" data-id="${r.recordID}">
       <div class="reading-item-header">
         <span class="reading-item-title">${r.bookTitle}</span>
         <span class="reading-item-date">${date}</span>
@@ -74,6 +74,10 @@ function renderRecordList(records) {
         <span>${r.durationMinutes || 0}分钟</span>
         ${r.pagesRead ? `<span>${r.pagesRead}页</span>` : ''}
         ${r.notes ? `<span class="reading-notes">${r.notes}</span>` : ''}
+      </div>
+      <div class="reading-item-actions">
+        <button class="reading-edit-btn" data-id="${r.recordID}" title="编辑">✏️</button>
+        <button class="reading-delete-btn" data-id="${r.recordID}" title="删除">🗑️</button>
       </div>
     </div>`;
   }).join('');
@@ -96,7 +100,7 @@ export function render() {
     ${renderBookshelf(records)}
     ${renderRecordList(records)}
     ${renderChartSection()}
-    <p style="color:var(--color-text-3);margin-top:var(--sp-3);font-size:var(--fs-xs)">v0.18 · 阅读系统</p>
+    <p style="color:var(--color-text-3);margin-top:var(--sp-3);font-size:var(--fs-xs)">v0.58 · 新增图表</p>
   </div>`;
 }
 
@@ -188,15 +192,133 @@ function openAddModal() {
   });
 }
 
-async function initCharts() {
-  const ec = await loadECharts();
-  if (!ec) return;
+// 编辑弹窗
+function openEditModal(recordID) {
   const records = getRecords();
-  if (records.length === 0) return;
+  const r = records.find(rec => rec.recordID === recordID);
+  if (!r) return;
+
+  const catOpts = CATEGORIES.map(c => `<option value="${c}"${r.category === c ? ' selected' : ''}>${c}</option>`).join('');
+  const fmtOpts = FORMATS.map(f => `<option value="${f.value}"${r.format === f.value ? ' selected' : ''}>${f.label}</option>`).join('');
+
+  const overlay = document.createElement('div');
+  overlay.className = 'entry-overlay';
+  overlay.id = 'reading-overlay';
+  overlay.innerHTML = `<div class="entry-modal">
+    <div class="entry-header">
+      <span class="entry-title">✏️ 编辑阅读记录</span>
+      <button class="entry-close" id="reading-close">✕</button>
+    </div>
+    <form id="reading-form" class="entry-form">
+      <div class="entry-field">
+        <label class="entry-label">书名 *</label>
+        <input type="text" id="rd-title" class="entry-input" required value="${r.bookTitle}">
+      </div>
+      <div class="entry-row">
+        <div class="entry-field entry-field-half">
+          <label class="entry-label">作者</label>
+          <input type="text" id="rd-author" class="entry-input" value="${r.author || ''}">
+        </div>
+        <div class="entry-field entry-field-half">
+          <label class="entry-label">分类</label>
+          <select id="rd-category" class="entry-select">${catOpts}</select>
+        </div>
+      </div>
+      <div class="entry-row">
+        <div class="entry-field entry-field-half">
+          <label class="entry-label">时长 (分钟) *</label>
+          <input type="number" id="rd-duration" class="entry-input" min="1" value="${r.durationMinutes || 30}" required>
+        </div>
+        <div class="entry-field entry-field-half">
+          <label class="entry-label">页数</label>
+          <input type="number" id="rd-pages" class="entry-input" min="0" value="${r.pagesRead || 0}">
+        </div>
+      </div>
+      <div class="entry-row">
+        <div class="entry-field entry-field-half">
+          <label class="entry-label">格式</label>
+          <select id="rd-format" class="entry-select">${fmtOpts}</select>
+        </div>
+        <div class="entry-field entry-field-half">
+          <label class="entry-label">评分</label>
+          <select id="rd-rating" class="entry-select">
+            <option value="">不评分</option>
+            ${[1,2,3,4,5].map(i => `<option value="${i}"${r.rating === i ? ' selected' : ''}>${'⭐'.repeat(i)}</option>`).join('')}
+          </select>
+        </div>
+      </div>
+      <div class="entry-field">
+        <label class="entry-label">笔记</label>
+        <textarea id="rd-notes" class="entry-textarea" rows="2">${r.notes || ''}</textarea>
+      </div>
+      <button type="submit" class="entry-submit">保存修改</button>
+    </form>
+  </div>`;
+
+  document.body.appendChild(overlay);
+  document.getElementById('reading-close').addEventListener('click', () => overlay.remove());
+  overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
+
+  document.getElementById('reading-form').addEventListener('submit', (e) => {
+    e.preventDefault();
+    r.bookTitle = document.getElementById('rd-title').value;
+    r.author = document.getElementById('rd-author').value || '';
+    r.category = document.getElementById('rd-category').value;
+    r.durationMinutes = parseInt(document.getElementById('rd-duration').value, 10) || 30;
+    r.pagesRead = parseInt(document.getElementById('rd-pages').value, 10) || 0;
+    r.format = document.getElementById('rd-format').value;
+    r.rating = parseInt(document.getElementById('rd-rating').value, 10) || 0;
+    r.notes = document.getElementById('rd-notes').value || '';
+    saveRecords(records);
+    overlay.remove();
+    Toast.show('阅读记录已更新', 'success');
+    window.location.reload();
+  });
+}
+
+// 删除确认
+function deleteRecord(recordID) {
+  const records = getRecords();
+  const r = records.find(rec => rec.recordID === recordID);
+  if (!r) return;
+
+  const overlay = document.createElement('div');
+  overlay.className = 'entry-overlay';
+  overlay.id = 'reading-overlay';
+  overlay.innerHTML = `<div class="entry-modal" style="max-width:300px">
+    <div class="entry-header"><span class="entry-title">确认删除</span></div>
+    <p style="padding:var(--sp-2);color:var(--color-text-2);font-size:var(--fs-sm)">删除「${r.bookTitle}」的阅读记录？此操作不可撤销。</p>
+    <div style="display:flex;gap:var(--sp-2);padding:var(--sp-2);justify-content:flex-end">
+      <button class="settings-btn" id="del-cancel">取消</button>
+      <button class="settings-btn" id="del-confirm" style="color:var(--color-error)">删除</button>
+    </div>
+  </div>`;
+
+  document.body.appendChild(overlay);
+  document.getElementById('del-cancel').addEventListener('click', () => overlay.remove());
+  document.getElementById('del-confirm').addEventListener('click', () => {
+    const updated = records.filter(rec => rec.recordID !== recordID);
+    saveRecords(updated);
+    overlay.remove();
+    Toast.show('阅读记录已删除', 'success');
+    window.location.reload();
+  });
+}
+
+async function initCharts() {
+  const monthlyEl = document.getElementById('reading-monthly-chart');
+  const catEl = document.getElementById('reading-category-chart');
+  if (monthlyEl) showChartLoading(monthlyEl);
+  if (catEl) showChartLoading(catEl);
+
+  const ec = await loadECharts();
+  if (!ec) { if (monthlyEl) hideChartLoading(monthlyEl); if (catEl) hideChartLoading(catEl); return; }
+  const records = getRecords();
+  if (records.length === 0) { if (monthlyEl) hideChartLoading(monthlyEl); if (catEl) hideChartLoading(catEl); return; }
 
   // 月度柱状图
-  const monthlyEl = document.getElementById('reading-monthly-chart');
   if (monthlyEl) {
+    hideChartLoading(monthlyEl);
     const chart = initChart(monthlyEl);
     if (chart) {
       chartInstances.push(chart);
@@ -217,8 +339,8 @@ async function initCharts() {
   }
 
   // 分类饼图
-  const catEl = document.getElementById('reading-category-chart');
   if (catEl) {
+    hideChartLoading(catEl);
     const chart = initChart(catEl);
     if (chart) {
       chartInstances.push(chart);
@@ -244,6 +366,14 @@ export function afterRender() {
   const onAdd = () => openAddModal();
   addBtn.addEventListener('click', onAdd);
 
+  // 编辑/删除按钮
+  const editBtns = document.querySelectorAll('.reading-edit-btn');
+  const deleteBtns = document.querySelectorAll('.reading-delete-btn');
+  const onEdit = (e) => openEditModal(e.currentTarget.dataset.id);
+  const onDelete = (e) => deleteRecord(e.currentTarget.dataset.id);
+  editBtns.forEach(b => b.addEventListener('click', onEdit));
+  deleteBtns.forEach(b => b.addEventListener('click', onDelete));
+
   // 折叠面板
   const foldHeaders = document.querySelectorAll('.fold-header');
   const onFold = (e) => {
@@ -258,6 +388,8 @@ export function afterRender() {
 
   return () => {
     addBtn.removeEventListener('click', onAdd);
+    editBtns.forEach(b => b.removeEventListener('click', onEdit));
+    deleteBtns.forEach(b => b.removeEventListener('click', onDelete));
     foldHeaders.forEach(h => h.removeEventListener('click', onFold));
     chartInstances.forEach(c => disposeChart(c));
     chartInstances = [];

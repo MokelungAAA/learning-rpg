@@ -14,10 +14,86 @@
   to { opacity: 1; transform: translateX(0); }
 }
 
+@keyframes cardEnter {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes numberPop {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.15); }
+  100% { transform: scale(1); }
+}
+
+@keyframes progressFill {
+  from { width: 0; }
+}
+
 .page-enter {
   animation: slideUp var(--duration-normal) var(--ease) forwards;
 }
 
 .page-fade {
   animation: fadeIn var(--duration-normal) var(--ease) forwards;
+}
+
+/* 卡片进入动画（stagger） */
+.card-enter {
+  animation: cardEnter 300ms var(--ease) forwards;
+  opacity: 0;
+}
+.card-enter:nth-child(1) { animation-delay: 0ms; }
+.card-enter:nth-child(2) { animation-delay: 50ms; }
+.card-enter:nth-child(3) { animation-delay: 100ms; }
+.card-enter:nth-child(4) { animation-delay: 150ms; }
+.card-enter:nth-child(5) { animation-delay: 200ms; }
+.card-enter:nth-child(6) { animation-delay: 250ms; }
+.card-enter:nth-child(7) { animation-delay: 300ms; }
+.card-enter:nth-child(8) { animation-delay: 350ms; }
+.card-enter:nth-child(9) { animation-delay: 400ms; }
+
+/* 卡片hover效果（桌面端） */
+@media (hover: hover) {
+  .subject-card,
+  .stat-card,
+  .fold-section,
+  .tb-item,
+  .review-item,
+  .log-item,
+  .achievement-badge,
+  .queue-item,
+  .rec-review-item {
+    transition: transform var(--duration-fast) var(--ease),
+                box-shadow var(--duration-fast) var(--ease);
+  }
+  .subject-card:hover,
+  .stat-card:hover,
+  .achievement-badge:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+  }
+  .fold-section:hover {
+    box-shadow: var(--shadow-sm);
+  }
+}
+
+/* 按钮active反馈 */
+button, .pill, .rec-action, .queue-review-btn, .pomo-start-btn, .pomo-action-btn {
+  transition: transform var(--duration-fast) var(--ease),
+              opacity var(--duration-fast) var(--ease);
+}
+button:active, .pill:active, .rec-action:active, .queue-review-btn:active,
+.pomo-start-btn:active, .pomo-action-btn:active {
+  transform: scale(0.96);
+  opacity: 0.85;
+}
+
+/* 进度条填充动画 */
+.progress-fill {
+  transition: width 800ms var(--ease);
+}
+
+/* 数字pop效果 */
+.number-pop {
+  animation: numberPop 300ms var(--ease-spring);
 }

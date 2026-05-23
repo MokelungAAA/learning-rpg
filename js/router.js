@@ -51,7 +51,8 @@ class Router {
 
   matchPattern(pattern, hash) {
     const patternParts = pattern.split('/');
-    const hashParts = hash.split('/');
+    const cleanHash = hash.split('?')[0];
+    const hashParts = cleanHash.split('/');
 
     if (patternParts.length !== hashParts.length) return null;
 

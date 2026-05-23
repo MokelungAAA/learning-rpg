@@ -15,11 +15,22 @@
   cursor: pointer; font-size: 16px; padding: 4px;
 }
 .search-history {
-  display: flex; align-items: center; gap: 8px;
-  flex-wrap: wrap; margin-bottom: var(--sp-3);
+  margin-bottom: var(--sp-3);
+}
+.search-history-top {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: var(--sp-1);
 }
 .search-history-label {
   font-size: var(--fs-xs); color: var(--color-text-3);
+}
+.search-history-clear {
+  background: none; border: none; color: var(--color-text-3);
+  font-size: var(--fs-xs); cursor: pointer; padding: 2px 6px;
+}
+.search-history-clear:hover { color: var(--color-error); }
+.search-history-tags {
+  display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
 }
 .search-history-tag {
   padding: 4px 12px; border-radius: var(--r-full);

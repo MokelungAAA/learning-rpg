@@ -1,7 +1,7 @@
 // sync-engine.js — GitHub Contents API 同步引擎
 import Storage from './store.js';
 import EventBus from './event-bus.js';
-import { StorageKeys } from './config.js';
+import { STORAGE_KEYS as StorageKeys } from './config.js';
 
 class SyncEngine {
   constructor() {

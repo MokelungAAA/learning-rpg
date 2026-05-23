@@ -59,6 +59,20 @@ export function initChart(container) {
   return chart;
 }
 
+export function showChartLoading(container) {
+  if (!container || container.querySelector('.chart-loading')) return;
+  const loader = document.createElement('div');
+  loader.className = 'chart-loading';
+  loader.innerHTML = '<div class="chart-loading-spinner"></div><div class="chart-loading-text">加载图表中...</div>';
+  container.appendChild(loader);
+}
+
+export function hideChartLoading(container) {
+  if (!container) return;
+  const loader = container.querySelector('.chart-loading');
+  if (loader) loader.remove();
+}
+
 // VIEW-10: 30天XP趋势折线图
 export function renderXPTrendChart(chart, records) {
   if (!chart) return;
@@ -245,6 +259,103 @@ export function renderTimeSlotChart(chart, records) {
   });
 }
 
+// VIEW-15: 得分率趋势折线图 (最近30天)
+export function renderScoreTrendChart(chart, records) {
+  if (!chart) return;
+  const theme = getChartTheme();
+  const today = new Date();
+  const days = [];
+  const scoreData = [];
+
+  for (let i = 29; i >= 0; i--) {
+    const d = new Date(today);
+    d.setDate(d.getDate() - i);
+    const key = d.toISOString().slice(0, 10);
+    days.push(key.slice(5));
+    const dayRecs = records.filter(r => r.timestamp && new Date(r.timestamp).toISOString().slice(0, 10) === key && r.score > 0);
+    const avg = dayRecs.length > 0 ? Math.round(dayRecs.reduce((s, r) => s + r.score, 0) / dayRecs.length) : null;
+    scoreData.push(avg);
+  }
+
+  chart.setOption({
+    backgroundColor: theme.bgColor,
+    tooltip: {
+      trigger: 'axis', backgroundColor: 'rgba(0,0,0,0.75)', textStyle: { color: '#fff', fontSize: 12 },
+      formatter: (p) => {
+        const v = p[0].value;
+        return `${p[0].axisValue}<br/>得分率: ${v != null ? v + '%' : '无数据'}`;
+      },
+    },
+    grid: { left: 40, right: 16, top: 24, bottom: 28 },
+    xAxis: {
+      type: 'category', data: days, boundaryGap: false,
+      axisLine: { lineStyle: { color: theme.gridColor } },
+      axisLabel: { color: theme.textColor, fontSize: 10, interval: 4 },
+    },
+    yAxis: {
+      type: 'value', min: 0, max: 100, name: '%',
+      axisLine: { show: false },
+      splitLine: { lineStyle: { color: theme.gridColor } },
+      axisLabel: { color: theme.textColor, fontSize: 10 },
+    },
+    series: [{
+      type: 'line', data: scoreData, smooth: true, connectNulls: true, symbol: 'circle', symbolSize: 4,
+      lineStyle: { color: theme.success, width: 2 },
+      itemStyle: { color: theme.success },
+      areaStyle: { color: { type: 'linear', x: 0, y: 0, x2: 0, y2: 1, colorStops: [
+        { offset: 0, color: theme.success + '30' },
+        { offset: 1, color: theme.success + '05' },
+      ]}},
+      markLine: {
+        silent: true, lineStyle: { color: theme.warning, type: 'dashed', width: 1 },
+        data: [{ yAxis: 60, label: { formatter: '及格线', fontSize: 10, color: theme.textColor } }],
+      },
+    }],
+  });
+}
+
+// VIEW-16: 输入输出比例环形图 (练习 vs 订正 vs 阅读 vs 网课)
+export function renderIORatioChart(chart, records) {
+  if (!chart) return;
+  const theme = getChartTheme();
+  const activityMap = { practice: '做题', review: '订正', reading: '阅读', video: '网课' };
+  const activityColors = { practice: theme.accent, review: theme.success, reading: theme.warning, video: '#9333ea' };
+
+  const byType = {};
+  for (const r of records) {
+    const type = r.activityType || 'practice';
+    byType[type] = (byType[type] || 0) + (r.duration || 0);
+  }
+
+  const pieData = Object.entries(byType).map(([type, value]) => ({
+    name: activityMap[type] || type,
+    value,
+    itemStyle: { color: activityColors[type] || '#6b7280' },
+  }));
+
+  if (pieData.length === 0) {
+    pieData.push({ name: '暂无数据', value: 1, itemStyle: { color: theme.gridColor } });
+  }
+
+  chart.setOption({
+    backgroundColor: theme.bgColor,
+    tooltip: {
+      backgroundColor: 'rgba(0,0,0,0.75)', textStyle: { color: '#fff', fontSize: 12 },
+      formatter: (p) => `${p.name}<br/>${p.value} 分钟 (${p.percent}%)`,
+    },
+    legend: {
+      bottom: 0, textStyle: { color: theme.textColor, fontSize: 11 },
+      itemWidth: 10, itemHeight: 10,
+    },
+    series: [{
+      type: 'pie', radius: ['45%', '70%'], center: ['50%', '45%'],
+      data: pieData,
+      label: { show: true, fontSize: 11, color: theme.textColor, formatter: '{b}\n{d}%' },
+      emphasis: { itemStyle: { shadowBlur: 10, shadowColor: 'rgba(0,0,0,0.3)' } },
+    }],
+  });
+}
+
 export function disposeChart(chart) {
-  if (chart && chart.dispose) chart.dispose();
+  try { if (chart && chart.dispose) chart.dispose(); } catch {}
 }
