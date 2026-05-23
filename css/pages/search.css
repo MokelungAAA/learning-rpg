@@ -53,6 +53,7 @@
   transition: background var(--duration-fast) var(--ease);
 }
 .search-result-item:hover { background: var(--color-surface-variant); }
+.search-result-item.search-active { background: var(--color-surface-variant); outline: 2px solid var(--color-accent); }
 .search-result-icon { font-size: 20px; flex-shrink: 0; width: 28px; text-align: center; }
 .search-result-text { flex: 1; min-width: 0; }
 .search-result-title { font-size: var(--fs-sm); font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }

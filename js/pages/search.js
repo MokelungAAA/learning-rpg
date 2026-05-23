@@ -24,6 +24,36 @@ function addToHistory(query) {
 // 拼音首字母简拼映射（支持输入 sx 匹配"数学"）
 const PINYIN_MAP = { '数学': 'sx', '语文': 'yw', '英语': 'yy', '物理': 'wl', '化学': 'hx', '生物': 'sw', '政治': 'zz', '历史': 'ls', '地理': 'dl' };
 
+// Levenshtein 编辑距离（模糊匹配，距离<=2 视为匹配）
+function levenshtein(a, b) {
+  if (a.length === 0) return b.length;
+  if (b.length === 0) return a.length;
+  const matrix = [];
+  for (let i = 0; i <= b.length; i++) matrix[i] = [i];
+  for (let j = 0; j <= a.length; j++) matrix[0][j] = j;
+  for (let i = 1; i <= b.length; i++) {
+    for (let j = 1; j <= a.length; j++) {
+      matrix[i][j] = b[i - 1] === a[j - 1]
+        ? matrix[i - 1][j - 1]
+        : Math.min(matrix[i - 1][j - 1] + 1, matrix[i][j - 1] + 1, matrix[i - 1][j] + 1);
+    }
+  }
+  return matrix[b.length][a.length];
+}
+
+function fuzzyMatch(text, query) {
+  const t = text.toLowerCase(), q = query.toLowerCase();
+  if (t.includes(q)) return true;
+  // 前缀匹配
+  if (t.startsWith(q.slice(0, Math.ceil(q.length * 0.6)))) return true;
+  // Levenshtein: 对短文本做精确模糊，长文本按子串窗口滑动
+  if (t.length <= 8 && levenshtein(t, q) <= 2) return true;
+  for (let i = 0; i <= t.length - q.length; i++) {
+    if (levenshtein(t.slice(i, i + q.length), q) <= 2) return true;
+  }
+  return false;
+}
+
 // 拼音首字母匹配（仅支持9个学科名）
 function matchPinyin(text, query) {
   const pinyin = PINYIN_MAP[text];
@@ -38,30 +68,30 @@ function searchAll(query) {
   const q = query.toLowerCase();
   const results = [];
 
-  // 搜索学科
+  // 搜索学科（精确+拼音+模糊）
   for (const s of SUBJECTS) {
-    if (s.name.includes(q) || s.id.includes(q) || matchPinyin(s.name, q)) {
+    if (s.name.includes(q) || s.id.includes(q) || matchPinyin(s.name, q) || fuzzyMatch(s.name, q)) {
       results.push({ type: 'subject', icon: getSubjectIcon(s.id), title: s.name, desc: '学科', hash: `#/subject/${s.id}` });
     }
   }
 
-  // 搜索教材/章节/知识点
+  // 搜索教材/章节/知识点（精确+模糊）
   for (const [sid, data] of Object.entries(SUBJECTS_DATA)) {
     if (!data.textbooks) continue;
     for (const tb of data.textbooks) {
-      if (tb.name.toLowerCase().includes(q)) {
+      if (fuzzyMatch(tb.name, q)) {
         results.push({ type: 'textbook', icon: '📚', title: tb.name, desc: data.name, hash: `#/data/log?q=${encodeURIComponent(tb.name.slice(0, 6))}` });
       }
       for (const ch of (tb.chapters || [])) {
-        if (ch.name.toLowerCase().includes(q)) {
+        if (fuzzyMatch(ch.name, q)) {
           results.push({ type: 'chapter', icon: '📖', title: ch.name, desc: tb.name, hash: `#/data/log?q=${encodeURIComponent(ch.name.slice(0, 6))}` });
         }
         for (const sec of (ch.sections || [])) {
-          if (sec.name.toLowerCase().includes(q)) {
+          if (fuzzyMatch(sec.name, q)) {
             results.push({ type: 'section', icon: '📝', title: sec.name, desc: ch.name, hash: `#/data/log?q=${encodeURIComponent(sec.name.slice(0, 6))}` });
           }
           for (const kp of (sec.knowledgePoints || [])) {
-            if (kp.toLowerCase().includes(q)) {
+            if (fuzzyMatch(kp, q)) {
               results.push({ type: 'kp', icon: '💡', title: kp, desc: sec.name, hash: `#/data/log?q=${encodeURIComponent(kp)}` });
             }
           }
@@ -70,21 +100,21 @@ function searchAll(query) {
     }
   }
 
-  // 搜索技能树知识点
+  // 搜索技能树知识点（精确+模糊）
   const allSkills = getAllSkills();
   for (const skill of allSkills) {
     for (const kp of skill.kps) {
-      if (kp.toLowerCase().includes(q)) {
+      if (fuzzyMatch(kp, q)) {
         results.push({ type: 'skill-kp', icon: '🌳', title: kp, desc: `${skill.subjectName} · ${skill.name}`, hash: '#/data/skill-tree' });
       }
     }
   }
 
-  // 搜索学习记录
+  // 搜索学习记录（精确+模糊）
   const records = Store.get(StorageKeys.STUDY_RECORDS) || [];
   for (const r of records) {
-    const text = [r.subject, r.textbook, r.section, r.notes, ...(r.knowledgePoints || [])].join(' ').toLowerCase();
-    if (text.includes(q)) {
+    const text = [r.subject, r.textbook, r.section, r.notes, ...(r.knowledgePoints || [])].join(' ');
+    if (fuzzyMatch(text, q)) {
       const date = r.timestamp ? new Date(r.timestamp).toLocaleDateString('zh-CN') : '';
       results.push({ type: 'record', icon: '📋', title: `${r.subject || '学习'} · ${r.duration || 0}分钟`, desc: `${date} ${r.notes || ''}`.trim(), hash: '#/data/log' });
     }
@@ -111,7 +141,7 @@ function searchAll(query) {
     { label: '设置', icon: '⚙️', hash: '#/settings' },
   ];
   for (const p of pages) {
-    if (p.label.includes(q) || matchPinyin(p.label, q)) {
+    if (p.label.includes(q) || matchPinyin(p.label, q) || fuzzyMatch(p.label, q)) {
       results.push({ type: 'page', icon: p.icon, title: p.label, desc: '页面', hash: p.hash });
     }
   }
@@ -168,26 +198,49 @@ export function render() {
   </div>`;
 }
 
-// afterRender: 输入防抖(200ms) + 历史标签 + 清除按钮 + 结果点击保存历史
+// afterRender: 输入防抖(200ms) + 历史标签 + 清除按钮 + 键盘导航 + 结果点击保存历史
 export function afterRender() {
   const input = document.getElementById('search-input');
   const clearBtn = document.getElementById('search-clear');
   const resultsEl = document.getElementById('search-results');
   let debounce = null;
+  let activeIdx = -1;
 
   const doSearch = () => {
     const q = input.value.trim();
     clearBtn.style.display = q ? 'block' : 'none';
+    activeIdx = -1;
     if (!q) { resultsEl.innerHTML = ''; return; }
     const results = searchAll(q);
     resultsEl.innerHTML = renderResults(results);
+    addToHistory(q);
+  };
+
+  const getResultItems = () => resultsEl.querySelectorAll('.search-result-item');
+
+  const updateActive = () => {
+    const items = getResultItems();
+    items.forEach((el, i) => el.classList.toggle('search-active', i === activeIdx));
+    if (items[activeIdx]) items[activeIdx].scrollIntoView({ block: 'nearest' });
   };
 
   const onInput = () => { clearTimeout(debounce); debounce = setTimeout(doSearch, 200); };
-  const onClear = () => { input.value = ''; clearBtn.style.display = 'none'; resultsEl.innerHTML = ''; input.focus(); };
+  const onClear = () => { input.value = ''; clearBtn.style.display = 'none'; resultsEl.innerHTML = ''; activeIdx = -1; input.focus(); };
   const onKeydown = (e) => {
-    if (e.key === 'Enter' && input.value.trim()) {
-      addToHistory(input.value.trim());
+    const items = getResultItems();
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      activeIdx = Math.min(activeIdx + 1, items.length - 1);
+      updateActive();
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      activeIdx = Math.max(activeIdx - 1, 0);
+      updateActive();
+    } else if (e.key === 'Enter') {
+      if (activeIdx >= 0 && items[activeIdx]) {
+        e.preventDefault();
+        items[activeIdx].click();
+      }
     }
   };
 
