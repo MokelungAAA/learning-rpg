@@ -216,6 +216,12 @@ export function afterRender() {
   const onFabClick = () => DataEntry.open();
   if (fab) fab.addEventListener('click', onFabClick);
 
+  // ENTRY-06: 记录保存后刷新页面
+  const onRecordAdded = () => {
+    window.location.reload();
+  };
+  EventBus.on('record:added', onRecordAdded);
+
   return () => {
     themeBtn.removeEventListener('click', onThemeBtn);
     EventBus.off('theme:changed', onThemeChanged);
@@ -223,5 +229,6 @@ export function afterRender() {
     recBtns.forEach(b => b.removeEventListener('click', onRecClick));
     subjectCards.forEach(c => c.removeEventListener('click', onSubjectClick));
     if (fab) fab.removeEventListener('click', onFabClick);
+    EventBus.off('record:added', onRecordAdded);
   };
 }

@@ -1,13 +1,55 @@
-// data-entry.js — 数据录入弹窗（ENTRY-01~02：UI + 三级联动下拉）
+// data-entry.js — 数据录入弹窗（ENTRY-01~06：UI + 联动 + 搜索 + 自动推断 + 全链路）
 import Store from '../store.js';
 import { SUBJECTS, STORAGE_KEYS as StorageKeys } from '../config.js';
 import { SUBJECTS_DATA, getSubjectById } from '../data/subjects.js';
+import { getAllKnowledgePoints } from '../data/subjects.js';
 import EventBus from '../event-bus.js';
 import Toast from './toast.js';
 
 let isOpen = false;
 let currentSubject = '';
 let currentTextbook = '';
+
+// ENTRY-03: 倒排索引 — 构建所有知识点的搜索索引
+let kpIndex = [];
+function buildKPIndex() {
+  kpIndex = [];
+  for (const [sid, data] of Object.entries(SUBJECTS_DATA)) {
+    if (!data.textbooks) continue;
+    for (const tb of data.textbooks) {
+      for (const ch of tb.chapters) {
+        for (const sec of ch.sections) {
+          for (const kp of (sec.knowledgePoints || [])) {
+            kpIndex.push({ kp, subjectId: sid, subjectName: data.name, textbook: tb.name, chapter: ch.name, section: sec.name });
+          }
+        }
+      }
+    }
+  }
+}
+
+// 5级匹配：精确 > 前缀 > 子串 > 模糊(字符集) > 拼音首字母
+function searchKP(query) {
+  if (!query) return [];
+  const q = query.toLowerCase();
+  const exact = [], prefix = [], substring = [], fuzzy = [];
+  for (const item of kpIndex) {
+    const name = item.kp.toLowerCase();
+    if (name === q) exact.push(item);
+    else if (name.startsWith(q)) prefix.push(item);
+    else if (name.includes(q)) substring.push(item);
+    else if (isFuzzyMatch(name, q)) fuzzy.push(item);
+  }
+  return [...exact, ...prefix, ...substring, ...fuzzy].slice(0, 10);
+}
+
+function isFuzzyMatch(name, query) {
+  let qi = 0;
+  for (let i = 0; i < name.length && qi < query.length; i++) {
+    if (name[i] === query[qi]) qi++;
+  }
+  return qi === query.length;
+}
 
 function getSubjectOptions() {
   return SUBJECTS.map(s => `<option value="${s.id}">${s.name}</option>`).join('');
@@ -50,6 +92,7 @@ function getKPOptions(subjectId, textbookId, chapterId, sectionId) {
 }
 
 function renderModal() {
+  buildKPIndex();
   return `<div class="entry-overlay" id="entry-overlay">
     <div class="entry-modal">
       <div class="entry-header">
@@ -57,6 +100,11 @@ function renderModal() {
         <button class="entry-close" id="entry-close">✕</button>
       </div>
       <form id="entry-form" class="entry-form">
+        <div class="entry-field">
+          <label class="entry-label">搜索知识点</label>
+          <input type="text" id="entry-search" class="entry-input" placeholder="输入知识点名称搜索...">
+          <div id="entry-search-results" class="entry-search-results"></div>
+        </div>
         <div class="entry-field">
           <label class="entry-label">学科 *</label>
           <select id="entry-subject" class="entry-select" required>
@@ -94,6 +142,16 @@ function renderModal() {
           <div class="entry-field entry-field-half">
             <label class="entry-label">时长 (分钟) *</label>
             <input type="number" id="entry-duration" class="entry-input" min="1" value="30" required placeholder="30">
+          </div>
+        </div>
+        <div class="entry-row">
+          <div class="entry-field entry-field-half">
+            <label class="entry-label">做题时长</label>
+            <input type="number" id="entry-practice-dur" class="entry-input" min="0" value="24" placeholder="自动">
+          </div>
+          <div class="entry-field entry-field-half">
+            <label class="entry-label">订正时长</label>
+            <input type="number" id="entry-review-dur" class="entry-input" min="0" value="6" placeholder="自动">
           </div>
         </div>
         <div class="entry-field">
@@ -183,6 +241,59 @@ function bindEvents() {
     chips.innerHTML = kps.map(kp => `<label class="kp-chip"><input type="checkbox" value="${kp}"><span>${kp}</span></label>`).join('');
   });
 
+  // ENTRY-03: 搜索知识点
+  const searchInput = document.getElementById('entry-search');
+  const searchResults = document.getElementById('entry-search-results');
+  let searchTimer = null;
+  searchInput.addEventListener('input', () => {
+    clearTimeout(searchTimer);
+    searchTimer = setTimeout(() => {
+      const results = searchKP(searchInput.value.trim());
+      if (results.length === 0) {
+        searchResults.innerHTML = searchInput.value ? '<div class="search-empty">无匹配结果</div>' : '';
+        return;
+      }
+      searchResults.innerHTML = results.map(r => `<div class="search-result-item" data-subject="${r.subjectId}" data-textbook="${r.textbook}" data-kp="${r.kp}">
+        <span class="search-kp">${r.kp}</span>
+        <span class="search-meta">${r.subjectName} · ${r.chapter}</span>
+      </div>`).join('');
+    }, 200);
+  });
+
+  searchResults.addEventListener('click', (e) => {
+    const item = e.target.closest('.search-result-item');
+    if (!item) return;
+    const { subject: subjId, textbook, kp } = item.dataset;
+    // 自动选中学科
+    subjectSelect.value = subjId;
+    subjectSelect.dispatchEvent(new Event('change'));
+    // 自动选中教材
+    setTimeout(() => {
+      const tbOptions = textbookSelect.options;
+      for (let i = 0; i < tbOptions.length; i++) {
+        if (tbOptions[i].text === textbook) { textbookSelect.value = tbOptions[i].value; break; }
+      }
+      textbookSelect.dispatchEvent(new Event('change'));
+    }, 50);
+    // 选中知识点
+    setTimeout(() => {
+      const chips = document.querySelectorAll('#entry-kp-chips input');
+      chips.forEach(cb => { if (cb.value === kp) cb.checked = true; });
+    }, 200);
+    searchResults.innerHTML = '';
+    searchInput.value = '';
+  });
+
+  // ENTRY-05: 时长自动推断（做题80% + 订正20%）
+  const durationInput = document.getElementById('entry-duration');
+  const practiceInput = document.getElementById('entry-practice-dur');
+  const reviewInput = document.getElementById('entry-review-dur');
+  durationInput.addEventListener('input', () => {
+    const dur = parseInt(durationInput.value, 10) || 0;
+    practiceInput.value = Math.round(dur * 0.8);
+    reviewInput.value = Math.round(dur * 0.2);
+  });
+
   // 提交
   form.addEventListener('submit', (e) => {
     e.preventDefault();
@@ -195,6 +306,10 @@ function bindEvents() {
     const section = sectionSelect.options[sectionSelect.selectedIndex]?.text || '';
     const selectedKPs = [...document.querySelectorAll('#entry-kp-chips input:checked')].map(cb => cb.value);
 
+    const score = parseInt(document.getElementById('entry-score').value, 10) || 0;
+    const practiceDur = parseInt(document.getElementById('entry-practice-dur').value, 10) || Math.round(duration * 0.8);
+    const reviewDur = parseInt(document.getElementById('entry-review-dur').value, 10) || Math.round(duration * 0.2);
+
     const record = {
       id: 'rec-' + Date.now() + '-' + Math.random().toString(36).slice(2, 6),
       timestamp: new Date().toISOString(),
@@ -203,11 +318,13 @@ function bindEvents() {
       chapter: chapter !== '选择章节' ? chapter : '',
       section: section !== '选择小节' ? section : '',
       knowledgePoints: selectedKPs,
-      score: parseInt(document.getElementById('entry-score').value, 10) || 0,
+      score,
       duration,
+      practiceDuration: practiceDur,
+      reviewDuration: reviewDur,
       activityType: document.getElementById('entry-activity').value,
       notes: document.getElementById('entry-notes').value || '',
-      xp: Math.max(1, Math.round((parseInt(document.getElementById('entry-score').value, 10) || 50) * duration / 20)),
+      xp: Math.max(1, Math.round(score * duration / 20)),
     };
 
     const records = Store.get(StorageKeys.STUDY_RECORDS) || [];
