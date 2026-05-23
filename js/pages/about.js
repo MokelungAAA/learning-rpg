@@ -1,5 +1,6 @@
 // about.js — 关于页（版本信息+致谢+历史）
 const VERSION_HISTORY = [
+  { version: 'v0.59', date: '2026-05-23', desc: '响应式增强 — 桌面侧边栏+平板双列+多断点适配' },
   { version: 'v0.58', date: '2026-05-23', desc: '新增图表 — 得分率趋势+输入输出比例+导航栏L型布局' },
   { version: 'v0.57', date: '2026-05-23', desc: '导航栏重构 — 4Tab+番茄钟独立入口+分隔线' },
   { version: 'v0.57', date: '2026-05-23', desc: 'CSS变量统一 — 缺失变量补全+深色模式对齐+搜索成就过滤' },
@@ -46,7 +47,7 @@ export function render() {
       <div class="about-hero">
         <div class="about-logo">LTS</div>
         <div class="about-title">学习RPG · 认知操作系统</div>
-        <div class="about-version">v0.58</div>
+        <div class="about-version">v0.59</div>
         <div class="about-credit">Created by 墨澜 × Miku</div>
       </div>
       <div class="about-section">

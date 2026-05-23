@@ -1,21 +1,110 @@
 /* responsive.css — Breakpoints (mobile first) */
-/* Tablet */
+
+/* === Tablet (768px+) === */
 @media (min-width: 768px) {
   :root {
     --content-max-width: 720px;
   }
-}
 
-/* Desktop */
-@media (min-width: 1024px) {
-  :root {
-    --content-max-width: 960px;
+  /* Hero stats: 4 columns */
+  .hero-stats {
+    grid-template-columns: repeat(4, 1fr) !important;
+  }
+
+  /* Subject grid: 4 columns on tablet */
+  .subject-grid {
+    grid-template-columns: repeat(4, 1fr) !important;
+  }
+
+  /* Achievement list: 2 columns */
+  .achievement-list {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--sp-2);
+  }
+
+  /* Log list wider cards */
+  .log-card {
+    padding: var(--sp-3) var(--sp-4);
+  }
+
+  /* Reading grid 2 columns */
+  .reading-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+
+  /* Settings sections 2 columns */
+  .settings-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--sp-3);
   }
 }
 
-/* Large Desktop */
+/* === Desktop (1024px+) — Sidebar layout === */
+@media (min-width: 1024px) {
+  :root {
+    --content-max-width: 960px;
+    --sidebar-width: 220px;
+  }
+
+  /* Hide bottom nav on desktop */
+  .bottom-nav {
+    display: none !important;
+  }
+
+  /* Show sidebar on desktop */
+  .sidebar-nav {
+    display: flex !important;
+  }
+
+  /* Body shifts right to make room for sidebar */
+  body {
+    padding-left: var(--sidebar-width);
+  }
+
+  /* Page container full width minus sidebar */
+  #page-container {
+    max-width: calc(var(--content-max-width) - var(--sidebar-width) + var(--content-max-width));
+    padding-left: var(--sp-4);
+    padding-right: var(--sp-4);
+  }
+
+  /* Subject grid: 4 columns on desktop */
+  .subject-grid {
+    grid-template-columns: repeat(4, 1fr) !important;
+  }
+
+  /* Hero stats: 4 columns */
+  .hero-stats {
+    grid-template-columns: repeat(4, 1fr) !important;
+  }
+
+  /* Reading grid: 3 columns */
+  .reading-grid {
+    grid-template-columns: repeat(3, 1fr) !important;
+  }
+
+  /* Achievement list: 2 columns */
+  .achievement-list {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+/* === Large Desktop (1280px+) === */
 @media (min-width: 1280px) {
   :root {
-    --content-max-width: 1200px;
+    --content-max-width: 1040px;
+    --sidebar-width: 240px;
+  }
+
+  /* Subject grid: 5 columns */
+  .subject-grid {
+    grid-template-columns: repeat(5, 1fr) !important;
+  }
+
+  /* Reading grid: 4 columns */
+  .reading-grid {
+    grid-template-columns: repeat(4, 1fr) !important;
   }
 }
