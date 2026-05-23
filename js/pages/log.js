@@ -3,7 +3,7 @@ import Store from '../store.js';
 import { SUBJECTS, STORAGE_KEYS as StorageKeys } from '../config.js';
 import EventBus from '../event-bus.js';
 import Toast from '../components/toast.js';
-import { getSubjectIcon } from '../utils/level.js';
+import { getSubjectIcon, calcXP } from '../utils/level.js';
 
 const PAGE_SIZE = 20;
 let currentPage = 1;
@@ -152,7 +152,7 @@ export function render() {
     ${renderFilters()}
     <div id="log-list" class="log-list"></div>
     <button id="log-load-more" class="log-load-more" style="display:none">加载更多</button>
-    <p style="color:var(--color-text-3);margin-top:var(--sp-3);font-size:var(--fs-xs)">v0.61 · Bug修复</p>
+    <p style="color:var(--color-text-3);margin-top:var(--sp-3);font-size:var(--fs-xs)">v0.62 · XP引擎2.0</p>
   </div>`;
 }
 
@@ -237,7 +237,13 @@ function openEditModal(recordId) {
     records[idx].notes = document.getElementById('edit-notes').value;
     records[idx].practiceDuration = Math.round(duration * 0.8);
     records[idx].reviewDuration = Math.round(duration * 0.2);
-    records[idx].xp = Math.max(1, Math.round(score * duration / 20));
+    // XP Engine 2.0: 编辑时用新公式重算
+    const profile = Store.get(StorageKeys.USER_PROFILE) || {};
+    const last10 = records.slice(-10).map(r => r.score || 0);
+    const today = new Date().toISOString().slice(0, 10);
+    const todayXP = records.filter(r => r.timestamp && r.timestamp.slice(0, 10) === today).reduce((s, r) => s + (r.xp || 0), 0);
+    profile._runtimeTotalXP = records.reduce((s, r) => s + (r.xp || 0), 0);
+    records[idx].xp = calcXP(records[idx], profile, todayXP, last10);
     saveRecords(records);
     overlay.remove();
     Toast.show('记录已更新', 'success');

@@ -59,4 +59,30 @@ export function getDataVersion() {
   return LATEST_VERSION;
 }
 
-export default { migrate, getDataVersion };
+// 迁移 v4: 重算所有学习记录的 XP（用 XP Engine 2.0）
+// 需要在 profile 迁移完成后调用，因为 calcXP 需要 profile 参数
+export function migrateRecordsXP(Store, StorageKeys, calcXP) {
+  const records = Store.get(StorageKeys.STUDY_RECORDS) || [];
+  if (!records.length) return;
+  // 检查是否需要迁移（如果已有 _xpMigrated 标记则跳过）
+  const profile = Store.get(StorageKeys.USER_PROFILE) || {};
+  if (profile._xpMigrated) return;
+
+  const today = new Date().toISOString().slice(0, 10);
+  let runningTotal = 0;
+  for (let i = 0; i < records.length; i++) {
+    const r = records[i];
+    const last10 = records.slice(Math.max(0, i - 9), i + 1).map(rec => rec.score || 0);
+    profile._runtimeTotalXP = runningTotal;
+    const todayXP = records.filter(rec => rec.timestamp && rec.timestamp.slice(0, 10) === today && records.indexOf(rec) < i).reduce((s, rec) => s + (rec.xp || 0), 0);
+    r.xp = calcXP(r, profile, todayXP, last10);
+    runningTotal += r.xp;
+  }
+  Store.set(StorageKeys.STUDY_RECORDS, records);
+  // 标记迁移完成
+  profile._xpMigrated = true;
+  delete profile._runtimeTotalXP;
+  Store.set(StorageKeys.USER_PROFILE, profile);
+}
+
+export default { migrate, getDataVersion, migrateRecordsXP };

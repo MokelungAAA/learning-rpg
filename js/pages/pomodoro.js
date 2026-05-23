@@ -4,6 +4,7 @@ import { SUBJECTS, STORAGE_KEYS as StorageKeys, POMODORO_PRESETS } from '../conf
 import EventBus from '../event-bus.js';
 import Toast from '../components/toast.js';
 import { playFocusStart, playFocusEnd, playBreakEnd, playLongBreakEnd, sendNotification } from '../utils/sound.js';
+import { calcXP } from '../utils/level.js';
 
 // 状态
 let timer = null;
@@ -138,7 +139,7 @@ export function render() {
     ${renderTimer()}
     ${renderComplete()}
     ${renderHistory()}
-    <p style="color:var(--color-text-3);margin-top:var(--sp-3);font-size:var(--fs-xs)">v0.61 · Bug修复</p>
+    <p style="color:var(--color-text-3);margin-top:var(--sp-3);font-size:var(--fs-xs)">v0.62 · XP引擎2.0</p>
   </div>`;
 }
 
@@ -320,8 +321,16 @@ function autoSaveRecord() {
     reviewDuration: isReview ? Math.round(duration * 0.7) : Math.round(duration * 0.2),
     activityType: isReview ? 'review' : 'practice',
     notes: `番茄钟第${currentRound}轮 · 专注度${focusScore}%${isReview ? ' · 复习' : ''}`,
-    xp: Math.max(1, Math.round(focusScore * duration / 20)),
+    xp: 0, // 占位，下方用 calcXP 计算
   };
+  // XP Engine 2.0: 番茄钟完成后用完整公式计算 XP
+  const profile = Store.get(StorageKeys.USER_PROFILE) || {};
+  const allRecs = Store.get(StorageKeys.STUDY_RECORDS) || [];
+  const last10 = allRecs.slice(-10).map(r => r.score || 0);
+  const today = new Date().toISOString().slice(0, 10);
+  const todayXP = allRecs.filter(r => r.timestamp && r.timestamp.slice(0, 10) === today).reduce((s, r) => s + (r.xp || 0), 0);
+  profile._runtimeTotalXP = allRecs.reduce((s, r) => s + (r.xp || 0), 0);
+  record.xp = calcXP(record, profile, todayXP, last10);
   const records = Store.get(StorageKeys.STUDY_RECORDS) || [];
   records.push(record);
   Store.set(StorageKeys.STUDY_RECORDS, records);

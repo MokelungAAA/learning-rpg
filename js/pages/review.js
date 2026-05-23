@@ -139,7 +139,7 @@ export function render() {
     ${renderPotential(potentials)}
     ${renderFalseMastery(falseItems)}
     ${renderExamRecommend(queue)}
-    <p style="color:var(--color-text-3);margin-top:var(--sp-3);font-size:var(--fs-xs)">v0.61 · Bug修复</p>
+    <p style="color:var(--color-text-3);margin-top:var(--sp-3);font-size:var(--fs-xs)">v0.62 · XP引擎2.0</p>
   </div>`;
 }
 

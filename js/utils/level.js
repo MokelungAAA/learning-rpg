@@ -1,4 +1,4 @@
-// level.js — XP/等级计算工具
+// level.js — XP/等级计算工具 + XP Engine 2.0
 
 const LEVEL_TITLES = [
   { cn: '初学者',   name: 'Beginner' },
@@ -96,4 +96,76 @@ export function countUp(el, target, duration = 600) {
     if (progress < 1) requestAnimationFrame(step);
   };
   requestAnimationFrame(step);
+}
+
+// 最小二乘法线性回归斜率（用于进步动量计算）
+// 输入: values 数组，返回斜率值
+// 易错点: 数组长度 <2 时返回 0，避免除零
+export function regressionSlope(values) {
+  const n = values.length;
+  if (n < 2) return 0;
+  let sumX = 0, sumY = 0, sumXY = 0, sumX2 = 0;
+  for (let i = 0; i < n; i++) {
+    sumX += i;
+    sumY += values[i];
+    sumXY += i * values[i];
+    sumX2 += i * i;
+  }
+  const denom = n * sumX2 - sumX * sumX;
+  return denom === 0 ? 0 : (n * sumXY - sumX * sumY) / denom;
+}
+
+// XP Engine 2.0 — 完整 XP 计算公式
+// 参考文档 §5.4: XP = round(rawXP × qual × decay × softCap)
+// 参数:
+//   record — 学习记录（需含 score, duration, practiceDuration, reviewDuration, subject, activityType）
+//   profile — 用户画像（需含 xpBasePerMinute, subjectModifiers, activityWeights, decayRateForXP 等）
+//   todayXP — 今日已获取 XP（用于软上限计算）
+//   last10Scores — 最近 10 条记录的正确率数组（用于动量计算）
+// 易错点: subjectModifiers 用拉丁语 key（logos/physis），不是英文 key（math/physics）
+export function calcXP(record, profile, todayXP = 0, last10Scores = []) {
+  const xppm = profile.xpBasePerMinute || 2.0;
+  const score = record.score || 0;
+  const practiceDur = record.practiceDuration || (record.duration || 0) * 0.8;
+  const reviewDur = record.reviewDuration || (record.duration || 0) * 0.2;
+
+  // rawXP = practiceBase × PE + reviewBase × CE × 1.3
+  const PE = score / 100;
+  const CE = Math.min(1, score / 100 * 1.2);
+  const rawXP = practiceDur * xppm * PE + reviewDur * xppm * CE * 1.3;
+
+  // E = PE × (1 - reviewRatio) + CE × reviewRatio × 1.3
+  const reviewRatio = profile.baseReviewRatio || 0.20;
+  const E = PE * (1 - reviewRatio) + CE * reviewRatio * 1.3;
+
+  // 学科难度 = sqrt(1 / subjectModifiers[subject])
+  const modifiers = profile.subjectModifiers || {};
+  const subjectMod = modifiers[record.subject] || 1.0;
+  const difficulty = Math.sqrt(1 / subjectMod);
+
+  // 进步动量: tanh(slope) × 0.3，记录 <3 条时为 0
+  const momentum = last10Scores.length >= 3
+    ? Math.tanh(regressionSlope(last10Scores)) * 0.3
+    : 0;
+
+  // 活动类型权重
+  const weights = profile.activityWeights || {};
+  const activityWeight = weights[record.activityType] || 1.0;
+
+  // qual = E × difficulty × (1 + momentum) × activityWeight
+  const qual = E * difficulty * (1 + momentum) * activityWeight;
+
+  // 边际递减: decay = 1 / (1 + totalXP × decayRate)
+  const totalXP = profile._runtimeTotalXP || 0;
+  const decayRate = profile.decayRateForXP || 0.00005;
+  const decay = 1 / (1 + totalXP * decayRate);
+
+  // 软上限: 超过每日限额后 XP 递减
+  const limit = profile.dailyXPLimit || 500;
+  const softness = profile.dailyXPLimitSoftness || 0.5;
+  const softCap = todayXP >= limit
+    ? 1 - (1 - softness) * (todayXP - limit) / limit
+    : 1;
+
+  return Math.max(1, Math.min(500, Math.round(rawXP * qual * decay * softCap)));
 }

@@ -5,6 +5,7 @@ import { SUBJECTS_DATA, getSubjectById } from '../data/subjects.js';
 import { getAllKnowledgePoints } from '../data/subjects.js';
 import EventBus from '../event-bus.js';
 import Toast from './toast.js';
+import { calcXP } from '../utils/level.js';
 
 let isOpen = false;
 let currentSubject = '';
@@ -324,8 +325,16 @@ function bindEvents() {
       reviewDuration: reviewDur,
       activityType: document.getElementById('entry-activity').value,
       notes: document.getElementById('entry-notes').value || '',
-      xp: Math.max(1, Math.round(score * duration / 20)),
+      xp: 0, // 占位，下方用 calcXP 计算
     };
+    // XP Engine 2.0: 用完整公式替代简化公式
+    const profile = Store.get(StorageKeys.USER_PROFILE) || {};
+    const allRecs = Store.get(StorageKeys.STUDY_RECORDS) || [];
+    const last10 = allRecs.slice(-10).map(r => r.score || 0);
+    const today = new Date().toISOString().slice(0, 10);
+    const todayXP = allRecs.filter(r => r.timestamp && r.timestamp.slice(0, 10) === today).reduce((s, r) => s + (r.xp || 0), 0);
+    profile._runtimeTotalXP = allRecs.reduce((s, r) => s + (r.xp || 0), 0);
+    record.xp = calcXP(record, profile, todayXP, last10);
 
     const records = Store.get(StorageKeys.STUDY_RECORDS) || [];
     records.push(record);

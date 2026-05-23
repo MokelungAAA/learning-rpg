@@ -1,5 +1,6 @@
 // about.js — 关于页（版本信息+致谢+历史）
 const VERSION_HISTORY = [
+  { version: 'v0.62', date: '2026-05-23', desc: 'XP Engine 2.0 — 完整公式+动量+边际递减+软上限+旧记录重算' },
   { version: 'v0.61', date: '2026-05-23', desc: 'Bug修复 — 画像字段名+subjectModifiers+totalXP计算+数据迁移v3' },
   { version: 'v0.60', date: '2026-05-23', desc: '最终打磨 — 版本号统一+集成测试+版本历史修复' },
   { version: 'v0.59', date: '2026-05-23', desc: '响应式增强 — 桌面侧边栏+平板双列+多断点适配' },
@@ -49,7 +50,7 @@ export function render() {
       <div class="about-hero">
         <div class="about-logo">LTS</div>
         <div class="about-title">学习RPG · 认知操作系统</div>
-        <div class="about-version">v0.61</div>
+        <div class="about-version">v0.62</div>
         <div class="about-credit">Created by 墨澜 × Miku</div>
       </div>
       <div class="about-section">

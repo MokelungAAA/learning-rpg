@@ -28,7 +28,8 @@ Theme.init();
     const { default: DataEngine } = await import('./data-engine.js');
     const { getDefaultProfile } = await import('./data/defaults.js');
     const { StorageKeys } = await import('./config.js');
-    const { migrate } = await import('./data-migration.js');
+    const { migrate, migrateRecordsXP } = await import('./data-migration.js');
+    const { calcXP } = await import('./utils/level.js');
     await DataEngine.init({ [StorageKeys.USER_PROFILE]: getDefaultProfile() });
     // 运行用户画像迁移
     const Store = (await import('./store.js')).default;
@@ -37,6 +38,8 @@ Theme.init();
       const migrated = migrate(profile);
       if (migrated !== profile) Store.set(StorageKeys.USER_PROFILE, migrated);
     }
+    // 重算所有记录 XP（XP Engine 2.0 迁移）
+    migrateRecordsXP(Store, StorageKeys, calcXP);
   } catch { /* data engine optional */ }
 })();
 
