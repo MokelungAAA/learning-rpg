@@ -187,8 +187,10 @@ export function calcImprovementPotential(tempStates, records) {
     .slice(0, 5);
 }
 
-// 假性熟练检测: 高正确率(>=70%)但温度低(<40)的知识点
-// 特征: 练习次数>=3，可能是短期记忆而非真正掌握
+// 假性熟练检测: 对齐参考文档 §5.8
+// 条件: 连续3次正确率>85% AND 平均订正时间占比<10% AND 温度<60
+// 说明: 高正确率+低订正时间但温度低 → 可能只是短期记忆或运气
+//       需要更深入的检测（综合题、变式题）来验证真正掌握
 // @param {Object} tempStates — 温度状态
 // @param {Array} records — 学习记录
 // @returns {Array} 可疑知识点（按温度升序）
@@ -196,11 +198,37 @@ export function detectFalseMastery(tempStates, records) {
   const results = [];
   for (const [key, st] of Object.entries(tempStates)) {
     if (st.count < 3) continue;
-    const kpRecords = records.filter(r => r.knowledgePoints && r.knowledgePoints.some(k => k.includes(st.kp) || st.kp.includes(k)));
-    const highScoreRate = kpRecords.filter(r => (r.score || 0) >= 80).length / kpRecords.length;
-    if (highScoreRate >= 0.7 && st.temp < 40) {
-      results.push({ ...st, highScoreRate: Math.round(highScoreRate * 100), reason: '高正确率但温度低 — 可能是短期记忆' });
+    // v0.70: 温度阈值从 40 提升到 60
+    if (st.temp >= 60) continue;
+
+    const kpRecords = records
+      .filter(r => r.knowledgePoints && r.knowledgePoints.some(k => k.includes(st.kp) || st.kp.includes(k)))
+      .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+    if (kpRecords.length < 3) continue;
+
+    // v0.70: 检查最近3次是否全部 >85%（连续高正确率）
+    const last3 = kpRecords.slice(0, 3);
+    const allHighScore = last3.every(r => (r.score || 0) > 85);
+    if (!allHighScore) continue;
+
+    // v0.70: 检查订正时间占比（如有字段）
+    const hasReviewData = kpRecords.some(r => r.reviewDuration != null);
+    if (hasReviewData) {
+      const avgReviewRatio = kpRecords.reduce((s, r) => {
+        const total = r.duration || 1;
+        const review = r.reviewDuration || 0;
+        return s + review / total;
+      }, 0) / kpRecords.length;
+      if (avgReviewRatio >= 0.10) continue; // 订正占比≥10%，不算假性熟练
     }
+
+    results.push({
+      ...st,
+      last3Scores: last3.map(r => r.score),
+      reason: hasReviewData
+        ? '连续高分+低订正+温度下降 — 可能是短期记忆'
+        : '连续高分但温度低 — 建议深度检测',
+    });
   }
   return results.sort((a, b) => a.temp - b.temp);
 }

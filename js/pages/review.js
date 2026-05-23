@@ -148,7 +148,7 @@ export function render() {
     ${renderPotential(potentials)}
     ${renderFalseMastery(falseItems)}
     ${renderExamRecommend(queue)}
-    <p style="color:var(--color-text-3);margin-top:var(--sp-3);font-size:var(--fs-xs)">v0.68 · 开发者区</p>
+    <p style="color:var(--color-text-3);margin-top:var(--sp-3);font-size:var(--fs-xs)">v0.70 · 开发者区</p>
   </div>`;
 }
 
