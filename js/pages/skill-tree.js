@@ -101,7 +101,7 @@ export function render() {
     </div>
     ${renderLegend()}
     ${renderSkillDetailPanel()}
-    <p style="color:var(--color-text-3);margin-top:var(--sp-3);font-size:var(--fs-xs)">v0.65 · 开发者区</p>
+    <p style="color:var(--color-text-3);margin-top:var(--sp-3);font-size:var(--fs-xs)">v0.90 · 开发者区</p>
   </div>`;
 }
 
