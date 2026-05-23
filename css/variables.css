@@ -1,53 +1,100 @@
-/* variables.css — All design tokens */
+/* variables.css — Material Design 3 design tokens + legacy aliases */
 :root {
-  /* === Colors === */
-  --color-bg: #FAFAFA;
-  --color-surface: #FFFFFF;
-  --color-surface-variant: #F5F5F5;
-  --color-text-1: #1A1A1A;
-  --color-text-2: #666666;
-  --color-text-3: #999999;
-  --color-accent: #2563eb;
-  --color-accent-light: #EFF6FF;
-  --color-accent-dark: #1d4ed8;
-  --color-accent-gradient: linear-gradient(135deg, #2563eb, #60a5fa);
-  --color-success: #4CAF50;
-  --color-warning: #FF9800;
-  --color-error: #F44336;
-  --color-info: #2196F3;
-  --color-outline: #E0E0E0;
+  /* === Material Design 3 颜色 === */
+  --md-primary: #6750A4;
+  --md-primary-container: #EADDFF;
+  --md-on-primary: #FFFFFF;
+  --md-on-primary-container: #21005D;
+  --md-secondary: #625B71;
+  --md-secondary-container: #E8DEF8;
+  --md-surface: #FFFBFE;
+  --md-surface-variant: #E7E0EC;
+  --md-background: #FFFBFE;
+  --md-on-surface: #1C1B1F;
+  --md-on-surface-variant: #49454F;
+  --md-outline: #79747E;
+  --md-error: #B3261E;
+
+  /* === Legacy aliases (映射到 MD3) === */
+  --color-bg: var(--md-background);
+  --color-surface: var(--md-surface);
+  --color-surface-variant: var(--md-surface-variant);
+  --color-text-1: var(--md-on-surface);
+  --color-text-2: var(--md-on-surface-variant);
+  --color-text-3: var(--md-outline);
+  --color-accent: var(--md-primary);
+  --color-accent-light: #EADDFF;
+  --color-accent-dark: #4F378B;
+  --color-accent-gradient: linear-gradient(135deg, #6750A4, #D0BCFF);
+  --color-success: #10B981;
+  --color-warning: #F59E0B;
+  --color-error: var(--md-error);
+  --color-info: #3B82F6;
+  --color-outline: var(--md-outline);
   --glass-border: rgba(255,255,255,0.18);
 
-  /* === Temperature Scale === */
-  --temp-1: #FF4444;
-  --temp-2: #FF8C00;
-  --temp-3: #FFD700;
-  --temp-4: #87CEEB;
-  --temp-5: #B0C4DE;
-  --temp-6: #D3D3D3;
+  /* === 语义色 === */
+  --color-danger: #EF4444;
 
-  /* === Spacing === */
+  /* === 温度色 === */
+  --temp-searing: #FF4500;
+  --temp-hot: #FF8C00;
+  --temp-warm: #FFD700;
+  --temp-normal: #62A0EA;
+  --temp-cool: #1A5FB4;
+  --temp-frozen: #6B7280;
+  --temp-1: var(--temp-searing);
+  --temp-2: var(--temp-hot);
+  --temp-3: var(--temp-warm);
+  --temp-4: var(--temp-normal);
+  --temp-5: var(--temp-cool);
+  --temp-6: var(--temp-frozen);
+
+  /* === 排版 === */
+  --font-sans: 'Roboto', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+
+  /* === 间距 === */
   --sp-1: 4px;
   --sp-2: 8px;
   --sp-3: 16px;
   --sp-4: 24px;
   --sp-5: 32px;
   --sp-6: 48px;
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --space-2xl: 48px;
 
-  /* === Border Radius === */
+  /* === 圆角 === */
+  --r-xs: 4px;
   --r-sm: 8px;
-  --r-md: 16px;
-  --r-lg: 24px;
-  --r-xl: 32px;
+  --r-md: 12px;
+  --r-lg: 16px;
+  --r-xl: 28px;
   --r-full: 9999px;
+  --radius-none: 0;
+  --radius-xs: 4px;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 28px;
+  --radius-full: 9999px;
 
-  /* === Shadows (Y-axis only) === */
-  --shadow-sm: 0 1px 3px rgba(0,0,0,0.04);
-  --shadow-md: 0 4px 12px rgba(0,0,0,0.06);
-  --shadow-lg: 0 8px 24px rgba(0,0,0,0.08);
-  --shadow-xl: 0 16px 48px rgba(0,0,0,0.12);
+  /* === 阴影 (MD3 5级) === */
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.3), 0 1px 3px 1px rgba(0,0,0,0.15);
+  --shadow-md: 0 1px 2px rgba(0,0,0,0.3), 0 2px 6px 2px rgba(0,0,0,0.15);
+  --shadow-lg: 0 4px 8px 3px rgba(0,0,0,0.15), 0 1px 3px rgba(0,0,0,0.3);
+  --shadow-xl: 0 6px 10px 4px rgba(0,0,0,0.15), 0 2px 3px rgba(0,0,0,0.3);
+  --elevation-1: 0 1px 2px rgba(0,0,0,0.3), 0 1px 3px 1px rgba(0,0,0,0.15);
+  --elevation-2: 0 1px 2px rgba(0,0,0,0.3), 0 2px 6px 2px rgba(0,0,0,0.15);
+  --elevation-3: 0 4px 8px 3px rgba(0,0,0,0.15), 0 1px 3px rgba(0,0,0,0.3);
+  --elevation-4: 0 6px 10px 4px rgba(0,0,0,0.15), 0 2px 3px rgba(0,0,0,0.3);
+  --elevation-5: 0 8px 12px 6px rgba(0,0,0,0.15), 0 4px 4px rgba(0,0,0,0.3);
 
-  /* === Typography === */
+  /* === 字号 === */
   --fs-xs: 0.75rem;
   --fs-sm: 0.875rem;
   --fs-base: 1rem;
@@ -57,17 +104,25 @@
   --fs-3xl: 2rem;
   --fs-4xl: 2.5rem;
 
-  /* === Animation === */
-  --ease: cubic-bezier(0.4, 0, 0.2, 1);
+  /* === 动画 (MD3 4级) === */
+  --ease: cubic-bezier(0.2, 0, 0, 1);
+  --ease-standard: cubic-bezier(0.2, 0, 0, 1);
   --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-emphasized: cubic-bezier(0.05, 0.7, 0.1, 1);
+  --ease-decelerate: cubic-bezier(0, 0, 0, 1);
+  --ease-accelerate: cubic-bezier(0.3, 0, 1, 1);
   --duration-fast: 100ms;
+  --duration-short: 150ms;
   --duration-normal: 250ms;
+  --duration-medium: 300ms;
   --duration-slow: 350ms;
+  --duration-long: 500ms;
   --duration-moment: 800ms;
   --duration-celebration: 1500ms;
 
-  /* === Layout === */
+  /* === 布局 === */
   --content-max-width: 100%;
   --nav-height: 64px;
+  --header-height: 56px;
   --nav-bottom: 16px;
 }

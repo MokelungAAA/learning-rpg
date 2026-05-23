@@ -1,18 +1,28 @@
-/* dark-mode.css — Dark theme overrides */
+/* dark-mode.css — Material Design 3 dark theme overrides */
 [data-theme="dark"] {
-  --color-bg: #121212;
-  --color-surface: #1E1E1E;
-  --color-surface-variant: #2C2C2C;
-  --color-text-1: #E0E0E0;
-  --color-text-2: #A0A0A0;
-  --color-text-3: #707070;
-  --color-accent: #60a5fa;
-  --color-accent-light: #1e3a5f;
-  --color-accent-gradient: linear-gradient(135deg, #3b82f6, #93c5fd);
+  --md-primary: #D0BCFF;
+  --md-primary-container: #4F378B;
+  --md-on-primary: #381E72;
+  --md-on-primary-container: #EADDFF;
+  --md-secondary: #CCC2DC;
+  --md-secondary-container: #4A4458;
+  --md-surface: #1C1B1F;
+  --md-surface-variant: #49454F;
+  --md-background: #1C1B1F;
+  --md-on-surface: #E6E1E5;
+  --md-on-surface-variant: #CAC4D0;
+  --md-outline: #938F99;
+  --md-error: #F2B8B5;
+
+  --color-accent-light: #4F378B;
+  --color-accent-dark: #D0BCFF;
+  --color-accent-gradient: linear-gradient(135deg, #D0BCFF, #6750A4);
   --color-success: #66BB6A;
   --color-warning: #FFA726;
-  --color-error: #EF5350;
   --color-info: #42A5F5;
-  --color-outline: #383838;
   --glass-border: rgba(255,255,255,0.08);
+
+  --elevation-1: 0 1px 2px rgba(0,0,0,0.3), 0 1px 3px 1px rgba(0,0,0,0.15);
+  --elevation-2: 0 1px 2px rgba(0,0,0,0.3), 0 2px 6px 2px rgba(0,0,0,0.15);
+  --elevation-3: 0 4px 8px 3px rgba(0,0,0,0.15), 0 1px 3px rgba(0,0,0,0.3);
 }
