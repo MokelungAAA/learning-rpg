@@ -138,7 +138,7 @@ export function render() {
     ${renderTimer()}
     ${renderComplete()}
     ${renderHistory()}
-    <p style="color:var(--color-text-3);margin-top:var(--sp-3);font-size:var(--fs-xs)">v0.59 · 响应式增强</p>
+    <p style="color:var(--color-text-3);margin-top:var(--sp-3);font-size:var(--fs-xs)">v0.60 · 最终打磨</p>
   </div>`;
 }
 
