@@ -43,7 +43,7 @@ export function render() {
       <div class="ach-progress">${unlocked.length} / ${ACHIEVEMENTS.length} 已解锁</div>
     </div>
     ${sections}
-    <p style="color:var(--color-text-3);margin-top:var(--sp-3);font-size:var(--fs-xs)">v0.64 · 成就持久化</p>
+    <p style="color:var(--color-text-3);margin-top:var(--sp-3);font-size:var(--fs-xs)">v0.65 · 开发者区</p>
   </div>`;
 }
 

@@ -108,6 +108,36 @@ function renderProfile() {
   </div>`;
 }
 
+// 开发者区块：算法引擎状态展示（纯只读）
+// 显示 profile 版本、半衰期、修正系数、XP 参数、记录统计
+function renderDeveloper() {
+  const profile = Store.get(StorageKeys.USER_PROFILE) || {};
+  const records = Store.get(StorageKeys.STUDY_RECORDS) || [];
+  const totalXP = records.reduce((s, r) => s + (r.xp || 0), 0);
+  const mods = profile.subjectModifiers || {};
+  const modEntries = Object.entries(mods).map(([k, v]) =>
+    `<span class="dev-tag">${k}: ${v}</span>`
+  ).join('');
+  const lastAdapt = localStorage.getItem('lts_last_adapt_date') || '未运行';
+  return `<div class="settings-section">
+    <h3 class="dev-toggle" id="dev-toggle">🔧 开发者 <span class="dev-arrow">▾</span></h3>
+    <div class="dev-content" id="dev-content" style="display:none">
+      <div class="settings-row"><span class="settings-label">Profile 版本</span><span class="settings-value">${profile.version || '—'}</span></div>
+      <div class="settings-row"><span class="settings-label">globalBaseHalfLife</span><span class="settings-value">${profile.globalBaseHalfLife || '—'} 天</span></div>
+      <div class="settings-row"><span class="settings-label">xpBasePerMinute</span><span class="settings-value">${profile.xpBasePerMinute || '—'}</span></div>
+      <div class="settings-row"><span class="settings-label">dailyXPLimit</span><span class="settings-value">${profile.dailyXPLimit || '—'}</span></div>
+      <div class="settings-row"><span class="settings-label">decayRateForXP</span><span class="settings-value">${profile.decayRateForXP || '—'}</span></div>
+      <div class="settings-row"><span class="settings-label">最近 EMA 适应</span><span class="settings-value">${lastAdapt}</span></div>
+      <div class="settings-row"><span class="settings-label">总记录数</span><span class="settings-value">${records.length}</span></div>
+      <div class="settings-row"><span class="settings-label">总 XP</span><span class="settings-value">${totalXP}</span></div>
+      <div class="dev-mods">
+        <div class="dev-mods-title">subjectModifiers</div>
+        <div class="dev-mods-list">${modEntries || '<span class="dev-tag">无数据</span>'}</div>
+      </div>
+    </div>
+  </div>`;
+}
+
 // 关于区块：跳转 #/about 的导航链接
 function renderAboutLink() {
   return `<div class="settings-section settings-about-link">
@@ -122,8 +152,9 @@ export function render() {
     ${renderSync()}
     ${renderPomodoroSettings()}
     ${renderProfile()}
+    ${renderDeveloper()}
     ${renderAboutLink()}
-    <p style="color:var(--color-text-3);margin-top:var(--sp-3);font-size:var(--fs-xs)">v0.64 · 成就持久化</p>
+    <p style="color:var(--color-text-3);margin-top:var(--sp-3);font-size:var(--fs-xs)">v0.65 · 开发者区</p>
   </div>`;
 }
 
@@ -226,6 +257,18 @@ export function afterRender() {
   if (syncSave) syncSave.addEventListener('click', saveSyncConfig);
   if (syncNowBtn) syncNowBtn.addEventListener('click', doSync);
 
+  // 开发者区块折叠/展开
+  const devToggle = document.getElementById('dev-toggle');
+  const devContent = document.getElementById('dev-content');
+  const onDevToggle = () => {
+    if (!devContent) return;
+    const shown = devContent.style.display !== 'none';
+    devContent.style.display = shown ? 'none' : 'block';
+    const arrow = devToggle?.querySelector('.dev-arrow');
+    if (arrow) arrow.textContent = shown ? '▾' : '▴';
+  };
+  if (devToggle) devToggle.addEventListener('click', onDevToggle);
+
   // 恢复已保存的同步配置到引擎（页面加载时执行一次）
   const savedCfg = Store.get('lts_sync_config') || {};
   if (savedCfg.token) SyncEngine.configure(savedCfg.token, savedCfg.owner, savedCfg.repo);
@@ -248,5 +291,6 @@ export function afterRender() {
     if (syncCancel) syncCancel.removeEventListener('click', closeSyncModal);
     if (syncSave) syncSave.removeEventListener('click', saveSyncConfig);
     if (syncNowBtn) syncNowBtn.removeEventListener('click', doSync);
+    if (devToggle) devToggle.removeEventListener('click', onDevToggle);
   };
 }
