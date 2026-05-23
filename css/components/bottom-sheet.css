@@ -1,0 +1,64 @@
+/* bottom-sheet.css — 底部面板组件 */
+.bottom-sheet {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  pointer-events: none;
+}
+
+.bottom-sheet--open {
+  pointer-events: auto;
+}
+
+.bottom-sheet__backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  opacity: 0;
+  transition: opacity var(--duration-normal);
+  z-index: 999;
+}
+
+.bottom-sheet--open .bottom-sheet__backdrop {
+  opacity: 1;
+}
+
+.bottom-sheet__content {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  max-height: 85vh;
+  border-radius: var(--r-xl) var(--r-xl) 0 0;
+  padding: var(--sp-3);
+  transform: translateY(100%);
+  transition: transform var(--duration-slow) var(--ease);
+  z-index: 1000;
+  overflow-y: auto;
+}
+
+.bottom-sheet--open .bottom-sheet__content {
+  transform: translateY(0);
+}
+
+.bottom-sheet__handle {
+  width: 36px;
+  height: 4px;
+  background: var(--color-text-3);
+  border-radius: var(--r-full);
+  margin: 0 auto var(--sp-3);
+  cursor: grab;
+}
+
+.bottom-sheet__handle:active {
+  cursor: grabbing;
+}
+
+.bottom-sheet__body {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* Dark mode */
+[data-theme="dark"] .bottom-sheet__backdrop {
+  background: rgba(0, 0, 0, 0.6);
+}

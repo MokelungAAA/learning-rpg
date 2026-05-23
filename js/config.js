@@ -41,6 +41,20 @@ export const SUBJECTS = [
   { id: 'geography', name: '地理',   latin: 'geographia' },
 ];
 
+export const POMODORO_PRESETS = [
+  { id: 'classic', name: '经典', work: 25, shortBreak: 5, longBreak: 15, rounds: 4 },
+  { id: 'short', name: '短时', work: 15, shortBreak: 3, longBreak: 10, rounds: 4 },
+  { id: 'long', name: '长时', work: 45, shortBreak: 8, longBreak: 20, rounds: 4 },
+  { id: 'intense', name: '高强度', work: 50, shortBreak: 10, longBreak: 30, rounds: 3 },
+];
+
+export const ACHIEVEMENT_CONDITION_TYPES = [
+  'pomodoro_count', 'record_count', 'streak_days', 'total_minutes',
+  'unique_subjects', 'reading_count', 'review_count',
+  'max_score_rate', 'level',
+  'study_at_night', 'study_at_dawn', 'fast_pomodoro',
+];
+
 export const NAV_TABS = [
   { id: 'home',     label: '首页', icon: '🏠', hash: '#/' },
   { id: 'data',     label: '数据', icon: '📊', hash: '#/data' },

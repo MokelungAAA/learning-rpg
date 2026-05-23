@@ -35,6 +35,27 @@ class Store {
     this.cache.delete(key);
     localStorage.removeItem(key);
   }
+
+  has(key) {
+    if (this.cache.has(key)) return true;
+    return localStorage.getItem(key) !== null;
+  }
+
+  getAll(prefix = '') {
+    const result = {};
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key.startsWith(prefix)) {
+        result[key] = this.get(key);
+      }
+    }
+    return result;
+  }
+
+  clear() {
+    this.cache.clear();
+    localStorage.clear();
+  }
 }
 
 export default new Store();

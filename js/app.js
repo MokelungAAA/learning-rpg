@@ -2,12 +2,20 @@
 import Router from './router.js';
 import Navbar from './components/navbar.js';
 import EventBus from './event-bus.js';
+import DataEngine from './data-engine.js';
+import { getDefaultProfile } from './data/defaults.js';
+import { StorageKeys } from './config.js';
 import * as home from './pages/home.js';
 import * as dataTab from './pages/data-tab.js';
 import * as pomodoro from './pages/pomodoro.js';
 import * as settings from './pages/settings.js';
 
 const container = document.getElementById('page-container');
+
+// Init data engine with defaults
+DataEngine.init({
+  [StorageKeys.USER_PROFILE]: getDefaultProfile(),
+});
 
 // Init router
 Router.init(container);

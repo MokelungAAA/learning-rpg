@@ -1,0 +1,198 @@
+// achievements.js — 成就定义列表
+export const ACHIEVEMENTS = [
+  // === 进度类 (progress) ===
+  {
+    id: 'ach_first_pomodoro',
+    name: '第一个番茄',
+    description: '完成你的第一个番茄钟',
+    category: 'progress',
+    rarity: 'common',
+    icon: '🍅',
+    condition: { type: 'pomodoro_count', operator: '>=', value: 1 },
+  },
+  {
+    id: 'ach_pomodoro_10',
+    name: '番茄达人',
+    description: '累计完成 10 个番茄钟',
+    category: 'progress',
+    rarity: 'common',
+    icon: '🍅',
+    condition: { type: 'pomodoro_count', operator: '>=', value: 10 },
+  },
+  {
+    id: 'ach_pomodoro_50',
+    name: '番茄大师',
+    description: '累计完成 50 个番茄钟',
+    category: 'progress',
+    rarity: 'rare',
+    icon: '🍅',
+    condition: { type: 'pomodoro_count', operator: '>=', value: 50 },
+  },
+  {
+    id: 'ach_pomodoro_100',
+    name: '番茄宗师',
+    description: '累计完成 100 个番茄钟',
+    category: 'progress',
+    rarity: 'epic',
+    icon: '🍅',
+    condition: { type: 'pomodoro_count', operator: '>=', value: 100 },
+  },
+  {
+    id: 'ach_first_record',
+    name: '初学者',
+    description: '创建第一条学习记录',
+    category: 'progress',
+    rarity: 'common',
+    icon: '📝',
+    condition: { type: 'record_count', operator: '>=', value: 1 },
+  },
+  {
+    id: 'ach_record_50',
+    name: '勤学者',
+    description: '累计创建 50 条学习记录',
+    category: 'progress',
+    rarity: 'rare',
+    icon: '📚',
+    condition: { type: 'record_count', operator: '>=', value: 50 },
+  },
+  {
+    id: 'ach_streak_7',
+    name: '一周不断',
+    description: '连续学习 7 天',
+    category: 'progress',
+    rarity: 'common',
+    icon: '🔥',
+    condition: { type: 'streak_days', operator: '>=', value: 7 },
+  },
+  {
+    id: 'ach_streak_30',
+    name: '月度坚持',
+    description: '连续学习 30 天',
+    category: 'progress',
+    rarity: 'rare',
+    icon: '🔥',
+    condition: { type: 'streak_days', operator: '>=', value: 30 },
+  },
+  {
+    id: 'ach_study_hours_10',
+    name: '十小时',
+    description: '累计学习 10 小时',
+    category: 'progress',
+    rarity: 'common',
+    icon: '⏰',
+    condition: { type: 'total_minutes', operator: '>=', value: 600 },
+  },
+  {
+    id: 'ach_study_hours_100',
+    name: '百小时',
+    description: '累计学习 100 小时',
+    category: 'progress',
+    rarity: 'epic',
+    icon: '⏰',
+    condition: { type: 'total_minutes', operator: '>=', value: 6000 },
+  },
+
+  // === 探索类 (exploration) ===
+  {
+    id: 'ach_all_subjects',
+    name: '全科学者',
+    description: '在所有 9 个学科中都有学习记录',
+    category: 'exploration',
+    rarity: 'rare',
+    icon: '🌈',
+    condition: { type: 'unique_subjects', operator: '>=', value: 9 },
+  },
+  {
+    id: 'ach_first_reading',
+    name: '开卷有益',
+    description: '创建第一条阅读记录',
+    category: 'exploration',
+    rarity: 'common',
+    icon: '📖',
+    condition: { type: 'reading_count', operator: '>=', value: 1 },
+  },
+  {
+    id: 'ach_first_review',
+    name: '温故知新',
+    description: '完成第一次复习',
+    category: 'exploration',
+    rarity: 'common',
+    icon: '🔄',
+    condition: { type: 'review_count', operator: '>=', value: 1 },
+  },
+
+  // === 成绩类 (score) ===
+  {
+    id: 'ach_score_perfect',
+    name: '满分达人',
+    description: '单次学习正确率达到 100%',
+    category: 'score',
+    rarity: 'rare',
+    icon: '💯',
+    condition: { type: 'max_score_rate', operator: '>=', value: 1.0 },
+  },
+  {
+    id: 'ach_level_10',
+    name: '十级学徒',
+    description: '达到等级 10',
+    category: 'score',
+    rarity: 'common',
+    icon: '⭐',
+    condition: { type: 'level', operator: '>=', value: 10 },
+  },
+  {
+    id: 'ach_level_25',
+    name: '二十五级学者',
+    description: '达到等级 25',
+    category: 'score',
+    rarity: 'rare',
+    icon: '⭐',
+    condition: { type: 'level', operator: '>=', value: 25 },
+  },
+  {
+    id: 'ach_level_50',
+    name: '五十级大师',
+    description: '达到等级 50',
+    category: 'score',
+    rarity: 'epic',
+    icon: '🌟',
+    condition: { type: 'level', operator: '>=', value: 50 },
+  },
+
+  // === 彩蛋类 (easter) ===
+  {
+    id: 'ach_night_owl',
+    name: '夜猫子',
+    description: '在凌晨 0-5 点学习',
+    category: 'easter',
+    rarity: 'common',
+    icon: '🦉',
+    condition: { type: 'study_at_night', operator: '>=', value: 1 },
+  },
+  {
+    id: 'ach_early_bird',
+    name: '早起的鸟',
+    description: '在早上 5-7 点学习',
+    category: 'easter',
+    rarity: 'common',
+    icon: '🐦',
+    condition: { type: 'study_at_dawn', operator: '>=', value: 1 },
+  },
+  {
+    id: 'ach_speed_demon',
+    name: '极速番茄',
+    description: '在 15 分钟内完成一个番茄钟',
+    category: 'easter',
+    rarity: 'rare',
+    icon: '⚡',
+    condition: { type: 'fast_pomodoro', operator: '>=', value: 1 },
+  },
+];
+
+export function getAchievementById(id) {
+  return ACHIEVEMENTS.find(a => a.id === id) || null;
+}
+
+export function getAchievementsByCategory(category) {
+  return ACHIEVEMENTS.filter(a => a.category === category);
+}
