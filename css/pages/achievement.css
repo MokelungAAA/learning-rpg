@@ -1,21 +1,33 @@
-/* achievement.css — 成就浏览页样式 */
+/* achievement.css — 成就浏览页样式（5稀有度+进度条+解锁动画） */
+
+.ach-back {
+  display: inline-block;
+  font-size: var(--fs-sm);
+  color: var(--color-accent);
+  text-decoration: none;
+  margin-bottom: var(--sp-3);
+}
+.ach-back:hover { text-decoration: underline; }
 
 .ach-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: var(--sp-3);
-}
-
-.ach-progress {
-  font-size: var(--fs-sm);
-  color: var(--color-text-3);
-}
-
-.ach-section {
   margin-bottom: var(--sp-4);
 }
+.ach-title {
+  font-size: var(--fs-xl);
+  font-weight: 700;
+}
+.ach-count {
+  font-size: var(--fs-sm);
+  color: var(--color-text-3);
+  background: var(--color-surface-2);
+  padding: 4px 12px;
+  border-radius: var(--r-full);
+}
 
+.ach-section { margin-bottom: var(--sp-4); }
 .ach-section-title {
   font-size: var(--fs-sm);
   font-weight: 600;
@@ -26,107 +38,103 @@
 
 .ach-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
   gap: var(--sp-2);
 }
 
 .ach-card {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: var(--sp-3);
   padding: var(--sp-2) var(--sp-3);
   border-radius: var(--r-md);
   background: rgba(255, 255, 255, 0.4);
-  transition: transform var(--duration-fast) var(--ease);
+  transition: transform var(--duration-fast) var(--ease), box-shadow var(--duration-fast) var(--ease);
 }
+.ach-card:hover { transform: translateY(-1px); box-shadow: var(--shadow-sm); }
+[data-theme="dark"] .ach-card { background: rgba(255, 255, 255, 0.03); }
 
-.ach-card:hover {
-  transform: translateY(-1px);
-}
-
-[data-theme="dark"] .ach-card {
-  background: rgba(255, 255, 255, 0.02);
-}
-
-.ach-card.locked {
-  opacity: 0.5;
-}
-
+.ach-card.locked { opacity: 0.55; }
 .ach-card.locked .ach-name,
-.ach-card.locked .ach-desc {
-  color: var(--color-text-3);
-}
+.ach-card.locked .ach-desc { color: var(--color-text-3); }
 
-.ach-icon {
-  font-size: 28px;
-  flex-shrink: 0;
-  width: 40px;
-  text-align: center;
-}
-
-.ach-info {
-  flex: 1;
-  min-width: 0;
-}
-
-.ach-name {
-  font-size: var(--fs-sm);
-  font-weight: 600;
-  color: var(--color-text-1);
-}
-
-.ach-desc {
-  font-size: var(--fs-xs);
-  color: var(--color-text-3);
-  margin-top: 2px;
-}
+.ach-icon { font-size: 28px; flex-shrink: 0; width: 40px; text-align: center; padding-top: 2px; }
+.ach-info { flex: 1; min-width: 0; }
+.ach-name { font-size: var(--fs-sm); font-weight: 600; color: var(--color-text-1); }
+.ach-desc { font-size: var(--fs-xs); color: var(--color-text-3); margin-top: 2px; }
+.ach-date { font-size: 10px; color: var(--color-text-3); margin-top: 2px; }
 
 .ach-rarity {
   font-size: 10px;
-  padding: 1px 6px;
+  padding: 1px 8px;
   border-radius: var(--r-full);
   margin-top: var(--sp-1);
   display: inline-block;
+  font-weight: 500;
 }
 
-/* Rarity colors */
-.ach-card.common .ach-rarity {
-  background: rgba(158, 158, 158, 0.15);
-  color: #9e9e9e;
+/* ═══ 5级稀有度颜色 ═══ */
+.ach-card.bronze .ach-rarity    { background: rgba(205,127,50,0.15);  color: #CD7F32; }
+.ach-card.bronze.unlocked       { border-left: 3px solid #CD7F32; }
+.ach-card.silver .ach-rarity    { background: rgba(192,192,192,0.2);  color: #9E9E9E; }
+.ach-card.silver.unlocked       { border-left: 3px solid #C0C0C0; }
+.ach-card.gold .ach-rarity      { background: rgba(255,215,0,0.15);   color: #FFB300; }
+.ach-card.gold.unlocked         { border-left: 3px solid #FFD700; }
+.ach-card.legendary .ach-rarity { background: rgba(139,92,246,0.15);  color: #8B5CF6; }
+.ach-card.legendary.unlocked    { border-left: 3px solid #8B5CF6; }
+.ach-card.hidden .ach-rarity    { background: rgba(236,72,153,0.15);  color: #EC4899; }
+.ach-card.hidden.unlocked       { border-left: 3px solid #EC4899; }
+
+/* ═══ 进度条 ═══ */
+.ach-progress-bar {
+  position: relative;
+  height: 6px;
+  background: var(--color-surface-2);
+  border-radius: 3px;
+  margin-top: var(--sp-1);
+  overflow: hidden;
+}
+.ach-progress-fill {
+  height: 100%;
+  border-radius: 3px;
+  background: var(--color-accent);
+  transition: width 0.6s ease;
+}
+.ach-progress-text {
+  position: absolute;
+  right: 0;
+  top: -14px;
+  font-size: 10px;
+  color: var(--color-text-3);
 }
 
-.ach-card.rare .ach-rarity {
-  background: rgba(66, 165, 245, 0.15);
-  color: #42a5f5;
+/* ═══ 解锁弹窗动画 ═══ */
+.ach-unlock-toast {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%) translateY(-100px) scale(0.8);
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  padding: var(--sp-2) var(--sp-4);
+  background: var(--color-surface);
+  border: 2px solid var(--color-accent);
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow-lg);
+  z-index: 9999;
+  opacity: 0;
+  transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.3s ease;
 }
-
-.ach-card.epic .ach-rarity {
-  background: rgba(171, 71, 188, 0.15);
-  color: #ab47bc;
+.ach-unlock-toast.show {
+  transform: translateX(-50%) translateY(0) scale(1);
+  opacity: 1;
 }
+.ach-unlock-icon { font-size: 32px; }
+.ach-unlock-label { font-size: var(--fs-xs); color: var(--color-accent); font-weight: 600; }
+.ach-unlock-name { font-size: var(--fs-sm); font-weight: 700; color: var(--color-text-1); }
 
-.ach-card.legendary .ach-rarity {
-  background: rgba(255, 183, 77, 0.15);
-  color: #ffb74d;
-}
-
-/* View all link */
-.ach-view-all {
-  display: block;
-  text-align: center;
-  font-size: var(--fs-sm);
-  color: var(--color-accent);
-  margin-top: var(--sp-2);
-  text-decoration: none;
-}
-
-.ach-view-all:hover {
-  text-decoration: underline;
-}
-
-/* Responsive */
+/* ═══ 响应式 ═══ */
 @media (max-width: 480px) {
-  .ach-grid {
-    grid-template-columns: 1fr;
-  }
+  .ach-grid { grid-template-columns: 1fr; }
 }
