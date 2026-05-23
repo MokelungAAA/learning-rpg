@@ -10,6 +10,7 @@ import * as settings from './pages/settings.js';
 import * as skillTree from './pages/skill-tree.js';
 import * as review from './pages/review.js';
 import * as logPage from './pages/log.js';
+import * as reading from './pages/reading.js';
 
 const container = document.getElementById('page-container');
 
@@ -46,6 +47,7 @@ Router.register('#/settings', () => handleRoute(settings, '#/settings'));
 Router.register('#/data/skill-tree', () => handleRoute(skillTree, '#/data/skill-tree'));
 Router.register('#/data/review', () => handleRoute(review, '#/data/review'));
 Router.register('#/data/log', () => handleRoute(logPage, '#/data/log'));
+Router.register('#/data/reading', () => handleRoute(reading, '#/data/reading'));
 
 // Render navbar
 Navbar.render(document.body);

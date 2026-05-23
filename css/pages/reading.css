@@ -1,0 +1,147 @@
+/* reading.css — 阅读记录页样式 */
+
+.reading-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--sp-3);
+}
+
+.reading-add-btn {
+  padding: var(--sp-1) var(--sp-3);
+  border: 1px solid var(--color-accent);
+  border-radius: var(--r-full);
+  background: transparent;
+  color: var(--color-accent);
+  font-size: var(--fs-sm);
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.reading-add-btn:hover {
+  background: var(--color-accent);
+  color: #fff;
+}
+
+/* === Book List === */
+.book-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+}
+
+.book-card {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  padding: var(--sp-2) var(--sp-3);
+  border-radius: var(--r-md);
+  background: rgba(255, 255, 255, 0.4);
+}
+
+[data-theme="dark"] .book-card {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.book-cover {
+  font-size: 28px;
+  flex-shrink: 0;
+}
+
+.book-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.book-title {
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  color: var(--color-text-1);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.book-meta {
+  font-size: var(--fs-xs);
+  color: var(--color-text-3);
+}
+
+.book-stats {
+  font-size: var(--fs-xs);
+  color: var(--color-text-3);
+}
+
+.book-date {
+  font-size: var(--fs-xs);
+  color: var(--color-text-3);
+  flex-shrink: 0;
+}
+
+/* === Reading List === */
+.reading-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+}
+
+.reading-item {
+  padding: var(--sp-2) var(--sp-3);
+  border-radius: var(--r-md);
+  background: rgba(255, 255, 255, 0.4);
+}
+
+[data-theme="dark"] .reading-item {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.reading-item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--sp-1);
+}
+
+.reading-item-title {
+  font-size: var(--fs-sm);
+  font-weight: 500;
+  color: var(--color-text-1);
+}
+
+.reading-item-date {
+  font-size: var(--fs-xs);
+  color: var(--color-text-3);
+}
+
+.reading-item-body {
+  display: flex;
+  gap: var(--sp-1);
+  flex-wrap: wrap;
+  margin-bottom: var(--sp-1);
+}
+
+.reading-tag {
+  font-size: 10px;
+  padding: 1px 6px;
+  border-radius: var(--r-full);
+  background: var(--color-surface-variant);
+  color: var(--color-text-3);
+}
+
+.reading-rating {
+  font-size: 12px;
+}
+
+.reading-item-footer {
+  display: flex;
+  gap: var(--sp-2);
+  font-size: var(--fs-xs);
+  color: var(--color-text-3);
+}
+
+.reading-notes {
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

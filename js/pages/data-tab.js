@@ -167,6 +167,7 @@ export function render() {
     <a href="#/data/skill-tree" class="nav-link-card">🌳 技能树 — 查看学科能力图谱 →</a>
     <a href="#/data/review" class="nav-link-card">📝 复习中心 — 遗忘曲线与智能推荐 →</a>
     <a href="#/data/log" class="nav-link-card">📋 学习日志 — 记录查看与管理 →</a>
+    <a href="#/data/reading" class="nav-link-card">📖 阅读记录 — 书架与阅读统计 →</a>
     ${renderAchievements(records, profile)}
     ${renderExamReflection(records)}
     ${renderWeakPoints(records)}

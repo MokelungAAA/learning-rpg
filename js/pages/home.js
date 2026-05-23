@@ -174,7 +174,7 @@ export function render() {
     ${renderRecommendations(records)}
     ${renderSubjectGrid(records)}
     <button class="entry-fab" id="entry-fab" title="录入学习记录">＋</button>
-    <p style="color:var(--color-text-3);margin-top:var(--sp-3);font-size:var(--fs-xs)">v0.7 · 数据录入</p>
+    <p style="color:var(--color-text-3);margin-top:var(--sp-3);font-size:var(--fs-xs)">v1.0 · 正式版</p>
   </div>`;
 }
 
