@@ -1,28 +1,59 @@
 // command-palette.js — 全局命令面板 (Ctrl+K)
-// 功能: 快速导航、操作执行、搜索记录
-// 引用: app.js 中注册 Ctrl+K 快捷键
+// 功能: 快速导航、操作执行、拼音+模糊搜索
 import Store from '../store.js';
 import { STORAGE_KEYS as StorageKeys } from '../config.js';
+import Theme from '../theme.js';
+import EventBus from '../event-bus.js';
 
 const COMMANDS = [
   // 导航
-  { id: 'nav-home',     icon: '🏠', label: '去首页',       category: '导航', action: () => location.hash = '#/' },
-  { id: 'nav-data',     icon: '📊', label: '去数据页',     category: '导航', action: () => location.hash = '#/data' },
-  { id: 'nav-skill',    icon: '🌳', label: '去技能树',     category: '导航', action: () => location.hash = '#/skill-tree' },
-  { id: 'nav-review',   icon: '🔄', label: '去复习中心',   category: '导航', action: () => location.hash = '#/review' },
-  { id: 'nav-pomo',     icon: '🍅', label: '去番茄钟',     category: '导航', action: () => location.hash = '#/pomodoro' },
-  { id: 'nav-log',      icon: '📋', label: '去日志',       category: '导航', action: () => location.hash = '#/log' },
-  { id: 'nav-reading',  icon: '📖', label: '去阅读',       category: '导航', action: () => location.hash = '#/reading' },
-  { id: 'nav-ach',      icon: '🏆', label: '去成就',       category: '导航', action: () => location.hash = '#/achievement' },
-  { id: 'nav-settings', icon: '⚙️', label: '去设置',       category: '导航', action: () => location.hash = '#/settings' },
-  { id: 'nav-search',   icon: '🔍', label: '去搜索页',     category: '导航', action: () => location.hash = '#/search' },
+  { id: 'nav-home',     icon: '🏠', label: '去首页',       pinyin: 'shouye', category: '导航', action: () => location.hash = '#/' },
+  { id: 'nav-data',     icon: '📊', label: '去数据页',     pinyin: 'shuju', category: '导航', action: () => location.hash = '#/data' },
+  { id: 'nav-skill',    icon: '🌳', label: '去技能树',     pinyin: 'jinengshu', category: '导航', action: () => location.hash = '#/data/skill-tree' },
+  { id: 'nav-review',   icon: '🔄', label: '去复习中心',   pinyin: 'fuxi', category: '导航', action: () => location.hash = '#/data/review' },
+  { id: 'nav-pomo',     icon: '🍅', label: '去番茄钟',     pinyin: 'fanqiezhong', category: '导航', action: () => location.hash = '#/pomodoro' },
+  { id: 'nav-log',      icon: '📋', label: '去日志',       pinyin: 'rizhi', category: '导航', action: () => location.hash = '#/data/log' },
+  { id: 'nav-reading',  icon: '📖', label: '去阅读',       pinyin: 'yuedu', category: '导航', action: () => location.hash = '#/data/reading' },
+  { id: 'nav-ach',      icon: '🏆', label: '去成就',       pinyin: 'chengjiu', category: '导航', action: () => location.hash = '#/achievement' },
+  { id: 'nav-settings', icon: '⚙️', label: '去设置',       pinyin: 'shezhi', category: '导航', action: () => location.hash = '#/settings' },
+  { id: 'nav-search',   icon: '🔍', label: '去搜索页',     pinyin: 'sousuo', category: '导航', action: () => location.hash = '#/search' },
+  { id: 'nav-export',   icon: '📦', label: '去数据管理',   pinyin: 'shuju guanli daoru daochu', category: '导航', action: () => location.hash = '#/data/export' },
 
   // 操作
-  { id: 'act-dark',     icon: '🌙', label: '切换深色模式',  category: '操作', action: () => toggleDarkMode() },
-  { id: 'act-export',   icon: '💾', label: '导出数据',      category: '操作', action: () => exportData() },
-  { id: 'act-new-rec',  icon: '➕', label: '新建学习记录',  category: '操作', action: () => location.hash = '#/data' },
-  { id: 'act-new-read', icon: '📚', label: '新建阅读记录',  category: '操作', action: () => location.hash = '#/reading' },
+  { id: 'act-dark',     icon: '🌙', label: '切换深色模式',  pinyin: 'shense anse mode', category: '操作', action: () => Theme.toggle() },
+  { id: 'act-export',   icon: '💾', label: '导出数据',      pinyin: 'daochu shuju backup', category: '操作', action: () => exportData() },
+  { id: 'act-new-rec',  icon: '➕', label: '新建学习记录',  pinyin: 'xinjian xuxi jilu', category: '操作', action: () => EventBus.emit('fab:click') },
+  { id: 'act-new-read', icon: '📚', label: '新建阅读记录',  pinyin: 'xinjian yuedu jilu', category: '操作', action: () => location.hash = '#/data/reading' },
+  { id: 'act-about',    icon: 'ℹ️', label: '关于系统',      pinyin: 'guanyu xitong banben', category: '操作', action: () => location.hash = '#/about' },
 ];
+
+// Levenshtein 编辑距离
+function levenshtein(a, b) {
+  if (a.length === 0) return b.length;
+  if (b.length === 0) return a.length;
+  const matrix = [];
+  for (let i = 0; i <= b.length; i++) matrix[i] = [i];
+  for (let j = 0; j <= a.length; j++) matrix[0][j] = j;
+  for (let i = 1; i <= b.length; i++) {
+    for (let j = 1; j <= a.length; j++) {
+      matrix[i][j] = b[i - 1] === a[j - 1]
+        ? matrix[i - 1][j - 1]
+        : Math.min(matrix[i - 1][j - 1] + 1, matrix[i][j - 1] + 1, matrix[i - 1][j] + 1);
+    }
+  }
+  return matrix[b.length][a.length];
+}
+
+// 模糊匹配：子串 > 前缀 > 拼音 > 编辑距离≤2
+function fuzzyMatch(text, pinyin, query) {
+  const t = text.toLowerCase();
+  const q = query.toLowerCase();
+  if (t.includes(q)) return 3; // 子串匹配
+  if (t.startsWith(q)) return 3;
+  if (pinyin && pinyin.includes(q)) return 2; // 拼音匹配
+  if (levenshtein(t, q) <= 2) return 1; // 模糊匹配
+  return 0;
+}
 
 let paletteEl = null;
 let inputEl = null;
@@ -77,9 +108,15 @@ export function closePalette() {
 
 function onInput() {
   const q = inputEl.value.trim().toLowerCase();
-  filteredCmds = q
-    ? COMMANDS.filter(c => c.label.includes(q) || c.category.includes(q))
-    : [...COMMANDS];
+  if (!q) {
+    filteredCmds = [...COMMANDS];
+  } else {
+    filteredCmds = COMMANDS
+      .map(c => ({ cmd: c, score: fuzzyMatch(c.label, c.pinyin || '', q) }))
+      .filter(x => x.score > 0)
+      .sort((a, b) => b.score - a.score)
+      .map(x => x.cmd);
+  }
   activeIndex = 0;
   renderList();
 }
@@ -126,7 +163,6 @@ function updateActive() {
   listEl.querySelectorAll('.cmd-item').forEach((el, i) => {
     el.classList.toggle('active', +el.dataset.idx === activeIndex);
   });
-  // 滚动到可见区域
   const activeEl = listEl.querySelector('.cmd-item.active');
   if (activeEl) activeEl.scrollIntoView({ block: 'nearest' });
 }
@@ -137,13 +173,6 @@ function executeActive() {
     closePalette();
     cmd.action();
   }
-}
-
-// 切换深色模式
-function toggleDarkMode() {
-  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-  document.documentElement.setAttribute('data-theme', isDark ? 'light' : 'dark');
-  localStorage.setItem('theme', isDark ? 'light' : 'dark');
 }
 
 // 导出数据
