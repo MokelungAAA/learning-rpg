@@ -18,43 +18,31 @@ class Navbar {
     EventBus.on('route:changed', (hash) => this.setActive(hash));
   }
 
-  // 构建移动端底部导航：主tab + FAB按钮 + 番茄钟浮动按钮
+  // 构建移动端底部导航：首页→数据→番茄钟→设置→+
   renderBottomNav(container) {
     this.el = document.createElement('nav');
     this.el.className = 'bottom-nav';
     this.el.id = 'bottom-nav';
 
-    const mainTabs = NAV_TABS.filter(t => t.id !== 'pomodoro');
-    const pomodoroTab = NAV_TABS.find(t => t.id === 'pomodoro');
-
-    mainTabs.forEach((tab, i) => {
-      if (i === mainTabs.length - 1) {
-        const divider = document.createElement('div');
-        divider.className = 'nav-divider';
-        this.el.appendChild(divider);
-      }
+    // 按指定顺序渲染 tab：home, data, pomodoro, settings
+    const order = ['home', 'data', 'pomodoro', 'settings'];
+    for (const id of order) {
+      const tab = NAV_TABS.find(t => t.id === id);
+      if (!tab) continue;
       const btn = document.createElement('button');
-      btn.className = 'nav-tab';
+      btn.className = 'nav-tab' + (id === 'pomodoro' ? ' nav-tab-pomo' : '');
       btn.dataset.tab = tab.id;
       btn.innerHTML = `<span class="nav-icon">${tab.icon}</span><span class="nav-label">${tab.label}</span>`;
       btn.addEventListener('click', () => { window.location.hash = tab.hash; });
       this.el.appendChild(btn);
-    });
+    }
 
+    // FAB 新记录按钮
     const fab = document.createElement('button');
     fab.className = 'nav-fab';
     fab.textContent = '+';
     fab.addEventListener('click', () => EventBus.emit('fab:click'));
     this.el.appendChild(fab);
-
-    if (pomodoroTab) {
-      const pomBtn = document.createElement('button');
-      pomBtn.className = 'nav-tab nav-tab-float';
-      pomBtn.dataset.tab = pomodoroTab.id;
-      pomBtn.innerHTML = `<span class="nav-icon">${pomodoroTab.icon}</span><span class="nav-label">${pomodoroTab.label}</span>`;
-      pomBtn.addEventListener('click', () => { window.location.hash = pomodoroTab.hash; });
-      this.el.appendChild(pomBtn);
-    }
 
     container.appendChild(this.el);
   }

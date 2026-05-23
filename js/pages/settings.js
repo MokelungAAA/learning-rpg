@@ -8,6 +8,16 @@ import EventBus from '../event-bus.js';
 import Toast from '../components/toast.js';
 import SyncEngine from '../sync-engine.js';
 
+// 可折叠区块通用模板
+function foldable(id, icon, title, content, open = false) {
+  return `<div class="settings-section fold-section">
+    <h3 class="fold-toggle" data-fold="${id}">${icon} ${title} <span class="fold-arrow">${open ? '▴' : '▾'}</span></h3>
+    <div class="fold-body" id="fold-${id}" style="display:${open ? 'block' : 'none'}">
+      ${content}
+    </div>
+  </div>`;
+}
+
 const FONT_SIZES = [
   { key: 'small', label: '小', scale: 0.875 },
   { key: 'normal', label: '标准', scale: 1 },
@@ -25,8 +35,8 @@ function saveSettings(patch) {
   Store.set(StorageKeys.SETTINGS, { ...current, ...patch });
 }
 
-// 外观区块：主题切换（浅色/深色/跟随系统）+ 字号
-function renderAppearance() {
+// 外观区块内容：主题切换（浅色/深色/跟随系统）+ 字号
+function renderAppearanceContent() {
   const mode = Theme.getTheme();
   const fontSize = getSettings().fontSize || 'normal';
   const themePills = [
@@ -37,30 +47,29 @@ function renderAppearance() {
   const fontPills = FONT_SIZES.map(f =>
     `<button class="pill font-pill${fontSize === f.key ? ' active' : ''}" data-font="${f.key}">${f.label}</button>`
   ).join('');
-  return `<div class="settings-section">
-    <h3>🎨 外观</h3>
-    <div class="settings-row"><span class="settings-label">主题</span><div class="pill-group theme-pills">${themePills}</div></div>
-    <div class="settings-row"><span class="settings-label">字号</span><div class="pill-group font-pills">${fontPills}</div></div>
-  </div>`;
+  return `<div class="settings-row"><span class="settings-label">主题</span><div class="pill-group theme-pills">${themePills}</div></div>
+    <div class="settings-row"><span class="settings-label">字号</span><div class="pill-group font-pills">${fontPills}</div></div>`;
 }
 
-// 同步区块：GitHub Token 配置 + 立即同步按钮
+// 同步区块内容：GitHub Token 配置 + 立即同步按钮
 // 坑: 同步配置存 lts_sync_config（非 SETTINGS 内）
-function renderSync() {
+function renderSyncContent() {
   const meta = Store.get(StorageKeys.SYNC_META) || {};
   const syncCfg = Store.get('lts_sync_config') || {};
   const configured = !!(syncCfg.token && syncCfg.owner && syncCfg.repo);
   const statusText = configured
     ? (meta.lastSync ? `上次同步: ${new Date(meta.lastSync).toLocaleString('zh-CN')}` : '已配置，未同步')
     : '未配置';
-  return `<div class="settings-section">
-    <h3>☁️ 数据同步</h3>
-    <div class="settings-row"><span class="settings-label">状态</span><span class="settings-value">${statusText}</span></div>
+  return `<div class="settings-row"><span class="settings-label">状态</span><span class="settings-value">${statusText}</span></div>
     <div class="settings-row"><span class="settings-label">仓库</span><span class="settings-value">${configured ? syncCfg.owner + '/' + syncCfg.repo : '—'}</span></div>
     <div class="settings-row"><span class="settings-label">GitHub Token</span><button class="settings-btn" id="sync-config-btn">配置</button></div>
-    <div class="settings-row"><button class="settings-btn settings-btn-primary" id="sync-now-btn"${configured ? '' : ' disabled'}>立即同步</button></div>
-  </div>
-  <div class="sync-config-modal" id="sync-config-modal" style="display:none">
+    <div class="settings-row"><button class="settings-btn settings-btn-primary" id="sync-now-btn"${configured ? '' : ' disabled'}>立即同步</button></div>`;
+}
+
+// 同步配置弹窗（在 fold 外部，独立渲染）
+function renderSyncModal() {
+  const syncCfg = Store.get('lts_sync_config') || {};
+  return `<div class="sync-config-modal" id="sync-config-modal" style="display:none">
     <div class="sync-modal-backdrop" id="sync-modal-backdrop"></div>
     <div class="sync-modal-content">
       <div class="sync-modal-header">☁️ 同步配置</div>
@@ -75,8 +84,8 @@ function renderSync() {
   </div>`;
 }
 
-// 番茄钟区块：默认预设 + 提示音/振动开关
-function renderPomodoroSettings() {
+// 番茄钟区块内容：默认预设 + 提示音/振动开关
+function renderPomodoroContent() {
   const settings = getSettings();
   const currentPreset = settings.pomodoroPreset || 'classic';
   const sound = settings.pomodoroSound !== false;
@@ -84,33 +93,26 @@ function renderPomodoroSettings() {
   const presetOpts = POMODORO_PRESETS.map(p =>
     `<option value="${p.id}"${currentPreset === p.id ? ' selected' : ''}>${p.name} (${p.work}分)</option>`
   ).join('');
-  return `<div class="settings-section">
-    <h3>🍅 番茄钟</h3>
-    <div class="settings-row"><span class="settings-label">默认方案</span><select id="pomo-preset" class="settings-select">${presetOpts}</select></div>
+  return `<div class="settings-row"><span class="settings-label">默认方案</span><select id="pomo-preset" class="settings-select">${presetOpts}</select></div>
     <div class="settings-row"><span class="settings-label">提示音</span><button class="pill toggle-pill${sound ? ' active' : ''}" id="pomo-sound">${sound ? '开' : '关'}</button></div>
-    <div class="settings-row"><span class="settings-label">振动</span><button class="pill toggle-pill${vibration ? ' active' : ''}" id="pomo-vibration">${vibration ? '开' : '关'}</button></div>
-  </div>`;
+    <div class="settings-row"><span class="settings-label">振动</span><button class="pill toggle-pill${vibration ? ' active' : ''}" id="pomo-vibration">${vibration ? '开' : '关'}</button></div>`;
 }
 
-// 个人信息区块：昵称 + 年级选择
-function renderProfile() {
+// 个人信息区块内容：昵称 + 年级选择
+function renderProfileContent() {
   const profile = Store.get(StorageKeys.USER_PROFILE) || {};
   const nickname = profile.nickname || '墨澜';
   const grade = profile.grade || '高一';
-  return `<div class="settings-section">
-    <h3>👤 个人信息</h3>
-    <div class="settings-row"><span class="settings-label">昵称</span><input type="text" id="profile-nickname" class="settings-input" value="${nickname}" maxlength="20"></div>
+  return `<div class="settings-row"><span class="settings-label">昵称</span><input type="text" id="profile-nickname" class="settings-input" value="${nickname}" maxlength="20"></div>
     <div class="settings-row"><span class="settings-label">年级</span><select id="profile-grade" class="settings-select">
       <option${grade === '高一' ? ' selected' : ''}>高一</option>
       <option${grade === '高二' ? ' selected' : ''}>高二</option>
       <option${grade === '高三' ? ' selected' : ''}>高三</option>
-    </select></div>
-  </div>`;
+    </select></div>`;
 }
 
-// 开发者区块：算法引擎状态展示（纯只读）
-// 显示 profile 版本、半衰期、修正系数、XP 参数、记录统计
-function renderDeveloper() {
+// 开发者区块内容：算法引擎状态展示（纯只读）
+function renderDeveloperContent() {
   const profile = Store.get(StorageKeys.USER_PROFILE) || {};
   const records = Store.get(StorageKeys.STUDY_RECORDS) || [];
   const totalXP = records.reduce((s, r) => s + (r.xp || 0), 0);
@@ -119,41 +121,35 @@ function renderDeveloper() {
     `<span class="dev-tag">${k}: ${v}</span>`
   ).join('');
   const lastAdapt = localStorage.getItem('lts_last_adapt_date') || '未运行';
-  return `<div class="settings-section">
-    <h3 class="dev-toggle" id="dev-toggle">🔧 开发者 <span class="dev-arrow">▾</span></h3>
-    <div class="dev-content" id="dev-content" style="display:none">
-      <div class="settings-row"><span class="settings-label">Profile 版本</span><span class="settings-value">${profile.version || '—'}</span></div>
-      <div class="settings-row"><span class="settings-label">globalBaseHalfLife</span><span class="settings-value">${profile.globalBaseHalfLife || '—'} 天</span></div>
-      <div class="settings-row"><span class="settings-label">xpBasePerMinute</span><span class="settings-value">${profile.xpBasePerMinute || '—'}</span></div>
-      <div class="settings-row"><span class="settings-label">dailyXPLimit</span><span class="settings-value">${profile.dailyXPLimit || '—'}</span></div>
-      <div class="settings-row"><span class="settings-label">decayRateForXP</span><span class="settings-value">${profile.decayRateForXP || '—'}</span></div>
-      <div class="settings-row"><span class="settings-label">最近 EMA 适应</span><span class="settings-value">${lastAdapt}</span></div>
-      <div class="settings-row"><span class="settings-label">总记录数</span><span class="settings-value">${records.length}</span></div>
-      <div class="settings-row"><span class="settings-label">总 XP</span><span class="settings-value">${totalXP}</span></div>
-      <div class="dev-mods">
-        <div class="dev-mods-title">subjectModifiers</div>
-        <div class="dev-mods-list">${modEntries || '<span class="dev-tag">无数据</span>'}</div>
-      </div>
-    </div>
-  </div>`;
+  return `<div class="settings-row"><span class="settings-label">Profile 版本</span><span class="settings-value">${profile.version || '—'}</span></div>
+    <div class="settings-row"><span class="settings-label">globalBaseHalfLife</span><span class="settings-value">${profile.globalBaseHalfLife || '—'} 天</span></div>
+    <div class="settings-row"><span class="settings-label">xpBasePerMinute</span><span class="settings-value">${profile.xpBasePerMinute || '—'}</span></div>
+    <div class="settings-row"><span class="settings-label">dailyXPLimit</span><span class="settings-value">${profile.dailyXPLimit || '—'}</span></div>
+    <div class="settings-row"><span class="settings-label">decayRateForXP</span><span class="settings-value">${profile.decayRateForXP || '—'}</span></div>
+    <div class="settings-row"><span class="settings-label">最近 EMA 适应</span><span class="settings-value">${lastAdapt}</span></div>
+    <div class="settings-row"><span class="settings-label">总记录数</span><span class="settings-value">${records.length}</span></div>
+    <div class="settings-row"><span class="settings-label">总 XP</span><span class="settings-value">${totalXP}</span></div>
+    <div class="dev-mods">
+      <div class="dev-mods-title">subjectModifiers</div>
+      <div class="dev-mods-list">${modEntries || '<span class="dev-tag">无数据</span>'}</div>
+    </div>`;
 }
 
-// 关于区块：跳转 #/about 的导航链接
-function renderAboutLink() {
-  return `<div class="settings-section settings-about-link">
-    <a href="#/about" class="settings-nav-link"><span>ℹ️ 关于</span><span class="settings-arrow">→</span></a>
-  </div>`;
+// 关于区块内容：跳转 #/about 的导航链接
+function renderAboutContent() {
+  return `<a href="#/about" class="settings-nav-link"><span>ℹ️ 关于</span><span class="settings-arrow">→</span></a>`;
 }
 
 export function render() {
   return `<div class="page-enter">
     <div class="settings-header">⚙️ 设置</div>
-    ${renderAppearance()}
-    ${renderSync()}
-    ${renderPomodoroSettings()}
-    ${renderProfile()}
-    ${renderDeveloper()}
-    ${renderAboutLink()}
+    ${foldable('appearance', '🎨', '外观', renderAppearanceContent(), true)}
+    ${foldable('sync', '☁️', '数据同步', renderSyncContent())}
+    ${foldable('pomodoro', '🍅', '番茄钟', renderPomodoroContent())}
+    ${foldable('profile', '👤', '个人信息', renderProfileContent())}
+    ${foldable('about', 'ℹ️', '关于', renderAboutContent())}
+    ${foldable('developer', '🔧', '开发者', renderDeveloperContent())}
+    ${renderSyncModal()}
     <p style="color:var(--color-text-3);margin-top:var(--sp-3);font-size:var(--fs-xs)">v0.65 · 开发者区</p>
   </div>`;
 }
@@ -257,17 +253,19 @@ export function afterRender() {
   if (syncSave) syncSave.addEventListener('click', saveSyncConfig);
   if (syncNowBtn) syncNowBtn.addEventListener('click', doSync);
 
-  // 开发者区块折叠/展开
-  const devToggle = document.getElementById('dev-toggle');
-  const devContent = document.getElementById('dev-content');
-  const onDevToggle = () => {
-    if (!devContent) return;
-    const shown = devContent.style.display !== 'none';
-    devContent.style.display = shown ? 'none' : 'block';
-    const arrow = devToggle?.querySelector('.dev-arrow');
+  // 通用折叠/展开：所有 .fold-toggle 点击切换对应 .fold-body
+  const foldToggles = document.querySelectorAll('.fold-toggle');
+  const onFoldToggle = (e) => {
+    const toggle = e.currentTarget;
+    const id = toggle.dataset.fold;
+    const body = document.getElementById('fold-' + id);
+    if (!body) return;
+    const shown = body.style.display !== 'none';
+    body.style.display = shown ? 'none' : 'block';
+    const arrow = toggle.querySelector('.fold-arrow');
     if (arrow) arrow.textContent = shown ? '▾' : '▴';
   };
-  if (devToggle) devToggle.addEventListener('click', onDevToggle);
+  foldToggles.forEach(t => t.addEventListener('click', onFoldToggle));
 
   // 恢复已保存的同步配置到引擎（页面加载时执行一次）
   const savedCfg = Store.get('lts_sync_config') || {};
@@ -291,6 +289,6 @@ export function afterRender() {
     if (syncCancel) syncCancel.removeEventListener('click', closeSyncModal);
     if (syncSave) syncSave.removeEventListener('click', saveSyncConfig);
     if (syncNowBtn) syncNowBtn.removeEventListener('click', doSync);
-    if (devToggle) devToggle.removeEventListener('click', onDevToggle);
+    foldToggles.forEach(t => t.removeEventListener('click', onFoldToggle));
   };
 }
