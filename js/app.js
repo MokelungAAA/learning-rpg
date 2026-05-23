@@ -22,13 +22,21 @@ const container = document.getElementById('page-container');
 // Theme must init before any render (FOUC already handled by inline script)
 Theme.init();
 
-// Init data engine (non-blocking, failure won't break the app)
+// Init data engine + 运行数据迁移（non-blocking, failure won't break the app）
 (async () => {
   try {
     const { default: DataEngine } = await import('./data-engine.js');
     const { getDefaultProfile } = await import('./data/defaults.js');
     const { StorageKeys } = await import('./config.js');
+    const { migrate } = await import('./data-migration.js');
     await DataEngine.init({ [StorageKeys.USER_PROFILE]: getDefaultProfile() });
+    // 运行用户画像迁移
+    const Store = (await import('./store.js')).default;
+    const profile = Store.get(StorageKeys.USER_PROFILE);
+    if (profile) {
+      const migrated = migrate(profile);
+      if (migrated !== profile) Store.set(StorageKeys.USER_PROFILE, migrated);
+    }
   } catch { /* data engine optional */ }
 })();
 

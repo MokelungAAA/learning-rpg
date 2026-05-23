@@ -1,6 +1,6 @@
 // defaults.js — 默认数据模板
 export const DEFAULT_USER_PROFILE = {
-  version: 1,
+  version: 3,
   updatedAt: Date.now(),
   nickname: '墨澜',
   grade: '高一',
@@ -26,7 +26,18 @@ export const DEFAULT_USER_PROFILE = {
     subjectType: { '理科': 1.05, '文科': 0.95 },
     sessionLength: { short: 0.9, medium: 1.0, long: 1.05 },
   },
-  globalHalfLife: 7.0,
+  globalBaseHalfLife: 3.0,
+  subjectModifiers: {
+    logos: 1.0, mythos: 1.0, lingua: 1.0,
+    physis: 1.0, khemeia: 1.0, zoe: 1.0,
+    politeia: 1.0, historia: 1.0, geographia: 1.0,
+  },
+  xpBasePerMinute: 2.0,
+  activityWeights: { practice: 1.2, exam: 1.5, lecture: 0.8, review: 1.0, reading: 0.6, video: 0.7, other: 0.5 },
+  decayRateForXP: 0.00005,
+  dailyXPLimit: 500,
+  dailyXPLimitSoftness: 0.5,
+  baseReviewRatio: 0.20,
   totalStudyMinutes: 0,
   totalPomodoros: 0,
   pomodoroSettings: {

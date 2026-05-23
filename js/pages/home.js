@@ -43,7 +43,7 @@ function renderStatusBar() {
 
 // 4.3 Hero Stats
 function renderHeroStats(profile, records) {
-  const totalXP = profile.totalXP || 0;
+  const totalXP = records.reduce((s, r) => s + (r.xp || 0), 0);
   const todayXP = calcTodayXP(records);
   const streakDays = calcStreakDays(records);
   const day = getDayStatus();
@@ -182,7 +182,7 @@ export function render() {
     ${renderPomodoroWidget()}
     ${renderRecommendations(records)}
     ${renderSubjectGrid(records)}
-    <p style="color:var(--color-text-3);margin-top:var(--sp-3);font-size:var(--fs-xs)">v0.60 · 最终打磨</p>
+    <p style="color:var(--color-text-3);margin-top:var(--sp-3);font-size:var(--fs-xs)">v0.61 · Bug修复</p>
   </div>`;
 }
 
@@ -190,7 +190,7 @@ export function afterRender() {
   // 数字滚动动画
   const profile = getProfile();
   const records = getRecords();
-  const totalXP = profile.totalXP || 0;
+  const totalXP = records.reduce((s, r) => s + (r.xp || 0), 0);
   const todayXP = calcTodayXP(records);
   const streakDays = calcStreakDays(records);
   setTimeout(() => {
