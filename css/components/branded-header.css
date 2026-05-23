@@ -1,0 +1,58 @@
+/* branded-header.css — 品牌头部栏（§4.2/§6.3） */
+
+.branded-header {
+  display: none;
+  position: sticky;
+  top: 0;
+  z-index: 900;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--sp-2) var(--sp-4);
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  transition: background var(--duration-normal) var(--ease);
+}
+
+[data-theme="dark"] .branded-header {
+  background: rgba(30, 30, 30, 0.85);
+  border-bottom-color: rgba(255, 255, 255, 0.06);
+}
+
+.branded-header-left {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+}
+
+.branded-header-logo {
+  font-size: 20px;
+}
+
+.branded-header-name {
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  color: var(--color-text-1);
+}
+
+.branded-header-ver {
+  font-size: 10px;
+  color: var(--color-text-3);
+  background: var(--color-surface-variant);
+  padding: 1px 6px;
+  border-radius: var(--r-full);
+}
+
+.branded-header-right {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+}
+
+/* 桌面端显示 */
+@media (min-width: 1024px) {
+  .branded-header {
+    display: flex;
+  }
+}

@@ -1,0 +1,144 @@
+/* launch-screen.css — 启动页（§4.2） */
+
+.launch-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: var(--color-bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: launchFadeIn 0.5s ease;
+}
+
+.launch-overlay.launch-fade-out {
+  animation: launchFadeOut 0.5s ease forwards;
+}
+
+@keyframes launchFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes launchFadeOut {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+.launch-content {
+  text-align: center;
+  max-width: 360px;
+  padding: var(--sp-4);
+}
+
+.launch-logo {
+  font-size: 64px;
+  margin-bottom: var(--sp-3);
+  animation: launchBounce 1s ease;
+}
+
+@keyframes launchBounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-12px); }
+}
+
+.launch-title {
+  font-size: 28px;
+  font-weight: 800;
+  color: var(--color-text-1);
+  margin-bottom: var(--sp-1);
+}
+
+.launch-subtitle {
+  font-size: var(--fs-sm);
+  color: var(--color-text-3);
+  margin-bottom: var(--sp-4);
+}
+
+.launch-card {
+  background: var(--color-surface);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--r-lg);
+  padding: var(--sp-3);
+  margin-bottom: var(--sp-4);
+  text-align: left;
+}
+
+.launch-card-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--sp-2);
+}
+
+.launch-card-label {
+  font-size: var(--fs-sm);
+  color: var(--color-text-2);
+}
+
+.launch-level {
+  font-size: var(--fs-md);
+  font-weight: 700;
+  color: var(--color-accent);
+}
+
+.launch-xp {
+  font-size: var(--fs-sm);
+  color: var(--color-text-3);
+}
+
+.launch-progress {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+}
+
+.launch-progress-bar {
+  flex: 1;
+  height: 6px;
+  background: var(--color-surface-variant);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.launch-progress-fill {
+  height: 100%;
+  background: var(--color-accent-gradient);
+  border-radius: 3px;
+  transition: width 0.8s ease;
+}
+
+.launch-progress-text {
+  font-size: var(--fs-xs);
+  color: var(--color-text-3);
+  width: 32px;
+  text-align: right;
+}
+
+.launch-streak {
+  font-size: var(--fs-sm);
+  color: var(--color-warning);
+}
+
+.launch-start-btn {
+  width: 100%;
+  padding: var(--sp-3);
+  border: none;
+  border-radius: var(--r-md);
+  background: var(--color-accent-gradient);
+  color: #fff;
+  font-size: var(--fs-md);
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform var(--duration-fast) var(--ease-spring),
+              box-shadow var(--duration-fast) var(--ease);
+}
+
+.launch-start-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(37, 99, 235, 0.3);
+}
+
+.launch-start-btn:active {
+  transform: scale(0.97);
+}

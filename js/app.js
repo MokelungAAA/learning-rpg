@@ -2,6 +2,7 @@
 // 注意：Theme.init() 必须在首屏渲染前调用
 import Router from './router.js';
 import Navbar from './components/navbar.js';
+import BrandedHeader from './components/branded-header.js';
 import EventBus from './event-bus.js';
 import Theme from './theme.js';
 import * as home from './pages/home.js';
@@ -55,6 +56,17 @@ Theme.init();
 
 // Init router
 Router.init(container);
+
+// §4.2: 启动页 — 首次加载时显示，点击"开始学习"或3秒后自动消失
+(async () => {
+  try {
+    const { showLaunchScreen } = await import('./components/launch-screen.js');
+    await showLaunchScreen();
+  } catch {}
+})();
+
+// §4.2/§6.3: 品牌头部栏（桌面端显示）
+BrandedHeader.render(document.body);
 
 // 路由切换：销毁旧页面 → 渲染新页面 → 执行 afterRender
 // 返回值 cleanup 函数在下次路由切换时自动调用
