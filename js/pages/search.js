@@ -8,6 +8,7 @@ import { ACHIEVEMENTS } from '../data/achievements.js';
 import { getAllSkills } from '../data/skill-tree.js';
 import { getSubjectIcon } from '../utils/level.js';
 import { checkAchievement } from '../utils/achievements-check.js';
+import { fuzzyMatch as sharedFuzzyMatch, matchPinyin } from '../utils/search.js';
 
 // 搜索历史管理（最多5条，存 localStorage）
 const MAX_HISTORY = 5;
@@ -21,43 +22,9 @@ function addToHistory(query) {
   saveHistory(history);
 }
 
-// 拼音首字母简拼映射（支持输入 sx 匹配"数学"）
-const PINYIN_MAP = { '数学': 'sx', '语文': 'yw', '英语': 'yy', '物理': 'wl', '化学': 'hx', '生物': 'sw', '政治': 'zz', '历史': 'ls', '地理': 'dl' };
-
-// Levenshtein 编辑距离（模糊匹配，距离<=2 视为匹配）
-function levenshtein(a, b) {
-  if (a.length === 0) return b.length;
-  if (b.length === 0) return a.length;
-  const matrix = [];
-  for (let i = 0; i <= b.length; i++) matrix[i] = [i];
-  for (let j = 0; j <= a.length; j++) matrix[0][j] = j;
-  for (let i = 1; i <= b.length; i++) {
-    for (let j = 1; j <= a.length; j++) {
-      matrix[i][j] = b[i - 1] === a[j - 1]
-        ? matrix[i - 1][j - 1]
-        : Math.min(matrix[i - 1][j - 1] + 1, matrix[i][j - 1] + 1, matrix[i - 1][j] + 1);
-    }
-  }
-  return matrix[b.length][a.length];
-}
-
+// 复用共享搜索工具（levenshtein + pinyin + fuzzyMatch）
 function fuzzyMatch(text, query) {
-  const t = text.toLowerCase(), q = query.toLowerCase();
-  if (t.includes(q)) return true;
-  // 前缀匹配
-  if (t.startsWith(q.slice(0, Math.ceil(q.length * 0.6)))) return true;
-  // Levenshtein: 对短文本做精确模糊，长文本按子串窗口滑动
-  if (t.length <= 8 && levenshtein(t, q) <= 2) return true;
-  for (let i = 0; i <= t.length - q.length; i++) {
-    if (levenshtein(t.slice(i, i + q.length), q) <= 2) return true;
-  }
-  return false;
-}
-
-// 拼音首字母匹配（仅支持9个学科名）
-function matchPinyin(text, query) {
-  const pinyin = PINYIN_MAP[text];
-  return pinyin && pinyin.includes(query.toLowerCase());
+  return sharedFuzzyMatch(text, query) > 0;
 }
 
 // 全文搜索：遍历学科/教材/知识点/技能树/记录/成就/功能页
@@ -194,7 +161,7 @@ export function render() {
       ${renderHistory()}
       <div id="search-results" class="search-results"></div>
     </div>
-    <p style="color:var(--color-text-3);margin-top:var(--sp-3);font-size:var(--fs-xs)">v0.99 · 开发者区</p>
+    <p style="color:var(--color-text-3);margin-top:var(--sp-3);font-size:var(--fs-xs)">v0.114 · 开发者区</p>
   </div>`;
 }
 

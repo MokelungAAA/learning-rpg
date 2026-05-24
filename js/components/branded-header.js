@@ -15,7 +15,7 @@ class BrandedHeader {
       <div class="branded-header-left">
         <span class="branded-header-logo">🎮</span>
         <span class="branded-header-name">学习RPG</span>
-        <span class="branded-header-ver">v0.99</span>
+        <span class="branded-header-ver">v0.114</span>
       </div>
       <div class="branded-header-right" id="branded-header-right"></div>
     `;

@@ -8,6 +8,7 @@ import { getAllKnowledgePoints } from '../data/subjects.js';
 import EventBus from '../event-bus.js';
 import Toast from './toast.js';
 import { calcXP } from '../utils/level.js';
+import { levenshtein, matchPinyin } from '../utils/search.js';
 
 let isOpen = false;        // 防止重复打开
 let currentSubject = '';   // 当前选中学科id
@@ -33,20 +34,20 @@ function buildKPIndex() {
 }
 
 // 5级匹配搜索知识点，返回最多10条
-// @param {string} query - 搜索关键词
-// @returns {Array} 匹配结果，按优先级排序
+// §10.2: 精确→前缀→子串→模糊(Levenshtein+逐字)→拼音
 function searchKP(query) {
   if (!query) return [];
   const q = query.toLowerCase();
-  const exact = [], prefix = [], substring = [], fuzzy = [];
+  const exact = [], prefix = [], substring = [], fuzzy = [], pinyin = [];
   for (const item of kpIndex) {
     const name = item.kp.toLowerCase();
     if (name === q) exact.push(item);
     else if (name.startsWith(q)) prefix.push(item);
     else if (name.includes(q)) substring.push(item);
-    else if (isFuzzyMatch(name, q)) fuzzy.push(item);
+    else if (isFuzzyMatch(name, q) || (name.length <= 10 && levenshtein(name, q) <= 2)) fuzzy.push(item);
+    else if (matchPinyin(item.subjectName, q)) pinyin.push(item);
   }
-  return [...exact, ...prefix, ...substring, ...fuzzy].slice(0, 10);
+  return [...exact, ...prefix, ...substring, ...fuzzy, ...pinyin].slice(0, 10);
 }
 
 // 逐字符匹配，query中每个字符需在name中按序出现
@@ -145,8 +146,8 @@ function renderModal() {
         </div>
         <div class="entry-row">
           <div class="entry-field entry-field-half">
-            <label class="entry-label">得分 (0-100)</label>
-            <input type="number" id="entry-score" class="entry-input" min="0" max="100" value="0" placeholder="0">
+            <label class="entry-label">得分 <span id="entry-score-display" class="score-display">0</span></label>
+            <input type="range" id="entry-score" class="entry-range" min="0" max="100" value="0" step="5">
           </div>
           <div class="entry-field entry-field-half">
             <label class="entry-label">时长 (分钟) *</label>
@@ -307,14 +308,31 @@ function bindEvents() {
     searchInput.value = '';
   });
 
-  // ENTRY-05: 时长自动推断（做题80% + 订正20%）
+  // §10.3: 得分滑块同步显示
+  const scoreRange = document.getElementById('entry-score');
+  const scoreDisplay = document.getElementById('entry-score-display');
+  scoreRange.addEventListener('input', () => { scoreDisplay.textContent = scoreRange.value; });
+
+  // §10.3: 时长自动推断（EMA学习用户习惯，默认80/20）
   const durationInput = document.getElementById('entry-duration');
   const practiceInput = document.getElementById('entry-practice-dur');
   const reviewInput = document.getElementById('entry-review-dur');
+  // 从历史记录计算EMA做题比例（alpha=0.3，最近的记录权重更高）
+  const allRecs = Store.get(StorageKeys.STUDY_RECORDS) || [];
+  let practiceRatio = 0.8;
+  const recsWithRatio = allRecs.filter(r => r.practiceDuration > 0 && r.duration > 0).slice(-20);
+  if (recsWithRatio.length >= 3) {
+    let ema = recsWithRatio[0].practiceDuration / recsWithRatio[0].duration;
+    for (let i = 1; i < recsWithRatio.length; i++) {
+      const r = recsWithRatio[i].practiceDuration / recsWithRatio[i].duration;
+      ema = 0.3 * r + 0.7 * ema;
+    }
+    practiceRatio = Math.max(0.5, Math.min(0.95, ema));
+  }
   durationInput.addEventListener('input', () => {
     const dur = parseInt(durationInput.value, 10) || 0;
-    practiceInput.value = Math.round(dur * 0.8);
-    reviewInput.value = Math.round(dur * 0.2);
+    practiceInput.value = Math.round(dur * practiceRatio);
+    reviewInput.value = Math.round(dur * (1 - practiceRatio));
   });
 
   // 提交

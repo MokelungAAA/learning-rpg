@@ -1,68 +1,173 @@
 // navbar.js — 导航组件：移动端底部栏 + 桌面端侧边栏
-// 导出单例，监听 route:changed 事件自动高亮
+// v0.114: "+"核心交互 — 点击扇形展开，长按录入
 import { NAV_TABS, STORAGE_KEYS as StorageKeys } from '../config.js';
 import EventBus from '../event-bus.js';
 
+// 扇形菜单配置：4个快捷操作（去掉番茄钟）
+const FAN_ITEMS = [
+  { id: 'home',     icon: '🏠', label: '首页', hash: '#/' },
+  { id: 'data',     icon: '📊', label: '数据', hash: '#/data' },
+  { id: 'search',   icon: '🔍', label: '搜索', hash: '#/search' },
+  { id: 'settings', icon: '⚙️', label: '设置', hash: '#/settings' },
+];
+
 class Navbar {
   constructor() {
-    this.el = null;       // 底部导航 DOM
-    this.sidebar = null;  // 侧边栏 DOM
-    this.detailPanel = null; // 侧边栏详情面板
+    this.el = null;
+    this.sidebar = null;
+    this.detailPanel = null;
     this.activeTab = 'home';
+    this.fanOpen = false;
+    this.fanOverlay = null;
+    this.fanBtns = [];
   }
 
-  // 渲染两种导航，绑定路由监听
   render(container) {
     this.renderBottomNav(container);
     this.renderSidebar(container);
     this.setActive(window.location.hash || '#/');
-    EventBus.on('route:changed', (hash) => this.setActive(hash));
+    EventBus.on('route:changed', (hash) => {
+      this.setActive(hash);
+      this.closeFan(); // 路由切换时自动关闭扇形菜单
+    });
+
+    // ESC 键关闭扇形菜单
+    this._onKeydown = (e) => {
+      if (e.key === 'Escape' && this.fanOpen) this.closeFan();
+    };
+    document.addEventListener('keydown', this._onKeydown);
   }
 
-  // 构建移动端底部导航：首页→数据→设置→+
+  // 底部导航：只有 + 按钮
   renderBottomNav(container) {
     this.el = document.createElement('nav');
     this.el.className = 'bottom-nav';
     this.el.id = 'bottom-nav';
 
-    // 按指定顺序渲染 tab：home, data, settings
-    const order = ['home', 'data', 'settings'];
-    for (const id of order) {
-      const tab = NAV_TABS.find(t => t.id === id);
-      if (!tab) continue;
-      const btn = document.createElement('button');
-      btn.className = 'nav-tab';
-      btn.dataset.tab = tab.id;
-      btn.innerHTML = `<span class="nav-icon">${tab.icon}</span><span class="nav-label">${tab.label}</span>`;
-      btn.addEventListener('click', () => { window.location.hash = tab.hash; });
-      this.el.appendChild(btn);
-    }
+    // 中央：+ 按钮（56px）
+    const fabWrap = document.createElement('div');
+    fabWrap.className = 'nav-fab-wrap';
 
-    // FAB 新记录按钮
     const fab = document.createElement('button');
-    fab.className = 'nav-fab';
-    fab.textContent = '+';
-    fab.addEventListener('click', () => EventBus.emit('fab:click'));
-    this.el.appendChild(fab);
+    fab.className = 'nav-fab-center';
+    fab.innerHTML = '<span class="nav-fab-icon">+</span>';
+    fab.setAttribute('aria-label', '快捷操作');
 
+    // 长按500ms → 打开数据录入；短按 → 切换扇形菜单
+    let pressTimer = null;
+    let isLongPress = false;
+    fab.addEventListener('pointerdown', () => {
+      isLongPress = false;
+      pressTimer = setTimeout(() => {
+        isLongPress = true;
+        this.closeFan();
+        EventBus.emit('fab:click');
+      }, 500);
+    });
+    fab.addEventListener('pointerup', () => {
+      clearTimeout(pressTimer);
+    });
+    fab.addEventListener('pointerleave', () => {
+      clearTimeout(pressTimer);
+      isLongPress = false;
+    });
+    fab.addEventListener('click', (e) => {
+      if (isLongPress) {
+        isLongPress = false;
+        return;
+      }
+      this.toggleFan();
+    });
+
+    fabWrap.appendChild(fab);
+    this.el.appendChild(fabWrap);
     container.appendChild(this.el);
+
+    // 创建扇形菜单
+    this.renderFanMenu(container);
   }
 
-  // 构建桌面端侧边栏：品牌 + 全部tab + 详情面板 + 新记录按钮
+  // 扇形菜单：4个快捷按钮
+  renderFanMenu(container) {
+    // 半透明遮罩
+    this.fanOverlay = document.createElement('div');
+    this.fanOverlay.className = 'fan-overlay';
+    this.fanOverlay.addEventListener('click', () => this.closeFan());
+
+    // 扇形容器
+    const fanContainer = document.createElement('div');
+    fanContainer.className = 'fan-container';
+    fanContainer.id = 'fan-container';
+
+    FAN_ITEMS.forEach((item, i) => {
+      const btn = document.createElement('button');
+      btn.className = 'fan-item';
+      btn.dataset.idx = i;
+      btn.innerHTML = `<span class="fan-item-icon">${item.icon}</span><span class="fan-item-label">${item.label}</span>`;
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        this.closeFan();
+        window.location.hash = item.hash;
+      });
+      fanContainer.appendChild(btn);
+      this.fanBtns.push(btn);
+    });
+
+    this.fanOverlay.appendChild(fanContainer);
+    container.appendChild(this.fanOverlay);
+  }
+
+  toggleFan() {
+    if (this.fanOpen) this.closeFan();
+    else this.openFan();
+  }
+
+  openFan() {
+    if (this.fanOpen) return;
+    this.fanOpen = true;
+    this.fanOverlay.classList.add('open');
+
+    // 更新+按钮旋转
+    const fab = this.el.querySelector('.nav-fab-center');
+    if (fab) fab.classList.add('rotated');
+
+    // 展开按钮
+    this.fanBtns.forEach((btn, i) => {
+      btn.style.transitionDelay = `${i * 50}ms`;
+      btn.classList.add('open');
+    });
+  }
+
+  closeFan() {
+    if (!this.fanOpen) return;
+    this.fanOpen = false;
+
+    const fab = this.el.querySelector('.nav-fab-center');
+    if (fab) fab.classList.remove('rotated');
+
+    // 反向收起
+    this.fanBtns.forEach((btn, i) => {
+      btn.style.transitionDelay = `${(this.fanBtns.length - 1 - i) * 30}ms`;
+      btn.classList.remove('open');
+    });
+
+    setTimeout(() => {
+      if (this.fanOverlay) this.fanOverlay.classList.remove('open');
+    }, 300);
+  }
+
+  // 桌面端侧边栏（保持不变）
   renderSidebar(container) {
     this.sidebar = document.createElement('nav');
     this.sidebar.className = 'sidebar-nav';
 
-    // Brand
     const brand = document.createElement('div');
     brand.className = 'sidebar-brand';
     brand.innerHTML = '<span class="sidebar-brand-icon">🎮</span> 学习RPG';
     this.sidebar.appendChild(brand);
 
-    // Nav items
     const items = document.createElement('div');
     items.className = 'sidebar-items';
-
     NAV_TABS.forEach(tab => {
       const btn = document.createElement('button');
       btn.className = 'sidebar-item';
@@ -71,21 +176,17 @@ class Navbar {
       btn.addEventListener('click', () => { window.location.hash = tab.hash; });
       items.appendChild(btn);
     });
-
     this.sidebar.appendChild(items);
 
-    // Detail panel (context-sensitive, shown for data tab)
     this.detailPanel = document.createElement('div');
     this.detailPanel.className = 'sidebar-detail';
     this.detailPanel.id = 'sidebar-detail';
     this.sidebar.appendChild(this.detailPanel);
 
-    // Divider
     const divider = document.createElement('div');
     divider.className = 'sidebar-divider';
     this.sidebar.appendChild(divider);
 
-    // FAB as full-width button
     const fab = document.createElement('button');
     fab.className = 'sidebar-fab';
     fab.innerHTML = '+ 新记录';
@@ -95,23 +196,18 @@ class Navbar {
     container.appendChild(this.sidebar);
   }
 
-  // 侧边栏详情面板：根据当前 tab 展示上下文信息
   updateDetailPanel(hash) {
     if (!this.detailPanel) return;
-    // 只在数据相关页面显示详情
     const dataRoutes = ['#/data', '#/data/skill-tree', '#/data/review', '#/data/log', '#/data/reading'];
     const isDataPage = dataRoutes.some(r => hash === r || hash.startsWith(r + '?'));
-
     if (!isDataPage) {
       this.detailPanel.style.display = 'none';
       return;
     }
-
     this.detailPanel.style.display = 'block';
     this.renderDataSidebarDetail();
   }
 
-  // 渲染数据侧边栏详情：今日摘要 + 学科进度
   renderDataSidebarDetail() {
     try {
       const records = JSON.parse(localStorage.getItem(StorageKeys.STUDY_RECORDS) || '[]');
@@ -123,16 +219,13 @@ class Navbar {
       const totalXP = records.reduce((s, r) => s + (r.xp || 0), 0);
       const totalMin = records.reduce((s, r) => s + (r.duration || 0), 0);
 
-      // 学科时长分布（最近7天）
       const weekRecs = records.filter(r => r.timestamp && (now - new Date(r.timestamp).getTime()) < 7 * 86400000);
       const bySubject = {};
       for (const r of weekRecs) {
         const subj = r.subject || '未知';
         bySubject[subj] = (bySubject[subj] || 0) + (r.duration || 0);
       }
-      const topSubjects = Object.entries(bySubject)
-        .sort((a, b) => b[1] - a[1])
-        .slice(0, 5);
+      const topSubjects = Object.entries(bySubject).sort((a, b) => b[1] - a[1]).slice(0, 5);
 
       const subjectBars = topSubjects.map(([name, min]) => {
         const pct = Math.min(100, Math.round((min / Math.max(...topSubjects.map(s => s[1]))) * 100));
@@ -143,7 +236,6 @@ class Navbar {
         </div>`;
       }).join('');
 
-      // 最近3条记录
       const recent = records.filter(r => r.timestamp).sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)).slice(0, 3);
       const recentItems = recent.map(r => {
         const time = new Date(r.timestamp).toLocaleDateString('zh-CN', { month: 'numeric', day: 'numeric' });
@@ -166,23 +258,13 @@ class Navbar {
     }
   }
 
-  // 根据当前路由hash高亮对应tab，底部栏和侧边栏同步
   setActive(hash) {
-    // Bottom nav
-    if (this.el) {
-      this.el.querySelectorAll('.nav-tab').forEach(btn => {
-        const tabHash = NAV_TABS.find(t => t.id === btn.dataset.tab)?.hash;
-        btn.classList.toggle('active', tabHash === hash || (hash === '#/' && tabHash === '#/'));
-      });
-    }
-    // Sidebar
     if (this.sidebar) {
       this.sidebar.querySelectorAll('.sidebar-item').forEach(btn => {
         const tabHash = NAV_TABS.find(t => t.id === btn.dataset.tab)?.hash;
         btn.classList.toggle('active', tabHash === hash || (hash === '#/' && tabHash === '#/'));
       });
     }
-    // Update detail panel
     this.updateDetailPanel(hash);
   }
 }

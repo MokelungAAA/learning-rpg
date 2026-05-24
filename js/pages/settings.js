@@ -47,8 +47,10 @@ function renderAppearanceContent() {
   const fontPills = FONT_SIZES.map(f =>
     `<button class="pill font-pill${fontSize === f.key ? ' active' : ''}" data-font="${f.key}">${f.label}</button>`
   ).join('');
+  const launchEnabled = getSettings().launchScreen !== false;
   return `<div class="settings-row"><span class="settings-label">主题</span><div class="pill-group theme-pills">${themePills}</div></div>
-    <div class="settings-row"><span class="settings-label">字号</span><div class="pill-group font-pills">${fontPills}</div></div>`;
+    <div class="settings-row"><span class="settings-label">字号</span><div class="pill-group font-pills">${fontPills}</div></div>
+    <div class="settings-row"><span class="settings-label">启动动画</span><label class="settings-toggle"><input type="checkbox" id="launch-toggle" ${launchEnabled ? 'checked' : ''}><span class="settings-toggle-slider"></span></label></div>`;
 }
 
 // 同步区块内容：GitHub Token 配置 + 立即同步按钮
@@ -150,7 +152,7 @@ export function render() {
     ${foldable('about', 'ℹ️', '关于', renderAboutContent())}
     ${foldable('developer', '🔧', '开发者', renderDeveloperContent())}
     ${renderSyncModal()}
-    <p style="color:var(--color-text-3);margin-top:var(--sp-3);font-size:var(--fs-xs)">v0.99 · 开发者区</p>
+    <p style="color:var(--color-text-3);margin-top:var(--sp-3);font-size:var(--fs-xs)">v0.114 · 开发者区</p>
   </div>`;
 }
 
@@ -178,6 +180,14 @@ export function afterRender() {
     e.currentTarget.classList.add('active');
   };
   fontPills.forEach(p => p.addEventListener('click', onFont));
+
+  // 启动动画开关
+  const launchToggle = document.getElementById('launch-toggle');
+  if (launchToggle) {
+    launchToggle.addEventListener('change', () => {
+      saveSettings({ launchScreen: launchToggle.checked });
+    });
+  }
 
   // 番茄钟预设
   const presetSelect = document.getElementById('pomo-preset');

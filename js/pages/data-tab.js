@@ -1,6 +1,5 @@
-// data-tab.js — 数据Tab：概览摘要 + 图表/成就/热力图/进度
-// 读取: STUDY_RECORDS, USER_PROFILE
-// 写入: 无（纯展示页）
+// data-tab.js — 数据Tab：渐进式披露（§12.6）
+// 3个Tab分组（概览/进度/图表）+ 3×2图标导航网格 + 横滑摘要 + 折叠区块
 import Store from '../store.js';
 import { SUBJECTS, STORAGE_KEYS as StorageKeys } from '../config.js';
 import { ACHIEVEMENTS } from '../data/achievements.js';
@@ -18,105 +17,66 @@ import {
 const getRecords = () => Store.get(StorageKeys.STUDY_RECORDS) || [];
 const getProfile = () => Store.get(StorageKeys.USER_PROFILE) || {};
 
-// 可折叠区块通用模板
-// id: 用于折叠 body 的 DOM id（fold-{id}）
-function fold(id, title, content) {
+// 折叠区块通用模板
+// open: 默认是否展开
+// badge: 折叠头右侧摘要数字
+function fold(id, title, content, { open = false, badge = '' } = {}) {
+  const badgeHtml = badge ? `<span class="fold-badge">${badge}</span>` : '';
   return `<div class="fold-section">
-    <div class="fold-header" data-fold="${id}">
-      <span>${title}</span>
-      <span class="fold-arrow">▾</span>
+    <div class="fold-header${open ? ' open' : ''}" data-fold="${id}">
+      <span class="fold-title">${title}</span>
+      ${badgeHtml}
+      <span class="fold-arrow${open ? ' open' : ''}">▾</span>
     </div>
-    <div class="fold-body" id="fold-${id}">
+    <div class="fold-body${open ? ' open' : ''}" id="fold-${id}">
       <div class="fold-content">${content}</div>
     </div>
   </div>`;
 }
 
-// 概览摘要卡片：总时长/总XP/覆盖学科/本周XP
+// 摘要卡片（移动端横滑，桌面端4列网格）
 function renderSummary(profile, records) {
   const totalMin = records.reduce((s, r) => s + (r.duration || 0), 0);
   const totalXP = records.reduce((s, r) => s + (r.xp || 0), 0);
   const subjects = new Set(records.map(r => r.subject)).size;
   const weekXP = records.filter(r => r.timestamp && (Date.now() - new Date(r.timestamp).getTime()) < 7 * 86400000)
     .reduce((s, r) => s + (r.xp || 0), 0);
-  return `<div class="data-summary">
-    <div class="summary-item"><div class="summary-value">${formatNumber(totalMin)}</div><div class="summary-label">总时长(分)</div></div>
-    <div class="summary-item"><div class="summary-value">${formatNumber(totalXP)}</div><div class="summary-label">总XP</div></div>
-    <div class="summary-item"><div class="summary-value">${subjects}/9</div><div class="summary-label">覆盖学科</div></div>
-    <div class="summary-item"><div class="summary-value">${weekXP}</div><div class="summary-label">本周XP</div></div>
+  return `<div class="summary-scroll">
+    <div class="data-summary">
+      <div class="summary-item"><div class="summary-value">${formatNumber(totalMin)}</div><div class="summary-label">总时长(分)</div></div>
+      <div class="summary-item"><div class="summary-value">${formatNumber(totalXP)}</div><div class="summary-label">总XP</div></div>
+      <div class="summary-item"><div class="summary-value">${subjects}/9</div><div class="summary-label">覆盖学科</div></div>
+      <div class="summary-item"><div class="summary-value">${weekXP}</div><div class="summary-label">本周XP</div></div>
+    </div>
   </div>`;
 }
 
-// 最近 3 个已解锁成就 + 全部成就链接
-function renderAchievements(records, profile) {
-  const unlocked = ACHIEVEMENTS.filter(a => checkAchievement(a, records, profile));
-  const recent = unlocked.slice(-3).reverse();
-  if (recent.length === 0) {
-    return fold('achievements', '🏆 成就', '<p style="color:var(--color-text-3);font-size:var(--fs-sm)">记录学习数据来解锁成就</p><a href="#/achievement" class="ach-view-all">查看全部成就 →</a>');
-  }
-  const badges = recent.map(a => `<div class="achievement-badge ${a.rarity}">
-    <div class="achievement-icon">${a.icon}</div>
-    <div class="achievement-info"><div class="achievement-name">${a.name}</div><div class="achievement-desc">${a.description}</div></div>
-  </div>`).join('');
-  return fold('achievements', `🏆 成就 · ${unlocked.length}/${ACHIEVEMENTS.length}`, `<div class="achievement-list">${badges}</div><a href="#/achievement" class="ach-view-all">查看全部成就 →</a>`);
+// 3×2 图标导航网格
+function renderNavGrid() {
+  const items = [
+    ['🌳', '技能树', '#/data/skill-tree'],
+    ['📝', '复习中心', '#/data/review'],
+    ['📋', '学习日志', '#/data/log'],
+    ['📖', '阅读记录', '#/data/reading'],
+    ['🔍', '全局搜索', '#/search'],
+    ['📦', '数据管理', '#/data/export'],
+  ];
+  return `<div class="nav-grid">${items.map(([icon, label, href]) =>
+    `<a href="${href}" class="nav-grid-item"><span class="nav-grid-icon">${icon}</span><span class="nav-grid-label">${label}</span><span class="nav-grid-arrow">›</span></a>`
+  ).join('')}</div>`;
 }
 
-// 考试反思卡片：筛选 textbook 含"反思/考试"的记录
-function renderExamReflection(records) {
-  const reflections = records.filter(r => r.textbook && (r.textbook.includes('反思') || r.textbook.includes('考试'))).slice(-5).reverse();
-  if (reflections.length === 0) return '';
-  const cards = reflections.map(r => {
-    const date = r.timestamp ? new Date(r.timestamp).toLocaleDateString('zh-CN') : '';
-    return `<div class="reflection-card">
-      <div class="reflection-header"><span class="reflection-subject">${r.subject}</span><span class="reflection-date">${date}</span></div>
-      <div class="reflection-body"><div class="reflection-score">${r.score > 0 ? r.score + '分' : '--'}</div><div class="reflection-text">${r.textbook}</div></div>
-    </div>`;
-  }).join('');
-  return fold('reflections', '📝 考试反思', `<div class="reflection-list">${cards}</div>`);
+// Tab栏
+function renderTabBar() {
+  return `<div class="data-tab-bar" id="data-tab-bar">
+    <button class="data-tab active" data-tab="overview">📊 概览</button>
+    <button class="data-tab" data-tab="progress">📈 进度</button>
+    <button class="data-tab" data-tab="charts">📉 图表</button>
+  </div>`;
 }
 
-// 学习日历热力图（最近169天）
-function renderHeatmapSection(records) {
-  return fold('heatmap', '📅 学习日历 · 最近169天', renderHeatmap(records));
-}
+// === 概览Tab内容 ===
 
-// 教材进度：按教材名前4字匹配记录，计算覆盖率%
-// 坑: 匹配用 slice(0,4)，教材名太短会误匹配
-function renderTextbookProgress(records) {
-  const progress = [];
-  for (const [sid, data] of Object.entries(SUBJECTS_DATA)) {
-    if (!data.textbooks) continue;
-    for (const tb of data.textbooks) {
-      const totalKP = tb.chapters.reduce((s, ch) => s + ch.sections.reduce((s2, sec) => s2 + (sec.knowledgePoints?.length || 0), 0), 0);
-      const covered = records.filter(r => r.textbook && r.textbook.includes(tb.name.slice(0, 4))).length;
-      const pct = totalKP > 0 ? Math.min(100, Math.round((covered / totalKP) * 100)) : 0;
-      progress.push({ subject: data.name, name: tb.name, pct, sid });
-    }
-  }
-  if (progress.length === 0) return '';
-  const items = progress.map(p => `<div class="progress-map-item">
-    <div class="progress-map-header"><span class="progress-map-subject">${getSubjectIcon(p.sid)} ${p.subject}</span><span class="progress-map-pct">${p.pct}%</span></div>
-    <div class="progress-map-name">${p.name}</div>
-    <div class="progress-bar"><div class="progress-fill" style="width:${p.pct}%"></div></div>
-  </div>`).join('');
-  return fold('textbooks', '📚 教材进度', `<div class="progress-map-list">${items}</div>`);
-}
-
-// 网课进度：筛选 textbook 含"网课/课程/课"的记录
-function renderCourseProgress(records) {
-  const courses = records.filter(r => r.textbook && (r.textbook.includes('网课') || r.textbook.includes('课程') || r.textbook.includes('课')));
-  if (courses.length === 0) return '';
-  const bySubject = {};
-  for (const r of courses) (bySubject[r.subject] ||= []).push(r);
-  const items = Object.entries(bySubject).map(([subj, recs]) => {
-    const totalMin = recs.reduce((s, r) => s + (r.duration || 0), 0);
-    const sid = SUBJECTS.find(s => s.name === subj)?.id || '';
-    return `<div class="course-item"><span class="course-icon">${getSubjectIcon(sid)}</span><span class="course-name">${subj}</span><span class="course-time">${recs.length}节 · ${totalMin}分钟</span></div>`;
-  }).join('');
-  return fold('courses', '🎓 网课进度', `<div class="course-list">${items}</div>`);
-}
-
-// §12.2 月度学习报告：本月XP/时长/活跃天数/日均XP/最活跃学科
 function renderMonthlyReport(records) {
   const now = new Date();
   const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).getTime();
@@ -129,7 +89,6 @@ function renderMonthlyReport(records) {
   const daysInMonth = now.getDate();
   const dailyAvgXP = Math.round(totalXP / Math.max(1, activeDays));
 
-  // 最活跃学科
   const bySubject = {};
   for (const r of monthRecs) {
     const subj = r.subject || '未知';
@@ -151,11 +110,22 @@ function renderMonthlyReport(records) {
       </div>
       <div class="monthly-highlight">最活跃学科: <b>${topSubjectName}</b> (${topSubject ? topSubject[1] : 0}分钟)</div>
     </div>
-  `);
+  `, { open: true });
 }
 
-// 薄弱点识别：平均分<60 / 超7天未学 / 总时长<30分
-// severity 2=严重（无记录或极低分），1=一般
+function renderAchievements(records, profile) {
+  const unlocked = ACHIEVEMENTS.filter(a => checkAchievement(a, records, profile));
+  const recent = unlocked.slice(-3).reverse();
+  if (recent.length === 0) {
+    return fold('achievements', '🏆 成就', '<p style="color:var(--color-text-3);font-size:var(--fs-sm)">记录学习数据来解锁成就</p><a href="#/achievement" class="ach-view-all">查看全部成就 →</a>', { open: true, badge: `0/${ACHIEVEMENTS.length}` });
+  }
+  const badges = recent.map(a => `<div class="achievement-badge ${a.rarity}">
+    <div class="achievement-icon">${a.icon}</div>
+    <div class="achievement-info"><div class="achievement-name">${a.name}</div><div class="achievement-desc">${a.description}</div></div>
+  </div>`).join('');
+  return fold('achievements', `🏆 成就`, `<div class="achievement-list">${badges}</div><a href="#/achievement" class="ach-view-all">查看全部成就 →</a>`, { open: true, badge: `${unlocked.length}/${ACHIEVEMENTS.length}` });
+}
+
 function renderWeakPoints(records) {
   if (records.length === 0) return '';
   const now = Date.now();
@@ -183,7 +153,7 @@ function renderWeakPoints(records) {
 
   weakPoints.sort((a, b) => b.severity - a.severity);
   if (weakPoints.length === 0) {
-    return fold('weakpoints', '🔍 薄弱点识别', '<p style="color:var(--color-success);font-size:var(--fs-sm)">各科状态良好，继续保持！</p>');
+    return fold('weakpoints', '🔍 薄弱点识别', '<p style="color:var(--color-success);font-size:var(--fs-sm)">各科状态良好，继续保持！</p>', { open: true, badge: '0' });
   }
 
   const items = weakPoints.map(wp => {
@@ -194,17 +164,73 @@ function renderWeakPoints(records) {
       <div class="weakpoint-reasons">${wp.reasons.map(r => `<span class="weakpoint-tag">${r}</span>`).join('')}</div>
     </div>`;
   }).join('');
-  return fold('weakpoints', `🔍 薄弱点识别 · ${weakPoints.length}科待加强`, `<div class="weakpoint-list">${items}</div>`);
+  return fold('weakpoints', `🔍 薄弱点识别`, `<div class="weakpoint-list">${items}</div>`, { open: true, badge: `${weakPoints.length}科` });
 }
 
-// 6个图表容器占位，XP趋势带7/30/90天切换
+// === 进度Tab内容 ===
+
+function renderHeatmapSection(records) {
+  const activeDays = new Set(records.filter(r => r.timestamp).map(r => new Date(r.timestamp).toISOString().slice(0, 10))).size;
+  return fold('heatmap', '📅 学习日历', renderHeatmap(records), { open: true, badge: `${activeDays}天` });
+}
+
+function renderTextbookProgress(records) {
+  const progress = [];
+  for (const [sid, data] of Object.entries(SUBJECTS_DATA)) {
+    if (!data.textbooks) continue;
+    for (const tb of data.textbooks) {
+      const totalKP = tb.chapters.reduce((s, ch) => s + ch.sections.reduce((s2, sec) => s2 + (sec.knowledgePoints?.length || 0), 0), 0);
+      const covered = records.filter(r => r.textbook && r.textbook.includes(tb.name.slice(0, 4))).length;
+      const pct = totalKP > 0 ? Math.min(100, Math.round((covered / totalKP) * 100)) : 0;
+      progress.push({ subject: data.name, name: tb.name, pct, sid });
+    }
+  }
+  if (progress.length === 0) return '';
+  const covered = progress.filter(p => p.pct > 0).length;
+  const items = progress.map(p => `<div class="progress-map-item">
+    <div class="progress-map-header"><span class="progress-map-subject">${getSubjectIcon(p.sid)} ${p.subject}</span><span class="progress-map-pct">${p.pct}%</span></div>
+    <div class="progress-map-name">${p.name}</div>
+    <div class="progress-bar"><div class="progress-fill" style="width:${p.pct}%"></div></div>
+  </div>`).join('');
+  return fold('textbooks', '📚 教材进度', `<div class="progress-map-list">${items}</div>`, { badge: `${covered}/${progress.length}` });
+}
+
+function renderCourseProgress(records) {
+  const courses = records.filter(r => r.textbook && (r.textbook.includes('网课') || r.textbook.includes('课程') || r.textbook.includes('课')));
+  if (courses.length === 0) return '';
+  const bySubject = {};
+  for (const r of courses) (bySubject[r.subject] ||= []).push(r);
+  const totalSessions = courses.length;
+  const items = Object.entries(bySubject).map(([subj, recs]) => {
+    const totalMin = recs.reduce((s, r) => s + (r.duration || 0), 0);
+    const sid = SUBJECTS.find(s => s.name === subj)?.id || '';
+    return `<div class="course-item"><span class="course-icon">${getSubjectIcon(sid)}</span><span class="course-name">${subj}</span><span class="course-time">${recs.length}节 · ${totalMin}分钟</span></div>`;
+  }).join('');
+  return fold('courses', '🎓 网课进度', `<div class="course-list">${items}</div>`, { badge: `${totalSessions}节` });
+}
+
+function renderExamReflection(records) {
+  const reflections = records.filter(r => r.textbook && (r.textbook.includes('反思') || r.textbook.includes('考试'))).slice(-5).reverse();
+  if (reflections.length === 0) return '';
+  const cards = reflections.map(r => {
+    const date = r.timestamp ? new Date(r.timestamp).toLocaleDateString('zh-CN') : '';
+    return `<div class="reflection-card">
+      <div class="reflection-header"><span class="reflection-subject">${r.subject}</span><span class="reflection-date">${date}</span></div>
+      <div class="reflection-body"><div class="reflection-score">${r.score > 0 ? r.score + '分' : '--'}</div><div class="reflection-text">${r.textbook}</div></div>
+    </div>`;
+  }).join('');
+  return fold('reflections', '📝 考试反思', `<div class="reflection-list">${cards}</div>`, { badge: `${reflections.length}条` });
+}
+
+// === 图表Tab内容 ===
+
 function renderChartsSection() {
   const xpToggle = `<div class="chart-period-toggle">
     <button class="period-btn active" data-days="7">7天</button>
     <button class="period-btn" data-days="30">30天</button>
     <button class="period-btn" data-days="90">90天</button>
   </div>`;
-  const charts = [
+  const chartItems = [
     ['chart-xp-trend', '📈 XP趋势折线图', xpToggle],
     ['chart-subject-duration', '📊 学科时长柱状图', ''],
     ['chart-efficiency', '⏱️ 学习效率散点图', ''],
@@ -216,8 +242,10 @@ function renderChartsSection() {
     ${extra}
     <div class="chart-container" id="${id}"></div>
   </div>`).join('');
-  return fold('charts', '📈 数据图表', charts);
+  return fold('charts', '📈 数据图表', charts, { badge: '6个' });
 }
+
+// === 主渲染 ===
 
 export function render() {
   const profile = getProfile();
@@ -225,20 +253,24 @@ export function render() {
   return `<div class="page-enter">
     <div class="data-page-header">📊 数据</div>
     ${renderSummary(profile, records)}
-    <a href="#/data/skill-tree" class="nav-link-card">🌳 技能树 — 查看学科能力图谱 →</a>
-    <a href="#/data/review" class="nav-link-card">📝 复习中心 — 遗忘曲线与智能推荐 →</a>
-    <a href="#/data/log" class="nav-link-card">📋 学习日志 — 记录查看与管理 →</a>
-    <a href="#/data/reading" class="nav-link-card">📖 阅读记录 — 书架与阅读统计 →</a>
-    <a href="#/search" class="nav-link-card">🔍 全局搜索 — 搜索知识点/记录/功能 →</a>
-    <a href="#/data/export" class="nav-link-card">📦 数据管理 — 导入导出备份 →</a>
-    ${renderMonthlyReport(records)}
-    ${renderAchievements(records, profile)}
-    ${renderExamReflection(records)}
-    ${renderWeakPoints(records)}
-    ${renderHeatmapSection(records)}
-    ${renderTextbookProgress(records)}
-    ${renderCourseProgress(records)}
-    ${renderChartsSection()}
+    ${renderNavGrid()}
+    ${renderTabBar()}
+    <div class="data-tab-panels">
+      <div class="data-tab-panel active" data-panel="overview">
+        ${renderMonthlyReport(records)}
+        ${renderAchievements(records, profile)}
+        ${renderWeakPoints(records)}
+      </div>
+      <div class="data-tab-panel" data-panel="progress">
+        ${renderHeatmapSection(records)}
+        ${renderTextbookProgress(records)}
+        ${renderCourseProgress(records)}
+        ${renderExamReflection(records)}
+      </div>
+      <div class="data-tab-panel" data-panel="charts">
+        ${renderChartsSection()}
+      </div>
+    </div>
   </div>`;
 }
 
@@ -274,10 +306,23 @@ async function initCharts(records, xpDays) {
   }
 }
 
-// afterRender: 折叠面板交互 + 热力图点击弹窗 + 图表懒加载
-// 返回清理函数，dispose 所有 ECharts 实例
+// afterRender: Tab切换 + 折叠交互 + 图表懒加载
 export function afterRender() {
   const records = getRecords();
+
+  // Tab切换
+  const tabBtns = document.querySelectorAll('.data-tab');
+  const panels = document.querySelectorAll('.data-tab-panel');
+  const onTabClick = (e) => {
+    const tab = e.currentTarget.dataset.tab;
+    tabBtns.forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
+    panels.forEach(p => p.classList.toggle('active', p.dataset.panel === tab));
+    // 图表Tab激活时懒加载
+    if (tab === 'charts' && charts.length === 0) initCharts(records);
+  };
+  tabBtns.forEach(b => b.addEventListener('click', onTabClick));
+
+  // 折叠面板交互
   const foldHeaders = document.querySelectorAll('.fold-header');
   const onFoldClick = (e) => {
     const { fold: foldId } = e.currentTarget.dataset;
@@ -285,6 +330,7 @@ export function afterRender() {
     const arrow = e.currentTarget.querySelector('.fold-arrow');
     if (body) body.classList.toggle('open');
     if (arrow) arrow.classList.toggle('open');
+    e.currentTarget.classList.toggle('open');
     if (foldId === 'charts' && body?.classList.contains('open') && charts.length === 0) initCharts(records);
   };
   foldHeaders.forEach(h => h.addEventListener('click', onFoldClick));
@@ -296,13 +342,12 @@ export function afterRender() {
     const days = parseInt(btn.dataset.days, 10);
     periodBtns.forEach(b => b.classList.toggle('active', b === btn));
     xpTrendDays = days;
-    // 重绘XP趋势图
     const xpChart = charts[0];
     if (xpChart) renderXPTrendChart(xpChart, records, days);
   };
   periodBtns.forEach(b => b.addEventListener('click', onPeriodToggle));
 
-  // 热力图单元格点击 → 弹出当日学习详情+记录列表
+  // 热力图单元格点击 → 弹出当日学习详情
   const heatmapGrid = document.querySelector('.heatmap-grid');
   let heatmapPopup = null;
   const onHeatmapClick = (e) => {
@@ -330,6 +375,7 @@ export function afterRender() {
   if (heatmapGrid) heatmapGrid.addEventListener('click', onHeatmapClick);
 
   return () => {
+    tabBtns.forEach(b => b.removeEventListener('click', onTabClick));
     foldHeaders.forEach(h => h.removeEventListener('click', onFoldClick));
     if (heatmapGrid) heatmapGrid.removeEventListener('click', onHeatmapClick);
     periodBtns.forEach(b => b.removeEventListener('click', onPeriodToggle));

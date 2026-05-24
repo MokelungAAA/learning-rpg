@@ -59,6 +59,7 @@
   padding: var(--sp-2) var(--sp-2);
   text-align: center;
   min-width: 0;
+  box-shadow: var(--shadow-sm);
 }
 
 [data-theme="dark"] .stat-card {
@@ -153,6 +154,7 @@
   transition: all var(--duration-fast) var(--ease);
   position: relative;
   overflow: hidden;
+  box-shadow: var(--shadow-sm);
 }
 
 [data-theme="dark"] .subject-card {
@@ -221,6 +223,8 @@
   color: var(--color-text-1);
   transition: background var(--duration-fast) var(--ease);
   user-select: none;
+  box-shadow: var(--shadow-sm);
+  border-left: 3px solid var(--color-accent);
 }
 
 [data-theme="dark"] .fold-header {
@@ -434,6 +438,7 @@
   padding: var(--sp-3);
   margin-bottom: var(--sp-3);
   text-align: center;
+  box-shadow: var(--shadow-sm);
 }
 
 [data-theme="dark"] .pomodoro-widget {
@@ -493,6 +498,7 @@
   border-radius: var(--r-lg);
   padding: var(--sp-3);
   margin-bottom: var(--sp-3);
+  box-shadow: var(--shadow-sm);
 }
 
 [data-theme="dark"] .recommendations {

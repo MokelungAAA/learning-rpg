@@ -1,4 +1,4 @@
-/* navbar.css — 底部导航栏（主tab组 + FAB + 番茄钟） */
+/* navbar.css — 底部导航栏（v0.114: +核心交互，扇形展开） */
 .bottom-nav {
   position: fixed;
   bottom: var(--nav-bottom);
@@ -7,8 +7,8 @@
   height: var(--nav-height);
   display: flex;
   align-items: center;
-  gap: var(--sp-1);
-  padding: 0 var(--sp-3);
+  justify-content: center;
+  padding: 0 var(--sp-4);
   border-radius: var(--r-full);
   z-index: 1000;
   background: rgba(255, 255, 255, 0.72);
@@ -17,6 +17,9 @@
   border: 1px solid rgba(255, 255, 255, 0.18);
   box-shadow: var(--shadow-lg);
   transition: background var(--duration-normal) var(--ease);
+  min-width: 80px;
+  max-width: 120px;
+  width: auto;
 }
 
 [data-theme="dark"] .bottom-nav {
@@ -24,87 +27,174 @@
   border-color: rgba(255, 255, 255, 0.08);
 }
 
+/* === Tab 按钮（已移除，保留样式以防其他引用） === */
 .nav-tab {
+  display: none;
+}
+
+/* === 中央 + 按钮 === */
+.nav-fab-wrap {
+  position: relative;
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
-  width: 56px;
-  height: 48px;
-  border-radius: var(--r-md);
-  color: var(--color-text-3);
-  transition: color var(--duration-fast) var(--ease),
-              background var(--duration-fast) var(--ease);
-  font-size: var(--fs-xs);
-  gap: 2px;
-}
-
-.nav-tab:hover {
-  color: var(--color-text-2);
-  background: var(--color-surface-variant);
-}
-
-.nav-tab.active {
-  color: var(--color-accent);
-  position: relative;
-}
-.nav-tab.active::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 24px;
-  height: 3px;
-  border-radius: 0 0 3px 3px;
-  background: var(--color-accent);
-}
-
-.nav-tab .nav-icon {
-  font-size: 20px;
-  line-height: 1;
-}
-
-.nav-tab .nav-label {
-  font-weight: 500;
-  line-height: 1;
-}
-
-.nav-divider {
-  width: 1px;
-  height: 32px;
-  background: var(--color-outline);
-  margin: 0 var(--sp-1);
   flex-shrink: 0;
 }
 
-.nav-fab {
-  width: 48px;
-  height: 48px;
-  border-radius: var(--r-full);
+.nav-fab-center {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  border: none;
   background: var(--color-accent-gradient);
   color: #fff;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 24px;
+  font-size: 28px;
   font-weight: 300;
-  box-shadow: 0 4px 16px rgba(37, 99, 235, 0.3);
-  transition: transform var(--duration-fast) var(--ease-spring),
-              box-shadow var(--duration-fast) var(--ease);
-  margin: 0 var(--sp-1);
+  cursor: pointer;
+  position: relative;
+  z-index: 1001;
+  transition: transform 0.2s ease;
+  box-shadow: 0 4px 16px rgba(103, 80, 164, 0.35);
+  margin-top: 0;
 }
 
-.nav-fab:hover {
-  transform: scale(1.08);
-  box-shadow: 0 6px 20px rgba(37, 99, 235, 0.4);
+.nav-fab-center:hover {
+  transform: scale(1.05);
 }
 
-.nav-fab:active {
+.nav-fab-center:active {
   transform: scale(0.95);
 }
 
-/* === Desktop Sidebar Nav (hidden on mobile) === */
+/* 脉冲光晕 */
+.nav-fab-center::before {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  border-radius: 50%;
+  background: rgba(103, 80, 164, 0.15);
+  animation: fabPulse 2.5s ease-in-out infinite;
+  z-index: -1;
+}
+
+@keyframes fabPulse {
+  0%, 100% { transform: scale(1); opacity: 0.5; }
+  50%      { transform: scale(1.25); opacity: 0; }
+}
+
+/* + 图标旋转动画 */
+.nav-fab-icon {
+  display: inline-block;
+  transition: transform 0.2s ease;
+  line-height: 1;
+}
+
+.nav-fab-center.rotated .nav-fab-icon {
+  transform: rotate(45deg);
+}
+
+/* === 扇形菜单 === */
+.fan-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1002;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity var(--duration-normal) var(--ease);
+}
+
+.fan-overlay.open {
+  pointer-events: auto;
+  opacity: 1;
+}
+
+/* 半透明背景遮罩 */
+.fan-overlay::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.2);
+  opacity: 0;
+  transition: opacity var(--duration-normal) var(--ease);
+}
+
+.fan-overlay.open::before {
+  opacity: 1;
+}
+
+.fan-container {
+  position: fixed;
+  bottom: calc(var(--nav-bottom) + var(--nav-height) / 2);
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  z-index: 1001;
+}
+
+/* 扇形按钮 */
+.fan-item {
+  position: absolute;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  border: none;
+  background: var(--color-surface);
+  color: var(--color-text-1);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  cursor: pointer;
+  box-shadow: var(--shadow-md);
+  transition: transform 0.25s ease, opacity 0.25s ease;
+  transform: translate(-50%, -50%) scale(0);
+  opacity: 0;
+  left: 0;
+  top: 0;
+}
+
+[data-theme="dark"] .fan-item {
+  background: var(--md-surface-variant);
+}
+
+.fan-item:hover {
+  transform: translate(calc(-50% + var(--fan-x)), calc(-50% + var(--fan-y))) scale(1.08);
+  box-shadow: var(--shadow-lg);
+}
+
+.fan-item:active {
+  transform: translate(calc(-50% + var(--fan-x)), calc(-50% + var(--fan-y))) scale(0.95);
+}
+
+/* 展开位置 — 弧形排列 */
+.fan-item[data-idx="0"] { --fan-x: -78px; --fan-y: -45px; }
+.fan-item[data-idx="1"] { --fan-x: -45px; --fan-y: -78px; }
+.fan-item[data-idx="2"] { --fan-x: 45px; --fan-y: -78px; }
+.fan-item[data-idx="3"] { --fan-x: 78px; --fan-y: -45px; }
+
+.fan-item.open {
+  transform: translate(calc(-50% + var(--fan-x)), calc(-50% + var(--fan-y))) scale(1);
+  opacity: 1;
+}
+
+.fan-item-icon {
+  font-size: 20px;
+  line-height: 1;
+}
+
+.fan-item-label {
+  font-size: 9px;
+  font-weight: 500;
+  color: var(--color-text-2);
+  line-height: 1;
+}
+
+/* === Desktop Sidebar Nav === */
 .sidebar-nav {
   display: none;
   position: fixed;
@@ -204,13 +294,11 @@
   font-weight: 600;
   cursor: pointer;
   margin-top: auto;
-  transition: transform var(--duration-fast) var(--ease-spring),
-              box-shadow var(--duration-fast) var(--ease);
+  transition: transform 0.15s ease;
 }
 
 .sidebar-fab:hover {
   transform: translateY(-1px);
-  box-shadow: 0 4px 16px rgba(37, 99, 235, 0.3);
 }
 
 .sidebar-fab:active {

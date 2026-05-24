@@ -51,17 +51,22 @@ Theme.init();
       adaptProfile();
       localStorage.setItem('lts_last_adapt_date', today);
     }
+    // §11.5: 应用启动时全量成就检测
+    checkAchievements();
   } catch { /* data engine optional */ }
 })();
 
 // Init router
 Router.init(container);
 
-// §4.2: 启动页 — 首次加载时显示，点击"开始学习"或3秒后自动消失
+// §4.2: 启动页 — 首次加载时显示，点击或 2.5s 自动消失（可在设置中关闭）
 (async () => {
   try {
-    const { showLaunchScreen } = await import('./components/launch-screen.js');
-    await showLaunchScreen();
+    const settings = JSON.parse(localStorage.getItem('lts_settings') || '{}');
+    if (settings.launchScreen !== false) {
+      const { showLaunchScreen } = await import('./components/launch-screen.js');
+      await showLaunchScreen();
+    }
   } catch {}
 })();
 

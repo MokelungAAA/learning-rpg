@@ -1,6 +1,236 @@
-/* data-tab.css — 数据Tab页样式（从home.css分离） */
+/* data-tab.css — 数据Tab页样式（§12.6 渐进式披露） */
 
-/* === VIEW-05: Achievement Badges === */
+/* === 摘要卡片横滑（移动端） === */
+.summary-scroll {
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  margin: 0 calc(var(--sp-3) * -1);
+  padding: 0 var(--sp-3);
+  scrollbar-width: none;
+}
+.summary-scroll::-webkit-scrollbar { display: none; }
+
+.data-summary {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--sp-2);
+  margin-bottom: var(--sp-3);
+  min-width: max-content;
+}
+
+.summary-item {
+  background: rgba(255, 255, 255, 0.72);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: var(--r-md);
+  padding: var(--sp-2) var(--sp-3);
+  text-align: center;
+  scroll-snap-align: start;
+  min-width: 88px;
+  box-shadow: var(--shadow-sm);
+}
+
+[data-theme="dark"] .summary-item {
+  background: rgba(30, 30, 30, 0.72);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+.summary-value {
+  font-size: var(--fs-lg);
+  font-weight: 700;
+  color: var(--color-text-1);
+}
+
+.summary-label {
+  font-size: var(--fs-xs);
+  color: var(--color-text-3);
+}
+
+@media (max-width: 480px) {
+  .data-summary {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+/* === 3×2 图标导航网格 === */
+.nav-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--sp-2);
+  margin-bottom: var(--sp-3);
+}
+
+.nav-grid-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: var(--sp-2) var(--sp-1);
+  background: rgba(255, 255, 255, 0.72);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: var(--r-md);
+  text-decoration: none;
+  transition: all var(--duration-fast) var(--ease);
+  position: relative;
+  box-shadow: var(--shadow-sm);
+}
+
+.nav-grid-item:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+  border-color: var(--color-accent);
+}
+
+[data-theme="dark"] .nav-grid-item {
+  background: rgba(30, 30, 30, 0.72);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+.nav-grid-icon {
+  font-size: 22px;
+}
+
+.nav-grid-label {
+  font-size: var(--fs-xs);
+  font-weight: 500;
+  color: var(--color-text-1);
+}
+
+.nav-grid-arrow {
+  position: absolute;
+  top: var(--sp-1);
+  right: var(--sp-2);
+  font-size: 14px;
+  color: var(--color-text-3);
+}
+
+@media (max-width: 360px) {
+  .nav-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* === Tab栏（吸顶） === */
+.data-tab-bar {
+  display: flex;
+  gap: var(--sp-1);
+  margin-bottom: var(--sp-3);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: var(--color-bg);
+  padding: var(--sp-2) 0;
+  border-bottom: 1px solid var(--color-surface-variant);
+}
+
+.data-tab {
+  flex: 1;
+  padding: var(--sp-2) var(--sp-2);
+  border: 1px solid var(--color-outline);
+  border-radius: var(--r-full);
+  background: transparent;
+  color: var(--color-text-2);
+  font-size: var(--fs-sm);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--duration-fast) var(--ease);
+  white-space: nowrap;
+}
+
+.data-tab.active {
+  background: var(--color-accent);
+  color: var(--md-on-primary);
+  border-color: var(--color-accent);
+}
+
+.data-tab:not(.active):hover {
+  background: var(--color-surface-variant);
+}
+
+/* === Tab面板 === */
+.data-tab-panel {
+  display: none;
+}
+
+.data-tab-panel.active {
+  display: block;
+}
+
+/* === 折叠区块 === */
+.fold-section {
+  margin-bottom: var(--sp-2);
+}
+
+.fold-header {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  padding: var(--sp-2) var(--sp-3);
+  cursor: pointer;
+  border-radius: var(--r-md);
+  transition: background var(--duration-fast) var(--ease);
+  user-select: none;
+  box-shadow: var(--shadow-sm);
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-left: 3px solid var(--color-accent);
+}
+
+.fold-header:hover {
+  background: var(--color-surface-variant);
+}
+
+[data-theme="dark"] .fold-header {
+  background: rgba(30, 30, 30, 0.72);
+  border-color: rgba(255, 255, 255, 0.08);
+  border-left-color: var(--color-accent);
+}
+
+.fold-title {
+  flex: 1;
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  color: var(--color-text-1);
+}
+
+.fold-badge {
+  font-size: var(--fs-xs);
+  color: var(--color-text-3);
+  background: var(--color-surface-variant);
+  padding: 1px 8px;
+  border-radius: var(--r-full);
+  white-space: nowrap;
+}
+
+.fold-arrow {
+  font-size: 14px;
+  color: var(--color-text-3);
+  transition: transform var(--duration-fast) var(--ease);
+}
+
+.fold-arrow.open {
+  transform: rotate(180deg);
+}
+
+.fold-body {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.25s ease;
+}
+
+.fold-body.open {
+  max-height: 2000px;
+}
+
+.fold-content {
+  padding: var(--sp-2) var(--sp-3);
+}
+
+/* === Achievement Badges === */
 .achievement-list {
   display: flex;
   flex-direction: column;
@@ -22,29 +252,12 @@
   border-color: rgba(255, 255, 255, 0.06);
 }
 
-.achievement-badge.rare {
-  border-left: 3px solid var(--color-accent);
-}
+.achievement-badge.rare { border-left: 3px solid var(--color-accent); }
+.achievement-badge.epic { border-left: 3px solid #9333ea; }
 
-.achievement-badge.epic {
-  border-left: 3px solid #9333ea;
-}
-
-.achievement-icon {
-  font-size: 28px;
-  flex-shrink: 0;
-}
-
-.achievement-name {
-  font-weight: 600;
-  font-size: var(--fs-sm);
-  color: var(--color-text-1);
-}
-
-.achievement-desc {
-  font-size: var(--fs-xs);
-  color: var(--color-text-3);
-}
+.achievement-icon { font-size: 28px; flex-shrink: 0; }
+.achievement-name { font-weight: 600; font-size: var(--fs-sm); color: var(--color-text-1); }
+.achievement-desc { font-size: var(--fs-xs); color: var(--color-text-3); }
 
 .ach-view-all {
   display: block;
@@ -54,17 +267,10 @@
   margin-top: var(--sp-2);
   text-decoration: none;
 }
+.ach-view-all:hover { text-decoration: underline; }
 
-.ach-view-all:hover {
-  text-decoration: underline;
-}
-
-/* === VIEW-06: Exam Reflection === */
-.reflection-list {
-  display: flex;
-  flex-direction: column;
-  gap: var(--sp-2);
-}
+/* === Exam Reflection === */
+.reflection-list { display: flex; flex-direction: column; gap: var(--sp-2); }
 
 .reflection-card {
   padding: var(--sp-3);
@@ -78,79 +284,19 @@
   border-color: rgba(255, 255, 255, 0.06);
 }
 
-.reflection-header {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: var(--sp-1);
-}
+.reflection-header { display: flex; justify-content: space-between; margin-bottom: var(--sp-1); }
+.reflection-subject { font-weight: 600; font-size: var(--fs-sm); color: var(--color-text-1); }
+.reflection-date { font-size: var(--fs-xs); color: var(--color-text-3); }
+.reflection-body { display: flex; align-items: center; gap: var(--sp-3); }
+.reflection-score { font-size: var(--fs-lg); font-weight: 700; color: var(--color-accent); white-space: nowrap; }
+.reflection-text { font-size: var(--fs-xs); color: var(--color-text-2); }
 
-.reflection-subject {
-  font-weight: 600;
-  font-size: var(--fs-sm);
-  color: var(--color-text-1);
-}
-
-.reflection-date {
-  font-size: var(--fs-xs);
-  color: var(--color-text-3);
-}
-
-.reflection-body {
-  display: flex;
-  align-items: center;
-  gap: var(--sp-3);
-}
-
-.reflection-score {
-  font-size: var(--fs-lg);
-  font-weight: 700;
-  color: var(--color-accent);
-  white-space: nowrap;
-}
-
-.reflection-text {
-  font-size: var(--fs-xs);
-  color: var(--color-text-2);
-}
-
-/* === VIEW-07: Heatmap === */
-.heatmap-container {
-  display: flex;
-  gap: var(--sp-1);
-  overflow-x: auto;
-  padding-bottom: var(--sp-2);
-  position: relative;
-}
-
-.heatmap-weekdays {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  flex-shrink: 0;
-}
-
-.heatmap-weekday {
-  width: 16px;
-  height: 14px;
-  font-size: 10px;
-  color: var(--color-text-3);
-  display: flex;
-  align-items: center;
-}
-
-.heatmap-grid {
-  display: grid;
-  grid-template-rows: repeat(7, 14px);
-  grid-auto-flow: column;
-  gap: 2px;
-}
-
-.heatmap-cell {
-  width: 14px;
-  height: 14px;
-  border-radius: 2px;
-  cursor: pointer;
-}
+/* === Heatmap === */
+.heatmap-container { display: flex; gap: var(--sp-1); overflow-x: auto; padding-bottom: var(--sp-2); position: relative; }
+.heatmap-weekdays { display: flex; flex-direction: column; gap: 2px; flex-shrink: 0; }
+.heatmap-weekday { width: 16px; height: 14px; font-size: 10px; color: var(--color-text-3); display: flex; align-items: center; }
+.heatmap-grid { display: grid; grid-template-rows: repeat(7, 14px); grid-auto-flow: column; gap: 2px; }
+.heatmap-cell { width: 14px; height: 14px; border-radius: 2px; cursor: pointer; }
 
 .heatmap-cell.level-0 { background: var(--color-surface-variant); }
 .heatmap-cell.level-1 { background: #c6e48b; }
@@ -166,35 +312,11 @@
 [data-theme="dark"] .heatmap-cell.level-4 { background: #3aad3a; }
 [data-theme="dark"] .heatmap-cell.level-5 { background: #4ec94e; }
 
-.heatmap-labels {
-  display: flex;
-  gap: 2px;
-  position: absolute;
-  bottom: 0;
-  left: 24px;
-}
+.heatmap-labels { display: flex; gap: 2px; position: absolute; bottom: 0; left: 24px; }
+.heatmap-month { font-size: 10px; color: var(--color-text-3); white-space: nowrap; }
+.heatmap-legend { display: flex; align-items: center; gap: 2px; justify-content: flex-end; margin-top: var(--sp-2); }
+.heatmap-legend-label { font-size: 10px; color: var(--color-text-3); margin: 0 var(--sp-1); }
 
-.heatmap-month {
-  font-size: 10px;
-  color: var(--color-text-3);
-  white-space: nowrap;
-}
-
-.heatmap-legend {
-  display: flex;
-  align-items: center;
-  gap: 2px;
-  justify-content: flex-end;
-  margin-top: var(--sp-2);
-}
-
-.heatmap-legend-label {
-  font-size: 10px;
-  color: var(--color-text-3);
-  margin: 0 var(--sp-1);
-}
-
-/* Heatmap click popup */
 .heatmap-popup {
   position: absolute;
   bottom: calc(100% + 6px);
@@ -210,43 +332,19 @@
   pointer-events: none;
   animation: fadeInUp 0.15s var(--ease);
 }
-
-.heatmap-popup-title {
-  font-size: var(--fs-sm);
-  font-weight: 600;
-  color: var(--color-text-1);
-  margin-bottom: 2px;
-}
-
-.heatmap-popup-row {
-  font-size: var(--fs-xs);
-  color: var(--color-text-3);
-}
+.heatmap-popup-title { font-size: var(--fs-sm); font-weight: 600; color: var(--color-text-1); margin-bottom: 2px; }
+.heatmap-popup-row { font-size: var(--fs-xs); color: var(--color-text-3); }
 
 @keyframes fadeInUp {
   from { opacity: 0; transform: translateX(-50%) translateY(4px); }
   to { opacity: 1; transform: translateX(-50%) translateY(0); }
 }
 
-/* 热力图弹窗记录列表 */
-.heatmap-record {
-  font-size: 10px;
-  color: var(--color-text-2);
-  padding: 1px 0;
-  white-space: nowrap;
-}
-.heatmap-popup-more {
-  font-size: 10px;
-  color: var(--color-text-3);
-  margin-top: 2px;
-}
+.heatmap-record { font-size: 10px; color: var(--color-text-2); padding: 1px 0; white-space: nowrap; }
+.heatmap-popup-more { font-size: 10px; color: var(--color-text-3); margin-top: 2px; }
 
-/* XP趋势周期切换 */
-.chart-period-toggle {
-  display: flex;
-  gap: var(--sp-1);
-  margin-bottom: var(--sp-1);
-}
+/* === XP趋势周期切换 === */
+.chart-period-toggle { display: flex; gap: var(--sp-1); margin-bottom: var(--sp-1); }
 .period-btn {
   padding: 2px 10px;
   border: 1px solid var(--color-outline);
@@ -263,220 +361,70 @@
   border-color: var(--color-accent);
 }
 
-/* === VIEW-08: Textbook Progress Map === */
-.progress-map-list {
-  display: flex;
-  flex-direction: column;
-  gap: var(--sp-3);
-}
+/* === Textbook Progress === */
+.progress-map-list { display: flex; flex-direction: column; gap: var(--sp-3); }
+.progress-map-item { padding: var(--sp-2) 0; }
+.progress-map-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px; }
+.progress-map-subject { font-weight: 600; font-size: var(--fs-sm); color: var(--color-text-1); }
+.progress-map-pct { font-size: var(--fs-sm); font-weight: 600; color: var(--color-accent); }
+.progress-map-name { font-size: var(--fs-xs); color: var(--color-text-3); margin-bottom: var(--sp-1); }
 
-.progress-map-item {
-  padding: var(--sp-2) 0;
-}
-
-.progress-map-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 2px;
-}
-
-.progress-map-subject {
-  font-weight: 600;
-  font-size: var(--fs-sm);
-  color: var(--color-text-1);
-}
-
-.progress-map-pct {
-  font-size: var(--fs-sm);
-  font-weight: 600;
-  color: var(--color-accent);
-}
-
-.progress-map-name {
-  font-size: var(--fs-xs);
-  color: var(--color-text-3);
-  margin-bottom: var(--sp-1);
-}
-
-/* === VIEW-09: Course Progress === */
-.course-list {
-  display: flex;
-  flex-direction: column;
-  gap: var(--sp-2);
-}
-
+/* === Course Progress === */
+.course-list { display: flex; flex-direction: column; gap: var(--sp-2); }
 .course-item {
-  display: flex;
-  align-items: center;
-  gap: var(--sp-2);
-  padding: var(--sp-2);
-  border-radius: var(--r-md);
+  display: flex; align-items: center; gap: var(--sp-2);
+  padding: var(--sp-2); border-radius: var(--r-md);
   background: rgba(255, 255, 255, 0.4);
 }
+[data-theme="dark"] .course-item { background: rgba(255, 255, 255, 0.04); }
+.course-icon { font-size: 20px; }
+.course-name { font-weight: 500; font-size: var(--fs-sm); color: var(--color-text-1); flex: 1; }
+.course-time { font-size: var(--fs-xs); color: var(--color-text-3); }
 
-[data-theme="dark"] .course-item {
-  background: rgba(255, 255, 255, 0.04);
-}
-
-.course-icon {
-  font-size: 20px;
-}
-
-.course-name {
-  font-weight: 500;
-  font-size: var(--fs-sm);
-  color: var(--color-text-1);
-  flex: 1;
-}
-
-.course-time {
-  font-size: var(--fs-xs);
-  color: var(--color-text-3);
-}
-
-/* === VIEW-10~14: Charts === */
-.chart-block {
-  margin-bottom: var(--sp-4);
-}
-
-.chart-title {
-  font-size: var(--fs-sm);
-  font-weight: 600;
-  color: var(--color-text-2);
-  margin-bottom: var(--sp-2);
-}
-
-.chart-container {
-  width: 100%;
-  height: 220px;
-  border-radius: var(--r-md);
-  overflow: hidden;
-  position: relative;
-}
-
+/* === Charts === */
+.chart-block { margin-bottom: var(--sp-4); }
+.chart-title { font-size: var(--fs-sm); font-weight: 600; color: var(--color-text-2); margin-bottom: var(--sp-2); }
+.chart-container { width: 100%; height: 220px; border-radius: var(--r-md); overflow: hidden; position: relative; }
 .chart-loading {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  background: var(--color-surface);
-  z-index: 1;
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  background: var(--color-surface); z-index: 1;
 }
-
 .chart-loading-spinner {
-  width: 24px;
-  height: 24px;
+  width: 24px; height: 24px;
   border: 2px solid var(--color-surface-variant);
   border-top-color: var(--color-accent);
   border-radius: 50%;
   animation: chart-spin 0.6s linear infinite;
 }
+.chart-loading-text { font-size: var(--fs-xs); color: var(--color-text-3); margin-top: var(--sp-1); }
+@keyframes chart-spin { to { transform: rotate(360deg); } }
 
-.chart-loading-text {
-  font-size: var(--fs-xs);
-  color: var(--color-text-3);
-  margin-top: var(--sp-1);
-}
-
-@keyframes chart-spin {
-  to { transform: rotate(360deg); }
-}
-
-/* === Responsive: Charts & Heatmap === */
-@media (max-width: 480px) {
-  .chart-container {
-    height: 180px;
-  }
-  .heatmap-cell {
-    width: 11px;
-    height: 11px;
-  }
-  .heatmap-weekday {
-    width: 12px;
-    height: 11px;
-    font-size: 9px;
-  }
-}
-
-/* === VIEW-12: Weak Points === */
-.weakpoint-list {
-  display: flex;
-  flex-direction: column;
-  gap: var(--sp-2);
-}
-
+/* === Weak Points === */
+.weakpoint-list { display: flex; flex-direction: column; gap: var(--sp-2); }
 .weakpoint-item {
   padding: var(--sp-2) var(--sp-3);
   border-radius: var(--r-md);
   background: rgba(255, 255, 255, 0.5);
   border: 1px solid rgba(255, 255, 255, 0.18);
 }
-
 [data-theme="dark"] .weakpoint-item {
   background: rgba(30, 30, 30, 0.5);
   border-color: rgba(255, 255, 255, 0.06);
 }
+.weakpoint-header { display: flex; align-items: center; gap: var(--sp-1); font-weight: 600; font-size: var(--fs-sm); color: var(--color-text-1); margin-bottom: var(--sp-1); }
+.weakpoint-name { font-size: var(--fs-sm); }
+.weakpoint-reasons { display: flex; flex-wrap: wrap; gap: var(--sp-1); }
+.weakpoint-tag { font-size: var(--fs-xs); color: var(--color-text-3); background: var(--color-surface-variant); padding: 2px 8px; border-radius: var(--r-full); }
 
-.weakpoint-header {
-  display: flex;
-  align-items: center;
-  gap: var(--sp-1);
-  font-weight: 600;
-  font-size: var(--fs-sm);
-  color: var(--color-text-1);
-  margin-bottom: var(--sp-1);
-}
+/* === Monthly Report === */
+.monthly-report-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--sp-2); margin-bottom: var(--sp-2); }
+.monthly-stat { text-align: center; padding: var(--sp-2); background: var(--color-surface-variant); border-radius: var(--r-sm); }
+.monthly-stat-value { font-size: var(--fs-md); font-weight: 700; color: var(--color-text-1); }
+.monthly-stat-label { font-size: 10px; color: var(--color-text-3); margin-top: 2px; }
+.monthly-highlight { font-size: var(--fs-sm); color: var(--color-text-2); padding: var(--sp-2) 0; border-top: 1px solid var(--color-surface-variant); }
 
-.weakpoint-name {
-  font-size: var(--fs-sm);
-}
-
-.weakpoint-reasons {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--sp-1);
-}
-
-.weakpoint-tag {
-  font-size: var(--fs-xs);
-  color: var(--color-text-3);
-  background: var(--color-surface-variant);
-  padding: 2px 8px;
-  border-radius: var(--r-full);
-}
-
-/* === Nav Link Card === */
-.nav-link-card {
-  display: block;
-  padding: var(--sp-3);
-  margin-bottom: var(--sp-3);
-  background: rgba(255, 255, 255, 0.72);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  border-radius: var(--r-md);
-  font-size: var(--fs-sm);
-  font-weight: 500;
-  color: var(--color-accent);
-  text-decoration: none;
-  transition: all var(--duration-fast) var(--ease);
-}
-
-.nav-link-card:hover {
-  transform: translateY(-1px);
-  box-shadow: var(--shadow-md);
-  border-color: var(--color-accent);
-}
-
-[data-theme="dark"] .nav-link-card {
-  background: rgba(30, 30, 30, 0.72);
-  border-color: rgba(255, 255, 255, 0.08);
-}
-
-/* === Data Tab === */
+/* === Data Page Header === */
 .data-page-header {
   font-size: var(--fs-lg);
   font-weight: 700;
@@ -484,81 +432,10 @@
   margin-bottom: var(--sp-3);
 }
 
-.data-summary {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: var(--sp-2);
-  margin-bottom: var(--sp-3);
-}
-
-.summary-item {
-  background: rgba(255, 255, 255, 0.72);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  border-radius: var(--r-md);
-  padding: var(--sp-2);
-  text-align: center;
-}
-
-[data-theme="dark"] .summary-item {
-  background: rgba(30, 30, 30, 0.72);
-  border-color: rgba(255, 255, 255, 0.08);
-}
-
-.summary-value {
-  font-size: var(--fs-lg);
-  font-weight: 700;
-  color: var(--color-text-1);
-}
-
-.summary-label {
-  font-size: var(--fs-xs);
-  color: var(--color-text-3);
-}
-
+/* === Responsive === */
 @media (max-width: 480px) {
-  .data-summary {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-/* === Monthly Report (§12.2) === */
-.monthly-report-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: var(--sp-2);
-  margin-bottom: var(--sp-2);
-}
-
-.monthly-stat {
-  text-align: center;
-  padding: var(--sp-2);
-  background: var(--color-surface-variant);
-  border-radius: var(--r-sm);
-}
-
-.monthly-stat-value {
-  font-size: var(--fs-md);
-  font-weight: 700;
-  color: var(--color-text-1);
-}
-
-.monthly-stat-label {
-  font-size: 10px;
-  color: var(--color-text-3);
-  margin-top: 2px;
-}
-
-.monthly-highlight {
-  font-size: var(--fs-sm);
-  color: var(--color-text-2);
-  padding: var(--sp-2) 0;
-  border-top: 1px solid var(--color-surface-variant);
-}
-
-@media (max-width: 480px) {
-  .monthly-report-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
+  .chart-container { height: 180px; }
+  .heatmap-cell { width: 11px; height: 11px; }
+  .heatmap-weekday { width: 12px; height: 11px; font-size: 9px; }
+  .monthly-report-grid { grid-template-columns: repeat(2, 1fr); }
 }

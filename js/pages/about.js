@@ -1,6 +1,13 @@
 // about.js — 关于页（版本信息+致谢+版本历史）
 // 纯静态页面，无 Store 读写，VERSION_HISTORY 手动维护
 const VERSION_HISTORY = [
+  { version: 'v0.114', date: '2026-05-24', desc: 'Phase B: 导航+视觉 — "+"扇形菜单+粒子网络启动页+MD3阴影系统' },
+  { version: 'v0.113', date: '2026-05-24', desc: 'Phase A: 数据+算法 — 9科完整教材数据+FSRS幂律遗忘曲线+交错效应+心流检测+元认知校准' },
+  { version: 'v0.112', date: '2026-05-24', desc: '全面升级规划 — §17规划写入参考文档+学习科学调研+课本/网课/教辅数据规划' },
+  { version: 'v0.103', date: '2026-05-24', desc: '搜索+录入增强 — 共享搜索工具+5级匹配+得分滑块+EMA时长推断+启动成就检测' },
+  { version: 'v0.102', date: '2026-05-24', desc: '数据页UI重构 — Tab分组+图标网格+横滑摘要+折叠区块渐进式披露' },
+  { version: 'v0.101', date: '2026-05-24', desc: '启动页重设计 — 日出/晴空/星空时间主题动画+自动进入+设置开关' },
+  { version: 'v0.100', date: '2026-05-24', desc: '录入弹窗重构 — 居中弹窗+底部导航保留+弹出动画' },
   { version: 'v0.99', date: '2026-05-24', desc: '最终打磨 — 版本号统一+全页面v0.99更新' },
   { version: 'v0.98', date: '2026-05-24', desc: 'PWA离线队列 — §13.3离线记录延迟同步+成就数量验证(64个/5隐藏)' },
   { version: 'v0.97', date: '2026-05-24', desc: '番茄钟完成页增强 — §7.1手动生成学习记录按钮' },
@@ -88,7 +95,7 @@ export function render() {
       <div class="about-hero">
         <div class="about-logo">LTS</div>
         <div class="about-title">学习RPG · 认知操作系统</div>
-        <div class="about-version">v0.99</div>
+        <div class="about-version">v0.114</div>
         <div class="about-credit">Created by 墨澜 × Miku</div>
       </div>
       <div class="about-section">

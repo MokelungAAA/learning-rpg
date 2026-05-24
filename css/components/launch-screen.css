@@ -1,23 +1,18 @@
-/* launch-screen.css — 启动页（§4.2） */
+/* launch-screen.css — 启动页（§4.2）粒子网络+时间主题 */
 
 .launch-overlay {
   position: fixed;
   inset: 0;
   z-index: 9999;
-  background: var(--color-bg);
   display: flex;
   align-items: center;
   justify-content: center;
-  animation: launchFadeIn 0.5s ease;
+  overflow: hidden;
+  cursor: pointer;
 }
 
 .launch-overlay.launch-fade-out {
-  animation: launchFadeOut 0.5s ease forwards;
-}
-
-@keyframes launchFadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  animation: launchFadeOut 0.6s ease forwards;
 }
 
 @keyframes launchFadeOut {
@@ -25,120 +20,150 @@
   to { opacity: 0; }
 }
 
+/* === 时间主题背景 === */
+.launch-theme-sunrise {
+  background: linear-gradient(180deg, #1a1020 0%, #2a1520 40%, #1a1020 100%);
+}
+
+.launch-theme-sunshine {
+  background: linear-gradient(180deg, #0a1525 0%, #0f2040 40%, #0a1525 100%);
+}
+
+.launch-theme-starry {
+  background: linear-gradient(180deg, #0a0a1a 0%, #1a1a3e 40%, #0a0a1a 100%);
+}
+
+/* 暗角效果 */
+.launch-overlay::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at center, transparent 40%, rgba(0,0,0,0.4) 100%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Canvas 粒子层 */
+.launch-canvas {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+}
+
+/* 中央光晕（颜色由JS动态设置） */
+.launch-glow {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 500px;
+  height: 500px;
+  z-index: 2;
+  pointer-events: none;
+  animation: glowPulse 4s ease-in-out infinite;
+}
+
+@keyframes glowPulse {
+  0%, 100% { opacity: 0.8; transform: translate(-50%, -50%) scale(1); }
+  50%      { opacity: 1; transform: translate(-50%, -50%) scale(1.1); }
+}
+
+/* === 内容 === */
 .launch-content {
+  position: relative;
+  z-index: 3;
   text-align: center;
   max-width: 360px;
   padding: var(--sp-4);
+  animation: launchContentIn 0.8s ease 0.3s both;
 }
 
-.launch-logo {
-  font-size: 64px;
-  margin-bottom: var(--sp-3);
-  animation: launchBounce 1s ease;
+@keyframes launchContentIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
-@keyframes launchBounce {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-12px); }
+/* Logo 环（颜色由JS动态设置） */
+.launch-logo-ring {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  border: 2px solid rgba(208, 188, 255, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto var(--sp-3);
+  animation: logoPulse 2.5s ease-in-out infinite;
+  position: relative;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.launch-logo-ring::before {
+  content: '';
+  position: absolute;
+  inset: -8px;
+  border-radius: 50%;
+  border: 1px solid rgba(208, 188, 255, 0.15);
+  animation: logoPulse 2.5s ease-in-out infinite 0.3s;
+}
+
+.launch-logo-text {
+  font-size: 24px;
+  font-weight: 800;
+  color: #D0BCFF;
+  letter-spacing: 2px;
+}
+
+@keyframes logoPulse {
+  0%, 100% { transform: scale(1); opacity: 0.8; }
+  50%      { transform: scale(1.06); opacity: 1; }
 }
 
 .launch-title {
   font-size: 28px;
   font-weight: 800;
-  color: var(--color-text-1);
+  color: #fff;
   margin-bottom: var(--sp-1);
+  letter-spacing: 1px;
+  text-shadow: 0 2px 12px rgba(0,0,0,0.3);
 }
 
 .launch-subtitle {
   font-size: var(--fs-sm);
-  color: var(--color-text-3);
+  color: rgba(208, 188, 255, 0.6);
   margin-bottom: var(--sp-4);
+  letter-spacing: 2px;
 }
 
-.launch-card {
-  background: var(--color-surface);
-  border: 1px solid var(--glass-border);
-  border-radius: var(--r-lg);
-  padding: var(--sp-3);
-  margin-bottom: var(--sp-4);
-  text-align: left;
-}
-
-.launch-card-row {
+.launch-info {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: var(--sp-2);
-}
-
-.launch-card-label {
-  font-size: var(--fs-sm);
-  color: var(--color-text-2);
-}
-
-.launch-level {
-  font-size: var(--fs-md);
-  font-weight: 700;
-  color: var(--color-accent);
-}
-
-.launch-xp {
-  font-size: var(--fs-sm);
-  color: var(--color-text-3);
-}
-
-.launch-progress {
-  display: flex;
+  justify-content: center;
   align-items: center;
   gap: var(--sp-2);
-}
-
-.launch-progress-bar {
-  flex: 1;
-  height: 6px;
-  background: var(--color-surface-variant);
-  border-radius: 3px;
-  overflow: hidden;
-}
-
-.launch-progress-fill {
-  height: 100%;
-  background: var(--color-accent-gradient);
-  border-radius: 3px;
-  transition: width 0.8s ease;
-}
-
-.launch-progress-text {
-  font-size: var(--fs-xs);
-  color: var(--color-text-3);
-  width: 32px;
-  text-align: right;
-}
-
-.launch-streak {
+  margin-bottom: var(--sp-3);
+  color: rgba(255, 255, 255, 0.7);
   font-size: var(--fs-sm);
-  color: var(--color-warning);
 }
 
-.launch-start-btn {
-  width: 100%;
-  padding: var(--sp-3);
-  border: none;
-  border-radius: var(--r-md);
-  background: var(--color-accent-gradient);
-  color: #fff;
-  font-size: var(--fs-md);
-  font-weight: 600;
-  cursor: pointer;
-  transition: transform var(--duration-fast) var(--ease-spring),
-              box-shadow var(--duration-fast) var(--ease);
+.launch-info-divider {
+  color: rgba(255, 255, 255, 0.25);
 }
 
-.launch-start-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 16px rgba(37, 99, 235, 0.3);
+.launch-info-item {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-1);
 }
 
-.launch-start-btn:active {
-  transform: scale(0.97);
+.launch-hint {
+  font-size: var(--fs-xs);
+  color: rgba(255, 255, 255, 0.3);
+  animation: hintPulse 2s ease-in-out infinite;
+}
+
+@keyframes hintPulse {
+  0%, 100% { opacity: 0.3; }
+  50%      { opacity: 0.6; }
 }

@@ -4,6 +4,7 @@ import Store from '../store.js';
 import { STORAGE_KEYS as StorageKeys } from '../config.js';
 import Theme from '../theme.js';
 import EventBus from '../event-bus.js';
+import { fuzzyMatch as sharedFuzzyMatch } from '../utils/search.js';
 
 const COMMANDS = [
   // 导航
@@ -27,33 +28,7 @@ const COMMANDS = [
   { id: 'act-about',    icon: 'ℹ️', label: '关于系统',      pinyin: 'guanyu xitong banben', category: '操作', action: () => location.hash = '#/about' },
 ];
 
-// Levenshtein 编辑距离
-function levenshtein(a, b) {
-  if (a.length === 0) return b.length;
-  if (b.length === 0) return a.length;
-  const matrix = [];
-  for (let i = 0; i <= b.length; i++) matrix[i] = [i];
-  for (let j = 0; j <= a.length; j++) matrix[0][j] = j;
-  for (let i = 1; i <= b.length; i++) {
-    for (let j = 1; j <= a.length; j++) {
-      matrix[i][j] = b[i - 1] === a[j - 1]
-        ? matrix[i - 1][j - 1]
-        : Math.min(matrix[i - 1][j - 1] + 1, matrix[i][j - 1] + 1, matrix[i - 1][j] + 1);
-    }
-  }
-  return matrix[b.length][a.length];
-}
-
-// 模糊匹配：子串 > 前缀 > 拼音 > 编辑距离≤2
-function fuzzyMatch(text, pinyin, query) {
-  const t = text.toLowerCase();
-  const q = query.toLowerCase();
-  if (t.includes(q)) return 3; // 子串匹配
-  if (t.startsWith(q)) return 3;
-  if (pinyin && pinyin.includes(q)) return 2; // 拼音匹配
-  if (levenshtein(t, q) <= 2) return 1; // 模糊匹配
-  return 0;
-}
+// 复用共享搜索工具（levenshtein + pinyin + fuzzyMatch）
 
 let paletteEl = null;
 let inputEl = null;
@@ -112,7 +87,7 @@ function onInput() {
     filteredCmds = [...COMMANDS];
   } else {
     filteredCmds = COMMANDS
-      .map(c => ({ cmd: c, score: fuzzyMatch(c.label, c.pinyin || '', q) }))
+      .map(c => ({ cmd: c, score: sharedFuzzyMatch(c.label, q, c.pinyin || '') }))
       .filter(x => x.score > 0)
       .sort((a, b) => b.score - a.score)
       .map(x => x.cmd);
