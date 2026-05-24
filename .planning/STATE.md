@@ -2,8 +2,8 @@
 
 **Project:** LTS
 **Phase:** 2 (In Progress)
-**Version:** 0.20
-**Last Updated:** 2026-05-23
+**Version:** 0.21
+**Last Updated:** 2026-05-24
 
 ---
 

@@ -5,6 +5,7 @@ import Navbar from './components/navbar.js';
 import BrandedHeader from './components/branded-header.js';
 import EventBus from './event-bus.js';
 import Theme from './theme.js';
+import { showLaunchScreen } from './components/launch-screen.js';
 import * as home from './pages/home.js';
 import * as dataTab from './pages/data-tab.js';
 import * as pomodoro from './pages/pomodoro.js';
@@ -27,6 +28,16 @@ const container = document.getElementById('page-container');
 
 // Theme must init before any render (FOUC already handled by inline script)
 Theme.init();
+
+// 开屏动画（默认开启，设置页可关闭）
+(async () => {
+  try {
+    const settings = JSON.parse(localStorage.getItem('lts_settings') || '{}');
+    if (settings.launchScreen !== false) {
+      await showLaunchScreen();
+    }
+  } catch {}
+})();
 
 // Init data engine + 运行数据迁移（non-blocking, failure won't break the app）
 // 数据架构: 内嵌JS(即时可用) → GitHub云端(后台合并) → localStorage(缓存)
@@ -74,7 +85,7 @@ Theme.init();
     console.log('[LTS] data:ready (local): records=%d, totalXP=%d', _records.length, _records.reduce((s, r) => s + (r.xp || 0), 0));
     EventBus.emit('data:ready');
 
-    // ── 第二步: 后台从 GitHub 云端同步（不阻塞渲染） ──
+    // ── 第二步: 后台从 GitHub 云端同步（不阻塞渲染，不用 await） ──
     try {
       const { default: SyncEngine } = await import('./sync-engine.js');
       const builtInCfg = window.LTS_SYNC_CONFIG || {};
@@ -83,15 +94,16 @@ Theme.init();
       if (syncCfg.token && syncCfg.owner && syncCfg.repo) {
         SyncEngine.configure(syncCfg.token, syncCfg.owner, syncCfg.repo);
         if (!userCfg.token) Store.set('lts_sync_config', syncCfg);
-        const cloudOk = await SyncEngine.startupLoad(fromEmbedded);
-        if (cloudOk) {
-          // 云端数据已合并，再次通知页面刷新
-          const _cloudRecords = Store.get(StorageKeys.STUDY_RECORDS) || [];
-          console.log('[LTS] cloud sync OK: records=%d, totalXP=%d', _cloudRecords.length, _cloudRecords.reduce((s, r) => s + (r.xp || 0), 0));
-          EventBus.emit('data:ready');
-        } else {
-          console.log('[LTS] cloud sync returned false (no data or network error)');
-        }
+        // fire-and-forget: 不 await，让同步在后台运行
+        SyncEngine.startupLoad(fromEmbedded).then(cloudOk => {
+          if (cloudOk) {
+            const _cloudRecords = Store.get(StorageKeys.STUDY_RECORDS) || [];
+            console.log('[LTS] cloud sync OK: records=%d, totalXP=%d', _cloudRecords.length, _cloudRecords.reduce((s, r) => s + (r.xp || 0), 0));
+            EventBus.emit('data:ready');
+          } else {
+            console.log('[LTS] cloud sync returned false (no data or network error)');
+          }
+        }).catch(e => console.warn('[LTS] cloud sync error:', e.message || e));
       }
     } catch (e) { console.warn('[LTS] cloud sync failed:', e.message || e); }
 

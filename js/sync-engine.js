@@ -101,6 +101,7 @@ class SyncEngine {
       achievements: Storage.get(StorageKeys.ACHIEVEMENTS) || [],
       examScores: Storage.get(StorageKeys.EXAM_SCORES) || {},
       settings: Storage.get(StorageKeys.SETTINGS) || {},
+      userProfile: Storage.get(StorageKeys.USER_PROFILE) || {},
       recitationState: Storage.get(StorageKeys.RECITATION_STATE) || {},
       chartPreferences: Storage.get(StorageKeys.CHART_PREFS) || {},
       lastSync: Date.now(),
@@ -116,6 +117,7 @@ class SyncEngine {
     if (merged.achievements) Storage.set(StorageKeys.ACHIEVEMENTS, merged.achievements);
     if (merged.examScores) Storage.set(StorageKeys.EXAM_SCORES, merged.examScores);
     if (merged.settings) Storage.set(StorageKeys.SETTINGS, merged.settings);
+    if (merged.userProfile) Storage.set(StorageKeys.USER_PROFILE, merged.userProfile);
     if (merged.recitationState) Storage.set(StorageKeys.RECITATION_STATE, merged.recitationState);
     if (merged.chartPreferences) Storage.set(StorageKeys.CHART_PREFS, merged.chartPreferences);
     Storage.set(StorageKeys.SYNC_META, {
@@ -125,8 +127,10 @@ class SyncEngine {
     });
   }
 
-  // 智能合并：本地 vs 远程
-  // 策略：数组按 id 去重(本地优先)，对象取本地值
+  // 智能合并策略：
+  //   数组（records/readingRecords/pomodoroSessions/achievements）→ 按 id 去重，本地优先
+  //   对象（settings/userProfile/knowledgeState/examScores 等）→ 合并，本地字段覆盖远程
+  //   这样保证：两台设备各加的记录都能保留，设置以最后修改的设备为准
   mergeUnified(local, remote) {
     if (!local && !remote) return null;
     if (!local || !local.records) return remote;
@@ -153,12 +157,13 @@ class SyncEngine {
       achievements: this._mergeArraysById(local.achievements || [], remote.achievements || [], 'id'),
       examScores: this._mergeObjects(local.examScores || {}, remote.examScores || {}),
       settings: this._mergeObjects(local.settings || {}, remote.settings || {}),
+      userProfile: this._mergeObjects(local.userProfile || {}, remote.userProfile || {}),
       recitationState: this._mergeObjects(local.recitationState || {}, remote.recitationState || {}),
       chartPreferences: this._mergeObjects(local.chartPreferences || {}, remote.chartPreferences || {}),
     };
   }
 
-  // 数组合并：按 id 去重，本地优先
+  // 数组合并：按 id 去重，本地优先（两台设备各加的记录都会保留）
   _mergeArraysById(localArr, remoteArr, idKey) {
     const merged = new Map();
     for (const r of remoteArr) {
@@ -167,12 +172,12 @@ class SyncEngine {
     }
     for (const r of localArr) {
       const key = r[idKey] || r.id;
-      if (key) merged.set(key, r); // 本地覆盖远程
+      if (key) merged.set(key, r);
     }
     return Array.from(merged.values());
   }
 
-  // 对象合并：取本地值
+  // 对象合并：远程打底，本地覆盖（本地字段优先）
   _mergeObjects(localObj, remoteObj) {
     return { ...remoteObj, ...localObj };
   }

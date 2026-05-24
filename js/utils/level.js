@@ -2,15 +2,18 @@
 // 功能: 等级公式、XP进度、连续天数、今日XP、数字动画、回归斜率、XP引擎
 // 易错点: 等级公式为 log₁.₅，subject key 用英文（math/physics）
 
+// 每 10 级一个段位，共 10 段（Level 1-100）
 const LEVEL_TITLES = [
-  { cn: '初学者',   name: 'Beginner' },
-  { cn: '见习生',   name: 'Novice' },
-  { cn: '学徒',     name: 'Apprentice' },
-  { cn: '熟练者',   name: 'Adept' },
-  { cn: '专家',     name: 'Expert' },
-  { cn: '大师',     name: 'Master' },
-  { cn: '宗师',     name: 'Grandmaster' },
-  { cn: '传说',     name: 'Legend' },
+  { min: 1,  max: 10,  cn: '初学者',   name: 'Beginner' },
+  { min: 11, max: 20,  cn: '见习生',   name: 'Novice' },
+  { min: 21, max: 30,  cn: '学徒',     name: 'Apprentice' },
+  { min: 31, max: 40,  cn: '熟练者',   name: 'Adept' },
+  { min: 41, max: 50,  cn: '专家',     name: 'Expert' },
+  { min: 51, max: 60,  cn: '大师',     name: 'Master' },
+  { min: 61, max: 70,  cn: '宗师',     name: 'Grandmaster' },
+  { min: 71, max: 80,  cn: '传说',     name: 'Legend' },
+  { min: 81, max: 90,  cn: '神话',     name: 'Mythic' },
+  { min: 91, max: 100, cn: '超越',     name: 'Transcend' },
 ];
 
 // §5.3 学科等级称号体系（日语）：按正确率分数范围映射
@@ -62,12 +65,14 @@ export function calcLevelProgress(totalXP) {
   return { level, xpInLevel, xpNeeded, percent };
 }
 
-// 获取等级对应的中文称号（8级封顶：初学者→传说）
+// 获取等级对应的中文称号（每10级一段，10段封顶）
 // @param {number} level — 当前等级
-// @returns {{cn, name}} 中英文称号对象
+// @returns {{cn, name, min, max}} 段位信息
 export function getLevelTitle(level) {
-  const idx = Math.min(level - 1, LEVEL_TITLES.length - 1);
-  return LEVEL_TITLES[Math.max(0, idx)];
+  for (const t of LEVEL_TITLES) {
+    if (level >= t.min && level <= t.max) return t;
+  }
+  return LEVEL_TITLES[LEVEL_TITLES.length - 1];
 }
 
 // §5.3 获取学科等级称号（日语体系，按正确率分数范围）

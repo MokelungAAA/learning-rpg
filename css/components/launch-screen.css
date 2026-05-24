@@ -1,14 +1,14 @@
-/* launch-screen.css — 启动页（§4.2）粒子网络+时间主题 */
+/* launch-screen.css — 简约开屏动画：几何 + 微光 + 时间色调 */
 
 .launch-overlay {
   position: fixed;
   inset: 0;
   z-index: 9999;
+  overflow: hidden;
+  cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  overflow: hidden;
-  cursor: pointer;
 }
 
 .launch-overlay.launch-fade-out {
@@ -20,150 +20,295 @@
   to { opacity: 0; }
 }
 
-/* === 时间主题背景 === */
-.launch-theme-sunrise {
-  background: linear-gradient(180deg, #1a1020 0%, #2a1520 40%, #1a1020 100%);
-}
-
-.launch-theme-sunshine {
-  background: linear-gradient(180deg, #0a1525 0%, #0f2040 40%, #0a1525 100%);
-}
-
-.launch-theme-starry {
-  background: linear-gradient(180deg, #0a0a1a 0%, #1a1a3e 40%, #0a0a1a 100%);
-}
-
-/* 暗角效果 */
-.launch-overlay::after {
-  content: '';
+/* === 背景 === */
+.launch-bg {
   position: absolute;
   inset: 0;
-  background: radial-gradient(ellipse at center, transparent 40%, rgba(0,0,0,0.4) 100%);
-  pointer-events: none;
   z-index: 0;
+  opacity: 0;
+  animation: bgReveal 1.2s ease-out 0.2s forwards;
 }
 
-/* Canvas 粒子层 */
-.launch-canvas {
+@keyframes bgReveal {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* 早晨：暖米色 */
+.launch-bg-morning {
+  background: linear-gradient(160deg, #faf6f0 0%, #f5ede3 50%, #ede4d8 100%);
+}
+
+/* 下午：淡蓝灰 */
+.launch-bg-afternoon {
+  background: linear-gradient(160deg, #f0f4f8 0%, #e8eef4 50%, #dfe6ed 100%);
+}
+
+/* 傍晚：暖灰紫 */
+.launch-bg-evening {
+  background: linear-gradient(160deg, #f2eef5 0%, #e8e2ed 50%, #ddd5e3 100%);
+}
+
+/* 深夜：深蓝灰 */
+.launch-bg-night {
+  background: linear-gradient(160deg, #1a1d28 0%, #1e2130 50%, #22253a 100%);
+}
+
+/* 深色模式覆盖 */
+.launch-theme-night .launch-bg-morning,
+.launch-theme-night .launch-bg-afternoon,
+.launch-theme-night .launch-bg-evening {
+  background: linear-gradient(160deg, #1a1d28 0%, #1e2130 50%, #22253a 100%);
+}
+
+/* === 几何装饰线 === */
+.launch-lines {
   position: absolute;
   inset: 0;
   z-index: 1;
-}
-
-/* 中央光晕（颜色由JS动态设置） */
-.launch-glow {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 500px;
-  height: 500px;
-  z-index: 2;
   pointer-events: none;
-  animation: glowPulse 4s ease-in-out infinite;
+  overflow: hidden;
 }
 
-@keyframes glowPulse {
-  0%, 100% { opacity: 0.8; transform: translate(-50%, -50%) scale(1); }
-  50%      { opacity: 1; transform: translate(-50%, -50%) scale(1.1); }
+.launch-line {
+  position: absolute;
+  height: 1px;
+  opacity: 0;
+  animation: lineReveal 0.8s ease-out forwards;
 }
+
+@keyframes lineReveal {
+  from { opacity: 0; transform: scaleX(0); }
+  to   { opacity: 1; transform: scaleX(1); }
+}
+
+/* 早晨色调 */
+.launch-line-morning { background: linear-gradient(90deg, transparent, rgba(200, 160, 100, 0.2), transparent); }
+/* 下午色调 */
+.launch-line-afternoon { background: linear-gradient(90deg, transparent, rgba(100, 150, 200, 0.2), transparent); }
+/* 傍晚色调 */
+.launch-line-evening { background: linear-gradient(90deg, transparent, rgba(160, 120, 180, 0.2), transparent); }
+/* 深夜色调 */
+.launch-line-night { background: linear-gradient(90deg, transparent, rgba(120, 130, 180, 0.15), transparent); }
+
+.launch-line-1 {
+  top: 30%;
+  left: 10%;
+  width: 80%;
+  animation-delay: 0.5s;
+}
+
+.launch-line-2 {
+  top: 70%;
+  left: 15%;
+  width: 70%;
+  animation-delay: 0.7s;
+}
+
+.launch-line-3 {
+  top: 50%;
+  left: 5%;
+  width: 25%;
+  animation-delay: 0.9s;
+}
+
+/* === 微光点 === */
+.launch-dots {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.launch-dot {
+  position: absolute;
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  opacity: 0;
+  animation: dotFade 2s ease-in-out infinite alternate;
+  animation-delay: var(--delay, 0s);
+}
+
+@keyframes dotFade {
+  0%   { opacity: 0.1; }
+  100% { opacity: 0.4; }
+}
+
+.launch-dot-morning { background: rgba(200, 160, 100, 0.6); }
+.launch-dot-afternoon { background: rgba(100, 150, 200, 0.6); }
+.launch-dot-evening { background: rgba(160, 120, 180, 0.6); }
+.launch-dot-night { background: rgba(150, 160, 220, 0.5); }
 
 /* === 内容 === */
 .launch-content {
   position: relative;
-  z-index: 3;
+  z-index: 10;
   text-align: center;
-  max-width: 360px;
-  padding: var(--sp-4);
-  animation: launchContentIn 0.8s ease 0.3s both;
+  padding: 40px;
 }
 
-@keyframes launchContentIn {
-  from { opacity: 0; transform: translateY(20px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-
-/* Logo 环（颜色由JS动态设置） */
-.launch-logo-ring {
-  width: 80px;
-  height: 80px;
-  border-radius: 50%;
-  border: 2px solid rgba(208, 188, 255, 0.3);
-  display: flex;
+/* Logo 标记 */
+.launch-mark {
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  margin: 0 auto var(--sp-3);
-  animation: logoPulse 2.5s ease-in-out infinite;
+  width: 56px;
+  height: 56px;
+  border-radius: 12px;
+  margin-bottom: 24px;
   position: relative;
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  background: rgba(255, 255, 255, 0.05);
+  opacity: 0;
+  animation: markReveal 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.4s forwards;
 }
 
-.launch-logo-ring::before {
-  content: '';
-  position: absolute;
-  inset: -8px;
-  border-radius: 50%;
-  border: 1px solid rgba(208, 188, 255, 0.15);
-  animation: logoPulse 2.5s ease-in-out infinite 0.3s;
+@keyframes markReveal {
+  from {
+    opacity: 0;
+    transform: scale(0.8) translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
 }
 
-.launch-logo-text {
-  font-size: 24px;
+/* 早晨色调 */
+.launch-mark-morning {
+  background: linear-gradient(135deg, #e8d5b8 0%, #d4b896 100%);
+  box-shadow: 0 4px 20px rgba(200, 160, 100, 0.15);
+}
+/* 下午色调 */
+.launch-mark-afternoon {
+  background: linear-gradient(135deg, #b8d4e8 0%, #96b8d4 100%);
+  box-shadow: 0 4px 20px rgba(100, 150, 200, 0.15);
+}
+/* 傍晚色调 */
+.launch-mark-evening {
+  background: linear-gradient(135deg, #d4b8e0 0%, #b896c8 100%);
+  box-shadow: 0 4px 20px rgba(160, 120, 180, 0.15);
+}
+/* 深夜色调 */
+.launch-mark-night {
+  background: linear-gradient(135deg, #2a2d42 0%, #363a54 100%);
+  box-shadow: 0 4px 20px rgba(100, 110, 180, 0.1);
+  border: 1px solid rgba(150, 160, 220, 0.15);
+}
+
+.launch-mark-text {
+  font-size: 18px;
   font-weight: 800;
-  color: #D0BCFF;
-  letter-spacing: 2px;
-}
-
-@keyframes logoPulse {
-  0%, 100% { transform: scale(1); opacity: 0.8; }
-  50%      { transform: scale(1.06); opacity: 1; }
-}
-
-.launch-title {
-  font-size: 28px;
-  font-weight: 800;
-  color: #fff;
-  margin-bottom: var(--sp-1);
   letter-spacing: 1px;
-  text-shadow: 0 2px 12px rgba(0,0,0,0.3);
 }
+
+.launch-mark-morning .launch-mark-text { color: #8b6f47; }
+.launch-mark-afternoon .launch-mark-text { color: #4a7a9b; }
+.launch-mark-evening .launch-mark-text { color: #7a5a8a; }
+.launch-mark-night .launch-mark-text { color: #9ea4c8; }
+
+/* 标题 */
+.launch-title {
+  font-size: 26px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  margin-bottom: 4px;
+  opacity: 0;
+  animation: textReveal 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.6s forwards;
+}
+
+.launch-title-morning { color: #3d3528; }
+.launch-title-afternoon { color: #2c3e50; }
+.launch-title-evening { color: #3a2d42; }
+.launch-title-night { color: #e0e2ec; }
 
 .launch-subtitle {
-  font-size: var(--fs-sm);
-  color: rgba(208, 188, 255, 0.6);
-  margin-bottom: var(--sp-4);
-  letter-spacing: 2px;
+  font-size: 12px;
+  letter-spacing: 4px;
+  margin-bottom: 28px;
+  opacity: 0;
+  animation: textReveal 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.75s forwards;
 }
 
+.launch-subtitle-morning { color: #9a8a72; }
+.launch-subtitle-afternoon { color: #7a8e9e; }
+.launch-subtitle-evening { color: #8a7a96; }
+.launch-subtitle-night { color: #7a7e94; }
+
+@keyframes textReveal {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 用户信息 */
 .launch-info {
   display: flex;
-  justify-content: center;
   align-items: center;
-  gap: var(--sp-2);
-  margin-bottom: var(--sp-3);
-  color: rgba(255, 255, 255, 0.7);
-  font-size: var(--fs-sm);
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 32px;
+  font-size: 12px;
+  opacity: 0;
+  animation: textReveal 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.9s forwards;
 }
+
+.launch-info-morning { color: #8a7a62; }
+.launch-info-afternoon { color: #6a7e8e; }
+.launch-info-evening { color: #7a6a86; }
+.launch-info-night { color: #6a6e84; }
 
 .launch-info-divider {
-  color: rgba(255, 255, 255, 0.25);
+  font-size: 8px;
+  opacity: 0.4;
 }
 
-.launch-info-item {
-  display: flex;
-  align-items: center;
-  gap: var(--sp-1);
-}
-
+/* 提示 */
 .launch-hint {
-  font-size: var(--fs-xs);
-  color: rgba(255, 255, 255, 0.3);
-  animation: hintPulse 2s ease-in-out infinite;
+  font-size: 11px;
+  letter-spacing: 3px;
+  opacity: 0;
+  animation: hintPulse 2.5s ease-in-out 1.5s infinite;
 }
+
+.launch-hint-morning { color: #b0a08a; }
+.launch-hint-afternoon { color: #8a9eae; }
+.launch-hint-evening { color: #9a8aa6; }
+.launch-hint-night { color: #5a5e74; }
 
 @keyframes hintPulse {
-  0%, 100% { opacity: 0.3; }
-  50%      { opacity: 0.6; }
+  0%, 100% { opacity: 0; }
+  15% { opacity: 0.5; }
+  85% { opacity: 0.5; }
+}
+
+/* === 进度条 === */
+.launch-progress {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  z-index: 10;
+  overflow: hidden;
+}
+
+.launch-progress-bar {
+  height: 100%;
+  width: 0%;
+  animation: progressFill 3.5s linear forwards;
+}
+
+.launch-progress-morning { background: linear-gradient(90deg, #d4b896, #e8d5b8); }
+.launch-progress-afternoon { background: linear-gradient(90deg, #96b8d4, #b8d4e8); }
+.launch-progress-evening { background: linear-gradient(90deg, #b896c8, #d4b8e0); }
+.launch-progress-night { background: linear-gradient(90deg, #363a54, #4a4e68); }
+
+@keyframes progressFill {
+  from { width: 0%; }
+  to   { width: 100%; }
 }
