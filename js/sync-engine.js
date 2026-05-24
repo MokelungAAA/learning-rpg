@@ -1,12 +1,11 @@
 // sync-engine.js — GitHub Contents API 同步引擎
 // 单例模式，通过 Personal Access Token 认证
 // 数据以 JSON 文件存储在仓库的 data/ 目录下
-// v0.121: 支持统一数据文件 data/lts_study_records.json 的双向同步
+// v0.129: 支持全量数据同步（12 种 localStorage key 统一存取）
 import Storage from './store.js';
 import EventBus from './event-bus.js';
 import { STORAGE_KEYS as StorageKeys } from './config.js';
 
-// 统一数据文件路径
 const UNIFIED_FILE = 'data/lts_study_records.json';
 
 class SyncEngine {
@@ -79,51 +78,103 @@ class SyncEngine {
 
   // ─── 统一数据文件同步 ───
 
-  // 从 GitHub 下载统一数据文件
   async downloadUnified() {
     return this.downloadFile(UNIFIED_FILE);
   }
 
-  // 上传统一数据文件到 GitHub
   async uploadUnified(data) {
     return this.uploadFile(UNIFIED_FILE, data, 'Update study records via LTS');
   }
 
-  // 智能合并：本地 vs 远程
-  // 策略：按 record.id 去重，本地记录优先（用户最近操作的）
-  mergeUnified(local, remote) {
-    // 如果一边没有数据，直接用另一边
-    if (!local || !local.records) return remote;
-    if (!remote || !remote.records) return local;
-
-    const localRecords = local.records;
-    const remoteRecords = remote.records;
-
-    // 按 id 建立 map，本地优先
-    const merged = new Map();
-    for (const r of remoteRecords) merged.set(r.id, r);
-    for (const r of localRecords) merged.set(r.id, r);  // 本地覆盖远程
-
-    // 合并阅读记录（按 recordID 去重，本地优先）
-    const localReadings = local.readingRecords || [];
-    const remoteReadings = remote.readingRecords || [];
-    const mergedReadings = new Map();
-    for (const r of remoteReadings) mergedReadings.set(r.recordID, r);
-    for (const r of localReadings) mergedReadings.set(r.recordID, r);
-
-    const result = {
+  // 从 localStorage 读取全量本地数据
+  _readAllLocal() {
+    return {
       version: '2.0',
       lastUpdated: new Date().toISOString(),
       learnerName: '墨澜',
       schema: 'lts_study_record',
       schemaVersion: 1,
-      records: Array.from(merged.values()).sort((a, b) =>
-        a.timestamp.localeCompare(b.timestamp)
-      ),
-      readingRecords: Array.from(mergedReadings.values()),
+      records: Storage.get(StorageKeys.STUDY_RECORDS) || [],
+      readingRecords: Storage.get(StorageKeys.READING_RECORDS) || [],
+      pomodoroSessions: Storage.get(StorageKeys.POMODORO_SESSIONS) || [],
+      knowledgeState: Storage.get(StorageKeys.KNOWLEDGE_STATE) || {},
+      achievements: Storage.get(StorageKeys.ACHIEVEMENTS) || [],
+      examScores: Storage.get(StorageKeys.EXAM_SCORES) || {},
+      settings: Storage.get(StorageKeys.SETTINGS) || {},
+      recitationState: Storage.get(StorageKeys.RECITATION_STATE) || {},
+      chartPreferences: Storage.get(StorageKeys.CHART_PREFS) || {},
+      lastSync: Date.now(),
     };
+  }
 
-    return result;
+  // 将合并结果写回 localStorage
+  _writeAllLocal(merged) {
+    Storage.set(StorageKeys.STUDY_RECORDS, merged.records);
+    if (merged.readingRecords) Storage.set(StorageKeys.READING_RECORDS, merged.readingRecords);
+    if (merged.pomodoroSessions) Storage.set(StorageKeys.POMODORO_SESSIONS, merged.pomodoroSessions);
+    if (merged.knowledgeState) Storage.set(StorageKeys.KNOWLEDGE_STATE, merged.knowledgeState);
+    if (merged.achievements) Storage.set(StorageKeys.ACHIEVEMENTS, merged.achievements);
+    if (merged.examScores) Storage.set(StorageKeys.EXAM_SCORES, merged.examScores);
+    if (merged.settings) Storage.set(StorageKeys.SETTINGS, merged.settings);
+    if (merged.recitationState) Storage.set(StorageKeys.RECITATION_STATE, merged.recitationState);
+    if (merged.chartPreferences) Storage.set(StorageKeys.CHART_PREFS, merged.chartPreferences);
+    Storage.set(StorageKeys.SYNC_META, {
+      lastSync: Date.now(),
+      lastUpdated: merged.lastUpdated,
+      status: 'success'
+    });
+  }
+
+  // 智能合并：本地 vs 远程
+  // 策略：数组按 id 去重(本地优先)，对象取本地值
+  mergeUnified(local, remote) {
+    if (!local && !remote) return null;
+    if (!local || !local.records) return remote;
+    if (!remote || !remote.records) return local;
+
+    return {
+      version: '2.0',
+      lastUpdated: new Date().toISOString(),
+      learnerName: '墨澜',
+      schema: 'lts_study_record',
+      schemaVersion: 1,
+      records: this._mergeArraysById(local.records, remote.records, 'id'),
+      readingRecords: this._mergeArraysById(
+        local.readingRecords || [],
+        remote.readingRecords || [],
+        'recordID'
+      ),
+      pomodoroSessions: this._mergeArraysById(
+        local.pomodoroSessions || [],
+        remote.pomodoroSessions || [],
+        'id'
+      ),
+      knowledgeState: this._mergeObjects(local.knowledgeState || {}, remote.knowledgeState || {}),
+      achievements: this._mergeArraysById(local.achievements || [], remote.achievements || [], 'id'),
+      examScores: this._mergeObjects(local.examScores || {}, remote.examScores || {}),
+      settings: this._mergeObjects(local.settings || {}, remote.settings || {}),
+      recitationState: this._mergeObjects(local.recitationState || {}, remote.recitationState || {}),
+      chartPreferences: this._mergeObjects(local.chartPreferences || {}, remote.chartPreferences || {}),
+    };
+  }
+
+  // 数组合并：按 id 去重，本地优先
+  _mergeArraysById(localArr, remoteArr, idKey) {
+    const merged = new Map();
+    for (const r of remoteArr) {
+      const key = r[idKey] || r.id;
+      if (key) merged.set(key, r);
+    }
+    for (const r of localArr) {
+      const key = r[idKey] || r.id;
+      if (key) merged.set(key, r); // 本地覆盖远程
+    }
+    return Array.from(merged.values());
+  }
+
+  // 对象合并：取本地值
+  _mergeObjects(localObj, remoteObj) {
+    return { ...remoteObj, ...localObj };
   }
 
   // ─── 全量同步（智能合并模式）───
@@ -133,29 +184,11 @@ class SyncEngine {
     this.isSyncing = true;
 
     try {
-      // 1. 从 GitHub 下载远程数据
       const remote = await this.downloadUnified();
-
-      // 2. 从 localStorage 获取本地数据
-      const localRecords = Storage.get(StorageKeys.STUDY_RECORDS) || [];
-      const localReadings = Storage.get(StorageKeys.READING_RECORDS) || [];
-      const local = {
-        version: '2.0',
-        lastUpdated: Storage.get('lts_sync_meta')?.lastUpdated || new Date(0).toISOString(),
-        learnerName: '墨澜',
-        schema: 'lts_study_record',
-        schemaVersion: 1,
-        records: localRecords,
-        readingRecords: localReadings,
-      };
-
-      // 3. 智能合并
+      const local = this._readAllLocal();
       const merged = this.mergeUnified(local, remote);
 
-      // 4. 写回两边
-      Storage.set(StorageKeys.STUDY_RECORDS, merged.records);
-      if (merged.readingRecords) Storage.set(StorageKeys.READING_RECORDS, merged.readingRecords);
-      Storage.set('lts_sync_meta', { lastSync: Date.now(), lastUpdated: merged.lastUpdated, status: 'success' });
+      this._writeAllLocal(merged);
       await this.uploadUnified(merged);
 
       EventBus.emit('sync:complete', { status: 'success', count: merged.records.length });
@@ -168,7 +201,8 @@ class SyncEngine {
   }
 
   // ─── 启动时加载（智能合并 + 自动重算 XP）───
-  async startupLoad() {
+  // preferCloud: true 时（内嵌数据刚加载），直接用云端数据覆盖本地
+  async startupLoad(preferCloud) {
     if (!this.isConfigured) return false;
 
     try {
@@ -178,40 +212,32 @@ class SyncEngine {
       const localRecords = Storage.get(StorageKeys.STUDY_RECORDS) || [];
       const localReadings = Storage.get(StorageKeys.READING_RECORDS) || [];
 
-      let records, readingRecords;
-      if (localRecords.length === 0) {
-        records = remote.records;
-        readingRecords = remote.readingRecords || localReadings;
+      let merged;
+      if (localRecords.length === 0 || preferCloud) {
+        // 本地无数据或刚加载内嵌旧数据 → 直接用云端（含全部 key），再合并其他 key
+        if (preferCloud) {
+          const local = this._readAllLocal();
+          merged = this.mergeUnified(local, remote);
+          // 但 records 和 readingRecords 直接用云端（内嵌是旧快照）
+          merged.records = remote.records;
+          merged.readingRecords = remote.readingRecords || [];
+        } else {
+          merged = remote;
+        }
       } else {
-        const local = {
-          version: '2.0',
-          lastUpdated: Storage.get('lts_sync_meta')?.lastUpdated || new Date(0).toISOString(),
-          learnerName: '墨澜',
-          schema: 'lts_study_record',
-          schemaVersion: 1,
-          records: localRecords,
-          readingRecords: localReadings,
-        };
-        const merged = this.mergeUnified(local, remote);
-        records = merged.records;
-        readingRecords = merged.readingRecords;
+        // 本地有真实数据 → 智能合并
+        const local = this._readAllLocal();
+        merged = this.mergeUnified(local, remote);
       }
 
-      // 自动重算 XP（异步，不阻塞渲染）
-      this.recalcAllXP(records).then(affected => {
-        if (affected > 0) {
-          Storage.set(StorageKeys.STUDY_RECORDS, records);
-          this.uploadUnified({
-            version: '2.0', lastUpdated: new Date().toISOString(),
-            learnerName: '墨澜', schema: 'lts_study_record', schemaVersion: 1, records,
-          }).catch(() => {});
-          EventBus.emit('data:xp-recalculated', { affected });
-        }
-      });
+      // XP 重算（同步执行，不产生竞态）
+      const affected = await this.recalcAllXP(merged.records);
+      if (affected > 0) {
+        EventBus.emit('data:xp-recalculated', { affected });
+      }
 
-      Storage.set(StorageKeys.STUDY_RECORDS, records);
-      if (readingRecords) Storage.set(StorageKeys.READING_RECORDS, readingRecords);
-      EventBus.emit('data:loaded', { source: 'merged', count: records.length });
+      this._writeAllLocal(merged);
+      EventBus.emit('data:loaded', { source: 'merged', count: merged.records.length });
       return true;
     } catch (e) {
       console.error('Startup load failed:', e);
@@ -233,7 +259,6 @@ class SyncEngine {
       const subjectScores = {};
 
       for (const rec of records) {
-        // 只重算 xp=0 或 xp=1（最低值，可能未计算）的记录
         if (rec.xp > 1) {
           totalXP += rec.xp;
           if (rec.score > 0) {
@@ -260,18 +285,6 @@ class SyncEngine {
       console.error('XP recalc failed:', e);
       return 0;
     }
-  }
-
-  // ─── 旧版兼容：逐 key 同步 ───
-
-  async upload(key, data) {
-    const path = `data/${key}.json`;
-    return this.uploadFile(path, data, `Update ${key} via LTS`);
-  }
-
-  async download(key) {
-    const path = `data/${key}.json`;
-    return this.downloadFile(path);
   }
 }
 

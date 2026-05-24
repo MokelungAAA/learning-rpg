@@ -37,10 +37,12 @@ Theme.init();
 
     // ── 第一步: 立即加载内嵌数据（确保首屏有数据） ──
     const fileData = window.LTS_RECORDS_DATA;
+    let fromEmbedded = false;
     if (fileData?.records?.length > 0) {
       const existing = Store.get(StorageKeys.STUDY_RECORDS) || [];
       if (existing.length === 0) {
         Store.set(StorageKeys.STUDY_RECORDS, fileData.records);
+        fromEmbedded = true;
         console.log('[LTS] loaded', fileData.records.length, 'records from embedded data');
       }
     }
@@ -81,7 +83,7 @@ Theme.init();
       if (syncCfg.token && syncCfg.owner && syncCfg.repo) {
         SyncEngine.configure(syncCfg.token, syncCfg.owner, syncCfg.repo);
         if (!userCfg.token) Store.set('lts_sync_config', syncCfg);
-        const cloudOk = await SyncEngine.startupLoad();
+        const cloudOk = await SyncEngine.startupLoad(fromEmbedded);
         if (cloudOk) {
           // 云端数据已合并，再次通知页面刷新
           const _cloudRecords = Store.get(StorageKeys.STUDY_RECORDS) || [];
