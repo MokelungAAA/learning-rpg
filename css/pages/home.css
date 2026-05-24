@@ -282,6 +282,86 @@
   transform: scale(0.92);
 }
 
+/* === Subject View Toggle (§4.3) === */
+.subject-view-toggle {
+  display: flex;
+  gap: var(--sp-1);
+  margin-bottom: var(--sp-2);
+}
+
+.subject-view-btn {
+  padding: 4px 12px;
+  border: 1px solid var(--glass-border);
+  border-radius: var(--r-full);
+  background: transparent;
+  color: var(--color-text-3);
+  font-size: var(--fs-xs);
+  cursor: pointer;
+  transition: all var(--duration-fast) var(--ease);
+}
+
+.subject-view-btn.active {
+  background: var(--color-accent);
+  color: #fff;
+  border-color: transparent;
+}
+
+/* === Subject List View === */
+.subject-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-1);
+}
+
+.subject-list-item {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  padding: var(--sp-2) var(--sp-3);
+  background: var(--color-surface);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--r-md);
+  cursor: pointer;
+  transition: all var(--duration-fast) var(--ease);
+}
+
+.subject-list-item:hover {
+  background: var(--color-surface-variant);
+  transform: translateX(2px);
+}
+
+.subject-list-icon {
+  font-size: 24px;
+  flex-shrink: 0;
+}
+
+.subject-list-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.subject-list-name {
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  color: var(--color-text-1);
+}
+
+.subject-list-level {
+  font-size: var(--fs-xs);
+  font-weight: 500;
+}
+
+.subject-list-meta {
+  font-size: var(--fs-xs);
+  color: var(--color-text-3);
+  margin-top: 2px;
+}
+
+.subject-list-bar {
+  width: 80px;
+  flex-shrink: 0;
+}
+
 /* === Responsive === */
 @media (max-width: 768px) {
   .hero-stats {

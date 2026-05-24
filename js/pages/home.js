@@ -162,12 +162,13 @@ function renderRecommendations(records) {
   </div>`;
 }
 
-// 4.6 学科卡片网格：按综合分降序排列
+// 4.6 学科卡片网格/列表：按综合分降序排列
 // 点击卡片跳转 #/subject/{id} 详情页
+// §4.3: 支持 grid/list 视图切换
 function renderSubjectGrid(records) {
   const stats = calcSubjectStats(records);
   const sorted = [...SUBJECTS].sort((a, b) => (stats[b.id]?.score || 0) - (stats[a.id]?.score || 0));
-  const cards = sorted.map(s => {
+  const gridCards = sorted.map(s => {
     const st = stats[s.id] || { xp: 0, count: 0, score: 0, totalDur: 0 };
     const t = getSubjectLevelTitle(st.score);
     return `<div class="subject-card card-enter" data-subject="${s.id}">
@@ -178,7 +179,25 @@ function renderSubjectGrid(records) {
       <div class="subject-card-meta"><span>⭐${st.xp}XP</span><span>${st.count}条</span></div>
     </div>`;
   }).join('');
-  return `<div class="section-title">📊 学科等级</div><div class="subject-grid">${cards}</div>`;
+  const listCards = sorted.map(s => {
+    const st = stats[s.id] || { xp: 0, count: 0, score: 0, totalDur: 0 };
+    const t = getSubjectLevelTitle(st.score);
+    const hours = Math.floor(st.totalDur / 60);
+    const mins = st.totalDur % 60;
+    return `<div class="subject-list-item" data-subject="${s.id}">
+      <span class="subject-list-icon">${getSubjectIcon(s.id)}</span>
+      <div class="subject-list-info">
+        <div class="subject-list-name">${s.name} <span class="subject-list-level" style="color:${t.color}">${t.cn}</span></div>
+        <div class="subject-list-meta">${hours}h${mins}m · ${st.count}条 · ⭐${st.xp}XP</div>
+      </div>
+      <div class="subject-list-bar"><div class="progress-bar"><div class="progress-fill" style="width:${st.score}%"></div></div></div>
+    </div>`;
+  }).join('');
+  const toggle = `<div class="subject-view-toggle">
+    <button class="subject-view-btn active" data-view="grid">网格</button>
+    <button class="subject-view-btn" data-view="list">列表</button>
+  </div>`;
+  return `<div class="section-title">📊 学科等级</div>${toggle}<div class="subject-grid" id="subject-grid">${gridCards}</div><div class="subject-list" id="subject-list" style="display:none">${listCards}</div>`;
 }
 
 export function render() {
@@ -236,13 +255,27 @@ export function afterRender() {
   };
   recBtns.forEach(b => b.addEventListener('click', onRecClick));
 
-  // 学科卡片点击
+  // 学科卡片点击（网格+列表两种视图都支持）
   const subjectCards = document.querySelectorAll('.subject-card');
+  const subjectListItems = document.querySelectorAll('.subject-list-item');
   const onSubjectClick = (e) => {
     const id = e.currentTarget.dataset.subject;
     window.location.hash = `#/subject/${id}`;
   };
   subjectCards.forEach(c => c.addEventListener('click', onSubjectClick));
+  subjectListItems.forEach(c => c.addEventListener('click', onSubjectClick));
+
+  // §4.3: 学科视图切换（网格/列表）
+  const viewBtns = document.querySelectorAll('.subject-view-btn');
+  const gridEl = document.getElementById('subject-grid');
+  const listEl = document.getElementById('subject-list');
+  const onViewToggle = (e) => {
+    const view = e.currentTarget.dataset.view;
+    viewBtns.forEach(b => b.classList.toggle('active', b === e.currentTarget));
+    if (gridEl) gridEl.style.display = view === 'grid' ? '' : 'none';
+    if (listEl) listEl.style.display = view === 'list' ? '' : 'none';
+  };
+  viewBtns.forEach(b => b.addEventListener('click', onViewToggle));
 
   // ENTRY-06: 记录保存后整页刷新以更新所有统计
   // 坑: 用 reload 而非局部更新，因为多组件依赖同一批数据
@@ -257,6 +290,8 @@ export function afterRender() {
     if (pomBtn) pomBtn.removeEventListener('click', onPomClick);
     recBtns.forEach(b => b.removeEventListener('click', onRecClick));
     subjectCards.forEach(c => c.removeEventListener('click', onSubjectClick));
+    subjectListItems.forEach(c => c.removeEventListener('click', onSubjectClick));
+    viewBtns.forEach(b => b.removeEventListener('click', onViewToggle));
     EventBus.off('record:added', onRecordAdded);
   };
 }
