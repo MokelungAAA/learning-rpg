@@ -22,13 +22,13 @@ const BOOK_STATUSES = [
 
 let chartInstances = [];
 
-function fold(id, title, content) {
+function fold(id, title, content, { open = false } = {}) {
   return `<div class="fold-section">
-    <div class="fold-header" data-fold="${id}">
+    <div class="fold-header${open ? ' open' : ''}" data-fold="${id}">
       <span>${title}</span>
-      <span class="fold-arrow">▾</span>
+      <span class="fold-arrow${open ? ' open' : ''}">▾</span>
     </div>
-    <div class="fold-body" id="fold-${id}">
+    <div class="fold-body${open ? ' open' : ''}" id="fold-${id}">
       <div class="fold-content">${content}</div>
     </div>
   </div>`;
@@ -73,9 +73,19 @@ function renderBookshelfStats(records) {
   const books = {};
   for (const r of records) {
     const key = r.bookTitle;
-    if (!books[key]) books[key] = { status: 'reading', totalMin: 0 };
+    if (!books[key]) books[key] = { status: 'reading', totalMin: 0, lastDate: '' };
     books[key].totalMin += r.durationMinutes || 0;
     if (r.status) books[key].status = r.status;
+    if (r.timestamp > books[key].lastDate) books[key].lastDate = r.timestamp;
+  }
+  // 自动推断状态
+  const now = Date.now();
+  for (const b of Object.values(books)) {
+    if (b.status === 'reading' && b.lastDate) {
+      const daysSince = (now - new Date(b.lastDate).getTime()) / 86400000;
+      if (daysSince > 30) b.status = 'finished';
+      else if (daysSince > 14) b.status = 'paused';
+    }
   }
   const entries = Object.values(books);
   const total = entries.length;
@@ -98,14 +108,24 @@ function renderBookshelf(records) {
   const books = {};
   for (const r of records) {
     const key = r.bookTitle;
-    if (!books[key]) books[key] = { title: key, author: r.author || '', category: r.category || '', sessions: 0, totalMin: 0, pages: 0, lastDate: '', format: r.format || 'paper', status: 'reading', completion: 0 };
+    if (!books[key]) books[key] = { title: key, author: r.author || '', category: r.category || '', sessions: 0, totalMin: 0, pages: 0, firstDate: '', lastDate: '', format: r.format || 'paper', status: 'reading', completion: 0 };
     books[key].sessions++;
     books[key].totalMin += r.durationMinutes || 0;
     books[key].pages += r.pagesRead || 0;
+    if (!books[key].firstDate || r.timestamp < books[key].firstDate) books[key].firstDate = r.timestamp;
     if (r.timestamp > books[key].lastDate) {
       books[key].lastDate = r.timestamp;
       if (r.status) books[key].status = r.status;
       if (r.completion) books[key].completion = r.completion;
+    }
+  }
+  // 自动推断状态：最后阅读超过30天 → finished，超过14天 → paused
+  const now = Date.now();
+  for (const b of Object.values(books)) {
+    if (b.status === 'reading' && b.lastDate) {
+      const daysSince = (now - new Date(b.lastDate).getTime()) / 86400000;
+      if (daysSince > 30) b.status = 'finished';
+      else if (daysSince > 14) b.status = 'paused';
     }
   }
   const entries = Object.values(books).sort((a, b) => b.lastDate.localeCompare(a.lastDate));
@@ -160,7 +180,8 @@ function renderDailyReading(records) {
   const dateMap = {};
   for (const r of records) {
     if (!r.timestamp) continue;
-    const day = new Date(r.timestamp).toISOString().slice(0, 10);
+    // 直接从字符串取日期（支持 "2026-02-26T12:00:00" 和 ISO 格式）
+    const day = r.timestamp.slice(0, 10);
     if (!dateMap[day]) dateMap[day] = { min: 0, books: new Set() };
     dateMap[day].min += r.durationMinutes || 0;
     dateMap[day].books.add(r.bookTitle);
@@ -185,7 +206,7 @@ function renderDailyReading(records) {
     </div>`;
   }).join('');
 
-  return fold('daily-reading', `📅 每日阅读 · 近${days.length}天`, `<div class="daily-reading-list">${items}</div>`);
+  return fold('daily-reading', `📅 每日阅读 · 近${days.length}天`, `<div class="daily-reading-list">${items}</div>`, { open: true });
 }
 
 // 阅读记录列表（最多显示20条）+ 编辑/删除按钮
@@ -237,9 +258,9 @@ export function render() {
     ${renderBookshelfStats(records)}
     ${renderBookshelf(records)}
     ${renderDailyReading(records)}
-    ${renderRecordList(records)}
     ${renderChartSection()}
-    <p style="color:var(--color-text-3);margin-top:var(--sp-3);font-size:var(--fs-xs)">v0.121 · 开发者区</p>
+    ${renderRecordList(records)}
+    <p style="color:var(--color-text-3);margin-top:var(--sp-3);font-size:var(--fs-xs)">v0.126 · 开发者区</p>
   </div>`;
 }
 

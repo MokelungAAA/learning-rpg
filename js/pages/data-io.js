@@ -86,29 +86,26 @@ function importLegado(file) {
       const records = JSON.parse(e.target.result);
       if (!Array.isArray(records)) { Toast.show('格式错误：应为数组', 'error'); return; }
 
-      // 按书名聚合
-      const bookMap = {};
+      // 按书名+日期聚合每日阅读时长
+      const dayMap = {};
       for (const r of records) {
-        const key = r.bookName;
-        if (!bookMap[key]) {
-          bookMap[key] = { bookName: r.bookName, bookAuthor: r.bookAuthor, totalMs: 0, sessions: 0, lastDate: '' };
-        }
-        bookMap[key].totalMs += r.readTime || 0;
-        bookMap[key].sessions++;
-        if (r.date && (!bookMap[key].lastDate || r.date > bookMap[key].lastDate)) bookMap[key].lastDate = r.date;
+        const key = (r.bookName || r.name) + '|' + (r.date || '');
+        if (!dayMap[key]) dayMap[key] = { bookName: r.bookName || r.name, bookAuthor: r.bookAuthor || r.author, date: r.date, ms: 0 };
+        dayMap[key].ms += r.readTime || 0;
       }
 
-      // 生成 LTS 记录
       const existing = Store.get(StorageKeys.READING_RECORDS) || [];
-      const existingTitles = new Set(existing.map(r => r.bookTitle));
+      // 按"书名+日期"去重，而不是按书名去重
+      const existingKeys = new Set(existing.map(r => r.bookTitle + '|' + (r.timestamp ? r.timestamp.slice(0, 10) : '')));
       let imported = 0, skipped = 0;
 
-      for (const b of Object.values(bookMap)) {
-        const totalMin = Math.round(b.totalMs / 60000);
-        if (totalMin < 1) { skipped++; continue; }
-        if (existingTitles.has(b.bookName)) { skipped++; continue; }
+      for (const b of Object.values(dayMap)) {
+        const mins = Math.round(b.ms / 60000);
+        if (mins < 1) { skipped++; continue; }
+        const dayKey = b.bookName + '|' + b.date;
+        if (existingKeys.has(dayKey)) { skipped++; continue; }
 
-        const ts = b.lastDate ? new Date(b.lastDate + 'T12:00:00').toISOString() : new Date().toISOString();
+        const ts = b.date ? b.date + 'T12:00:00' : new Date().toISOString();
         existing.push({
           recordID: 'rd-legado-' + Date.now() + '-' + Math.random().toString(36).slice(2, 6),
           timestamp: ts,
@@ -116,16 +113,16 @@ function importLegado(file) {
           author: b.bookAuthor,
           category: legadoGuessCat(b.bookName, b.bookAuthor),
           status: 'reading',
-          durationMinutes: totalMin,
+          durationMinutes: mins,
           pageStart: 0, pageEnd: 0, pagesRead: 0,
           completion: 0, format: 'ebook', rating: 0,
-          notes: '从 Legado 导入 | 会话数: ' + b.sessions,
+          notes: '从 Legado 导入',
         });
         imported++;
       }
 
       Store.set(StorageKeys.READING_RECORDS, existing);
-      Toast.show(`Legado 导入完成 · 新增 ${imported} 本 · 跳过 ${skipped} 本`, 'success');
+      Toast.show(`Legado 导入完成 · 新增 ${imported} 条${skipped > 0 ? ' · 跳过 ' + skipped + ' 条(重复)' : ''}`, 'success');
       EventBus.emit('data:imported');
     } catch { Toast.show('文件解析失败', 'error'); }
   };
@@ -196,9 +193,9 @@ export function render() {
           <input type="file" id="import-legado-file" accept=".json" style="display:none">
         </label>
       </div>
-      <p class="data-io-note">JSON 备份按 ID 去重合并 · Legado 按书名去重，仅导入新书</p>
+      <p class="data-io-note">JSON 备份按 ID 去重合并 · Legado 请选择 readRecordDetail.json（按书名+日期去重）</p>
     </div>
-    <p style="color:var(--color-text-3);margin-top:var(--sp-3);font-size:var(--fs-xs)">v0.121 · 开发者区</p>
+    <p style="color:var(--color-text-3);margin-top:var(--sp-3);font-size:var(--fs-xs)">v0.126 · 开发者区</p>
   </div>`;
 }
 

@@ -4,7 +4,7 @@
 import Store from '../store.js';
 import { STORAGE_KEYS as StorageKeys } from '../config.js';
 import { ACHIEVEMENTS } from '../data/achievements.js';
-import { checkAchievement, loadUnlockedIds, loadUnlockData } from '../utils/achievements-check.js';
+import { checkAchievement, loadUnlockedIds, loadUnlockData, checkAndPersist } from '../utils/achievements-check.js';
 import { calcLevel } from '../utils/level.js';
 
 const RARITY_LABELS = { bronze: '青铜', silver: '白银', gold: '黄金', legendary: '传说', hidden: '隐藏' };
@@ -107,16 +107,13 @@ export function render() {
 export function afterRender() {
   const records = Store.get(StorageKeys.STUDY_RECORDS) || [];
   const profile = Store.get(StorageKeys.USER_PROFILE) || {};
-  const persistedIds = loadUnlockedIds();
-  const newlyUnlocked = ACHIEVEMENTS.filter(a => {
-    if (persistedIds.has(a.id)) return false;
-    return checkAchievement(a, records, profile);
-  });
+  const { newlyUnlocked } = checkAndPersist(records, profile, ACHIEVEMENTS);
 
-  // 弹窗显示第一个新解锁成就（如有）
+  // 弹窗显示所有新解锁成就（依次播放）
   if (newlyUnlocked.length > 0) {
-    const ach = newlyUnlocked[0];
-    showUnlockToast(ach);
+    newlyUnlocked.forEach((ach, i) => {
+      setTimeout(() => showUnlockToast(ach), i * 3500);
+    });
   }
   return () => {};
 }

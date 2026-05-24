@@ -6,6 +6,8 @@ import EventBus from '../event-bus.js';
 import Theme from '../theme.js';
 import Store from '../store.js';
 import { SUBJECTS, STORAGE_KEYS as StorageKeys } from '../config.js';
+import { ACHIEVEMENTS } from '../data/achievements.js';
+import { checkAndPersist } from '../utils/achievements-check.js';
 import {
   calcLevelProgress, getLevelTitle, getSubjectIcon, formatNumber,
   getDayStatus, calcStreakDays, calcTodayXP, countUp
@@ -369,7 +371,7 @@ export function render() {
     ${renderWeeklyChanges(records)}
     ${renderInsights(records, talents)}
     ${renderMoreSection(records)}
-    <p style="color:var(--color-text-3);margin-top:var(--sp-3);font-size:var(--fs-xs);text-align:center">v0.124</p>
+    <p style="color:var(--color-text-3);margin-top:var(--sp-3);font-size:var(--fs-xs);text-align:center">v0.126</p>
   </div>`;
 }
 
@@ -420,6 +422,41 @@ async function initRadarChart() {
   });
 }
 
+// 成就解锁动画（弹窗 + 金粒子）
+function showUnlockToast(ach) {
+  const existing = document.querySelector('.ach-unlock-toast');
+  if (existing) existing.remove();
+  const toast = document.createElement('div');
+  toast.className = 'ach-unlock-toast';
+  toast.innerHTML = `<div class="ach-unlock-icon">${ach.icon}<div class="ach-particles" id="ach-particles"></div></div>
+    <div class="ach-unlock-text"><div class="ach-unlock-label">成就解锁！</div><div class="ach-unlock-name">${ach.name}</div></div>`;
+  document.body.appendChild(toast);
+  requestAnimationFrame(() => {
+    toast.classList.add('show');
+    spawnParticles(document.getElementById('ach-particles'));
+  });
+  setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.remove(), 500); }, 3000);
+}
+
+function spawnParticles(container) {
+  if (!container) return;
+  const colors = ['#FFD700', '#FFA500', '#FF6347', '#FFDAB9', '#FFF8DC'];
+  for (let i = 0; i < 12; i++) {
+    const p = document.createElement('div');
+    p.className = 'ach-particle';
+    const angle = (Math.PI * 2 / 12) * i;
+    const dist = 30 + Math.random() * 40;
+    const dx = Math.cos(angle) * dist;
+    const dy = Math.sin(angle) * dist;
+    p.style.background = colors[i % colors.length];
+    container.appendChild(p);
+    p.animate([
+      { transform: 'translate(0,0) scale(1)', opacity: 1 },
+      { transform: `translate(${dx}px,${dy}px) scale(0)`, opacity: 0 }
+    ], { duration: 800, easing: 'cubic-bezier(0.25,0.46,0.45,0.94)', fill: 'forwards' });
+  }
+}
+
 // afterRender: 事件绑定 + 雷达图初始化
 export function afterRender() {
   // 数字滚动动画
@@ -432,6 +469,15 @@ export function afterRender() {
     if (todayEl) countUp(todayEl, todayXP, 600);
     if (streakEl) countUp(streakEl, streakDays, 600);
   }, 200);
+
+  // 成就解锁检测 + 动画
+  const profile = getProfile();
+  const { newlyUnlocked } = checkAndPersist(records, profile, ACHIEVEMENTS);
+  if (newlyUnlocked.length > 0) {
+    newlyUnlocked.forEach((ach, i) => {
+      setTimeout(() => showUnlockToast(ach), 500 + i * 3500);
+    });
+  }
 
   // 折叠面板
   const foldHeaders = document.querySelectorAll('.fold-header');
@@ -478,29 +524,27 @@ export function afterRender() {
   };
   if (pendingBtn) pendingBtn.addEventListener('click', onPendingClick);
 
-  // 数据加载完成 → 刷新首页（解决异步数据导致等级=0的问题）
-  // 用 sessionStorage 防止无限重载循环
-  const onDataReady = () => {
-    if (window.location.hash === '#/' || window.location.hash === '') {
-      if (!sessionStorage.getItem('lts_data_ready_reload')) {
-        sessionStorage.setItem('lts_data_ready_reload', '1');
-        window.location.reload();
-      }
-    }
-  };
-  EventBus.on('data:ready', onDataReady);
-
   // record:added → 刷新页面
   const onRecordAdded = () => window.location.reload();
   EventBus.on('record:added', onRecordAdded);
+
+  // data:ready → 数据从云端加载完成后重新渲染首页（解决 XP=0 问题）
+  const onDataReady = () => {
+    const container = document.getElementById('page-container');
+    if (container) {
+      container.innerHTML = render();
+      afterRender();
+    }
+  };
+  EventBus.on('data:ready', onDataReady);
 
   return () => {
     foldHeaders.forEach(h => h.removeEventListener('click', onFoldToggle));
     if (smartBtn) smartBtn.removeEventListener('click', onSmartAction);
     reviewBtns.forEach(b => b.removeEventListener('click', onReviewClick));
     if (pendingBtn) pendingBtn.removeEventListener('click', onPendingClick);
-    EventBus.off('data:ready', onDataReady);
     EventBus.off('record:added', onRecordAdded);
+    EventBus.off('data:ready', onDataReady);
     chartInstances.forEach(c => disposeChart(c));
     chartInstances = [];
   };

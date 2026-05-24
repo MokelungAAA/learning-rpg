@@ -19,6 +19,9 @@ package-lock.json
 # 旧版本代码
 Legacy/
 
+# 同步配置（含 token，不提交）
+data/sync-config.js
+
 # Claude Code
 .claude/
 .playwright-mcp/

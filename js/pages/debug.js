@@ -199,7 +199,7 @@ export function render() {
       <div class="debug-records">${recent}</div>
     </div>
 
-    <p style="color:var(--color-text-3);margin-top:var(--sp-3);font-size:var(--fs-xs);text-align:center">v0.122 · 调试工具</p>
+    <p style="color:var(--color-text-3);margin-top:var(--sp-3);font-size:var(--fs-xs);text-align:center">v0.126 · 调试工具</p>
   </div>`;
 }
 
