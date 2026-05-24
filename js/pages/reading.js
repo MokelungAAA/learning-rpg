@@ -260,7 +260,7 @@ export function render() {
     ${renderDailyReading(records)}
     ${renderChartSection()}
     ${renderRecordList(records)}
-    <p style="color:var(--color-text-3);margin-top:var(--sp-3);font-size:var(--fs-xs)">v0.130 · 开发者区</p>
+    <p style="color:var(--color-text-3);margin-top:var(--sp-3);font-size:var(--fs-xs)">v0.131 · 开发者区</p>
   </div>`;
 }
 

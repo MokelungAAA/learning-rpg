@@ -587,7 +587,7 @@ export function render() {
     ${renderInsights(records, talents)}
     ${renderStudyPlan(records, queue, talents)}
     ${renderMoreSection(records)}
-    <p style="color:var(--color-text-3);margin-top:var(--sp-3);font-size:var(--fs-xs);text-align:center">v0.130</p>
+    <p style="color:var(--color-text-3);margin-top:var(--sp-3);font-size:var(--fs-xs);text-align:center">v0.131</p>
   </div>`;
 }
 

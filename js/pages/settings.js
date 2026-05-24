@@ -143,7 +143,7 @@ function renderDeveloperContent() {
 
 // 关于区块内容：版本信息 + 跳转关于页
 function renderAboutContent() {
-  return `<div class="settings-row"><span class="settings-label">版本</span><span class="settings-value">v0.130</span></div>
+  return `<div class="settings-row"><span class="settings-label">版本</span><span class="settings-value">v0.131</span></div>
     <div class="settings-row"><span class="settings-label">技术栈</span><span class="settings-value">HTML + CSS + JS + ECharts</span></div>
     <div class="settings-row"><span class="settings-label">存储</span><span class="settings-value">localStorage + GitHub Sync</span></div>
     <a href="#/about" class="settings-nav-link"><span>ℹ️ 版本历史与致谢</span><span class="settings-arrow">→</span></a>`;
@@ -159,7 +159,7 @@ export function render() {
     ${foldable('developer', '🔧', '开发者', renderDeveloperContent())}
     ${foldable('about', 'ℹ️', '关于', renderAboutContent())}
     ${renderSyncModal()}
-    <p style="color:var(--color-text-3);margin-top:var(--sp-3);font-size:var(--fs-xs)">v0.130 · 开发者区</p>
+    <p style="color:var(--color-text-3);margin-top:var(--sp-3);font-size:var(--fs-xs)">v0.131 · 开发者区</p>
   </div>`;
 }
 

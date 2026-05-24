@@ -1,7 +1,8 @@
 ﻿// about.js — 关于页（版本信息+致谢+版本历史）
 // 纯静态页面，无 Store 读写，VERSION_HISTORY 手动维护
 const VERSION_HISTORY = [
-  { version: 'v0.130', date: '2026-05-24', desc: '简约开屏动画 — 时间段色调(晨/午/昏/夜)+几何装饰线+微光点+文字逐层淡入+进度条+设置开关+深色模式适配' },
+  { version: 'v0.131', date: '2026-05-24', desc: '教辅+网课进度修复 — 中文数字归一化+同学科教辅消歧+网课courseId机制+天星45套扩展+解题觉醒标学科+记录数据补全' },
+  { version: 'v0.131', date: '2026-05-24', desc: '简约开屏动画 — 时间段色调(晨/午/昏/夜)+几何装饰线+微光点+文字逐层淡入+进度条+设置开关+深色模式适配' },
   { version: 'v0.129', date: '2026-05-24', desc: '全量数据同步修复 — 12种localStorage key统一同步+云端优先启动+内嵌数据UTF-8编码修复+SW缓存更新' },
   { version: 'v0.128', date: '2026-05-24', desc: '网课+教辅数据补全 — 6门网课详细章节+15本教辅精确到节+进度追踪渲染升级' },
   { version: 'v0.127', date: '2026-05-24', desc: 'Legado阅读数据导入+网格书架+每日阅读详情+阅读统计+GitHub同步+数据中心整合' },
@@ -110,7 +111,7 @@ export function render() {
       <div class="about-hero">
         <div class="about-logo">LTS</div>
         <div class="about-title">学习RPG · 认知操作系统</div>
-        <div class="about-version">v0.130</div>
+        <div class="about-version">v0.131</div>
         <div class="about-credit">Created by 墨澜 × Miku</div>
       </div>
       <div class="about-section">
