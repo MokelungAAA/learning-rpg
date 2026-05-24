@@ -177,7 +177,7 @@ function detectActivePlan(records) {
 // 1. 紧凑问候栏（一行：问候 + 等级 + 主题切换）
 function renderGreeting(profile, records) {
   const totalXP = records.reduce((s, r) => s + (r.xp || 0), 0);
-  const { level, xpInLevel, xpNeeded, percent } = calcLevelProgress(totalXP);
+  const { level } = calcLevelProgress(totalXP);
   const title = getLevelTitle(level);
   const greeting = getGreeting();
   const nick = profile.nickname || '墨澜';
@@ -187,10 +187,6 @@ function renderGreeting(profile, records) {
     <div class="greeting-left">
       <span class="greeting-text">${greeting}，${nick}</span>
       <span class="greeting-level">Lv${level} ${title.cn}</span>
-      <div class="greeting-xp-bar">
-        <div class="greeting-xp-fill" style="width:${percent}%"></div>
-      </div>
-      <span class="greeting-xp-text">${xpInLevel} / ${xpNeeded} XP · 总 ${formatNumber(totalXP)} XP</span>
     </div>
     <button class="greeting-theme-toggle" id="theme-toggle" title="切换主题">${themeIcon}</button>
   </div>`;
