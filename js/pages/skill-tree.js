@@ -1,4 +1,4 @@
-// skill-tree.js — 技能树页面：力导向图 + 雷达图 + 详情面板
+﻿// skill-tree.js — 技能树页面：力导向图 + 雷达图 + 详情面板
 // 读取: STUDY_RECORDS, USER_PROFILE → computeAll() 计算掌握度
 // 写入: 无（纯展示）
 import Store from '../store.js';
@@ -107,7 +107,7 @@ export function render() {
     </div>
     ${renderLegend()}
     ${renderSkillDetailPanel()}
-    <p style="color:var(--color-text-3);margin-top:var(--sp-3);font-size:var(--fs-xs)">v0.126 · 开发者区</p>
+    <p style="color:var(--color-text-3);margin-top:var(--sp-3);font-size:var(--fs-xs)">v0.129 · 开发者区</p>
   </div>`;
 }
 

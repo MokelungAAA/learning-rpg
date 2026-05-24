@@ -1,0 +1,114 @@
+[
+  {
+    "bookSort": 0,
+    "enableRefresh": true,
+    "groupId": -20,
+    "groupName": "☕在读",
+    "order": 0,
+    "show": true
+  },
+  {
+    "bookSort": 2,
+    "enableRefresh": true,
+    "groupId": -21,
+    "groupName": "🍀未读",
+    "order": 1,
+    "show": true
+  },
+  {
+    "bookSort": 3,
+    "enableRefresh": true,
+    "groupId": -22,
+    "groupName": "📕已读",
+    "order": 2,
+    "show": true
+  },
+  {
+    "bookSort": -1,
+    "enableRefresh": true,
+    "groupId": -8,
+    "groupName": "小说",
+    "order": 3,
+    "show": false
+  },
+  {
+    "bookSort": -1,
+    "enableRefresh": true,
+    "groupId": -7,
+    "groupName": "漫画",
+    "order": 4,
+    "show": false
+  },
+  {
+    "bookSort": -1,
+    "enableRefresh": true,
+    "groupId": -1,
+    "groupName": "全部",
+    "order": 5,
+    "show": false
+  },
+  {
+    "bookSort": -1,
+    "enableRefresh": false,
+    "groupId": -2,
+    "groupName": "本地",
+    "order": 6,
+    "show": false
+  },
+  {
+    "bookSort": -1,
+    "enableRefresh": true,
+    "groupId": -3,
+    "groupName": "音频",
+    "order": 7,
+    "show": false
+  },
+  {
+    "bookSort": -1,
+    "enableRefresh": true,
+    "groupId": -4,
+    "groupName": "网络未分组",
+    "order": 8,
+    "show": false
+  },
+  {
+    "bookSort": -1,
+    "enableRefresh": true,
+    "groupId": -5,
+    "groupName": "本地未分组",
+    "order": 9,
+    "show": false
+  },
+  {
+    "bookSort": -1,
+    "enableRefresh": true,
+    "groupId": -11,
+    "groupName": "更新失败",
+    "order": 10,
+    "show": false
+  },
+  {
+    "bookSort": -1,
+    "enableRefresh": true,
+    "groupId": 1,
+    "groupName": "轻小说",
+    "order": 11,
+    "show": false
+  },
+  {
+    "bookSort": 2,
+    "enableRefresh": true,
+    "groupId": 2,
+    "groupName": "🧭ラノベ",
+    "order": 12,
+    "show": true
+  },
+  {
+    "bookSort": -1,
+    "enableRefresh": true,
+    "groupId": 4,
+    "groupName": "🎓EnG",
+    "order": 13,
+    "show": true
+  }
+]

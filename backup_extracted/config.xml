@@ -1,0 +1,119 @@
+<?xml version='1.0' encoding='utf-8' standalone='yes' ?>
+<map>
+    <string name="customMode">global</string>
+    <boolean name="selectText" value="true" />
+    <boolean name="volumeKeyPageOnPlay" value="false" />
+    <string name="themeMode">1</string>
+    <string name="tabletInterface">auto</string>
+    <boolean name="useDefaultCover" value="false" />
+    <boolean name="recordLog" value="false" />
+    <boolean name="Cronet" value="false" />
+    <string name="updateToVariant">beta_release_version</string>
+    <boolean name="showAddToShelfAlert" value="true" />
+    <boolean name="showReadTitleAddition" value="true" />
+    <boolean name="loadCoverOnlyWifi" value="false" />
+    <boolean name="textFullJustify" value="true" />
+    <boolean name="volumeKeyPage" value="true" />
+    <int name="coverTextColorN" value="-11751600" />
+    <int name="bookshelfLayoutPortrait" value="1" />
+    <boolean name="firebaseEnable" value="false" />
+    <boolean name="adaptSpecialStyle" value="true" />
+    <int name="colorPrimary" value="-11751600" />
+    <boolean name="keyPageOnLongPress" value="false" />
+    <boolean name="showStatusBar" value="true" />
+    <boolean name="delayBookLoadEnable" value="true" />
+    <boolean name="optimizeRender" value="false" />
+    <boolean name="useUnderline" value="false" />
+    <string name="read_slider_mode">4</string>
+    <boolean name="showRss" value="false" />
+    <boolean name="process_text" value="true" />
+    <string name="paletteStyle">tonalSpot</string>
+    <boolean name="mediaButtonOnExit" value="true" />
+    <boolean name="shareLayout" value="true" />
+    <boolean name="precisionSearch" value="false" />
+    <int name="bookshelfSort" value="2" />
+    <boolean name="defaultToRead" value="true" />
+    <boolean name="replaceEnableDefault" value="true" />
+    <string name="searchGroup"></string>
+    <boolean name="auto_refresh" value="false" />
+    <boolean name="ignoreAudioFocus" value="true" />
+    <boolean name="mouseWheelPage" value="true" />
+    <boolean name="coverShowNameN" value="true" />
+    <boolean name="showBookshelfFastScroller" value="true" />
+    <boolean name="showMangaUi" value="true" />
+    <boolean name="hideNavigationBar" value="false" />
+    <boolean name="sliderVibrator" value="false" />
+    <string name="titleBarMode">1</string>
+    <int name="coverTextColor" value="-11751600" />
+    <string name="screenOrientation">0</string>
+    <boolean name="autoClearExpired" value="true" />
+    <boolean name="textBottomJustify" value="true" />
+    <string name="fontFolder">content://com.android.providers.downloads.documents/tree/msd%3A82</string>
+    <string name="doubleHorizontalPage">0</string>
+    <boolean name="enableBlur" value="true" />
+    <string name="clickImgWay">2</string>
+    <string name="keep_light">-1</string>
+    <boolean name="pauseReadAloudWhilePhoneCalls" value="true" />
+    <boolean name="noAnimScrollPage" value="false" />
+    <boolean name="readAloudByPage" value="false" />
+    <boolean name="bookshelfCoverShadow" value="true" />
+    <boolean name="bookshelfTitleSmallFont" value="false" />
+    <boolean name="showTip" value="false" />
+    <boolean name="isPredictiveBackEnabled" value="true" />
+    <boolean name="autoCheckNewBackup" value="true" />
+    <string name="labelVisibilityMode">auto</string>
+    <string name="defaultHomePage">bookshelf</string>
+    <boolean name="coverShowStroke" value="true" />
+    <boolean name="expandTextMenu" value="false" />
+    <boolean name="syncBookProgressPlus" value="true" />
+    <boolean name="defaultSourceChangeAll" value="true" />
+    <boolean name="sharedElementEnterTransitionEnable" value="false" />
+    <string name="language">en</string>
+    <string name="appTtsEngine">{&#10;  &quot;a&quot;: &quot;MultiTTS&quot;,&#10;  &quot;b&quot;: &quot;org.nobody.multitts&quot;&#10;}</string>
+    <boolean name="coverDefaultColor" value="true" />
+    <int name="bookshelfSortOrder" value="0" />
+    <boolean name="systemMediaControlCompatibilityChange" value="false" />
+    <int name="containerOpacity" value="0" />
+    <boolean name="permissionChecked" value="true" />
+    <boolean name="useMiuixMonet" value="false" />
+    <boolean name="selectVibrator" value="false" />
+    <boolean name="ttsFollowSys" value="true" />
+    <boolean name="onlyLatestBackup" value="true" />
+    <string name="searchScope"></string>
+    <int name="readStyleSelect" value="7" />
+    <boolean name="showBrightnessView" value="false" />
+    <int name="coverShadowColorN" value="-11751600" />
+    <string name="composeEngine">miuix</string>
+    <long name="saveTabPosition" value="2" />
+    <boolean name="mediaButtonPerNext" value="false" />
+    <boolean name="paddingDisplayCutouts" value="false" />
+    <boolean name="coverShowAuthorN" value="true" />
+    <boolean name="syncBookProgress" value="true" />
+    <int name="backgroundImageBlurring" value="10" />
+    <boolean name="showDiscovery" value="false" />
+    <boolean name="enableProgressiveBlur" value="true" />
+    <boolean name="coverShowName" value="true" />
+    <int name="bookshelfLayoutGridPortrait" value="3" />
+    <boolean name="recordHeapDump" value="false" />
+    <boolean name="pure_black" value="false" />
+    <int name="coverShadowColor" value="-11751600" />
+    <boolean name="webServiceAutoStart" value="false" />
+    <boolean name="coverShowAuthor" value="true" />
+    <int name="bookGroupStyle" value="1" />
+    <boolean name="autoChangeSource" value="true" />
+    <string name="importBookPath">file:///storage/emulated/0</string>
+    <boolean name="brightnessAuto" value="false" />
+    <boolean name="swipeAnimation" value="true" />
+    <boolean name="readAloudByMediaButton" value="false" />
+    <int name="ttsSpeechRate" value="5" />
+    <boolean name="useZhLayout" value="false" />
+    <boolean name="disableReturnKey" value="false" />
+    <boolean name="hideStatusBar" value="false" />
+    <string name="app_theme">0</string>
+    <boolean name="readBodyToLh" value="true" />
+    <int name="brightness" value="47" />
+    <boolean name="showBottomView" value="false" />
+    <boolean name="antiAlias" value="false" />
+    <string name="progressBarBehavior">page</string>
+    <boolean name="streamReadAloudAudio" value="false" />
+</map>

@@ -1,4 +1,4 @@
-// reading.js — 阅读记录页（弹窗录入+书架+记录列表+图表）
+﻿// reading.js — 阅读记录页（弹窗录入+书架+记录列表+图表）
 // 读取: READING_RECORDS
 // 写入: READING_RECORDS（增/改/删）
 import Store from '../store.js';
@@ -260,7 +260,7 @@ export function render() {
     ${renderDailyReading(records)}
     ${renderChartSection()}
     ${renderRecordList(records)}
-    <p style="color:var(--color-text-3);margin-top:var(--sp-3);font-size:var(--fs-xs)">v0.126 · 开发者区</p>
+    <p style="color:var(--color-text-3);margin-top:var(--sp-3);font-size:var(--fs-xs)">v0.129 · 开发者区</p>
   </div>`;
 }
 

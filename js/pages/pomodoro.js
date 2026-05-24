@@ -1,4 +1,4 @@
-// pomodoro.js — 番茄钟系统（v0.122: 删除历史 + 后台计时修复）
+﻿// pomodoro.js — 番茄钟系统（v0.122: 删除历史 + 后台计时修复）
 // 读取: SETTINGS, POMODORO_SESSIONS, STUDY_RECORDS, USER_PROFILE
 // 写入: POMODORO_SESSIONS, STUDY_RECORDS（专注完成后自动录入）
 // 坑: 模块级状态变量（isRunning等），页面切换需清理 timer
@@ -158,7 +158,7 @@ export function render() {
     ${renderTimer()}
     ${renderComplete()}
     ${renderHistory()}
-    <p style="color:var(--color-text-3);margin-top:var(--sp-3);font-size:var(--fs-xs);text-align:center">v0.126</p>
+    <p style="color:var(--color-text-3);margin-top:var(--sp-3);font-size:var(--fs-xs);text-align:center">v0.129</p>
   </div>`;
 }
 

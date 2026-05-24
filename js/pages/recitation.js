@@ -1,4 +1,4 @@
-// recitation.js — 背诵/默写系统（语文古诗文）
+﻿// recitation.js — 背诵/默写系统（语文古诗文）
 // 记忆曲线: FSRS幂律衰减 + 自评修正
 // 流程: 未背诵→推荐背诵→用户背诵→标记已背诵→推荐默写→用户默写→自评→修正记忆曲线
 import Store from '../store.js';
@@ -197,7 +197,7 @@ export function render() {
         <div class="fold-content"><div class="recite-all-list">${allPassagesHtml}</div></div>
       </div>
     </div>
-    <p style="color:var(--color-text-3);margin-top:var(--sp-3);font-size:var(--fs-xs);text-align:center">v0.126</p>
+    <p style="color:var(--color-text-3);margin-top:var(--sp-3);font-size:var(--fs-xs);text-align:center">v0.129</p>
   </div>`;
 }
 

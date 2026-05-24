@@ -1,4 +1,4 @@
-// log.js — 日志管理页（列表+筛选+搜索+编辑+删除）
+﻿// log.js — 日志管理页（列表+筛选+搜索+编辑+删除）
 // 读取: STUDY_RECORDS, USER_PROFILE
 // 写入: STUDY_RECORDS（编辑/删除时）
 // 坑: 模块级 filteredRecords/currentPage 状态，页面切换需重置
@@ -162,7 +162,7 @@ export function render() {
     ${renderFilters()}
     <div id="log-list" class="log-list"></div>
     <button id="log-load-more" class="log-load-more" style="display:none">加载更多</button>
-    <p style="color:var(--color-text-3);margin-top:var(--sp-3);font-size:var(--fs-xs)">v0.126 · 开发者区</p>
+    <p style="color:var(--color-text-3);margin-top:var(--sp-3);font-size:var(--fs-xs)">v0.129 · 开发者区</p>
   </div>`;
 }
 

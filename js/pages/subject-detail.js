@@ -1,4 +1,4 @@
-// subject-detail.js — 学科详情页：概览+教材/复习/日志/图表 4折叠卡片
+﻿// subject-detail.js — 学科详情页：概览+教材/复习/日志/图表 4折叠卡片
 // 读取: STUDY_RECORDS（按 subjectId 过滤）
 // 写入: 无（纯展示）
 // 路由: #/subject/{id}，params.id 由 router 传入
@@ -245,7 +245,7 @@ export function render(params) {
     ${renderReviewCard(subjectId)}
     ${renderLogCard(subjectId)}
     ${renderChartCard(subjectId)}
-    <p style="color:var(--color-text-3);margin-top:var(--sp-3);font-size:var(--fs-xs)">v0.126 · 开发者区</p>
+    <p style="color:var(--color-text-3);margin-top:var(--sp-3);font-size:var(--fs-xs)">v0.129 · 开发者区</p>
   </div>`;
 }
 

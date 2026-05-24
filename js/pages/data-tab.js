@@ -4,6 +4,7 @@ import Store from '../store.js';
 import { SUBJECTS, STORAGE_KEYS as StorageKeys } from '../config.js';
 import { ACHIEVEMENTS } from '../data/achievements.js';
 import { SUBJECTS_DATA } from '../data/subjects.js';
+import { ONLINE_COURSES, STUDY_AIDS } from '../data/textbooks.js';
 import { checkAchievement } from '../utils/achievements-check.js';
 import { getSubjectIcon, formatNumber } from '../utils/level.js';
 import { renderHeatmap } from '../utils/heatmap.js';
@@ -215,18 +216,83 @@ function renderTextbookProgress(records) {
   return fold('textbooks', '📚 教材进度', `<div class="progress-map-list">${items}</div>`, { badge: `${covered}/${progress.length}` });
 }
 
+// 匹配网课记录：subject + textbook 关键词
+function matchCourseRecord(r, course) {
+  if (!r.textbook) return false;
+  const tb = r.textbook;
+  const subjMatch = r.subject === course.subject ||
+    SUBJECTS.some(s => s.id === course.subject && s.name === r.subject);
+  if (!subjMatch) return false;
+  if (tb.includes(course.name) || tb.includes(course.teacher)) return true;
+  if (tb.includes('网课') || tb.includes('课程') || tb.includes('课')) return true;
+  return false;
+}
+
 function renderCourseProgress(records) {
-  const courses = records.filter(r => r.textbook && (r.textbook.includes('网课') || r.textbook.includes('课程') || r.textbook.includes('课')));
-  if (courses.length === 0) return '';
-  const bySubject = {};
-  for (const r of courses) (bySubject[r.subject] ||= []).push(r);
-  const totalSessions = courses.length;
-  const items = Object.entries(bySubject).map(([subj, recs]) => {
-    const totalMin = recs.reduce((s, r) => s + (r.duration || 0), 0);
-    const sid = SUBJECTS.find(s => s.name === subj)?.id || '';
-    return `<div class="course-item"><span class="course-icon">${getSubjectIcon(sid)}</span><span class="course-name">${subj}</span><span class="course-time">${recs.length}节 · ${totalMin}分钟</span></div>`;
-  }).join('');
-  return fold('courses', '🎓 网课进度', `<div class="course-list">${items}</div>`, { badge: `${totalSessions}节` });
+  if (ONLINE_COURSES.length === 0) return '';
+  const items = [];
+  for (const course of ONLINE_COURSES) {
+    const matched = records.filter(r => matchCourseRecord(r, course));
+    if (matched.length === 0) continue;
+    const totalMin = matched.reduce((s, r) => s + (r.duration || 0), 0);
+    const sid = course.subject;
+    const totalChapters = course.chapters ? course.chapters.length : 0;
+    const coveredChapters = totalChapters > 0 && course.chapters
+      ? course.chapters.filter(ch => matched.some(r => r.textbook && r.textbook.includes(String(ch.number)))).length
+      : 0;
+    const chapterInfo = totalChapters > 0 ? ` · ${coveredChapters}/${totalChapters}章` : '';
+    items.push(`<div class="course-item">
+      <span class="course-icon">${getSubjectIcon(sid)}</span>
+      <div class="course-info">
+        <span class="course-name">${course.name}</span>
+        <span class="course-teacher">${course.teacher}</span>
+      </div>
+      <span class="course-time">${matched.length}节 · ${totalMin}分钟${chapterInfo}</span>
+    </div>`);
+  }
+  if (items.length === 0) return '';
+  return fold('courses', '🎓 网课进度', `<div class="course-list">${items.join('')}</div>`, { badge: `${items.length}门课` });
+}
+
+// 匹配教辅记录
+function matchStudyAidRecord(r, aid) {
+  if (!r.textbook) return false;
+  const tb = r.textbook;
+  const subjMatch = r.subject === aid.subject ||
+    SUBJECTS.some(s => s.id === aid.subject && s.name === r.subject);
+  if (!subjMatch) return false;
+  const keywords = aid.name.split('·').filter(k => k.length >= 2);
+  return keywords.some(k => tb.includes(k));
+}
+
+function renderStudyAidProgress(records) {
+  if (STUDY_AIDS.length === 0) return '';
+  const items = [];
+  for (const aid of STUDY_AIDS) {
+    const matched = records.filter(r => matchStudyAidRecord(r, aid));
+    const totalSections = aid.chapters
+      ? aid.chapters.reduce((s, ch) => s + (ch.sections || []).length, 0)
+      : 0;
+    const coveredSections = aid.chapters && matched.length > 0
+      ? aid.chapters.reduce((s, ch) => s + (ch.sections || []).filter(sec =>
+          matched.some(r => r.textbook && (r.textbook.includes(sec.name.slice(0, 4)) || r.textbook.includes(sec.number)))
+        ).length, 0)
+      : 0;
+    const pct = totalSections > 0 ? Math.min(100, Math.round((coveredSections / totalSections) * 100)) : (matched.length > 0 ? 100 : 0);
+    const sid = aid.subject;
+    const totalMin = matched.reduce((s, r) => s + (r.duration || 0), 0);
+    items.push(`<div class="study-aid-item">
+      <div class="study-aid-header">
+        <span class="study-aid-icon">${getSubjectIcon(sid)}</span>
+        <span class="study-aid-name">${aid.name}</span>
+        <span class="study-aid-pct">${pct}%</span>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
+      <div class="study-aid-detail">${matched.length}次 · ${totalMin}分钟 · ${coveredSections}/${totalSections}节</div>
+    </div>`);
+  }
+  if (items.length === 0) return '';
+  return fold('study-aids', '📖 教辅进度', `<div class="study-aid-list">${items.join('')}</div>`, { badge: `${items.length}本` });
 }
 
 function renderExamReflection(records) {
@@ -285,6 +351,7 @@ export function render() {
         ${renderHeatmapSection(records)}
         ${renderTextbookProgress(records)}
         ${renderCourseProgress(records)}
+        ${renderStudyAidProgress(records)}
         ${renderExamReflection(records)}
       </div>
       <div class="data-tab-panel" data-panel="charts">

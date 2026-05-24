@@ -1,4 +1,4 @@
-// home.js — 首页：智能行动指南
+﻿// home.js — 首页：智能行动指南
 // 设计哲学: 预测用户行为，突出最可能的下一步操作
 // 读取: STUDY_RECORDS, USER_PROFILE, POMODORO_SESSIONS, KNOWLEDGE_STATE
 // 写入: lts_review_context（一键专注/开始复习时写入）
@@ -440,7 +440,7 @@ export function render() {
     ${renderInsights(records, talents)}
     ${renderStudyPlan(records, queue, talents)}
     ${renderMoreSection(records)}
-    <p style="color:var(--color-text-3);margin-top:var(--sp-3);font-size:var(--fs-xs);text-align:center">v0.126</p>
+    <p style="color:var(--color-text-3);margin-top:var(--sp-3);font-size:var(--fs-xs);text-align:center">v0.129</p>
   </div>`;
 }
 

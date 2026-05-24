@@ -1,4 +1,4 @@
-// review.js — 复习中心：遗忘曲线 + 阴影队列 + 智能推荐
+﻿// review.js — 复习中心：遗忘曲线 + 阴影队列 + 智能推荐
 // 读取: STUDY_RECORDS, USER_PROFILE → buildTempStates 计算温度状态
 // 写入: lts_review_context（复习按钮点击时写入，番茄钟读取）
 // v0.68: 引入 subjectAbility 用于阴影队列优先级计算
@@ -148,7 +148,7 @@ export function render() {
     ${renderPotential(potentials)}
     ${renderFalseMastery(falseItems)}
     ${renderExamRecommend(queue)}
-    <p style="color:var(--color-text-3);margin-top:var(--sp-3);font-size:var(--fs-xs)">v0.126 · 开发者区</p>
+    <p style="color:var(--color-text-3);margin-top:var(--sp-3);font-size:var(--fs-xs)">v0.129 · 开发者区</p>
   </div>`;
 }
 

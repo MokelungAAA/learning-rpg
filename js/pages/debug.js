@@ -1,4 +1,4 @@
-// debug.js — 算法调试工具页
+﻿// debug.js — 算法调试工具页
 // 功能: 数据质量检查 + XP 计算分解 + 算法参数展示 + 记录逐条审查
 import Store from '../store.js';
 import { STORAGE_KEYS as StorageKeys, SUBJECTS } from '../config.js';
@@ -199,7 +199,7 @@ export function render() {
       <div class="debug-records">${recent}</div>
     </div>
 
-    <p style="color:var(--color-text-3);margin-top:var(--sp-3);font-size:var(--fs-xs);text-align:center">v0.126 · 调试工具</p>
+    <p style="color:var(--color-text-3);margin-top:var(--sp-3);font-size:var(--fs-xs);text-align:center">v0.129 · 调试工具</p>
   </div>`;
 }
 

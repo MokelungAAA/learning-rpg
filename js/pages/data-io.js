@@ -1,4 +1,4 @@
-// data-io.js — 数据导入导出页
+﻿// data-io.js — 数据导入导出页
 // 导出: JSON(全量备份) / CSV(学习记录)
 // 导入: JSON(合并去重，相同id不重复)
 import Store from '../store.js';
@@ -195,7 +195,7 @@ export function render() {
       </div>
       <p class="data-io-note">JSON 备份按 ID 去重合并 · Legado 请选择 readRecordDetail.json（按书名+日期去重）</p>
     </div>
-    <p style="color:var(--color-text-3);margin-top:var(--sp-3);font-size:var(--fs-xs)">v0.126 · 开发者区</p>
+    <p style="color:var(--color-text-3);margin-top:var(--sp-3);font-size:var(--fs-xs)">v0.129 · 开发者区</p>
   </div>`;
 }
 

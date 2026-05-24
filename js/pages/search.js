@@ -1,4 +1,4 @@
-// search.js — 全局搜索页（学科/教材/知识点/记录/成就/功能页面）
+﻿// search.js — 全局搜索页（学科/教材/知识点/记录/成就/功能页面）
 // 读取: STUDY_RECORDS, USER_PROFILE, SEARCH_HISTORY
 // 写入: SEARCH_HISTORY（搜索时自动保存，最多5条）
 import Store from '../store.js';
@@ -161,7 +161,7 @@ export function render() {
       ${renderHistory()}
       <div id="search-results" class="search-results"></div>
     </div>
-    <p style="color:var(--color-text-3);margin-top:var(--sp-3);font-size:var(--fs-xs)">v0.126 · 开发者区</p>
+    <p style="color:var(--color-text-3);margin-top:var(--sp-3);font-size:var(--fs-xs)">v0.129 · 开发者区</p>
   </div>`;
 }
 
