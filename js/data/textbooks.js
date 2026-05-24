@@ -1175,7 +1175,7 @@ export const ONLINE_COURSES = [
 
 // ─── 教辅数据 ──────────────────────────────────────────────────
 export const STUDY_AIDS = [
-  { id: 'aid-jtxj-phy', name: '解题觉醒', subject: 'physics', version: '全册',
+  { id: 'aid-jtxj-phy', name: '解题觉醒', displayName: '解题觉醒（物理）', subject: 'physics', version: '全册',
     desc: '物理全册解题方法论（必修123+选修）',
     chapters: [
       { name: '必修第一册', sections: [
@@ -1191,7 +1191,7 @@ export const STUDY_AIDS = [
         { name: '动量' }, { name: '机械振动' }, { name: '机械波' }, { name: '光' },
       ]},
     ]},
-  { id: 'aid-jtxj-bio', name: '解题觉醒', subject: 'biology', version: '全册',
+  { id: 'aid-jtxj-bio', name: '解题觉醒', displayName: '解题觉醒（生物）', subject: 'biology', version: '全册',
     desc: '生物全册解题方法论（必修12+选修123）',
     chapters: [
       { name: '必修第一册', sections: [
@@ -1207,7 +1207,7 @@ export const STUDY_AIDS = [
         { name: '生态系统' }, { name: '生态系统的稳定性' },
       ]},
     ]},
-  { id: 'aid-jtxj-chi', name: '解题觉醒', subject: 'chinese', version: '高考版',
+  { id: 'aid-jtxj-chi', name: '解题觉醒', displayName: '解题觉醒（语文）', subject: 'chinese', version: '高考版',
     desc: '高考语文全题型解题方法论',
     chapters: [
       { name: '现代文阅读', sections: [
@@ -1226,12 +1226,26 @@ export const STUDY_AIDS = [
   { id: 'aid-tx45-eng', name: '天星45套', subject: 'english', version: '2026版',
     desc: '高考英语45套模拟卷',
     chapters: [
-      { name: '模拟卷', sections: [
+      { name: '模拟卷一', sections: [
         { name: '模拟卷1' }, { name: '模拟卷2' }, { name: '模拟卷3' }, { name: '模拟卷4' }, { name: '模拟卷5' },
         { name: '模拟卷6' }, { name: '模拟卷7' }, { name: '模拟卷8' }, { name: '模拟卷9' }, { name: '模拟卷10' },
       ]},
-      { name: '冲刺卷', sections: [
+      { name: '冲刺卷一', sections: [
         { name: '冲刺卷1' }, { name: '冲刺卷2' }, { name: '冲刺卷3' }, { name: '冲刺卷4' }, { name: '冲刺卷5' },
+      ]},
+      { name: '模拟卷二', sections: [
+        { name: '模拟卷11' }, { name: '模拟卷12' }, { name: '模拟卷13' }, { name: '模拟卷14' }, { name: '模拟卷15' },
+        { name: '模拟卷16' }, { name: '模拟卷17' }, { name: '模拟卷18' }, { name: '模拟卷19' }, { name: '模拟卷20' },
+      ]},
+      { name: '冲刺卷二', sections: [
+        { name: '冲刺卷6' }, { name: '冲刺卷7' }, { name: '冲刺卷8' }, { name: '冲刺卷9' }, { name: '冲刺卷10' },
+      ]},
+      { name: '模拟卷三', sections: [
+        { name: '模拟卷21' }, { name: '模拟卷22' }, { name: '模拟卷23' }, { name: '模拟卷24' }, { name: '模拟卷25' },
+        { name: '模拟卷26' }, { name: '模拟卷27' }, { name: '模拟卷28' }, { name: '模拟卷29' }, { name: '模拟卷30' },
+      ]},
+      { name: '冲刺卷三', sections: [
+        { name: '冲刺卷11' }, { name: '冲刺卷12' }, { name: '冲刺卷13' }, { name: '冲刺卷14' }, { name: '冲刺卷15' },
       ]},
     ]},
   { id: 'aid-53-chem', name: '5·3', subject: 'chemistry', version: '必修第二册',

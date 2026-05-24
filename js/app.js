@@ -1,28 +1,12 @@
 // app.js — 应用入口：路由注册、数据迁移、成就检测
 // 注意：Theme.init() 必须在首屏渲染前调用
+// 页面模块全部用动态 import 懒加载，减少首屏 JS 解析量
 import Router from './router.js';
 import Navbar from './components/navbar.js';
 import BrandedHeader from './components/branded-header.js';
 import EventBus from './event-bus.js';
 import Theme from './theme.js';
 import { createLaunchOverlay } from './components/launch-screen.js';
-import * as home from './pages/home.js';
-import * as dataTab from './pages/data-tab.js';
-import * as pomodoro from './pages/pomodoro.js';
-import * as settings from './pages/settings.js';
-import * as skillTree from './pages/skill-tree.js';
-import * as review from './pages/review.js';
-import * as logPage from './pages/log.js';
-import * as reading from './pages/reading.js';
-import * as about from './pages/about.js';
-import * as search from './pages/search.js';
-import * as dataIO from './pages/data-io.js';
-import * as achievement from './pages/achievement.js';
-import * as subjectDetail from './pages/subject-detail.js';
-import * as debug from './pages/debug.js';
-import * as recitation from './pages/recitation.js';
-import * as scoreTrend from './pages/score-trend.js';
-import { ACHIEVEMENTS } from './data/achievements.js';
 
 const container = document.getElementById('page-container');
 
@@ -35,6 +19,9 @@ const _launchOverlay = _launchSettings.launchScreen !== false ? createLaunchOver
 // 移除 HTML 内联预遮罩（动画 overlay 已接管）
 const _preOverlay = document.getElementById('launch-pre-overlay');
 if (_preOverlay) _preOverlay.remove();
+
+// 工具：让出主线程（让点击事件有机会执行）
+const yieldToMain = () => new Promise(r => setTimeout(r, 0));
 
 // Init data engine + 运行数据迁移（non-blocking, failure won't break the app）
 // 数据架构: 内嵌JS(即时可用) → GitHub云端(后台合并) → localStorage(缓存)
@@ -55,10 +42,14 @@ if (_preOverlay) _preOverlay.remove();
       }
     }
 
+    await yieldToMain(); // 让出主线程，确保点击事件可以响应
+
     // 初始化用户画像
     const { default: DataEngine } = await import('./data-engine.js');
     const { getDefaultProfile } = await import('./data/defaults.js');
     await DataEngine.init({ [StorageKeys.USER_PROFILE]: getDefaultProfile() });
+
+    await yieldToMain();
 
     // 运行用户画像迁移
     const { migrate, migrateRecordsXP } = await import('./data-migration.js');
@@ -76,6 +67,8 @@ if (_preOverlay) _preOverlay.remove();
       Store.set(StorageKeys.USER_PROFILE, profileForXP);
     }
     migrateRecordsXP(Store, StorageKeys, calcXP);
+
+    await yieldToMain();
 
     // 通知页面重新渲染（内嵌数据已就绪）
     const _records = Store.get(StorageKeys.STUDY_RECORDS) || [];
@@ -133,6 +126,11 @@ function handleRoute(page, path, params) {
   EventBus.emit('route:changed', path);
 }
 
+// 懒加载路由：先 import 模块再渲染（减少首屏 JS 解析量）
+function lazyRoute(importFn, path, params) {
+  importFn().then(mod => handleRoute(mod, path, params));
+}
+
 // 全局 FAB "+" 点击 → 打开数据录入弹窗（所有页面可用）
 EventBus.on('fab:click', async () => {
   const { open } = await import('./components/data-entry.js');
@@ -145,25 +143,25 @@ EventBus.on('route:changed', async () => {
   close();
 });
 
-// Register routes
-Router.register('#/', () => handleRoute(home, '#/'));
-Router.register('#/data', () => handleRoute(dataTab, '#/data'));
-Router.register('#/pomodoro', () => handleRoute(pomodoro, '#/pomodoro'));
-Router.register('#/settings', () => handleRoute(settings, '#/settings'));
-Router.register('#/data/skill-tree', () => handleRoute(skillTree, '#/data/skill-tree'));
-Router.register('#/data/review', () => handleRoute(review, '#/data/review'));
-Router.register('#/data/log', () => handleRoute(logPage, '#/data/log'));
-Router.register('#/data/reading', () => handleRoute(reading, '#/data/reading'));
-Router.register('#/about', () => handleRoute(about, '#/about'));
-Router.register('#/search', () => handleRoute(search, '#/search'));
-Router.register('#/data/export', () => handleRoute(dataIO, '#/data/export'));
-Router.register('#/achievement', () => handleRoute(achievement, '#/achievement'));
+// Register routes — 全部懒加载
+Router.register('#/', () => lazyRoute(() => import('./pages/home.js'), '#/'));
+Router.register('#/data', () => lazyRoute(() => import('./pages/data-tab.js'), '#/data'));
+Router.register('#/pomodoro', () => lazyRoute(() => import('./pages/pomodoro.js'), '#/pomodoro'));
+Router.register('#/settings', () => lazyRoute(() => import('./pages/settings.js'), '#/settings'));
+Router.register('#/data/skill-tree', () => lazyRoute(() => import('./pages/skill-tree.js'), '#/data/skill-tree'));
+Router.register('#/data/review', () => lazyRoute(() => import('./pages/review.js'), '#/data/review'));
+Router.register('#/data/log', () => lazyRoute(() => import('./pages/log.js'), '#/data/log'));
+Router.register('#/data/reading', () => lazyRoute(() => import('./pages/reading.js'), '#/data/reading'));
+Router.register('#/about', () => lazyRoute(() => import('./pages/about.js'), '#/about'));
+Router.register('#/search', () => lazyRoute(() => import('./pages/search.js'), '#/search'));
+Router.register('#/data/export', () => lazyRoute(() => import('./pages/data-io.js'), '#/data/export'));
+Router.register('#/achievement', () => lazyRoute(() => import('./pages/achievement.js'), '#/achievement'));
 Router.register('#/subject/:id', (params) => {
-  handleRoute(subjectDetail, '#/subject/' + params.id, params);
+  lazyRoute(() => import('./pages/subject-detail.js'), '#/subject/' + params.id, params);
 });
-Router.register('#/debug', () => handleRoute(debug, '#/debug'));
-Router.register('#/data/recitation', () => handleRoute(recitation, '#/data/recitation'));
-Router.register('#/data/score-trend', () => handleRoute(scoreTrend, '#/data/score-trend'));
+Router.register('#/debug', () => lazyRoute(() => import('./pages/debug.js'), '#/debug'));
+Router.register('#/data/recitation', () => lazyRoute(() => import('./pages/recitation.js'), '#/data/recitation'));
+Router.register('#/data/score-trend', () => lazyRoute(() => import('./pages/score-trend.js'), '#/data/score-trend'));
 
 // Render navbar
 Navbar.render(document.body);
@@ -177,6 +175,7 @@ async function checkAchievements() {
   _achLock = true;
   try {
     const { checkAndPersist } = await import('./utils/achievements-check.js');
+    const { ACHIEVEMENTS } = await import('./data/achievements.js');
     const { default: Toast } = await import('./components/toast.js');
     const Store = (await import('./store.js')).default;
     const { STORAGE_KEYS: StorageKeys } = await import('./config.js');

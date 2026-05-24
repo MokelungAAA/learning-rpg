@@ -513,13 +513,26 @@ function renderActiveLearning(records) {
   for (const a of STUDY_AIDS) {
     const matched = recent.filter(r => matchAid(r, a));
     if (matched.length === 0) continue;
-    const totalSec = a.chapters ? a.chapters.reduce((s, ch) => s + (ch.sections || []).length, 0) : 0;
-    const covered = Math.min(totalSec, matched.length);
+    const allSecs = a.chapters ? a.chapters.flatMap(ch => (ch.sections || []).map(s => s.name)) : [];
+    const totalSec = allSecs.length;
+    // 通过笔记关键词匹配已覆盖的具体章节
+    let covered = 0;
+    if (totalSec > 0 && matched.length > 0) {
+      const coveredSet = new Set();
+      for (const r of matched) {
+        const note = (r.notes || '') + ' ' + (r.section || '');
+        for (const sec of allSecs) {
+          if (!coveredSet.has(sec) && note.includes(sec.slice(0, 2))) coveredSet.add(sec);
+        }
+      }
+      covered = coveredSet.size > 0 ? coveredSet.size : Math.min(totalSec, matched.length);
+    }
     // 全部完成 → 跳过
     if (totalSec > 0 && covered >= totalSec) continue;
     const pct = totalSec > 0 ? Math.round((covered / totalSec) * 100) : 0;
+    const displayName = a.displayName || a.name;
     const versionTag = a.version ? ` ${a.version}` : '';
-    items.push({ icon: getSubjectIcon(a.subject), name: `${a.name}${versionTag}`, sub: matched.length + '次记录', pct, covered, total: totalSec, unit: '节' });
+    items.push({ icon: getSubjectIcon(a.subject), name: `${displayName}${versionTag}`, sub: matched.length + '次记录', pct, covered, total: totalSec, unit: '节' });
   }
 
   if (items.length === 0) return '';

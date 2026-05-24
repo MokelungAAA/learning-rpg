@@ -9,6 +9,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .launch-overlay.launch-fade-out {
@@ -304,4 +306,45 @@
 @keyframes progressFill {
   from { width: 0%; }
   to   { width: 100%; }
+}
+
+/* 移动端优化：减少动画，减轻 GPU 负担 */
+@media (max-width: 768px) {
+  .launch-dot {
+    animation: none;
+    opacity: 0.2;
+  }
+  .launch-line {
+    animation: none;
+    opacity: 0.5;
+  }
+  .launch-bg {
+    animation: none;
+    opacity: 1;
+  }
+  .launch-mark,
+  .launch-title,
+  .launch-subtitle,
+  .launch-info {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+  .launch-hint {
+    animation: hintPulse 2.5s ease-in-out 1.5s infinite;
+  }
+}
+
+/* 减少动画偏好 */
+@media (prefers-reduced-motion: reduce) {
+  .launch-overlay * {
+    animation: none !important;
+    transition: none !important;
+  }
+  .launch-overlay {
+    opacity: 1;
+  }
+  .launch-overlay.launch-fade-out {
+    display: none;
+  }
 }

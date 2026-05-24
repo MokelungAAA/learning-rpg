@@ -292,22 +292,34 @@ function renderStudyAidProgress(records) {
     const matched = records.filter(r => matchStudyAidRecord(r, aid));
     const sid = aid.subject;
     const totalMin = matched.reduce((s, r) => s + (r.duration || 0), 0);
-    const totalSections = aid.chapters
-      ? aid.chapters.reduce((s, ch) => s + (ch.sections || []).length, 0)
-      : 0;
-    // 用匹配记录数估算覆盖章节（每条记录≈1节）
-    const coveredEst = Math.min(totalSections, matched.length);
+    const allSections = aid.chapters
+      ? aid.chapters.flatMap(ch => (ch.sections || []).map(s => s.name))
+      : [];
+    const totalSections = allSections.length;
+    // 通过笔记关键词匹配已覆盖的具体章节，而非单纯记录计数
+    let coveredEst = 0;
+    if (totalSections > 0 && matched.length > 0) {
+      const coveredSet = new Set();
+      for (const r of matched) {
+        const note = (r.notes || '') + ' ' + (r.section || '');
+        for (const sec of allSections) {
+          if (!coveredSet.has(sec) && note.includes(sec.slice(0, 2))) coveredSet.add(sec);
+        }
+      }
+      coveredEst = coveredSet.size > 0 ? coveredSet.size : Math.min(totalSections, matched.length);
+    }
     const pct = totalSections > 0 && matched.length > 0
       ? Math.min(100, Math.round((coveredEst / totalSections) * 100))
       : 0;
+    const displayName = aid.displayName || aid.name;
     const versionTag = aid.version ? ` (${aid.version})` : '';
     const detail = matched.length > 0
-      ? `${matched.length}次 · ${totalMin}分钟 · ≈${coveredEst}/${totalSections}节`
+      ? `${matched.length}次 · ${totalMin}分钟 · ${coveredEst}/${totalSections}节`
       : '暂无记录';
     items.push(`<div class="study-aid-item">
       <div class="study-aid-header">
         <span class="study-aid-icon">${getSubjectIcon(sid)}</span>
-        <span class="study-aid-name">${aid.name}${versionTag}</span>
+        <span class="study-aid-name">${displayName}${versionTag}</span>
         <span class="study-aid-pct">${pct}%</span>
       </div>
       <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>

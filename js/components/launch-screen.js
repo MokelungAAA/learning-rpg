@@ -80,8 +80,9 @@ export function createLaunchOverlay() {
   // 几何线
   createLines(overlay, period);
 
-  // 微光点
-  createDots(overlay, period, 12);
+  // 微光点（移动端减少数量）
+  const isMobile = window.innerWidth <= 768;
+  createDots(overlay, period, isMobile ? 4 : 12);
 
   // 内容
   const content = document.createElement('div');
@@ -122,6 +123,7 @@ export function createLaunchOverlay() {
   };
 
   overlay.addEventListener('click', dismiss);
+  overlay.addEventListener('touchend', (e) => { e.preventDefault(); dismiss(); }, { passive: false });
   setTimeout(dismiss, 3500);
 
   return overlay;
