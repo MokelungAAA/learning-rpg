@@ -96,14 +96,15 @@ function renderTimer() {
   </div>`;
 }
 
-// 完成界面：统计+下一轮/重新开始按钮
-// 无手动评分，专注完成后自动生成学习记录
+// 完成界面：统计+下一轮/重新开始/手动生成记录按钮
+// §7.1: 专注完成后可手动编辑并生成学习记录
 function renderComplete() {
   return `<div class="pomo-complete" id="pomo-complete" style="display:none">
     <div class="pomo-complete-icon">🎉</div>
     <div class="pomo-complete-title" id="pomo-complete-title">专注完成！</div>
     <div class="pomo-complete-stats" id="pomo-stats"></div>
     <div class="pomo-complete-actions">
+      <button class="pomo-action-btn" id="pomo-generate-record">📝 生成学习记录</button>
       <button class="pomo-action-btn" id="pomo-next-round">▶ 下一轮</button>
       <button class="pomo-action-btn pomo-secondary" id="pomo-restart">🔄 重新开始</button>
     </div>
@@ -427,6 +428,14 @@ export function afterRender() {
   };
   if (restartBtn) restartBtn.addEventListener('click', onRestart);
 
+  // §7.1: 手动生成学习记录（跳转数据录入弹窗）
+  const genBtn = document.getElementById('pomo-generate-record');
+  const onGenRecord = async () => {
+    const { open } = await import('../components/data-entry.js');
+    open();
+  };
+  if (genBtn) genBtn.addEventListener('click', onGenRecord);
+
   return () => {
     presetBtns.forEach(b => b.removeEventListener('click', onPreset));
     startBtn.removeEventListener('click', onStart);
@@ -434,6 +443,7 @@ export function afterRender() {
     if (stopBtn) stopBtn.removeEventListener('click', stopTimer);
     if (nextBtn) nextBtn.removeEventListener('click', onNext);
     if (restartBtn) restartBtn.removeEventListener('click', onRestart);
+    if (genBtn) genBtn.removeEventListener('click', onGenRecord);
     clearInterval(timer);
     document.removeEventListener('visibilitychange', onVisibilityChange);
   };
