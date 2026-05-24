@@ -182,17 +182,37 @@ export function regressionSlope(values) {
 export function calcXP(record, profile, todayXP = 0, last10Scores = [], talentSubjects = null) {
   const xppm = profile.xpBasePerMinute || 2.0;
   const score = record.score || 0;
-  const practiceDur = record.practiceDuration || (record.duration || 0) * 0.8;
-  const reviewDur = record.reviewDuration || (record.duration || 0) * 0.2;
+  const duration = record.duration || 0;
+  const practiceDur = record.practiceDuration || duration * 0.8;
+  const reviewDur = record.reviewDuration || duration * 0.2;
 
-  // rawXP = practiceBase × PE + reviewBase × CE × 1.3
-  const PE = score / 100;
-  const CE = Math.min(1, score / 100 * 1.2);
-  const rawXP = practiceDur * xppm * PE + reviewDur * xppm * CE * 1.3;
+  // 活动类型权重
+  const weights = profile.activityWeights || {};
+  const activityWeight = weights[record.activityType] || 1.0;
+  const hasScore = (record.activityType === 'practice' || record.activityType === 'exam') && score > 0;
 
-  // E = PE × (1 - reviewRatio) + CE × reviewRatio × 1.3
+  let rawXP;
+  if (hasScore) {
+    // 有分数路径: rawXP = practiceBase × PE + reviewBase × CE × 1.3
+    const PE = score / 100;
+    const CE = Math.min(1, score / 100 * 1.2);
+    rawXP = practiceDur * xppm * PE + reviewDur * xppm * CE * 1.3;
+  } else {
+    // 无分数路径: 基于时长的基础 XP（复习/上课/阅读等）
+    // 效率系数 0.6: 比有分数活动低，但不是零
+    rawXP = duration * xppm * 0.6;
+  }
+
+  // E 系数: 有分数时用 PE/CE 加权，无分数时固定 0.6
   const reviewRatio = profile.baseReviewRatio || 0.20;
-  const E = PE * (1 - reviewRatio) + CE * reviewRatio * 1.3;
+  let E;
+  if (hasScore) {
+    const PE = score / 100;
+    const CE = Math.min(1, score / 100 * 1.2);
+    E = PE * (1 - reviewRatio) + CE * reviewRatio * 1.3;
+  } else {
+    E = 0.6;
+  }
 
   // 学科难度 = sqrt(1 / subjectModifiers[subject])，subjectMod 下限 0.5 防止极端值
   const modifiers = profile.subjectModifiers || {};
@@ -204,10 +224,6 @@ export function calcXP(record, profile, todayXP = 0, last10Scores = [], talentSu
   const momentum = last10Scores.length >= 3
     ? Math.tanh(regressionSlope(last10Scores) / 10) * 0.3
     : 0;
-
-  // 活动类型权重
-  const weights = profile.activityWeights || {};
-  const activityWeight = weights[record.activityType] || 1.0;
 
   // qual = E × difficulty × (1 + momentum) × activityWeight × talentMultiplier
   // §5.4: 特长学科 XP 额外 ×1.1

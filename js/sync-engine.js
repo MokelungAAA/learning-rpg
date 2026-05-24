@@ -156,8 +156,7 @@ class SyncEngine {
     }
   }
 
-  // ─── 启动时加载（智能合并）───
-  // app 启动时调用：比较本地和远程，取更新的一方
+  // ─── 启动时加载（智能合并 + 自动重算 XP）───
   async startupLoad() {
     if (!this.isConfigured) return false;
 
@@ -167,36 +166,83 @@ class SyncEngine {
 
       const localRecords = Storage.get(StorageKeys.STUDY_RECORDS) || [];
 
-      // 如果本地没有数据，直接用远程
+      let records;
       if (localRecords.length === 0) {
-        Storage.set(StorageKeys.STUDY_RECORDS, remote.records);
-        EventBus.emit('data:loaded', { source: 'github', count: remote.records.length });
-        return true;
+        records = remote.records;
+      } else {
+        const local = {
+          version: '2.0',
+          lastUpdated: Storage.get('lts_sync_meta')?.lastUpdated || new Date(0).toISOString(),
+          learnerName: '墨澜',
+          schema: 'lts_study_record',
+          schemaVersion: 1,
+          records: localRecords,
+        };
+        const merged = this.mergeUnified(local, remote);
+        records = merged.records;
       }
 
-      // 智能合并
-      const local = {
-        version: '2.0',
-        lastUpdated: Storage.get('lts_sync_meta')?.lastUpdated || new Date(0).toISOString(),
-        learnerName: '墨澜',
-        schema: 'lts_study_record',
-        schemaVersion: 1,
-        records: localRecords,
-      };
+      // 自动重算 XP（异步，不阻塞渲染）
+      this.recalcAllXP(records).then(affected => {
+        if (affected > 0) {
+          Storage.set(StorageKeys.STUDY_RECORDS, records);
+          this.uploadUnified({
+            version: '2.0', lastUpdated: new Date().toISOString(),
+            learnerName: '墨澜', schema: 'lts_study_record', schemaVersion: 1, records,
+          }).catch(() => {});
+          EventBus.emit('data:xp-recalculated', { affected });
+        }
+      });
 
-      const merged = this.mergeUnified(local, remote);
-      Storage.set(StorageKeys.STUDY_RECORDS, merged.records);
-
-      // 如果有新数据，上传回 GitHub
-      if (merged.records.length > localRecords.length) {
-        await this.uploadUnified(merged);
-      }
-
-      EventBus.emit('data:loaded', { source: 'merged', count: merged.records.length });
+      Storage.set(StorageKeys.STUDY_RECORDS, records);
+      EventBus.emit('data:loaded', { source: 'merged', count: records.length });
       return true;
     } catch (e) {
       console.error('Startup load failed:', e);
       return false;
+    }
+  }
+
+  // ─── 批量重算 XP（跳过已有合理 XP 的记录）───
+  async recalcAllXP(records) {
+    try {
+      const { calcXP } = await import('./utils/level.js');
+      const profile = Storage.get(StorageKeys.USER_PROFILE) || {};
+      const today = new Date().toISOString().slice(0, 10);
+      const todayRecords = records.filter(r => r.timestamp?.slice(0, 10) === today);
+      const todayXP = todayRecords.reduce((s, r) => s + (r.xp || 0), 0);
+
+      let affected = 0;
+      let totalXP = 0;
+      const subjectScores = {};
+
+      for (const rec of records) {
+        // 只重算 xp=0 或 xp=1（最低值，可能未计算）的记录
+        if (rec.xp > 1) {
+          totalXP += rec.xp;
+          if (rec.score > 0) {
+            if (!subjectScores[rec.subject]) subjectScores[rec.subject] = [];
+            subjectScores[rec.subject].push(rec.score);
+          }
+          continue;
+        }
+
+        if (!subjectScores[rec.subject]) subjectScores[rec.subject] = [];
+        const last10 = subjectScores[rec.subject].slice(-10);
+
+        profile._runtimeTotalXP = totalXP;
+        const xp = calcXP(rec, profile, todayXP, last10, null);
+        rec.xp = xp;
+        totalXP += xp;
+        affected++;
+
+        if (rec.score > 0) subjectScores[rec.subject].push(rec.score);
+      }
+
+      return affected;
+    } catch (e) {
+      console.error('XP recalc failed:', e);
+      return 0;
     }
   }
 
