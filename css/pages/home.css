@@ -35,6 +35,20 @@
 
 .greeting-settings:hover { opacity: 1; }
 
+.greeting-theme-toggle {
+  font-size: 20px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  opacity: 0.7;
+  transition: opacity var(--duration-fast) var(--ease), transform var(--duration-fast) var(--ease);
+  padding: 4px;
+  line-height: 1;
+}
+
+.greeting-theme-toggle:hover { opacity: 1; }
+.greeting-theme-toggle:active { transform: scale(0.9); }
+
 /* === Smart Action Card (visual focal point) === */
 .smart-action-card {
   display: flex;
@@ -588,18 +602,87 @@
   margin-left: auto;
 }
 
+/* === Study Plan === */
+.plan-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+}
+
+.plan-item {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  padding: var(--sp-2);
+  border-radius: var(--r-md);
+  background: rgba(0, 0, 0, 0.02);
+  transition: background var(--duration-fast) var(--ease);
+}
+
+[data-theme="dark"] .plan-item {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.plan-high {
+  border-left: 3px solid var(--color-error);
+}
+
+.plan-mid {
+  border-left: 3px solid var(--color-warning);
+}
+
+.plan-icon { font-size: 18px; flex-shrink: 0; }
+
+.plan-body { flex: 1; min-width: 0; }
+
+.plan-text {
+  font-size: var(--fs-sm);
+  font-weight: 500;
+  color: var(--color-text-1);
+}
+
+.plan-sub {
+  font-size: var(--fs-xs);
+  color: var(--color-text-3);
+  margin-top: 1px;
+}
+
+/* === Achievement Condition === */
+.ach-condition {
+  font-size: var(--fs-xs);
+  color: var(--color-accent);
+  font-weight: 500;
+  margin-top: 2px;
+}
+
 /* === Responsive === */
 @media (max-width: 480px) {
   .weekly-grid {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--sp-1);
   }
   .more-grid {
     grid-template-columns: 1fr 1fr;
+  }
+  .fold-body.open {
+    max-height: 4000px;
+  }
+  .greeting-level {
+    display: block;
+    margin-top: 2px;
+  }
+  .greeting-left {
+    flex-direction: column;
+    gap: 0;
   }
 }
 
 @media (max-width: 360px) {
   .weekly-grid {
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 4px;
+  }
+  .weekly-name {
+    font-size: 10px;
   }
 }

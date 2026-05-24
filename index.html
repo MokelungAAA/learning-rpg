@@ -57,6 +57,17 @@
   <div id="page-container"></div>
   <script src="data/sync-config.js"></script>
   <script src="data/lts_study_records.js"></script>
+  <script>
+    // 诊断：检查数据是否正确加载
+    (function() {
+      var d = window.LTS_RECORDS_DATA;
+      var c = window.LTS_SYNC_CONFIG;
+      var r = d && d.records ? d.records : [];
+      var xp = r.reduce(function(s, x) { return s + (x.xp || 0); }, 0);
+      console.log('[LTS DIAG] records=' + r.length + ', totalXP=' + xp + ', syncToken=' + (c && c.token ? 'OK' : 'MISSING'));
+      if (r.length === 0) console.error('[LTS DIAG] NO DATA LOADED - window.LTS_RECORDS_DATA is empty or missing');
+    })();
+  </script>
   <script type="module" src="js/app.js"></script>
 </body>
 </html>

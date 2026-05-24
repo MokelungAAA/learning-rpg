@@ -11,6 +11,23 @@ const RARITY_LABELS = { bronze: '青铜', silver: '白银', gold: '黄金', lege
 const CATEGORY_LABELS = { persistence: '坚持之力', knowledge: '博学之路', mastery: '精进之魂', explore: '探索之心', legend: '传奇之巅' };
 const CATEGORY_ORDER = ['persistence', 'knowledge', 'mastery', 'explore', 'legend'];
 
+// 条件类型 → 可读描述
+const CONDITION_LABELS = {
+  record_count: v => `累计${v}条记录`,
+  streak_days: v => `连续学习${v}天`,
+  total_minutes: v => `累计学习${Math.round(v / 60)}小时`,
+  unique_subjects: v => `学习${v}个不同学科`,
+  level: v => `达到Lv${v}`,
+  total_xp: v => `累计${v}XP`,
+  pomodoro_count: v => `完成${v}次番茄钟`,
+  reading_count: v => `阅读${v}本书`,
+};
+
+function formatCondition(condition) {
+  const fn = CONDITION_LABELS[condition.type];
+  return fn ? fn(condition.value) : '';
+}
+
 // 计算单个成就的解锁进度(0-100)
 function calcProgress(ach, records, profile) {
   const c = ach.condition;
@@ -76,11 +93,15 @@ export function render() {
         ? `<div class="ach-progress-bar"><div class="ach-progress-fill" style="width:${progress}%"></div><span class="ach-progress-text">${progress}%</span></div>`
         : '';
 
+      // 已解锁的隐藏成就显示解锁条件
+      const conditionText = (isUnlocked && a.rarity === 'hidden') ? formatCondition(a.condition) : '';
+
       return `<div class="ach-card ${isUnlocked ? 'unlocked' : 'locked'} ${a.rarity}">
         <div class="ach-icon">${icon}</div>
         <div class="ach-info">
           <div class="ach-name">${displayName}</div>
           <div class="ach-desc">${displayDesc}</div>
+          ${conditionText ? `<div class="ach-condition">${conditionText}</div>` : ''}
           <div class="ach-rarity">${RARITY_LABELS[a.rarity] || a.rarity}</div>
           ${progressBar}
           ${unlockDate ? `<div class="ach-date">${unlockDate}</div>` : ''}

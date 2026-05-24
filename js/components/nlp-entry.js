@@ -113,7 +113,10 @@ function parseInput(text) {
 function saveRecord(result) {
   if (!result || !result.subject) return;
   const duration = result.duration || 30;
-  const score = result.score !== null ? result.score : 75;
+  // 听课/阅读/视频不需要分数，默认0
+  const noScoreTypes = ['lecture', 'reading', 'video'];
+  const defaultScore = noScoreTypes.includes(result.activityType) ? 0 : 75;
+  const score = result.score !== null ? result.score : defaultScore;
   const record = {
     id: 'rec-' + Date.now() + '-' + Math.random().toString(36).slice(2, 6),
     timestamp: new Date().toISOString(),
