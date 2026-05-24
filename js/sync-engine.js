@@ -1,7 +1,7 @@
 // sync-engine.js — GitHub Contents API 同步引擎
 // 单例模式，通过 Personal Access Token 认证
 // 数据以 JSON 文件存储在仓库的 data/ 目录下
-// v0.129: 支持全量数据同步（12 种 localStorage key 统一存取）
+// v0.130: 支持全量数据同步（12 种 localStorage key 统一存取）
 import Storage from './store.js';
 import EventBus from './event-bus.js';
 import { STORAGE_KEYS as StorageKeys } from './config.js';

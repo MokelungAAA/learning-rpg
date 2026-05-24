@@ -42,6 +42,7 @@ function createDots(container, period, count) {
 }
 
 // 同步创建开屏 overlay（立即盖住屏幕，返回 overlay 元素）
+// 内置点击关闭 + 超时自动关闭，不依赖外部调用 dismiss
 export function createLaunchOverlay() {
   const records = Store.get(StorageKeys.STUDY_RECORDS) || [];
   const totalXP = records.reduce((s, r) => s + (r.xp || 0), 0);
@@ -65,6 +66,11 @@ export function createLaunchOverlay() {
 
   const overlay = document.createElement('div');
   overlay.className = 'launch-overlay';
+  // 立即设置背景色，防止预遮罩移除时闪烁
+  const bgColors = {
+    morning: '#f5ede3', afternoon: '#e8eef4', evening: '#e8e2ed', night: '#1e2130'
+  };
+  overlay.style.background = bgColors[period] || bgColors.night;
 
   // 背景
   const bg = document.createElement('div');
@@ -105,24 +111,18 @@ export function createLaunchOverlay() {
   overlay.appendChild(progress);
 
   document.body.appendChild(overlay);
+
+  // 内置关闭逻辑（双保险：点击 + 超时）
+  let dismissed = false;
+  const dismiss = () => {
+    if (dismissed) return;
+    dismissed = true;
+    overlay.classList.add('launch-fade-out');
+    setTimeout(() => overlay.remove(), 600);
+  };
+
+  overlay.addEventListener('click', dismiss);
+  setTimeout(dismiss, 3500);
+
   return overlay;
-}
-
-// 关闭开屏（返回 Promise，动画结束后 resolve）
-export function dismissLaunchOverlay(overlay) {
-  return new Promise((resolve) => {
-    if (!overlay) { resolve(); return; }
-    const dismiss = () => {
-      overlay.classList.add('launch-fade-out');
-      setTimeout(() => { overlay.remove(); resolve(); }, 600);
-    };
-    overlay.addEventListener('click', dismiss);
-    setTimeout(dismiss, 3500);
-  });
-}
-
-// 便捷函数：创建 + 等待关闭
-export function showLaunchScreen() {
-  const overlay = createLaunchOverlay();
-  return dismissLaunchOverlay(overlay);
 }

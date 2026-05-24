@@ -221,10 +221,11 @@ export function calcXP(record, profile, todayXP = 0, last10Scores = [], talentSu
     E = 0.6;
   }
 
-  // 学科难度 = sqrt(1 / subjectModifiers[subject])，subjectMod 下限 0.5 防止极端值
+  // 学科难度 = 1 / subjectModifiers[subject]，subjectMod 范围 [0.6, 1.8]
+  // 线性反比: 难学科(subjectMod低) → difficulty高 → XP多
   const modifiers = profile.subjectModifiers || {};
-  const subjectMod = Math.max(0.5, modifiers[record.subject] || 1.0);
-  const difficulty = Math.sqrt(1 / subjectMod);
+  const subjectMod = Math.max(0.6, Math.min(1.8, modifiers[record.subject] || 1.0));
+  const difficulty = 1 / subjectMod;
 
   // 进步动量: tanh(slope / 10) × 0.3，记录 <3 条时为 0
   // §5.6: slope 除以 10 压缩尺度，防止 tanh 过早饱和
@@ -234,23 +235,14 @@ export function calcXP(record, profile, todayXP = 0, last10Scores = [], talentSu
 
   // qual = E × difficulty × (1 + momentum) × activityWeight × talentMultiplier
   // §5.4: 特长学科 XP 额外 ×1.1
+  // momentum 已经捕获进步趋势 (Dweck 成长型思维)，不再重复计算
   const talentMultiplier = (talentSubjects && talentSubjects.has(record.subject)) ? 1.1 : 1.0;
   let qual = E * difficulty * (1 + momentum) * activityWeight * talentMultiplier;
 
-  // === 4项心理学增强 ===
-
-  // 1. 进步趋势修正 (Dweck 成长型思维): accuracy 上升时额外加成
-  //    momentum 已经捕获了趋势，这里用额外的 progressBonus 放大效果
-  //    slope > 0 → 进步中 → ×1.0~1.2; slope < 0 → 退步 → ×0.9~1.0
-  const progressBonus = last10Scores.length >= 5
-    ? 1 + Math.max(-0.1, Math.min(0.2, regressionSlope(last10Scores) / 50))
-    : 1;
-  qual *= progressBonus;
-
   // 2. 挫败下限保护 (Deci & Ryan 自我决定理论):
-  //    正确率 <25% 且已尝试很多次 → 可能是挫败不是努力 → 降低 qual
-  //    用 last10Scores 的平均值判断持续低正确率
-  if (last10Scores.length >= 10) {
+  //    正确率 <25% 且持续低分 → 可能是挫败不是努力 → 降低 qual
+  //    阈值降到5条，新用户也需要保护
+  if (last10Scores.length >= 5) {
     const recentAvg = last10Scores.reduce((a, b) => a + b, 0) / last10Scores.length;
     if (recentAvg < 25) {
       // 持续极低正确率 → qual 降低 30%（但不归零，仍有基础奖励）
@@ -258,12 +250,13 @@ export function calcXP(record, profile, todayXP = 0, last10Scores = [], talentSu
     }
   }
 
-  // 3. 最佳间隔加成 (Cepeda 间隔效应):
-  //    review 活动 + 学科修正系数较高 → 间隔合理 → ×1.1~1.3
-  //    subjectMod > 1.0 说明该学科半衰期较长，复习间隔合理
-  if (record.activityType === 'review' && subjectMod > 1.0) {
-    const spacingMult = Math.min(1.3, 1 + (subjectMod - 1) * 0.3);
-    qual *= spacingMult;
+  // 3. 间隔加成 (Cepeda 2008 间隔效应):
+  //    最优复习间隔 ≈ 1~2 倍稳定度(stability)
+  //    用 last10Scores 的长度作为粗略的间隔信号：
+  //    有复习记录且距离上次学习不远 → 间隔合理 → ×1.1
+  //    无复习记录(纯首次学习) → 无加成
+  if (record.activityType === 'review' && last10Scores.length >= 2) {
+    qual *= 1.1;
   }
 
   // 边际递减: decay = 1 / (1 + totalXP × decayRate)

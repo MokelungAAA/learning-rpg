@@ -68,6 +68,27 @@
       if (r.length === 0) console.error('[LTS DIAG] NO DATA LOADED - window.LTS_RECORDS_DATA is empty or missing');
     })();
   </script>
+  <script>
+    // 开屏预遮罩：在 ES module 加载前同步盖住屏幕，防止主界面闪烁
+    (function() {
+      try {
+        var s = JSON.parse(localStorage.getItem('lts_settings') || '{}');
+        if (s.launchScreen === false) return;
+        var h = new Date().getHours();
+        var bg;
+        if (h >= 5 && h < 12) bg = '#f5ede3';
+        else if (h >= 12 && h < 17) bg = '#e8eef4';
+        else if (h >= 17 && h < 20) bg = '#e8e2ed';
+        else bg = '#1e2130';
+        var dark = document.documentElement.getAttribute('data-theme') === 'dark';
+        if (dark) bg = '#1e2130';
+        var el = document.createElement('div');
+        el.id = 'launch-pre-overlay';
+        el.style.cssText = 'position:fixed;inset:0;z-index:99999;background:' + bg;
+        document.documentElement.appendChild(el);
+      } catch(e) {}
+    })();
+  </script>
   <script type="module" src="js/app.js"></script>
 </body>
 </html>

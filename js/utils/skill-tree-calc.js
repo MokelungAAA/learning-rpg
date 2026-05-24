@@ -167,9 +167,11 @@ export function detectTalents(subjectAbility, tempStates) {
   const talents = [];
   for (const [key, val] of entries) {
     if (val.mastery >= avgMastery + 15 && val.mastery >= 50) {
-      // §5.10: 特长还需半衰期 > 平均×1.2
-      const hl = subjectAvgHL[key] || 0;
-      if (avgHalfLife > 0 && hl <= avgHalfLife * 1.2) continue;
+      // §5.10: 特长还需半衰期 > 平均×1.2（仅在有半衰期数据时验证）
+      if (avgHalfLife > 0) {
+        const hl = subjectAvgHL[key] || 0;
+        if (hl <= avgHalfLife * 1.2) continue;
+      }
       talents.push({ subjectKey: key, name: val.name, mastery: val.mastery, type: 'strength' });
     } else if (val.mastery <= avgMastery - 15 && val.count > 0) {
       talents.push({ subjectKey: key, name: val.name, mastery: val.mastery, type: 'weakness' });

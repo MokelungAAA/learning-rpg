@@ -32,8 +32,11 @@ export function calcRetrievability(daysSince, stability = 1.0, decay = 0.5) {
 }
 
 // 稳定度更新：复习后根据评分更新S
-// FSRS公式: S' = S * (1 + exp(w[8]) * (11 - D*10) * S^(-w[9]) * (exp(w[10]*(1-R)) - 1))
-// 简化版: 评分越高，稳定度增长越大
+// FSRS4.5 公式 (Jarrett Ye 2022):
+//   基础增长 G = exp(w[8]) * (11 - D*10) * S^(-w[9]) * (exp(w[10]*(1-R)) - 1)
+//   hard失败时使用不同参数: G_hard = w[11] * ...
+//   S' = S * (1 + G)
+// 核心特性: R越低 → 复习效果越大 (desirable difficulty)
 // @param {number} oldS — 复习前稳定度
 // @param {number} D — 难度 (0-1)
 // @param {number} R — 复习时的可提取度
@@ -41,16 +44,26 @@ export function calcRetrievability(daysSince, stability = 1.0, decay = 0.5) {
 // @returns {number} 新稳定度 S'
 export function calcStability(oldS, D, R, rating = 3) {
   const w = FSRS_DEFAULTS.w;
-  // 基础增长因子
-  const baseGrowth = rating === 1 ? 0.5 : rating === 2 ? 0.8 : rating === 3 ? 1.0 : 1.3;
-  // 难度修正：难度越高，稳定度增长越慢
-  const dFactor = 1 + w[8] * (11 - D * 10);
-  // 可提取度修正：R越低(快忘)，复习效果越大
-  const rFactor = Math.exp(w[10] * (1 - R)) - 1;
-  // 稳定度修正：S越大，增长越慢(边际递减)
-  const sFactor = Math.pow(Math.max(0.1, oldS), -w[9]);
+  const S = Math.max(0.1, oldS);
 
-  let newS = oldS * (1 + baseGrowth * dFactor * sFactor * (1 + rFactor));
+  if (rating === 1) {
+    // again(失败): 稳定度大幅下降，使用 w[11..13] 参数
+    const hardG = w[11] * Math.pow(D, -w[12]) * (Math.exp(w[13] * (1 - R)) - 1);
+    const newS = S * Math.max(0.1, hardG);
+    return Math.max(0.1, Math.min(365, newS));
+  }
+
+  // hard/good/easy: 稳定度增长
+  // dFactor: 难度越高(10-D*10越小) → 增长越慢
+  const dFactor = 1 + w[8] * (11 - D * 10);
+  // sFactor: S越大 → 增长越慢 (边际递减)
+  const sFactor = Math.pow(S, -w[9]);
+  // rFactor: R越低 → 复习效果越大 (desirable difficulty)
+  const rFactor = Math.exp(w[10] * (1 - R)) - 1;
+  // 评分倍率: hard=0.8, good=1.0, easy=1.3
+  const ratingMult = rating === 2 ? 0.8 : rating === 4 ? 1.3 : 1.0;
+  const G = ratingMult * dFactor * sFactor * rFactor;
+  const newS = S * (1 + G);
   return Math.max(0.1, Math.min(365, newS));
 }
 
@@ -124,14 +137,22 @@ export function buildTempStates(records, profile) {
       const lastDays = (now - new Date(lastRec.timestamp).getTime()) / 86400000;
       const avgScore = matched.reduce((s, r) => s + (r.score || 0), 0) / matched.length;
 
-      // FSRS: 从记录估算初始D和S
-      const difficulty = Math.max(0, Math.min(1, 1 - avgScore / 100));
-      const stability = calcStability(FSRS_DEFAULTS.s0, difficulty, 1, 3) * Math.min(matched.length, 5) * 0.5;
+      // FSRS: 逐次复习迭代计算 D 和 S（而非启发式估算）
+      // 按时间正序处理，让 FSRS 自然演化难度和稳定度
+      let difficulty = 0.3; // 初始难度
+      let stability = FSRS_DEFAULTS.s0; // 初始稳定度 1.0天
+      for (const rec of sorted.slice().reverse()) { // 正序：从最早到最近
+        const s = rec.score || 50;
+        const R = calcRetrievability(0, stability); // 复习瞬间 R≈1
+        difficulty = calcDifficulty(difficulty, s >= 80 ? 4 : s >= 60 ? 3 : s >= 40 ? 2 : 1);
+        stability = calcStability(stability, difficulty, R, s >= 80 ? 4 : s >= 60 ? 3 : s >= 40 ? 2 : 1);
+      }
+      // 最终 R 基于距上次复习的天数
       const R = calcRetrievability(lastDays, stability);
       const T_peak = Math.min(100, 60 + avgScore * 0.4);
       const temp = Math.max(0, Math.round(T_peak * R * 10) / 10);
 
-      // 半衰期从stability反推 (R=0.5时 t = S*(2^(1/d)-1)*9)
+      // 半衰期从stability反推: R=0.5时 t = S*(2^(1/d)-1)*9
       const halfLife = Math.round(stability * (Math.pow(2, 1 / FSRS_DEFAULTS.d) - 1) * 9 / 10 * 10) / 10;
 
       states[key] = {
@@ -152,13 +173,16 @@ export function calcShadowQueue(tempStates, subjectAbility) {
   const queue = Object.values(tempStates)
     .filter(s => s.count > 0 && s.retrievability < 0.9)
     .map(s => {
-      // urgency: 遗忘风险 × 学科权重 / (1 + 天数)
+      // urgency: 遗忘风险 × 学科权重 × 时间压力
+      // 遗忘风险: 1-R，R越低越紧急
       const forgetRisk = 1 - (s.retrievability || 0);
-      const urgency = forgetRisk * (s.examWeight || 0.1) / Math.max(1, s.lastDays);
+      // 时间压力: 天数越多越紧急，但用对数压缩防止极端值
+      const timePressure = Math.log(2 + Math.min(s.lastDays, 30));
+      const urgency = forgetRisk * (s.examWeight || 0.1) * timePressure;
       const subjLevel = subjectAbility
         ? ((subjectAbility[s.subjectKey]?.mastery || 0) / 100)
-        : Math.max(1, s.count);
-      const priority = urgency * subjLevel * Math.log(1 + s.lastDays);
+        : 0.5;
+      const priority = urgency * (0.5 + subjLevel);
       return { ...s, urgency: Math.round(urgency * 100) / 100, priority: Math.round(priority * 100) / 100 };
     })
     .sort((a, b) => b.priority - a.priority);
@@ -175,9 +199,9 @@ export function calcShadowQueue(tempStates, subjectAbility) {
 export function knapsackRecommend(queue, timeBudget, recentSubjects = []) {
   const items = queue.map(q => ({
     ...q,
-    cost: Math.max(5, Math.round(15 - q.temp / 10)),
-    benefit: q.priority,
-    // 交错惩罚: 最近推荐过的学科 benefit 打折
+    cost: 15, // 固定复习成本（分钟），与温度无关
+    benefit: q.priority, // 优先级越高 → 收益越大
+    // 交错惩罚: 最近推荐过的学科 benefit 打折 (Rohrer & Taylor 2007)
     interleavedBenefit: recentSubjects.includes(q.subjectKey)
       ? q.priority * 0.7
       : q.priority,

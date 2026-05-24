@@ -7,6 +7,7 @@ import Theme from '../theme.js';
 import Store from '../store.js';
 import { SUBJECTS, STORAGE_KEYS as StorageKeys } from '../config.js';
 import { ACHIEVEMENTS } from '../data/achievements.js';
+import { ONLINE_COURSES, STUDY_AIDS } from '../data/textbooks.js';
 import { checkAndPersist } from '../utils/achievements-check.js';
 import {
   calcLevelProgress, getLevelTitle, getSubjectIcon, formatNumber,
@@ -457,6 +458,83 @@ function renderStudyPlan(records, queue, talents) {
   </div>`;
 }
 
+// 进行中的学习：只显示有记录但未完成的网课和教辅
+function renderActiveLearning(records) {
+  const recent = records.filter(r => {
+    const d = (Date.now() - new Date(r.timestamp).getTime()) / 86400000;
+    return d <= 30 && r.textbook;
+  });
+  if (recent.length === 0) return '';
+
+  // 匹配网课
+  function matchCourse(r, c) {
+    if (!r.textbook) return false;
+    const subjOk = r.subject === c.subject || SUBJECTS.some(s => s.id === c.subject && s.name === r.subject);
+    return subjOk && (r.textbook.includes(c.name) || r.textbook.includes(c.teacher));
+  }
+  // 匹配教辅
+  function matchAid(r, a) {
+    if (!r.textbook) return false;
+    const subjOk = r.subject === a.subject || SUBJECTS.some(s => s.id === a.subject && s.name === r.subject);
+    if (!subjOk) return false;
+    const aidName = a.name.replace(/·/g, '');
+    const tbNorm = r.textbook.replace(/·/g, '');
+    if (!tbNorm.includes(aidName)) return false;
+    const sameCount = STUDY_AIDS.filter(sa => sa.name === a.name).length;
+    if (sameCount > 1 && a.version) return r.textbook.includes(a.version);
+    return true;
+  }
+
+  const items = [];
+
+  // 网课：有近30天记录的
+  for (const c of ONLINE_COURSES) {
+    const matched = recent.filter(r => matchCourse(r, c));
+    if (matched.length === 0) continue;
+    const totalModules = c.modules ? c.modules.length : 0;
+    const covered = totalModules > 0 && c.modules
+      ? c.modules.filter(m => matched.some(r => r.textbook.includes(m.slice(0, 2)))).length
+      : 0;
+    // 全部模块都有记录 → 完成，跳过
+    if (totalModules > 0 && covered >= totalModules) continue;
+    const pct = totalModules > 0 ? Math.round((covered / totalModules) * 100) : 0;
+    items.push({ icon: getSubjectIcon(c.subject), name: c.name, sub: `${c.teacher}`, pct, covered, total: totalModules, unit: '模块' });
+  }
+
+  // 教辅：有近30天记录的
+  for (const a of STUDY_AIDS) {
+    const matched = recent.filter(r => matchAid(r, a));
+    if (matched.length === 0) continue;
+    const totalSec = a.chapters ? a.chapters.reduce((s, ch) => s + (ch.sections || []).length, 0) : 0;
+    const covered = Math.min(totalSec, matched.length);
+    // 全部完成 → 跳过
+    if (totalSec > 0 && covered >= totalSec) continue;
+    const pct = totalSec > 0 ? Math.round((covered / totalSec) * 100) : 0;
+    const versionTag = a.version ? ` ${a.version}` : '';
+    items.push({ icon: getSubjectIcon(a.subject), name: `${a.name}${versionTag}`, sub: matched.length + '次记录', pct, covered, total: totalSec, unit: '节' });
+  }
+
+  if (items.length === 0) return '';
+
+  const cards = items.map(it => `<div class="active-item">
+    <span class="active-icon">${it.icon}</span>
+    <div class="active-info">
+      <div class="active-name">${it.name}</div>
+      <div class="active-sub">${it.sub}</div>
+    </div>
+    <div class="active-progress">
+      <div class="active-pct">${it.pct}%</div>
+      <div class="active-bar"><div class="active-fill" style="width:${it.pct}%"></div></div>
+      <div class="active-detail">${it.covered}/${it.total}${it.unit}</div>
+    </div>
+  </div>`).join('');
+
+  return `<div class="active-learning">
+    <div class="active-title">📌 进行中的学习</div>
+    <div class="active-list">${cards}</div>
+  </div>`;
+}
+
 // 9. 更多入口（紧凑网格）
 function renderMoreSection(records) {
   const achievements = Store.get(StorageKeys.ACHIEVEMENTS) || {};
@@ -483,11 +561,12 @@ export function render() {
     ${renderSmartAction(prediction, queue)}
     ${renderPendingReminder()}
     ${renderTodayTasks(queue)}
+    ${renderActiveLearning(records)}
     ${renderWeeklyChanges(records)}
     ${renderInsights(records, talents)}
     ${renderStudyPlan(records, queue, talents)}
     ${renderMoreSection(records)}
-    <p style="color:var(--color-text-3);margin-top:var(--sp-3);font-size:var(--fs-xs);text-align:center">v0.129</p>
+    <p style="color:var(--color-text-3);margin-top:var(--sp-3);font-size:var(--fs-xs);text-align:center">v0.130</p>
   </div>`;
 }
 

@@ -60,6 +60,7 @@ function updateGlobalHalfLife(profile, allHalfLives) {
 }
 
 // XP 参数自动校准: 每7天检查，偏离目标20%则调整
+// PI 控制: 比例项(快速修正) + 积分项(消除稳态偏差)
 // @param {Object} profile — 用户画像
 // @param {Array} recentRecords — 近期学习记录
 function autoCalibrateXP(profile, recentRecords) {
@@ -73,11 +74,18 @@ function autoCalibrateXP(profile, recentRecords) {
 
   const avgXpPerMinute = totalXP / totalMinutes;
   const target = 2.0;
-  const deviation = Math.abs(avgXpPerMinute - target) / target;
+  const error = avgXpPerMinute - target; // 正=XP过高，负=XP过低
+  const deviation = Math.abs(error) / target;
   if (deviation > 0.2) {
-    // 偏差超过 20%，调整 xpBasePerMinute
     const old = profile.xpBasePerMinute || 2.0;
-    profile.xpBasePerMinute = Math.round((0.8 * old + 0.2 * (target / avgXpPerMinute * old)) * 100) / 100;
+    // 比例项: 按偏差比例调整
+    const proportional = old * (target / avgXpPerMinute);
+    // 积分项: 累积误差修正，防止反复振荡
+    const cumError = (profile._xpCalibrationError || 0) + error;
+    profile._xpCalibrationError = cumError * 0.5; // 衰减累积误差
+    const integral = cumError * 0.05; // 积分增益，防止过冲
+    const adjusted = 0.7 * old + 0.3 * proportional - integral;
+    profile.xpBasePerMinute = Math.round(Math.max(0.5, Math.min(5.0, adjusted)) * 100) / 100;
   }
   profile._lastXPCalibration = Date.now();
 }
