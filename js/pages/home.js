@@ -230,7 +230,7 @@ function renderLevelCard(profile, records) {
       </div>
       <div class="level-stats">
         <div class="level-stat"><span class="level-stat-num" id="stat-today-xp">+${todayXP}</span><span class="level-stat-label">今日XP</span></div>
-        <div class="level-stat"><span class="level-stat-num" id="stat-streak">${streakDays}</span><span class="level-stat-label">连续天</span></div>
+        <div class="level-stat"><span class="level-stat-num" id="stat-streak">${streakDays}</span><span class="level-stat-label">连续天数</span></div>
         <div class="level-stat"><span class="level-stat-num">${formatNumber(totalXP)}</span><span class="level-stat-label">总XP</span></div>
       </div>
     </div>
