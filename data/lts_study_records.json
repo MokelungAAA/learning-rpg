@@ -1,6 +1,6 @@
 {
   "version": "2.0",
-  "lastUpdated": "2026-05-24T06:19:06.423Z",
+  "lastUpdated": "2026-05-24T06:19:07.894Z",
   "learnerName": "墨澜",
   "schema": "lts_study_record",
   "schemaVersion": 1,
@@ -2456,5 +2456,6 @@
       "examScores": null,
       "xp": 76
     }
-  ]
+  ],
+  "readingRecords": []
 }
