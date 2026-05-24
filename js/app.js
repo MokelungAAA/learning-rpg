@@ -55,13 +55,14 @@ Theme.init();
       const builtInCfg = window.LTS_SYNC_CONFIG || {};
       const userCfg = Store.get('lts_sync_config') || {};
       const syncCfg = { ...builtInCfg, ...userCfg };
+      console.log('[LTS] sync config:', syncCfg.token ? 'token=OK' : 'token=MISSING', 'owner=' + syncCfg.owner, 'repo=' + syncCfg.repo);
       if (syncCfg.token && syncCfg.owner && syncCfg.repo) {
         SyncEngine.configure(syncCfg.token, syncCfg.owner, syncCfg.repo);
         if (!userCfg.token) Store.set('lts_sync_config', syncCfg);
         cloudLoaded = await SyncEngine.startupLoad();
-        if (cloudLoaded) {
-          console.log('[LTS] cloud data loaded, records:', (Store.get(StorageKeys.STUDY_RECORDS) || []).length);
-        }
+        console.log('[LTS] cloud load result:', cloudLoaded, 'records:', (Store.get(StorageKeys.STUDY_RECORDS) || []).length);
+      } else {
+        console.warn('[LTS] sync config incomplete, skipping cloud sync');
       }
     } catch (e) { console.warn('[LTS] cloud sync failed:', e); }
 
@@ -69,8 +70,11 @@ Theme.init();
     if (!cloudLoaded) {
       try {
         const fileData = window.LTS_RECORDS_DATA;
+        const fileCount = fileData?.records?.length || 0;
+        console.log('[LTS] embedded data available:', fileCount, 'records');
         if (fileData && fileData.records && fileData.records.length > 0) {
           const existing = Store.get(StorageKeys.STUDY_RECORDS) || [];
+          console.log('[LTS] existing localStorage records:', existing.length);
           if (existing.length === 0) {
             // 首次安装：直接使用内嵌数据
             Store.set(StorageKeys.STUDY_RECORDS, fileData.records);

@@ -1,6 +1,6 @@
 // sw.js — Service Worker for LTS PWA (§13: Cache First + Background Update)
 // 策略: 缓存优先 + 后台静默更新 (stale-while-revalidate)
-const CACHE_NAME = 'lts-v3';
+const CACHE_NAME = 'lts-v4';
 const ASSETS = [
   './',
   './index.html',
@@ -42,6 +42,7 @@ const ASSETS = [
   './js/theme.js',
   './js/data-engine.js',
   './js/sync-engine.js',
+  './data/sync-config.js',
   './data/lts_study_records.js',
 ];
 
