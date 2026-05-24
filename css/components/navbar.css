@@ -4,27 +4,12 @@
   bottom: var(--nav-bottom);
   left: 50%;
   transform: translateX(-50%);
-  height: var(--nav-height);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0 var(--sp-4);
-  border-radius: var(--r-full);
   z-index: 1000;
-  background: rgba(255, 255, 255, 0.72);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  box-shadow: var(--shadow-lg);
-  transition: background var(--duration-normal) var(--ease);
-  min-width: 80px;
-  max-width: 120px;
-  width: auto;
-}
-
-[data-theme="dark"] .bottom-nav {
-  background: rgba(30, 30, 30, 0.72);
-  border-color: rgba(255, 255, 255, 0.08);
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
 }
 
 /* === Tab 按钮（已移除，保留样式以防其他引用） === */
@@ -171,11 +156,11 @@
   transform: translate(calc(-50% + var(--fan-x)), calc(-50% + var(--fan-y))) scale(0.95);
 }
 
-/* 展开位置 — 弧形排列 */
-.fan-item[data-idx="0"] { --fan-x: -78px; --fan-y: -45px; }
-.fan-item[data-idx="1"] { --fan-x: -45px; --fan-y: -78px; }
-.fan-item[data-idx="2"] { --fan-x: 45px; --fan-y: -78px; }
-.fan-item[data-idx="3"] { --fan-x: 78px; --fan-y: -45px; }
+/* 展开位置 — 弧形排列（半径增大，避免重叠） */
+.fan-item[data-idx="0"] { --fan-x: -90px; --fan-y: -52px; }
+.fan-item[data-idx="1"] { --fan-x: -52px; --fan-y: -90px; }
+.fan-item[data-idx="2"] { --fan-x: 52px; --fan-y: -90px; }
+.fan-item[data-idx="3"] { --fan-x: 90px; --fan-y: -52px; }
 
 .fan-item.open {
   transform: translate(calc(-50% + var(--fan-x)), calc(-50% + var(--fan-y))) scale(1);

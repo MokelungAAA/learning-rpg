@@ -59,17 +59,6 @@ Theme.init();
 // Init router
 Router.init(container);
 
-// §4.2: 启动页 — 首次加载时显示，点击或 2.5s 自动消失（可在设置中关闭）
-(async () => {
-  try {
-    const settings = JSON.parse(localStorage.getItem('lts_settings') || '{}');
-    if (settings.launchScreen !== false) {
-      const { showLaunchScreen } = await import('./components/launch-screen.js');
-      await showLaunchScreen();
-    }
-  } catch {}
-})();
-
 // §4.2/§6.3: 品牌头部栏（桌面端显示）
 BrandedHeader.render(document.body);
 
@@ -114,14 +103,6 @@ Router.register('#/subject/:id', (params) => {
 
 // Render navbar
 Navbar.render(document.body);
-
-// 番茄钟 FAB（始终可见, 移动端底部右侧）
-(async () => {
-  try {
-    const { default: PomoFab } = await import('./components/pomo-fab.js');
-    PomoFab.render();
-  } catch {}
-})();
 
 // 成就解锁检测：新增记录时异步检查，弹 Toast 通知
 // 内部用 dynamic import 避免循环依赖
