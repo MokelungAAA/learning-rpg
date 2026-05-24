@@ -520,6 +520,27 @@
   margin-left: auto;
 }
 
+.pomo-hist-delete {
+  border: none;
+  background: transparent;
+  color: var(--color-text-3);
+  font-size: 12px;
+  cursor: pointer;
+  padding: 2px 4px;
+  border-radius: var(--r-sm);
+  opacity: 0;
+  transition: opacity var(--duration-fast) var(--ease), background var(--duration-fast) var(--ease);
+}
+
+.pomo-hist-item:hover .pomo-hist-delete {
+  opacity: 1;
+}
+
+.pomo-hist-delete:hover {
+  background: var(--color-error);
+  color: #fff;
+}
+
 /* === Responsive === */
 @media (max-width: 480px) {
   .pomo-time-num {

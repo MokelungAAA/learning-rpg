@@ -1,4 +1,4 @@
-// pomodoro.js — 番茄钟系统（v0.121: 简约重构 + 庆祝动画）
+// pomodoro.js — 番茄钟系统（v0.122: 删除历史 + 后台计时修复）
 // 读取: SETTINGS, POMODORO_SESSIONS, STUDY_RECORDS, USER_PROFILE
 // 写入: POMODORO_SESSIONS, STUDY_RECORDS（专注完成后自动录入）
 // 坑: 模块级状态变量（isRunning等），页面切换需清理 timer
@@ -131,11 +131,12 @@ function renderHistory() {
     const t = s.startTime ? new Date(s.startTime) : null;
     const time = t ? t.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' }) : '';
     const phase = s.phase === 'focus' ? '🍅' : '☕';
-    return `<div class="pomo-hist-item">
+    return `<div class="pomo-hist-item" data-id="${s.id}">
       <span class="pomo-hist-icon">${s.completed ? phase : '○'}</span>
       <span class="pomo-hist-dur">${s.plannedDuration || 0}分</span>
       <span class="pomo-hist-score">${s.focusScore || 0}%</span>
       <span class="pomo-hist-time">${time}</span>
+      <button class="pomo-hist-delete" data-id="${s.id}" title="删除">✕</button>
     </div>`;
   }).join('');
 
@@ -156,7 +157,7 @@ export function render() {
     ${renderTimer()}
     ${renderComplete()}
     ${renderHistory()}
-    <p style="color:var(--color-text-3);margin-top:var(--sp-3);font-size:var(--fs-xs);text-align:center">v0.121</p>
+    <p style="color:var(--color-text-3);margin-top:var(--sp-3);font-size:var(--fs-xs);text-align:center">v0.122</p>
   </div>`;
 }
 
@@ -546,6 +547,20 @@ export function afterRender() {
   };
   if (editBtn) editBtn.addEventListener('click', onEditRecord);
 
+  // 删除历史记录
+  const onDeleteHist = (e) => {
+    const btn = e.target.closest('.pomo-hist-delete');
+    if (!btn) return;
+    const id = btn.dataset.id;
+    const sessions = Store.get(StorageKeys.POMODORO_SESSIONS) || [];
+    const filtered = sessions.filter(s => s.id !== id);
+    Store.set(StorageKeys.POMODORO_SESSIONS, filtered);
+    // 重新渲染历史区域
+    const histSection = document.querySelector('.pomo-history-section');
+    if (histSection) histSection.outerHTML = renderHistory();
+  };
+  document.addEventListener('click', onDeleteHist);
+
   return () => {
     if (minusBtn) minusBtn.removeEventListener('click', onMinus);
     if (plusBtn) plusBtn.removeEventListener('click', onPlus);
@@ -557,6 +572,7 @@ export function afterRender() {
     if (nextBtn) nextBtn.removeEventListener('click', onNext);
     if (restartBtn) restartBtn.removeEventListener('click', onRestart);
     if (editBtn) editBtn.removeEventListener('click', onEditRecord);
+    document.removeEventListener('click', onDeleteHist);
     clearInterval(timer);
     document.removeEventListener('visibilitychange', onVisibilityChange);
   };
