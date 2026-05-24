@@ -131,12 +131,13 @@ function renderHistory() {
     const t = s.startTime ? new Date(s.startTime) : null;
     const time = t ? t.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' }) : '';
     const phase = s.phase === 'focus' ? '🍅' : '☕';
-    return `<div class="pomo-hist-item" data-id="${s.id}">
+    const sid = s.sessionId || s.id || '';
+    return `<div class="pomo-hist-item" data-id="${sid}">
       <span class="pomo-hist-icon">${s.completed ? phase : '○'}</span>
       <span class="pomo-hist-dur">${s.plannedDuration || 0}分</span>
       <span class="pomo-hist-score">${s.focusScore || 0}%</span>
       <span class="pomo-hist-time">${time}</span>
-      <button class="pomo-hist-delete" data-id="${s.id}" title="删除">✕</button>
+      <button class="pomo-hist-delete" data-id="${sid}" title="删除">✕</button>
     </div>`;
   }).join('');
 
@@ -532,9 +533,14 @@ export function afterRender() {
   // 重新开始
   const restartBtn = document.getElementById('pomo-restart');
   const onRestart = () => {
-    document.getElementById('pomo-complete').style.display = 'none';
-    document.getElementById('pomo-config').style.display = 'block';
+    clearInterval(timer);
+    isRunning = false;
+    isPaused = false;
+    elapsed = 0;
     currentRound = 1;
+    document.getElementById('pomo-complete').style.display = 'none';
+    document.getElementById('pomo-timer').style.display = 'none';
+    document.getElementById('pomo-config').style.display = 'block';
     updateRoundIndicator();
   };
   if (restartBtn) restartBtn.addEventListener('click', onRestart);
@@ -553,7 +559,7 @@ export function afterRender() {
     if (!btn) return;
     const id = btn.dataset.id;
     const sessions = Store.get(StorageKeys.POMODORO_SESSIONS) || [];
-    const filtered = sessions.filter(s => s.id !== id);
+    const filtered = sessions.filter(s => (s.sessionId || s.id) !== id);
     Store.set(StorageKeys.POMODORO_SESSIONS, filtered);
     // 重新渲染历史区域
     const histSection = document.querySelector('.pomo-history-section');

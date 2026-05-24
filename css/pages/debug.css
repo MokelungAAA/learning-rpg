@@ -1,0 +1,144 @@
+/* debug.css — 算法调试工具页样式 */
+
+.debug-header {
+  font-size: var(--fs-xl);
+  font-weight: 700;
+  color: var(--color-text-1);
+  margin-bottom: var(--sp-3);
+}
+
+.debug-section {
+  background: var(--color-surface);
+  border-radius: var(--r-md);
+  padding: var(--sp-3);
+  margin-bottom: var(--sp-2);
+  box-shadow: var(--shadow-sm);
+}
+
+.debug-title {
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  color: var(--color-text-1);
+  margin-bottom: var(--sp-2);
+}
+
+.debug-summary {
+  display: flex;
+  gap: var(--sp-3);
+  font-size: var(--fs-sm);
+  color: var(--color-text-2);
+  margin-bottom: var(--sp-2);
+}
+
+.debug-issues {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-1);
+}
+
+.debug-issue {
+  font-size: var(--fs-xs);
+  color: var(--color-text-2);
+  padding: var(--sp-1) 0;
+}
+
+.debug-subjects {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-1);
+}
+
+.debug-subject {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  padding: var(--sp-1) 0;
+  font-size: var(--fs-xs);
+}
+
+.debug-sub-name {
+  font-weight: 500;
+  color: var(--color-text-1);
+  width: 40px;
+}
+
+.debug-sub-val {
+  color: var(--color-text-2);
+  flex: 1;
+}
+
+.debug-sub-score {
+  color: var(--color-accent);
+  font-weight: 500;
+}
+
+.debug-params {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-1);
+}
+
+.debug-param {
+  display: flex;
+  justify-content: space-between;
+  font-size: var(--fs-xs);
+  color: var(--color-text-2);
+  padding: var(--sp-1) 0;
+  border-bottom: 1px solid var(--color-surface-variant);
+}
+
+.debug-records {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+}
+
+.debug-record {
+  background: var(--color-surface-variant);
+  border-radius: var(--r-sm);
+  padding: var(--sp-2);
+}
+
+.debug-rec-header {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  font-size: var(--fs-xs);
+  margin-bottom: var(--sp-1);
+}
+
+.debug-rec-date {
+  color: var(--color-text-3);
+}
+
+.debug-rec-subject {
+  font-weight: 500;
+  color: var(--color-text-1);
+}
+
+.debug-rec-type {
+  color: var(--color-text-3);
+  font-size: 10px;
+  padding: 1px 4px;
+  background: var(--color-surface);
+  border-radius: var(--r-full);
+}
+
+.debug-rec-xp {
+  margin-left: auto;
+  font-weight: 600;
+  color: var(--color-accent);
+}
+
+.debug-rec-detail {
+  font-size: 10px;
+  color: var(--color-text-3);
+  line-height: 1.5;
+}
+
+@media (max-width: 480px) {
+  .debug-summary {
+    flex-wrap: wrap;
+    gap: var(--sp-2);
+  }
+}

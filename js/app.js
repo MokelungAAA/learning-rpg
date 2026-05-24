@@ -18,6 +18,7 @@ import * as search from './pages/search.js';
 import * as dataIO from './pages/data-io.js';
 import * as achievement from './pages/achievement.js';
 import * as subjectDetail from './pages/subject-detail.js';
+import * as debug from './pages/debug.js';
 import { ACHIEVEMENTS } from './data/achievements.js';
 
 const container = document.getElementById('page-container');
@@ -109,6 +110,7 @@ Router.register('#/achievement', () => handleRoute(achievement, '#/achievement')
 Router.register('#/subject/:id', (params) => {
   handleRoute(subjectDetail, '#/subject/' + params.id, params);
 });
+Router.register('#/debug', () => handleRoute(debug, '#/debug'));
 
 // Render navbar
 Navbar.render(document.body);

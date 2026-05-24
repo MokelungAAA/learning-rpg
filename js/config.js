@@ -18,6 +18,7 @@ export const ROUTES = {
   '#/data/export':    'data-io',
   '#/search':         'search',
   '#/achievement':    'achievement',
+  '#/debug':          'debug',
 };
 
 // localStorage 键名，所有模块必须引用此处常量

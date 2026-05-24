@@ -137,7 +137,8 @@ function renderDeveloperContent() {
     <div class="dev-mods">
       <div class="dev-mods-title">subjectModifiers</div>
       <div class="dev-mods-list">${modEntries || '<span class="dev-tag">无数据</span>'}</div>
-    </div>`;
+    </div>
+    <a href="#/debug" class="settings-nav-link"><span>🔧 算法调试工具</span><span class="settings-arrow">→</span></a>`;
 }
 
 // 关于区块内容：版本信息 + 跳转关于页
@@ -158,7 +159,7 @@ export function render() {
     ${foldable('developer', '🔧', '开发者', renderDeveloperContent())}
     ${foldable('about', 'ℹ️', '关于', renderAboutContent())}
     ${renderSyncModal()}
-    <p style="color:var(--color-text-3);margin-top:var(--sp-3);font-size:var(--fs-xs)">v0.121 · 开发者区</p>
+    <p style="color:var(--color-text-3);margin-top:var(--sp-3);font-size:var(--fs-xs)">v0.122 · 开发者区</p>
   </div>`;
 }
 
