@@ -32,7 +32,7 @@ Theme.init();
 // 数据架构: 内嵌JS(即时可用) → GitHub云端(后台合并) → localStorage(缓存)
 (async () => {
   try {
-    const { StorageKeys } = await import('./config.js');
+    const { STORAGE_KEYS: StorageKeys } = await import('./config.js');
     const Store = (await import('./store.js')).default;
 
     // ── 第一步: 立即加载内嵌数据（确保首屏有数据） ──
@@ -168,7 +168,7 @@ async function checkAchievements() {
     const { checkAndPersist } = await import('./utils/achievements-check.js');
     const { default: Toast } = await import('./components/toast.js');
     const Store = (await import('./store.js')).default;
-    const { StorageKeys } = await import('./config.js');
+    const { STORAGE_KEYS: StorageKeys } = await import('./config.js');
     const records = Store.get(StorageKeys.STUDY_RECORDS) || [];
     const profile = Store.get(StorageKeys.USER_PROFILE) || {};
     const { newlyUnlocked } = checkAndPersist(records, profile, ACHIEVEMENTS);
