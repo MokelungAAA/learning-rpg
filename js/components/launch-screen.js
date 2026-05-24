@@ -12,6 +12,10 @@ function getTimePeriod() {
   return 'night';
 }
 
+function isDarkMode() {
+  return document.documentElement.getAttribute('data-theme') === 'dark';
+}
+
 function createLines(container, period) {
   const lines = document.createElement('div');
   lines.className = 'launch-lines';
@@ -37,77 +41,88 @@ function createDots(container, period, count) {
   container.appendChild(dots);
 }
 
-export function showLaunchScreen() {
+// 同步创建开屏 overlay（立即盖住屏幕，返回 overlay 元素）
+export function createLaunchOverlay() {
+  const records = Store.get(StorageKeys.STUDY_RECORDS) || [];
+  const totalXP = records.reduce((s, r) => s + (r.xp || 0), 0);
+  const { level } = calcLevelProgress(totalXP);
+  const title = getLevelTitle(level);
+  const streak = (() => {
+    const days = new Set();
+    for (const r of records) {
+      if (r.timestamp) days.add(new Date(r.timestamp).toISOString().slice(0, 10));
+    }
+    let s = 0;
+    const d = new Date();
+    while (true) {
+      if (days.has(d.toISOString().slice(0, 10))) { s++; d.setDate(d.getDate() - 1); }
+      else break;
+    }
+    return s;
+  })();
+
+  const period = isDarkMode() ? 'night' : getTimePeriod();
+
+  const overlay = document.createElement('div');
+  overlay.className = 'launch-overlay';
+
+  // 背景
+  const bg = document.createElement('div');
+  bg.className = `launch-bg launch-bg-${period}`;
+  overlay.appendChild(bg);
+
+  // 几何线
+  createLines(overlay, period);
+
+  // 微光点
+  createDots(overlay, period, 12);
+
+  // 内容
+  const content = document.createElement('div');
+  content.className = 'launch-content';
+  content.innerHTML = `
+    <div class="launch-mark launch-mark-${period}">
+      <span class="launch-mark-text">LTS</span>
+    </div>
+    <div class="launch-title launch-title-${period}">学习RPG</div>
+    <div class="launch-subtitle launch-subtitle-${period}">认 知 操 作 系 统</div>
+    <div class="launch-info launch-info-${period}">
+      <span>Lv${level} ${title.cn}</span>
+      <span class="launch-info-divider">&middot;</span>
+      <span>${totalXP.toLocaleString()} XP</span>
+      ${streak > 0 ? `<span class="launch-info-divider">&middot;</span><span>${streak} 天连续</span>` : ''}
+    </div>
+    <div class="launch-hint launch-hint-${period}">点击进入</div>
+  `;
+  overlay.appendChild(content);
+
+  // 进度条
+  const progress = document.createElement('div');
+  progress.className = 'launch-progress';
+  const bar = document.createElement('div');
+  bar.className = `launch-progress-bar launch-progress-${period}`;
+  progress.appendChild(bar);
+  overlay.appendChild(progress);
+
+  document.body.appendChild(overlay);
+  return overlay;
+}
+
+// 关闭开屏（返回 Promise，动画结束后 resolve）
+export function dismissLaunchOverlay(overlay) {
   return new Promise((resolve) => {
-    const records = Store.get(StorageKeys.STUDY_RECORDS) || [];
-    const totalXP = records.reduce((s, r) => s + (r.xp || 0), 0);
-    const { level } = calcLevelProgress(totalXP);
-    const title = getLevelTitle(level);
-    const streak = (() => {
-      const days = new Set();
-      for (const r of records) {
-        if (r.timestamp) days.add(new Date(r.timestamp).toISOString().slice(0, 10));
-      }
-      let s = 0;
-      const d = new Date();
-      while (true) {
-        if (days.has(d.toISOString().slice(0, 10))) { s++; d.setDate(d.getDate() - 1); }
-        else break;
-      }
-      return s;
-    })();
-
-    const period = getTimePeriod();
-
-    const overlay = document.createElement('div');
-    overlay.className = 'launch-overlay';
-
-    // 背景
-    const bg = document.createElement('div');
-    bg.className = `launch-bg launch-bg-${period}`;
-    overlay.appendChild(bg);
-
-    // 几何线
-    createLines(overlay, period);
-
-    // 微光点
-    createDots(overlay, period, 12);
-
-    // 内容
-    const content = document.createElement('div');
-    content.className = 'launch-content';
-    content.innerHTML = `
-      <div class="launch-mark launch-mark-${period}">
-        <span class="launch-mark-text">LTS</span>
-      </div>
-      <div class="launch-title launch-title-${period}">学习RPG</div>
-      <div class="launch-subtitle launch-subtitle-${period}">认 知 操 作 系 统</div>
-      <div class="launch-info launch-info-${period}">
-        <span>Lv${level} ${title.cn}</span>
-        <span class="launch-info-divider">&middot;</span>
-        <span>${totalXP.toLocaleString()} XP</span>
-        ${streak > 0 ? `<span class="launch-info-divider">&middot;</span><span>${streak} 天连续</span>` : ''}
-      </div>
-      <div class="launch-hint launch-hint-${period}">点击进入</div>
-    `;
-    overlay.appendChild(content);
-
-    // 进度条
-    const progress = document.createElement('div');
-    progress.className = 'launch-progress';
-    const bar = document.createElement('div');
-    bar.className = `launch-progress-bar launch-progress-${period}`;
-    progress.appendChild(bar);
-    overlay.appendChild(progress);
-
-    document.body.appendChild(overlay);
-
+    if (!overlay) { resolve(); return; }
     const dismiss = () => {
       overlay.classList.add('launch-fade-out');
       setTimeout(() => { overlay.remove(); resolve(); }, 600);
     };
-
     overlay.addEventListener('click', dismiss);
     setTimeout(dismiss, 3500);
   });
+}
+
+// 便捷函数：创建 + 等待关闭
+export function showLaunchScreen() {
+  const overlay = createLaunchOverlay();
+  return dismissLaunchOverlay(overlay);
 }

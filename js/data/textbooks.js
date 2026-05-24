@@ -1162,19 +1162,104 @@ export const ONLINE_COURSES = [
   { id: 'course-yihuaer', name: '一化儿', teacher: '一化儿老师', subject: 'chemistry',
     desc: '高中化学系统课，注重原理与实验',
     modules: ['化学反应原理','有机化学','无机化学','化学实验','元素化合物'] },
-  { id: 'course-wangfuren', name: '王夫人', teacher: '王夫人老师', subject: 'chinese',
-    desc: '高中语文系统课，注重阅读理解与写作',
-    modules: ['现代文阅读','古诗文阅读','语言文字运用','作文','名句默写'] },
+  { id: 'course-huangfuren', name: '黄夫人', teacher: '黄夫人老师', subject: 'physics',
+    desc: '高中物理系统课，注重概念理解与解题思路',
+    modules: ['力学基础','运动学','牛顿定律','曲线运动','万有引力','机械能','动量','电场','磁场','电磁感应'] },
+  { id: 'course-yiying', name: '一英', teacher: '一英老师', subject: 'english',
+    desc: '高中英语系统课，注重语法与阅读',
+    modules: ['语法精讲','阅读理解','完形填空','写作','听力','词汇'] },
+  { id: 'course-yishenger', name: '一生儿', teacher: '一生儿老师', subject: 'biology',
+    desc: '高中生物系统课，注重概念理解与实验分析',
+    modules: ['细胞生物学','遗传与变异','生态系统','生理调节','生物技术'] },
 ];
 
 // ─── 教辅数据 ──────────────────────────────────────────────────
 export const STUDY_AIDS = [
+  { id: 'aid-jtxj-phy', name: '解题觉醒', subject: 'physics', version: '全册',
+    desc: '物理全册解题方法论（必修123+选修）',
+    chapters: [
+      { name: '必修第一册', sections: [
+        { name: '运动的描述' }, { name: '匀变速直线运动' }, { name: '相互作用——力' }, { name: '牛顿运动定律' },
+      ]},
+      { name: '必修第二册', sections: [
+        { name: '曲线运动' }, { name: '圆周运动' }, { name: '万有引力与宇宙航行' }, { name: '机械能守恒' },
+      ]},
+      { name: '必修第三册', sections: [
+        { name: '静电场' }, { name: '恒定电流' }, { name: '电磁感应' },
+      ]},
+      { name: '选择性必修第一册', sections: [
+        { name: '动量' }, { name: '机械振动' }, { name: '机械波' }, { name: '光' },
+      ]},
+    ]},
+  { id: 'aid-jtxj-bio', name: '解题觉醒', subject: 'biology', version: '全册',
+    desc: '生物全册解题方法论（必修12+选修123）',
+    chapters: [
+      { name: '必修第一册', sections: [
+        { name: '细胞的分子组成' }, { name: '细胞的结构' }, { name: '细胞的物质运输' }, { name: '细胞的能量供应' }, { name: '细胞的生命历程' },
+      ]},
+      { name: '必修第二册', sections: [
+        { name: '遗传因子的发现' }, { name: '基因与染色体的关系' }, { name: '基因的本质' }, { name: '基因的表达' }, { name: '生物的进化' },
+      ]},
+      { name: '选择性必修第一册', sections: [
+        { name: '内环境稳态' }, { name: '神经调节' }, { name: '体液调节' }, { name: '种群与群落' },
+      ]},
+      { name: '选择性必修第二册', sections: [
+        { name: '生态系统' }, { name: '生态系统的稳定性' },
+      ]},
+    ]},
   { id: 'aid-jtxj-chi', name: '解题觉醒', subject: 'chinese', version: '高考版',
     desc: '高考语文全题型解题方法论',
-    sections: ['现代文阅读','古诗文阅读','语言文字运用','作文','名句默写'] },
-  { id: 'aid-jtxj-phy', name: '解题觉醒', subject: 'physics', version: '必修2',
-    desc: '物理必修2解题方法论',
-    sections: ['曲线运动','圆周运动','万有引力','机械能守恒'] },
+    chapters: [
+      { name: '现代文阅读', sections: [
+        { name: '论述类文本' }, { name: '实用类文本' }, { name: '文学类文本' },
+      ]},
+      { name: '古诗文阅读', sections: [
+        { name: '文言文阅读' }, { name: '古代诗歌鉴赏' }, { name: '名句默写' },
+      ]},
+      { name: '语言文字运用', sections: [
+        { name: '成语辨析' }, { name: '语病修改' }, { name: '补写句子' },
+      ]},
+      { name: '写作', sections: [
+        { name: '议论文写作' }, { name: '审题立意' },
+      ]},
+    ]},
+  { id: 'aid-tx45-eng', name: '天星45套', subject: 'english', version: '2026版',
+    desc: '高考英语45套模拟卷',
+    chapters: [
+      { name: '模拟卷', sections: [
+        { name: '模拟卷1' }, { name: '模拟卷2' }, { name: '模拟卷3' }, { name: '模拟卷4' }, { name: '模拟卷5' },
+        { name: '模拟卷6' }, { name: '模拟卷7' }, { name: '模拟卷8' }, { name: '模拟卷9' }, { name: '模拟卷10' },
+      ]},
+      { name: '冲刺卷', sections: [
+        { name: '冲刺卷1' }, { name: '冲刺卷2' }, { name: '冲刺卷3' }, { name: '冲刺卷4' }, { name: '冲刺卷5' },
+      ]},
+    ]},
+  { id: 'aid-53-chem', name: '5·3', subject: 'chemistry', version: '必修第二册',
+    desc: '化学必修第二册同步练习',
+    chapters: [
+      { name: '第五章 化学反应与能量', sections: [
+        { name: '化学反应与能量变化' }, { name: '化学反应的速率与限度' },
+      ]},
+      { name: '第六章 化学反应与能量（续）', sections: [
+        { name: '化学能与电能' }, { name: '化学能与热能' },
+      ]},
+      { name: '第七章 有机化合物', sections: [
+        { name: '认识有机化合物' }, { name: '乙烯与有机高分子' }, { name: '乙醇与乙酸' },
+      ]},
+      { name: '第八章 化学与可持续发展', sections: [
+        { name: '自然资源的开发利用' }, { name: '化学与环境保护' },
+      ]},
+    ]},
+  { id: 'aid-53-math', name: '5·3', subject: 'math', version: '必修第二册',
+    desc: '数学必修第二册同步练习（湘教版对应内容）',
+    chapters: [
+      { name: '三角函数', sections: [
+        { name: '任意角与弧度制' }, { name: '三角函数的定义' }, { name: '三角函数的图象与性质' }, { name: '三角恒等变换' }, { name: '正弦定理与余弦定理' },
+      ]},
+      { name: '平面向量', sections: [
+        { name: '向量的概念与运算' }, { name: '向量的坐标运算' }, { name: '向量的应用' },
+      ]},
+    ]},
 ];
 
 // ─── 汇总导出（供 subjects.js 使用）────────────────────────────

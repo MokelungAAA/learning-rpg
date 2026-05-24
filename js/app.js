@@ -5,7 +5,7 @@ import Navbar from './components/navbar.js';
 import BrandedHeader from './components/branded-header.js';
 import EventBus from './event-bus.js';
 import Theme from './theme.js';
-import { showLaunchScreen } from './components/launch-screen.js';
+import { createLaunchOverlay, dismissLaunchOverlay } from './components/launch-screen.js';
 import * as home from './pages/home.js';
 import * as dataTab from './pages/data-tab.js';
 import * as pomodoro from './pages/pomodoro.js';
@@ -29,15 +29,9 @@ const container = document.getElementById('page-container');
 // Theme must init before any render (FOUC already handled by inline script)
 Theme.init();
 
-// 开屏动画（默认开启，设置页可关闭）
-(async () => {
-  try {
-    const settings = JSON.parse(localStorage.getItem('lts_settings') || '{}');
-    if (settings.launchScreen !== false) {
-      await showLaunchScreen();
-    }
-  } catch {}
-})();
+// 开屏动画：同步创建 overlay 立即盖住屏幕，数据初始化在遮罩下并行进行
+const _launchSettings = JSON.parse(localStorage.getItem('lts_settings') || '{}');
+const _launchOverlay = _launchSettings.launchScreen !== false ? createLaunchOverlay() : null;
 
 // Init data engine + 运行数据迁移（non-blocking, failure won't break the app）
 // 数据架构: 内嵌JS(即时可用) → GitHub云端(后台合并) → localStorage(缓存)

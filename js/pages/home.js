@@ -212,19 +212,40 @@ function renderSmartAction(prediction, queue) {
   </div>`;
 }
 
-// 3. 今日脉搏条（水平：连续天数 | 今日XP | 等级进度）
-function renderPulseBar(profile, records) {
+// 3. 等级详情卡（大号进度条 + 完整数据）
+function renderLevelCard(profile, records) {
   const totalXP = records.reduce((s, r) => s + (r.xp || 0), 0);
+  const { level, xpInLevel, xpNeeded, percent } = calcLevelProgress(totalXP);
+  const title = getLevelTitle(level);
   const todayXP = calcTodayXP(records);
   const streakDays = calcStreakDays(records);
-  const { level, percent } = calcLevelProgress(totalXP);
-  return `<div class="pulse-bar">
-    <div class="pulse-item"><span class="pulse-num" id="stat-streak">${streakDays}</span><span class="pulse-label">🔥连续</span></div>
-    <div class="pulse-divider"></div>
-    <div class="pulse-item"><span class="pulse-num" id="stat-today-xp">+${todayXP}</span><span class="pulse-label">⚡今日</span></div>
-    <div class="pulse-divider"></div>
-    <div class="pulse-item"><span class="pulse-num">Lv${level}</span>
-      <div class="pulse-progress"><div class="pulse-progress-fill" style="width:${percent}%"></div></div>
+  const tierProgress = title.max > title.min
+    ? Math.round((level - title.min) / (title.max - title.min) * 100)
+    : 100;
+  return `<div class="section-card level-card">
+    <div class="level-top">
+      <div class="level-badge">
+        <span class="level-num">Lv${level}</span>
+        <span class="level-title">${title.cn}</span>
+      </div>
+      <div class="level-stats">
+        <div class="level-stat"><span class="level-stat-num" id="stat-today-xp">+${todayXP}</span><span class="level-stat-label">今日XP</span></div>
+        <div class="level-stat"><span class="level-stat-num" id="stat-streak">${streakDays}</span><span class="level-stat-label">连续天</span></div>
+        <div class="level-stat"><span class="level-stat-num">${formatNumber(totalXP)}</span><span class="level-stat-label">总XP</span></div>
+      </div>
+    </div>
+    <div class="level-progress">
+      <div class="level-progress-header">
+        <span>升级进度</span>
+        <span>${xpInLevel} / ${xpNeeded} XP</span>
+      </div>
+      <div class="level-progress-bar">
+        <div class="level-progress-fill" style="width:${percent}%"></div>
+      </div>
+      <div class="level-progress-footer">
+        <span>${title.cn} ${level}/${title.max}</span>
+        <span>还差 ${xpNeeded - xpInLevel} XP 升级</span>
+      </div>
     </div>
   </div>`;
 }
@@ -300,7 +321,7 @@ function renderWeeklyChanges(records) {
   </div>`;
 }
 
-// 7. 当前规划 + 特长弱项 + 雷达图（合并折叠）
+// 7. 学习洞察（规划 + 特长弱项 + 各科统计 + 雷达图）
 function renderInsights(records, talents) {
   const plan = detectActivePlan(records);
   const strengths = talents.filter(t => t.type === 'strength');
@@ -326,6 +347,32 @@ function renderInsights(records, talents) {
       content += `<div class="tw-item tw-weakness"><span class="tw-icon">⚠️</span><span class="tw-name">${w.name}</span><span class="tw-val">${w.mastery}%</span></div>`;
     }
     content += `</div>`;
+  }
+
+  // 各科学习统计（总是显示）
+  const subjStats = [];
+  for (const s of SUBJECTS) {
+    const recs = records.filter(r => r.subject === s.id || r.subject === s.name);
+    if (recs.length === 0) continue;
+    const totalMin = recs.reduce((sum, r) => sum + (r.duration || 0), 0);
+    const scored = recs.filter(r => r.score > 0);
+    const avgScore = scored.length > 0 ? Math.round(scored.reduce((sum, r) => sum + r.score, 0) / scored.length) : 0;
+    subjStats.push({ name: s.name, icon: getSubjectIcon(s.id), count: recs.length, totalMin, avgScore });
+  }
+  if (subjStats.length > 0) {
+    subjStats.sort((a, b) => b.totalMin - a.totalMin);
+    content += `<div class="insight-block">
+      <div class="insight-title">📊 各科统计</div>
+      <div class="subj-stats-list">
+        ${subjStats.map(s => `<div class="subj-stat-row">
+          <span class="subj-stat-icon">${s.icon}</span>
+          <span class="subj-stat-name">${s.name}</span>
+          <span class="subj-stat-val">${s.totalMin}分</span>
+          <span class="subj-stat-val">${s.count}条</span>
+          ${s.avgScore > 0 ? `<span class="subj-stat-val">${s.avgScore}%</span>` : ''}
+        </div>`).join('')}
+      </div>
+    </div>`;
   }
 
   // 雷达图占位
@@ -436,8 +483,8 @@ export function render() {
 
   return `<div class="page-enter">
     ${renderGreeting(profile, records)}
+    ${renderLevelCard(profile, records)}
     ${renderSmartAction(prediction, queue)}
-    ${renderPulseBar(profile, records)}
     ${renderPendingReminder()}
     ${renderTodayTasks(queue)}
     ${renderWeeklyChanges(records)}
@@ -448,7 +495,7 @@ export function render() {
   </div>`;
 }
 
-// 初始化雷达图
+// 初始化雷达图（优先用知识点数据，无数据时用学习时长+正确率估算）
 async function initRadarChart() {
   const ec = await loadECharts();
   if (!ec) return;
@@ -463,12 +510,28 @@ async function initRadarChart() {
   const tempStates = buildTempStates(records, profile);
   const { subjectAbility } = computeAll();
 
+  // 检查是否有知识点数据
+  const hasAbilityData = SUBJECTS.some(s => subjectAbility[s.id]?.count > 0);
+
   const indicators = [];
   const values = [];
   for (const s of SUBJECTS) {
-    const ability = subjectAbility[s.id];
     indicators.push({ name: s.name, max: 100 });
-    values.push(ability ? Math.round(ability.mastery) : 0);
+    if (hasAbilityData) {
+      values.push(subjectAbility[s.id] ? Math.round(subjectAbility[s.id].mastery) : 0);
+    } else {
+      // 无知识点数据时，用学习时长+正确率估算
+      const subjRecs = records.filter(r => r.subject === s.id || r.subject === s.name);
+      if (subjRecs.length === 0) { values.push(0); continue; }
+      const totalMin = subjRecs.reduce((sum, r) => sum + (r.duration || 0), 0);
+      const scored = subjRecs.filter(r => r.score > 0);
+      const avgScore = scored.length > 0 ? scored.reduce((sum, r) => sum + r.score, 0) / scored.length : 0;
+      // 时长分: log₁.₅(分钟/10+1)×25，上限50
+      const timeScore = Math.min(50, Math.round(Math.log(totalMin / 10 + 1) / Math.log(1.5) * 25));
+      // 正确率分: 直接用，上限50
+      const scorePart = Math.round(avgScore * 0.5);
+      values.push(Math.min(100, timeScore + scorePart));
+    }
   }
 
   chart.setOption({

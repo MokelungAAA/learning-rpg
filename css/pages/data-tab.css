@@ -458,6 +458,53 @@
   margin-bottom: var(--sp-3);
 }
 
+/* === Progress Overview (概览Tab速览) === */
+.progress-overview {
+  background: rgba(255, 255, 255, 0.72);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-left: 3px solid var(--color-accent);
+  border-radius: var(--r-md);
+  padding: var(--sp-2) var(--sp-3);
+  margin-bottom: var(--sp-3);
+  box-shadow: var(--shadow-sm);
+}
+
+[data-theme="dark"] .progress-overview {
+  background: rgba(30, 30, 30, 0.72);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+.progress-overview-title {
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  color: var(--color-text-1);
+  margin-bottom: var(--sp-1);
+}
+
+.progress-overview-items {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-1);
+  margin-bottom: var(--sp-1);
+}
+
+.progress-overview-tag {
+  font-size: var(--fs-xs);
+  color: var(--color-text-2);
+  background: var(--color-surface-variant);
+  padding: 2px 10px;
+  border-radius: var(--r-full);
+}
+
+.progress-overview-link {
+  font-size: var(--fs-xs);
+  color: var(--color-accent);
+  text-decoration: none;
+}
+.progress-overview-link:hover { text-decoration: underline; }
+
 /* === Responsive === */
 @media (max-width: 480px) {
   .chart-container { height: 180px; }
