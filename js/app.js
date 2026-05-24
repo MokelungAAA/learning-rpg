@@ -168,17 +168,32 @@ if ('serviceWorker' in navigator) {
   });
 }
 
-// §13.3: 离线重连 — 恢复网络时自动触发同步
+// §13.3: 离线重连 — 恢复网络时自动触发同步 + 刷新离线队列
 window.addEventListener('online', async () => {
   try {
     const { default: Toast } = await import('./components/toast.js');
-    Toast.show('网络已恢复，正在同步...', 'info');
+    const { getQueue, clearQueue, queueSize } = await import('./utils/offline-queue.js');
+    const size = queueSize();
+    if (size > 0) {
+      Toast.show(`网络已恢复，${size} 条离线记录已就绪`, 'info');
+      clearQueue();
+    } else {
+      Toast.show('网络已恢复，正在同步...', 'info');
+    }
     if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
       const reg = await navigator.serviceWorker.ready;
       if (reg.sync) reg.sync.register('sync-data');
     }
     EventBus.emit('sync:triggered');
   } catch {}
+});
+
+// §13.3: 记录添加时，如果离线则加入队列
+EventBus.on('record:added', async (record) => {
+  if (!navigator.onLine) {
+    const { enqueue } = await import('./utils/offline-queue.js');
+    enqueue(record);
+  }
 });
 
 window.addEventListener('offline', async () => {
