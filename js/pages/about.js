@@ -1,6 +1,13 @@
 // about.js — 关于页（版本信息+致谢+版本历史）
 // 纯静态页面，无 Store 读写，VERSION_HISTORY 手动维护
 const VERSION_HISTORY = [
+  { version: 'v0.99', date: '2026-05-24', desc: '最终打磨 — 版本号统一+全页面v0.99更新' },
+  { version: 'v0.98', date: '2026-05-24', desc: 'PWA离线队列 — §13.3离线记录延迟同步+成就数量验证(64个/5隐藏)' },
+  { version: 'v0.97', date: '2026-05-24', desc: '番茄钟完成页增强 — §7.1手动生成学习记录按钮' },
+  { version: 'v0.96', date: '2026-05-24', desc: '统计增强 — §12.2月度报告+§12.3效率图参考线' },
+  { version: 'v0.95', date: '2026-05-24', desc: '首页打磨 — §4.3学科网格/列表视图切换' },
+  { version: 'v0.94', date: '2026-05-24', desc: '技能树增强 — §9.2温度图例+§9.3子技能雷达下钻' },
+  { version: 'v0.93', date: '2026-05-24', desc: '启动页+品牌头部 — §4.2启动动画+§6.3桌面品牌栏' },
   { version: 'v0.92', date: '2026-05-24', desc: '算法对齐 — 日文段位称号+天赋半衰期条件+每日状态修正+番茄环进度修正' },
   { version: 'v0.91', date: '2026-05-24', desc: 'Bug修复+侧边栏增强 — 弹窗层级/FAB全局化/自动关闭/折叠修复/桌面数据面板' },
   { version: 'v0.90', date: '2026-05-24', desc: '版本号统一+最终打磨 — 全页面版本字符串更新至v0.90' },
@@ -81,7 +88,7 @@ export function render() {
       <div class="about-hero">
         <div class="about-logo">LTS</div>
         <div class="about-title">学习RPG · 认知操作系统</div>
-        <div class="about-version">v0.92</div>
+        <div class="about-version">v0.99</div>
         <div class="about-credit">Created by 墨澜 × Miku</div>
       </div>
       <div class="about-section">
