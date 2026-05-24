@@ -1,6 +1,6 @@
 {
   "version": "2.0",
-  "lastUpdated": "2026-05-24T06:19:51.532Z",
+  "lastUpdated": "2026-05-24T14:24:19.890Z",
   "learnerName": "墨澜",
   "schema": "lts_study_record",
   "schemaVersion": 1,
@@ -2455,6 +2455,310 @@
       "correctQuestions": 0,
       "examScores": null,
       "xp": 76
+    },
+    {
+      "id": "rec-1779611257836-ff8t",
+      "timestamp": "2026-05-24T08:27:37.836Z",
+      "subject": "chinese",
+      "textbook": "",
+      "chapter": "先选择教材",
+      "section": "先选择章节",
+      "knowledgePoints": [],
+      "score": 0,
+      "duration": 30,
+      "practiceDuration": 24,
+      "reviewDuration": 6,
+      "courseId": "",
+      "activityType": "note",
+      "notes": "",
+      "totalQuestions": 0,
+      "correctQuestions": 0,
+      "examScores": null,
+      "xp": 20
+    },
+    {
+      "id": "rec-1779615210839-d94j",
+      "timestamp": "2026-05-24T09:33:30.839Z",
+      "subject": "math",
+      "textbook": "",
+      "chapter": "先选择教材",
+      "section": "先选择章节",
+      "knowledgePoints": [],
+      "score": 0,
+      "duration": 33,
+      "practiceDuration": 33,
+      "reviewDuration": 7,
+      "courseId": "",
+      "activityType": "note",
+      "notes": "",
+      "totalQuestions": 0,
+      "correctQuestions": 0,
+      "examScores": null,
+      "xp": 24
+    },
+    {
+      "id": "rec-1779617123367-7vg4",
+      "timestamp": "2026-05-24T10:05:23.367Z",
+      "subject": "math",
+      "textbook": "",
+      "chapter": "先选择教材",
+      "section": "先选择章节",
+      "knowledgePoints": [],
+      "score": 0,
+      "duration": 31,
+      "practiceDuration": 31,
+      "reviewDuration": 6,
+      "courseId": "",
+      "activityType": "note",
+      "notes": "",
+      "totalQuestions": 0,
+      "correctQuestions": 0,
+      "examScores": null,
+      "xp": 47
+    },
+    {
+      "id": "rec-1779622842136-9ihz",
+      "timestamp": "2026-05-24T11:40:42.136Z",
+      "subject": "chinese",
+      "textbook": "",
+      "chapter": "先选择教材",
+      "section": "先选择章节",
+      "knowledgePoints": [],
+      "score": 0,
+      "duration": 48,
+      "practiceDuration": 48,
+      "reviewDuration": 10,
+      "courseId": "",
+      "activityType": "note",
+      "notes": "写作",
+      "totalQuestions": 0,
+      "correctQuestions": 0,
+      "examScores": null,
+      "xp": 35
+    },
+    {
+      "id": "rec-1779623915128-zr6j",
+      "timestamp": "2026-05-24T11:58:35.128Z",
+      "subject": "chinese",
+      "textbook": "",
+      "chapter": "",
+      "section": "",
+      "knowledgePoints": [],
+      "score": 0,
+      "duration": 10,
+      "practiceDuration": 8,
+      "reviewDuration": 2,
+      "activityType": "video",
+      "notes": "作文",
+      "totalQuestions": 0,
+      "correctQuestions": 0,
+      "xp": 5
+    },
+    {
+      "id": "rec-1779632150050-s9ae",
+      "timestamp": "2026-05-24T14:15:50.050Z",
+      "subject": "math",
+      "textbook": "",
+      "chapter": "",
+      "section": "",
+      "knowledgePoints": [],
+      "score": 70,
+      "duration": 90,
+      "practiceDuration": 72,
+      "reviewDuration": 18,
+      "activityType": "practice",
+      "notes": "五年高考三年模拟概率高考模拟题板块",
+      "totalQuestions": 0,
+      "correctQuestions": 0,
+      "xp": 133
     }
-  ]
+  ],
+  "readingRecords": [],
+  "pomodoroSessions": [],
+  "knowledgeState": {},
+  "achievements": [
+    {
+      "id": "ach_study_1h",
+      "date": "2026-05-24"
+    },
+    {
+      "id": "ach_study_10h",
+      "date": "2026-05-24"
+    },
+    {
+      "id": "ach_study_50h",
+      "date": "2026-05-24"
+    },
+    {
+      "id": "ach_subjects_1",
+      "date": "2026-05-24"
+    },
+    {
+      "id": "ach_subjects_3",
+      "date": "2026-05-24"
+    },
+    {
+      "id": "ach_subjects_5",
+      "date": "2026-05-24"
+    },
+    {
+      "id": "ach_subjects_7",
+      "date": "2026-05-24"
+    },
+    {
+      "id": "ach_subjects_9",
+      "date": "2026-05-24"
+    },
+    {
+      "id": "ach_record_1",
+      "date": "2026-05-24"
+    },
+    {
+      "id": "ach_record_10",
+      "date": "2026-05-24"
+    },
+    {
+      "id": "ach_record_50",
+      "date": "2026-05-24"
+    },
+    {
+      "id": "ach_record_100",
+      "date": "2026-05-24"
+    },
+    {
+      "id": "ach_single_subj_10h",
+      "date": "2026-05-24"
+    },
+    {
+      "id": "ach_improve_20",
+      "date": "2026-05-24"
+    },
+    {
+      "id": "ach_improve_40",
+      "date": "2026-05-24"
+    },
+    {
+      "id": "ach_streak_3",
+      "date": "2026-05-24"
+    },
+    {
+      "id": "ach_streak_7",
+      "date": "2026-05-24"
+    },
+    {
+      "id": "ach_pomodoro_1",
+      "date": "2026-05-24"
+    }
+  ],
+  "examScores": {},
+  "settings": {
+    "launchScreen": false,
+    "perfMode": true,
+    "themeMode": "system",
+    "pomodoroSound": false,
+    "pomodoroVibration": false
+  },
+  "userProfile": {
+    "version": 3,
+    "updatedAt": 1779609427992,
+    "nickname": "墨澜",
+    "grade": "高一",
+    "subjects": [
+      "physics",
+      "chemistry",
+      "biology",
+      "math",
+      "english",
+      "chinese"
+    ],
+    "level": 1,
+    "totalXP": 0,
+    "title": "初学者",
+    "streakDays": 0,
+    "streakStartDate": null,
+    "subjectAbility": {
+      "physics": 0,
+      "chemistry": 0,
+      "biology": 0,
+      "math": 0,
+      "english": 0,
+      "chinese": 0,
+      "politics": 0,
+      "history": 0,
+      "geography": 0
+    },
+    "modifiers": {
+      "timeOfDay": {
+        "morning": 1.1,
+        "afternoon": 0.95,
+        "evening": 1,
+        "night": 0.8
+      },
+      "subjectType": {
+        "理科": 1.05,
+        "文科": 0.95
+      },
+      "sessionLength": {
+        "short": 0.9,
+        "medium": 1,
+        "long": 1.05
+      }
+    },
+    "globalBaseHalfLife": 3,
+    "subjectModifiers": {
+      "logos": 1,
+      "mythos": 1,
+      "lingua": 1,
+      "physis": 1,
+      "khemeia": 1,
+      "zoe": 1,
+      "politeia": 1,
+      "historia": 1,
+      "geographia": 1
+    },
+    "xpBasePerMinute": 3.06,
+    "activityWeights": {
+      "practice": 1.2,
+      "exam": 1.5,
+      "lecture": 0.8,
+      "review": 1,
+      "reading": 0.6,
+      "video": 0.7,
+      "other": 0.5
+    },
+    "decayRateForXP": 0.00005,
+    "dailyXPLimit": 500,
+    "dailyXPLimitSoftness": 0.5,
+    "baseReviewRatio": 0.2,
+    "totalStudyMinutes": 0,
+    "totalPomodoros": 0,
+    "pomodoroSettings": {
+      "defaultPreset": "classic",
+      "customPresets": [],
+      "soundEnabled": true,
+      "vibrationEnabled": true
+    },
+    "settings": {
+      "theme": "light",
+      "fontSize": "standard",
+      "syncFrequency": "realtime",
+      "chartPreferences": {}
+    },
+    "_talentSubjects": [],
+    "dynamicActivityWeights": {
+      "practice": 1.2,
+      "exam": 1.5,
+      "lecture": 0.8,
+      "review": 1,
+      "reading": 0.6,
+      "video": 0.7,
+      "other": 0.5
+    },
+    "_dynamicWeightsUpdatedAt": 1779609427989,
+    "_xpCalibrationError": -0.6244136698682153,
+    "_lastXPCalibration": 1779609427992,
+    "_xpMigrated": true
+  },
+  "recitationState": {},
+  "chartPreferences": {}
 }
