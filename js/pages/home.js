@@ -466,22 +466,30 @@ function renderActiveLearning(records) {
   });
   if (recent.length === 0) return '';
 
-  // 匹配网课
+  // 匹配网课：优先 courseId 精确匹配，回退 textbook 子串
   function matchCourse(r, c) {
+    if (r.courseId) return r.courseId === c.id;
     if (!r.textbook) return false;
     const subjOk = r.subject === c.subject || SUBJECTS.some(s => s.id === c.subject && s.name === r.subject);
     return subjOk && (r.textbook.includes(c.name) || r.textbook.includes(c.teacher));
+  }
+  // 中文数字 → 阿拉伯数字归一化
+  function normalizeNumerals(s) {
+    return s
+      .replace(/四十五/g, '45').replace(/三十五/g, '35').replace(/二十五/g, '25')
+      .replace(/五十三/g, '53').replace(/四十三/g, '43').replace(/三十三/g, '33')
+      .replace(/五三/g, '53').replace(/三五/g, '35').replace(/二五/g, '25');
   }
   // 匹配教辅
   function matchAid(r, a) {
     if (!r.textbook) return false;
     const subjOk = r.subject === a.subject || SUBJECTS.some(s => s.id === a.subject && s.name === r.subject);
     if (!subjOk) return false;
-    const aidName = a.name.replace(/·/g, '');
-    const tbNorm = r.textbook.replace(/·/g, '');
+    const aidName = normalizeNumerals(a.name.replace(/·/g, ''));
+    const tbNorm = normalizeNumerals(r.textbook.replace(/·/g, ''));
     if (!tbNorm.includes(aidName)) return false;
     const sameCount = STUDY_AIDS.filter(sa => sa.name === a.name).length;
-    if (sameCount > 1 && a.version) return r.textbook.includes(a.version);
+    if (sameCount > 1) return subjOk;
     return true;
   }
 
@@ -681,12 +689,14 @@ export function afterRender() {
     if (streakEl) countUp(streakEl, streakDays, 600);
   }, 200);
 
-  // 成就解锁检测 + 动画
+  // 成就解锁检测 + 动画（等开屏动画结束后再弹）
   const profile = getProfile();
   const { newlyUnlocked } = checkAndPersist(records, profile, ACHIEVEMENTS);
   if (newlyUnlocked.length > 0) {
+    const launchOverlay = document.querySelector('.launch-overlay');
+    const baseDelay = launchOverlay ? 4000 : 500;
     newlyUnlocked.forEach((ach, i) => {
-      setTimeout(() => showUnlockToast(ach), 500 + i * 3500);
+      setTimeout(() => showUnlockToast(ach), baseDelay + i * 3500);
     });
   }
 

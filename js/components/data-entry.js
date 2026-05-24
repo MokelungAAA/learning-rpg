@@ -5,6 +5,7 @@ import Store from '../store.js';
 import { SUBJECTS, STORAGE_KEYS as StorageKeys } from '../config.js';
 import { SUBJECTS_DATA, getSubjectById } from '../data/subjects.js';
 import { getAllKnowledgePoints } from '../data/subjects.js';
+import { ONLINE_COURSES } from '../data/textbooks.js';
 import EventBus from '../event-bus.js';
 import Toast from './toast.js';
 import { calcXP } from '../utils/level.js';
@@ -190,6 +191,12 @@ function renderModal() {
               <option value="exam">考试</option>
             </select>
           </div>
+          <div id="course-fields" class="entry-field" style="display:none">
+            <label class="entry-label">网课选择</label>
+            <select id="entry-course" class="entry-select">
+              <option value="">选择网课</option>
+            </select>
+          </div>
           <div id="exam-fields" class="exam-fields" style="display:none">
             <div class="exam-fields-title">📊 题型得分（可选）</div>
             <div id="exam-sub-fields"></div>
@@ -285,9 +292,21 @@ function bindEvents() {
       </div>`
     ).join('');
   }
-  activitySelect.addEventListener('change', updateExamFields);
+  const courseFields = document.getElementById('course-fields');
+  const courseSelect = document.getElementById('entry-course');
+  function updateCourseFields() {
+    const isVideo = activitySelect.value === 'video';
+    const subj = subjectSelect.value;
+    courseFields.style.display = isVideo ? 'block' : 'none';
+    if (!isVideo) return;
+    const courses = ONLINE_COURSES.filter(c => !subj || c.subject === subj);
+    courseSelect.innerHTML = '<option value="">选择网课</option>' +
+      courses.map(c => `<option value="${c.id}">${c.name}（${c.teacher}）</option>`).join('');
+  }
+  activitySelect.addEventListener('change', () => { updateExamFields(); updateCourseFields(); });
   subjectSelect.addEventListener('change', () => {
     if (activitySelect.value === 'exam') updateExamFields();
+    if (activitySelect.value === 'video') updateCourseFields();
   });
 
   // 三级联动
@@ -436,6 +455,9 @@ function bindEvents() {
       }
     }
 
+    // 网课 courseId
+    const courseId = (activityType === 'video' && courseSelect.value) ? courseSelect.value : '';
+
     const record = {
       id: 'rec-' + Date.now() + '-' + Math.random().toString(36).slice(2, 6),
       timestamp: new Date().toISOString(),
@@ -448,6 +470,7 @@ function bindEvents() {
       duration,
       practiceDuration: practiceDur,
       reviewDuration: reviewDur,
+      courseId,
       activityType,
       notes: document.getElementById('entry-notes').value || '',
       totalQuestions: totalQ,

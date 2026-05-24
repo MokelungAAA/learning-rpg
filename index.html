@@ -19,39 +19,42 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+SC:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+SC:wght@400;500;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+  <noscript><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+SC:wght@400;500;600;700&display=swap" rel="stylesheet"></noscript>
+  <!-- 关键 CSS：首屏必须 -->
   <link rel="stylesheet" href="css/variables.css">
   <link rel="stylesheet" href="css/reset.css">
   <link rel="stylesheet" href="css/base.css">
-  <link rel="stylesheet" href="css/glass.css">
-  <link rel="stylesheet" href="css/animations.css">
   <link rel="stylesheet" href="css/dark-mode.css">
   <link rel="stylesheet" href="css/responsive.css">
-  <link rel="stylesheet" href="css/components/navbar.css">
-  <link rel="stylesheet" href="css/components/bottom-sheet.css">
-  <link rel="stylesheet" href="css/components/toast.css">
-  <link rel="stylesheet" href="css/components/status-bar.css">
-  <link rel="stylesheet" href="css/pages/home.css">
-  <link rel="stylesheet" href="css/pages/data-tab.css">
-  <link rel="stylesheet" href="css/components/data-entry.css">
-  <link rel="stylesheet" href="css/pages/skill-tree.css">
-  <link rel="stylesheet" href="css/pages/review.css">
-  <link rel="stylesheet" href="css/pages/log.css">
-  <link rel="stylesheet" href="css/pages/pomodoro.css">
-  <link rel="stylesheet" href="css/pages/reading.css">
-  <link rel="stylesheet" href="css/pages/settings.css">
-  <link rel="stylesheet" href="css/pages/about.css">
-  <link rel="stylesheet" href="css/pages/search.css">
-  <link rel="stylesheet" href="css/pages/data-io.css">
-  <link rel="stylesheet" href="css/pages/achievement.css">
-  <link rel="stylesheet" href="css/pages/subject-detail.css">
-  <link rel="stylesheet" href="css/pages/debug.css">
-  <link rel="stylesheet" href="css/pages/recitation.css">
-  <link rel="stylesheet" href="css/pages/score-trend.css">
-  <link rel="stylesheet" href="css/components/command-palette.css">
-  <link rel="stylesheet" href="css/components/pomo-fab.css">
+  <link rel="stylesheet" href="css/animations.css">
   <link rel="stylesheet" href="css/components/launch-screen.css">
-  <link rel="stylesheet" href="css/components/branded-header.css">
+  <!-- 非关键 CSS：延迟加载 -->
+  <link rel="stylesheet" href="css/glass.css" media="print" onload="this.media='all'">
+  <link rel="stylesheet" href="css/components/navbar.css" media="print" onload="this.media='all'">
+  <link rel="stylesheet" href="css/components/bottom-sheet.css" media="print" onload="this.media='all'">
+  <link rel="stylesheet" href="css/components/toast.css" media="print" onload="this.media='all'">
+  <link rel="stylesheet" href="css/components/status-bar.css" media="print" onload="this.media='all'">
+  <link rel="stylesheet" href="css/pages/home.css" media="print" onload="this.media='all'">
+  <link rel="stylesheet" href="css/pages/data-tab.css" media="print" onload="this.media='all'">
+  <link rel="stylesheet" href="css/components/data-entry.css" media="print" onload="this.media='all'">
+  <link rel="stylesheet" href="css/pages/skill-tree.css" media="print" onload="this.media='all'">
+  <link rel="stylesheet" href="css/pages/review.css" media="print" onload="this.media='all'">
+  <link rel="stylesheet" href="css/pages/log.css" media="print" onload="this.media='all'">
+  <link rel="stylesheet" href="css/pages/pomodoro.css" media="print" onload="this.media='all'">
+  <link rel="stylesheet" href="css/pages/reading.css" media="print" onload="this.media='all'">
+  <link rel="stylesheet" href="css/pages/settings.css" media="print" onload="this.media='all'">
+  <link rel="stylesheet" href="css/pages/about.css" media="print" onload="this.media='all'">
+  <link rel="stylesheet" href="css/pages/search.css" media="print" onload="this.media='all'">
+  <link rel="stylesheet" href="css/pages/data-io.css" media="print" onload="this.media='all'">
+  <link rel="stylesheet" href="css/pages/achievement.css" media="print" onload="this.media='all'">
+  <link rel="stylesheet" href="css/pages/subject-detail.css" media="print" onload="this.media='all'">
+  <link rel="stylesheet" href="css/pages/debug.css" media="print" onload="this.media='all'">
+  <link rel="stylesheet" href="css/pages/recitation.css" media="print" onload="this.media='all'">
+  <link rel="stylesheet" href="css/pages/score-trend.css" media="print" onload="this.media='all'">
+  <link rel="stylesheet" href="css/components/command-palette.css" media="print" onload="this.media='all'">
+  <link rel="stylesheet" href="css/components/pomo-fab.css" media="print" onload="this.media='all'">
+  <link rel="stylesheet" href="css/components/branded-header.css" media="print" onload="this.media='all'">
 </head>
 <body>
   <div id="page-container"></div>

@@ -221,8 +221,9 @@ function renderTextbookProgress(records) {
   return fold('textbooks', '📚 教材进度', `<div class="progress-map-list">${items}</div>`, { badge: `${progress.length}本` });
 }
 
-// 匹配网课记录：学科 + (课程名 或 教师名) 精确匹配
+// 匹配网课记录：优先用 courseId 精确匹配，回退到 textbook 子串匹配
 function matchCourseRecord(r, course) {
+  if (r.courseId) return r.courseId === course.id;
   if (!r.textbook) return false;
   const tb = r.textbook;
   const subjMatch = r.subject === course.subject ||
@@ -257,21 +258,29 @@ function renderCourseProgress(records) {
   return fold('courses', '🎓 网课进度', `<div class="course-list">${items.join('')}</div>`, { badge: `${items.length}门课` });
 }
 
-// 匹配教辅记录 — 精确匹配：学科 + 教材名 + 版本（同名教辅用版本区分）
+// 中文数字 → 阿拉伯数字归一化（用于教辅名匹配）
+function normalizeNumerals(s) {
+  return s
+    .replace(/四十五/g, '45').replace(/三十五/g, '35').replace(/二十五/g, '25')
+    .replace(/五十三/g, '53').replace(/四十三/g, '43').replace(/三十三/g, '33')
+    .replace(/五三/g, '53').replace(/三五/g, '35').replace(/二五/g, '25');
+}
+
+// 匹配教辅记录 — 精确匹配：学科 + 教材名（同名教辅按学科区分）
 function matchStudyAidRecord(r, aid) {
   if (!r.textbook) return false;
   const tb = r.textbook;
   const subjMatch = r.subject === aid.subject ||
     SUBJECTS.some(s => s.id === aid.subject && s.name === r.subject);
   if (!subjMatch) return false;
-  // 教材名匹配（去掉中间点·兼容 "53" vs "5·3"）
-  const aidName = aid.name.replace(/·/g, '');
-  const tbNorm = tb.replace(/·/g, '');
+  // 教材名匹配（归一化中文/阿拉伯数字 + 去掉中间点·）
+  const aidName = normalizeNumerals(aid.name.replace(/·/g, ''));
+  const tbNorm = normalizeNumerals(tb.replace(/·/g, ''));
   if (!tbNorm.includes(aidName)) return false;
-  // 同名教辅（如多本"解题觉醒"）用版本字段区分
+  // 同名教辅（如多本"解题觉醒"）按学科区分（每本对应不同学科）
   const sameNameCount = STUDY_AIDS.filter(a => a.name === aid.name).length;
-  if (sameNameCount > 1 && aid.version) {
-    return tb.includes(aid.version);
+  if (sameNameCount > 1) {
+    return subjMatch;
   }
   return true;
 }
