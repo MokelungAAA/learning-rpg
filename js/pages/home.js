@@ -174,20 +174,21 @@ function detectActivePlan(records) {
   return { subject: top.subject, textbook: top.textbook, count: top.count, sectionsDone: top.sections.size };
 }
 
-// 1. 紧凑问候栏（一行：问候 + 等级 + 设置）
+// 1. 紧凑问候栏（一行：问候 + 等级 + 主题切换）
 function renderGreeting(profile, records) {
   const totalXP = records.reduce((s, r) => s + (r.xp || 0), 0);
   const { level } = calcLevelProgress(totalXP);
   const title = getLevelTitle(level);
   const greeting = getGreeting();
   const nick = profile.nickname || '墨澜';
-  console.log('[LTS] renderGreeting: records=%d, totalXP=%d, level=%d', records.length, totalXP, level);
+  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+  const themeIcon = isDark ? '🌙' : '☀️';
   return `<div class="home-greeting">
     <div class="greeting-left">
       <span class="greeting-text">${greeting}，${nick}</span>
       <span class="greeting-level">Lv${level} ${title.cn}</span>
     </div>
-    <a href="#/settings" class="greeting-settings" title="设置">⚙️</a>
+    <button class="greeting-theme-toggle" id="theme-toggle" title="切换主题">${themeIcon}</button>
   </div>`;
 }
 
@@ -342,7 +343,74 @@ function renderInsights(records, talents) {
   </div>`;
 }
 
-// 8. 更多入口（紧凑网格）
+// 8. 学习推荐（智能规划当天学习，默认展开）
+function renderStudyPlan(records, queue, talents) {
+  const now = new Date();
+  const hour = now.getHours();
+  const today = now.toISOString().slice(0, 10);
+  const todayRecs = records.filter(r => r.timestamp?.slice(0, 10) === today);
+  const todayMinutes = todayRecs.reduce((s, r) => s + (r.duration || 0), 0);
+  const weaknesses = talents.filter(t => t.type === 'weakness');
+
+  const tasks = [];
+
+  // 1. 紧急复习（温度 < 40）
+  const urgent = queue.filter(q => q.temp < 40).slice(0, 2);
+  for (const q of urgent) {
+    tasks.push({ icon: '🔥', text: `复习「${q.kp}」`, sub: `${q.subjectName} · 温度${Math.round(q.temp)}°`, priority: 'high', est: Math.max(5, Math.round(15 - q.temp / 10)) });
+  }
+
+  // 2. 弱科专项
+  for (const w of weaknesses.slice(0, 2)) {
+    tasks.push({ icon: '💪', text: `强化${w.name}`, sub: `掌握度${w.mastery}% · 建议刷题`, priority: 'medium', est: 20 });
+  }
+
+  // 3. 继续当前教辅
+  const activePlan = detectActivePlan(records);
+  if (activePlan) {
+    tasks.push({ icon: '📖', text: `继续${activePlan.textbook}`, sub: `${activePlan.subject} · 已覆盖${activePlan.sectionsDone}章`, priority: 'normal', est: 30 });
+  }
+
+  // 4. 基于时间段推荐
+  if (hour >= 6 && hour < 9 && todayRecs.length === 0) {
+    tasks.push({ icon: '🌅', text: '晨读时间', sub: '语文/英语背诵最佳时段', priority: 'normal', est: 20 });
+  } else if (hour >= 20 && hour < 23) {
+    tasks.push({ icon: '🌙', text: '睡前复习', sub: '回顾今日所学，加深记忆', priority: 'normal', est: 15 });
+  }
+
+  // 5. 如果今天还没学够
+  if (todayMinutes < 60 && tasks.length < 4) {
+    tasks.push({ icon: '⚡', text: '再来一轮专注', sub: `今日已学${todayMinutes}分钟`, priority: 'low', est: 25 });
+  }
+
+  if (tasks.length === 0) return '';
+
+  const taskHtml = tasks.map((t, i) => {
+    const prioClass = t.priority === 'high' ? 'plan-high' : t.priority === 'medium' ? 'plan-mid' : '';
+    return `<div class="plan-item ${prioClass}">
+      <span class="plan-icon">${t.icon}</span>
+      <div class="plan-body">
+        <div class="plan-text">${t.text}</div>
+        <div class="plan-sub">${t.sub} · 约${t.est}分钟</div>
+      </div>
+    </div>`;
+  }).join('');
+
+  const totalEst = tasks.reduce((s, t) => s + t.est, 0);
+
+  return `<div class="fold-section">
+    <div class="fold-header open" data-fold="study-plan">
+      <span>📋 今日学习计划</span>
+      <span class="fold-badge">约${totalEst}分钟</span>
+      <span class="fold-arrow open">▾</span>
+    </div>
+    <div class="fold-body open" id="fold-study-plan">
+      <div class="fold-content"><div class="plan-list">${taskHtml}</div></div>
+    </div>
+  </div>`;
+}
+
+// 9. 更多入口（紧凑网格）
 function renderMoreSection(records) {
   const achievements = Store.get(StorageKeys.ACHIEVEMENTS) || {};
   const unlocked = Object.keys(achievements).filter(k => achievements[k]).length;
@@ -370,6 +438,7 @@ export function render() {
     ${renderTodayTasks(queue)}
     ${renderWeeklyChanges(records)}
     ${renderInsights(records, talents)}
+    ${renderStudyPlan(records, queue, talents)}
     ${renderMoreSection(records)}
     <p style="color:var(--color-text-3);margin-top:var(--sp-3);font-size:var(--fs-xs);text-align:center">v0.126</p>
   </div>`;
@@ -479,6 +548,15 @@ export function afterRender() {
     });
   }
 
+  // 主题切换按钮
+  const themeBtn = document.getElementById('theme-toggle');
+  const onThemeToggle = () => {
+    Theme.toggle();
+    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+    if (themeBtn) themeBtn.textContent = isDark ? '🌙' : '☀️';
+  };
+  if (themeBtn) themeBtn.addEventListener('click', onThemeToggle);
+
   // 折叠面板
   const foldHeaders = document.querySelectorAll('.fold-header');
   const onFoldToggle = (e) => {
@@ -487,7 +565,6 @@ export function afterRender() {
     const arrow = e.currentTarget.querySelector('.fold-arrow');
     if (body) body.classList.toggle('open');
     if (arrow) arrow.classList.toggle('open');
-    // 雷达图在 insights 展开时初始化
     if (foldId === 'insights' && body?.classList.contains('open')) initRadarChart();
   };
   foldHeaders.forEach(h => h.addEventListener('click', onFoldToggle));
@@ -528,7 +605,7 @@ export function afterRender() {
   const onRecordAdded = () => window.location.reload();
   EventBus.on('record:added', onRecordAdded);
 
-  // data:ready → 数据从云端加载完成后重新渲染首页（解决 XP=0 问题）
+  // data:ready → 数据从云端加载完成后重新渲染首页
   const onDataReady = () => {
     const container = document.getElementById('page-container');
     if (container) {
@@ -539,6 +616,7 @@ export function afterRender() {
   EventBus.on('data:ready', onDataReady);
 
   return () => {
+    if (themeBtn) themeBtn.removeEventListener('click', onThemeToggle);
     foldHeaders.forEach(h => h.removeEventListener('click', onFoldToggle));
     if (smartBtn) smartBtn.removeEventListener('click', onSmartAction);
     reviewBtns.forEach(b => b.removeEventListener('click', onReviewClick));

@@ -29,81 +29,37 @@ const container = document.getElementById('page-container');
 Theme.init();
 
 // Init data engine + 运行数据迁移（non-blocking, failure won't break the app）
-// 数据架构: GitHub 云端(主) → localStorage(缓存) → 内嵌JS(首次安装兜底)
+// 数据架构: 内嵌JS(即时可用) → GitHub云端(后台合并) → localStorage(缓存)
 (async () => {
   try {
-    const { default: DataEngine } = await import('./data-engine.js');
-    const { getDefaultProfile } = await import('./data/defaults.js');
     const { StorageKeys } = await import('./config.js');
-    const { migrate, migrateRecordsXP } = await import('./data-migration.js');
-    const { calcXP } = await import('./utils/level.js');
-    await DataEngine.init({ [StorageKeys.USER_PROFILE]: getDefaultProfile() });
     const Store = (await import('./store.js')).default;
 
+    // ── 第一步: 立即加载内嵌数据（确保首屏有数据） ──
+    const fileData = window.LTS_RECORDS_DATA;
+    if (fileData?.records?.length > 0) {
+      const existing = Store.get(StorageKeys.STUDY_RECORDS) || [];
+      if (existing.length === 0) {
+        Store.set(StorageKeys.STUDY_RECORDS, fileData.records);
+        console.log('[LTS] loaded', fileData.records.length, 'records from embedded data');
+      }
+    }
+
+    // 初始化用户画像
+    const { default: DataEngine } = await import('./data-engine.js');
+    const { getDefaultProfile } = await import('./data/defaults.js');
+    await DataEngine.init({ [StorageKeys.USER_PROFILE]: getDefaultProfile() });
+
     // 运行用户画像迁移
+    const { migrate, migrateRecordsXP } = await import('./data-migration.js');
+    const { calcXP } = await import('./utils/level.js');
     const profile = Store.get(StorageKeys.USER_PROFILE);
     if (profile) {
       const migrated = migrate(profile);
       if (migrated !== profile) Store.set(StorageKeys.USER_PROFILE, migrated);
     }
 
-    // ── 第一优先级: 从 GitHub 云端加载数据 ──
-    let cloudLoaded = false;
-    try {
-      const { default: SyncEngine } = await import('./sync-engine.js');
-      // 同步配置来源: window.LTS_SYNC_CONFIG (外部注入) > localStorage > 无
-      const builtInCfg = window.LTS_SYNC_CONFIG || {};
-      const userCfg = Store.get('lts_sync_config') || {};
-      const syncCfg = { ...builtInCfg, ...userCfg };
-      console.log('[LTS] sync config:', syncCfg.token ? 'token=OK' : 'token=MISSING', 'owner=' + syncCfg.owner, 'repo=' + syncCfg.repo);
-      if (syncCfg.token && syncCfg.owner && syncCfg.repo) {
-        SyncEngine.configure(syncCfg.token, syncCfg.owner, syncCfg.repo);
-        if (!userCfg.token) Store.set('lts_sync_config', syncCfg);
-        cloudLoaded = await SyncEngine.startupLoad();
-        console.log('[LTS] cloud load result:', cloudLoaded, 'records:', (Store.get(StorageKeys.STUDY_RECORDS) || []).length);
-      } else {
-        console.warn('[LTS] sync config incomplete, skipping cloud sync');
-      }
-    } catch (e) { console.warn('[LTS] cloud sync failed:', e); }
-
-    // ── 第二优先级: 内嵌数据兜底（仅当云端加载失败时） ──
-    if (!cloudLoaded) {
-      try {
-        const fileData = window.LTS_RECORDS_DATA;
-        const fileCount = fileData?.records?.length || 0;
-        console.log('[LTS] embedded data available:', fileCount, 'records');
-        if (fileData && fileData.records && fileData.records.length > 0) {
-          const existing = Store.get(StorageKeys.STUDY_RECORDS) || [];
-          console.log('[LTS] existing localStorage records:', existing.length);
-          if (existing.length === 0) {
-            // 首次安装：直接使用内嵌数据
-            Store.set(StorageKeys.STUDY_RECORDS, fileData.records);
-            console.log('[LTS] fallback: loaded', fileData.records.length, 'records from embedded data');
-          } else {
-            // 已有数据：合并（补全 xp=0 的记录）
-            const existingMap = new Map(existing.map(r => [r.id, r]));
-            let updated = 0;
-            for (const fileRec of fileData.records) {
-              const localRec = existingMap.get(fileRec.id);
-              if (localRec) {
-                if ((!localRec.xp || localRec.xp <= 0) && fileRec.xp > 0) {
-                  localRec.xp = fileRec.xp;
-                  updated++;
-                }
-              } else {
-                existingMap.set(fileRec.id, fileRec);
-              }
-            }
-            if (updated > 0) {
-              Store.set(StorageKeys.STUDY_RECORDS, [...existingMap.values()]);
-              console.log('[LTS] embedded data patched', updated, 'records with XP');
-            }
-          }
-        }
-      } catch (e) { console.warn('[LTS] embedded data error:', e); }
-    }
-
-    // 重算所有记录 XP（XP Engine 2.0 迁移）
+    // 重算所有记录 XP
     const profileForXP = Store.get(StorageKeys.USER_PROFILE);
     if (profileForXP && profileForXP._xpMigrated) {
       delete profileForXP._xpMigrated;
@@ -111,21 +67,43 @@ Theme.init();
     }
     migrateRecordsXP(Store, StorageKeys, calcXP);
 
+    // 通知页面重新渲染（内嵌数据已就绪）
+    const _records = Store.get(StorageKeys.STUDY_RECORDS) || [];
+    console.log('[LTS] data:ready (local): records=%d, totalXP=%d', _records.length, _records.reduce((s, r) => s + (r.xp || 0), 0));
+    EventBus.emit('data:ready');
+
+    // ── 第二步: 后台从 GitHub 云端同步（不阻塞渲染） ──
+    try {
+      const { default: SyncEngine } = await import('./sync-engine.js');
+      const builtInCfg = window.LTS_SYNC_CONFIG || {};
+      const userCfg = Store.get('lts_sync_config') || {};
+      const syncCfg = { ...builtInCfg, ...userCfg };
+      if (syncCfg.token && syncCfg.owner && syncCfg.repo) {
+        SyncEngine.configure(syncCfg.token, syncCfg.owner, syncCfg.repo);
+        if (!userCfg.token) Store.set('lts_sync_config', syncCfg);
+        const cloudOk = await SyncEngine.startupLoad();
+        if (cloudOk) {
+          // 云端数据已合并，再次通知页面刷新
+          const _cloudRecords = Store.get(StorageKeys.STUDY_RECORDS) || [];
+          console.log('[LTS] cloud sync OK: records=%d, totalXP=%d', _cloudRecords.length, _cloudRecords.reduce((s, r) => s + (r.xp || 0), 0));
+          EventBus.emit('data:ready');
+        } else {
+          console.log('[LTS] cloud sync returned false (no data or network error)');
+        }
+      }
+    } catch (e) { console.warn('[LTS] cloud sync failed:', e.message || e); }
+
     // 每日首次打开时运行画像自适应
     const today = new Date().toISOString().slice(0, 10);
     const lastAdapt = localStorage.getItem('lts_last_adapt_date');
     if (lastAdapt !== today) {
-      const { adaptProfile } = await import('./utils/profile-adapt.js');
-      adaptProfile();
-      localStorage.setItem('lts_last_adapt_date', today);
+      try {
+        const { adaptProfile } = await import('./utils/profile-adapt.js');
+        adaptProfile();
+        localStorage.setItem('lts_last_adapt_date', today);
+      } catch {}
     }
-
-    // 数据加载完成，通知页面重新渲染
-    const _finalRecords = Store.get(StorageKeys.STUDY_RECORDS) || [];
-    const _finalXP = _finalRecords.reduce((s, r) => s + (r.xp || 0), 0);
-    console.log('[LTS] data:ready: records=%d, totalXP=%d, cloud=%s', _finalRecords.length, _finalXP, cloudLoaded);
-    EventBus.emit('data:ready');
-  } catch { /* data engine optional */ }
+  } catch (e) { console.error('[LTS] init failed:', e); }
 })();
 
 // Init router
