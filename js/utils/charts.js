@@ -217,6 +217,14 @@ export function renderEfficiencyChart(chart, records) {
       type: 'scatter', symbolSize: 10,
       data: points,
       itemStyle: { color: theme.accent, opacity: 0.7 },
+      markLine: {
+        silent: true,
+        lineStyle: { type: 'dashed', width: 1 },
+        data: [
+          { xAxis: 30, label: { formatter: '最优时长 30min', fontSize: 10, position: 'insideEndTop' }, lineStyle: { color: '#F59E0B' } },
+          { yAxis: 70, label: { formatter: '70% 基准线', fontSize: 10, position: 'insideEndTop' }, lineStyle: { color: '#10B981' } },
+        ],
+      },
     }],
   });
 }

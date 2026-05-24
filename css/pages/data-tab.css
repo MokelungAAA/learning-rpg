@@ -522,3 +522,43 @@
     grid-template-columns: repeat(2, 1fr);
   }
 }
+
+/* === Monthly Report (§12.2) === */
+.monthly-report-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--sp-2);
+  margin-bottom: var(--sp-2);
+}
+
+.monthly-stat {
+  text-align: center;
+  padding: var(--sp-2);
+  background: var(--color-surface-variant);
+  border-radius: var(--r-sm);
+}
+
+.monthly-stat-value {
+  font-size: var(--fs-md);
+  font-weight: 700;
+  color: var(--color-text-1);
+}
+
+.monthly-stat-label {
+  font-size: 10px;
+  color: var(--color-text-3);
+  margin-top: 2px;
+}
+
+.monthly-highlight {
+  font-size: var(--fs-sm);
+  color: var(--color-text-2);
+  padding: var(--sp-2) 0;
+  border-top: 1px solid var(--color-surface-variant);
+}
+
+@media (max-width: 480px) {
+  .monthly-report-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}

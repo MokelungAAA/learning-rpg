@@ -116,6 +116,44 @@ function renderCourseProgress(records) {
   return fold('courses', '🎓 网课进度', `<div class="course-list">${items}</div>`);
 }
 
+// §12.2 月度学习报告：本月XP/时长/活跃天数/日均XP/最活跃学科
+function renderMonthlyReport(records) {
+  const now = new Date();
+  const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).getTime();
+  const monthRecs = records.filter(r => r.timestamp && new Date(r.timestamp).getTime() >= monthStart);
+  if (monthRecs.length === 0) return '';
+
+  const totalXP = monthRecs.reduce((s, r) => s + (r.xp || 0), 0);
+  const totalMin = monthRecs.reduce((s, r) => s + (r.duration || 0), 0);
+  const activeDays = new Set(monthRecs.map(r => new Date(r.timestamp).toISOString().slice(0, 10))).size;
+  const daysInMonth = now.getDate();
+  const dailyAvgXP = Math.round(totalXP / Math.max(1, activeDays));
+
+  // 最活跃学科
+  const bySubject = {};
+  for (const r of monthRecs) {
+    const subj = r.subject || '未知';
+    bySubject[subj] = (bySubject[subj] || 0) + (r.duration || 0);
+  }
+  const topSubject = Object.entries(bySubject).sort((a, b) => b[1] - a[1])[0];
+  const topSubjectName = topSubject ? (SUBJECTS.find(s => s.id === topSubject[0] || s.name === topSubject[0])?.name || topSubject[0]) : '-';
+
+  const hours = Math.floor(totalMin / 60);
+  const mins = totalMin % 60;
+
+  return fold('monthly-report', `📅 ${now.getMonth() + 1}月学习报告`, `
+    <div class="monthly-report">
+      <div class="monthly-report-grid">
+        <div class="monthly-stat"><div class="monthly-stat-value">${totalXP}</div><div class="monthly-stat-label">本月XP</div></div>
+        <div class="monthly-stat"><div class="monthly-stat-value">${hours}h${mins}m</div><div class="monthly-stat-label">学习时长</div></div>
+        <div class="monthly-stat"><div class="monthly-stat-value">${activeDays}/${daysInMonth}</div><div class="monthly-stat-label">活跃天数</div></div>
+        <div class="monthly-stat"><div class="monthly-stat-value">${dailyAvgXP}</div><div class="monthly-stat-label">日均XP</div></div>
+      </div>
+      <div class="monthly-highlight">最活跃学科: <b>${topSubjectName}</b> (${topSubject ? topSubject[1] : 0}分钟)</div>
+    </div>
+  `);
+}
+
 // 薄弱点识别：平均分<60 / 超7天未学 / 总时长<30分
 // severity 2=严重（无记录或极低分），1=一般
 function renderWeakPoints(records) {
@@ -193,6 +231,7 @@ export function render() {
     <a href="#/data/reading" class="nav-link-card">📖 阅读记录 — 书架与阅读统计 →</a>
     <a href="#/search" class="nav-link-card">🔍 全局搜索 — 搜索知识点/记录/功能 →</a>
     <a href="#/data/export" class="nav-link-card">📦 数据管理 — 导入导出备份 →</a>
+    ${renderMonthlyReport(records)}
     ${renderAchievements(records, profile)}
     ${renderExamReflection(records)}
     ${renderWeakPoints(records)}
