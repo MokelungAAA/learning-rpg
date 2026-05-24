@@ -1,6 +1,9 @@
 // about.js — 关于页（版本信息+致谢+版本历史）
 // 纯静态页面，无 Store 读写，VERSION_HISTORY 手动维护
 const VERSION_HISTORY = [
+  { version: 'v0.124', date: '2026-05-24', desc: '等级显示修复+动态XP权重(努力+表现)+成就动画防重复+首页密度调整' },
+  { version: 'v0.123', date: '2026-05-24', desc: '首页智能行动指南+番茄钟重启修复+数据加载修复+笔记活动类型' },
+  { version: 'v0.122', date: '2026-05-24', desc: '算法调试工具+同步引擎自动重算XP+数据文件统一' },
   { version: 'v0.121', date: '2026-05-24', desc: '书架增强+扇形菜单5按钮+NLP正确率格式+首页布局优化' },
   { version: 'v0.120', date: '2026-05-24', desc: '番茄钟简约重构 — 番茄ToDo风格+粒子庆祝动画+遗忘曲线文字修复' },
   { version: 'v0.119', date: '2026-05-24', desc: 'Phase 5 考试记录+手势支持+题型分录入+左滑右滑导航' },
@@ -102,7 +105,7 @@ export function render() {
       <div class="about-hero">
         <div class="about-logo">LTS</div>
         <div class="about-title">学习RPG · 认知操作系统</div>
-        <div class="about-version">v0.120</div>
+        <div class="about-version">v0.124</div>
         <div class="about-credit">Created by 墨澜 × Miku</div>
       </div>
       <div class="about-section">

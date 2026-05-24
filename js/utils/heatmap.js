@@ -7,13 +7,21 @@ const WEEKDAY_LABELS = ['', '一', '', '三', '', '五', ''];
 
 // 将记录按日期聚合为 {YYYY-MM-DD → 总 XP}
 // @param {Array} records — 学习记录（需含 timestamp, xp）
+// @param {Array} [readingRecords] — 阅读记录（需含 timestamp, durationMinutes），按 1分钟=1XP 换算
 // @returns {Object} 日期到 XP 的映射
-function buildDateMap(records) {
+function buildDateMap(records, readingRecords) {
   const map = {};
   for (const r of records) {
     if (!r.timestamp) continue;
     const day = new Date(r.timestamp).toISOString().slice(0, 10);
     map[day] = (map[day] || 0) + (r.xp || 0);
+  }
+  if (readingRecords) {
+    for (const r of readingRecords) {
+      if (!r.timestamp) continue;
+      const day = new Date(r.timestamp).toISOString().slice(0, 10);
+      map[day] = (map[day] || 0) + Math.round((r.durationMinutes || 0) / 10);
+    }
   }
   return map;
 }
@@ -40,8 +48,8 @@ function getMonthLabel(date) {
 // 渲染完整热力图 HTML（含网格、月份标签、图例）
 // @param {Array} records — 学习记录数组
 // @returns {string} 热力图 HTML 字符串
-export function renderHeatmap(records) {
-  const dateMap = buildDateMap(records);
+export function renderHeatmap(records, readingRecords) {
+  const dateMap = buildDateMap(records, readingRecords);
   const today = new Date();
   const startDate = new Date(today);
   startDate.setDate(startDate.getDate() - HEATMAP_DAYS + 1);

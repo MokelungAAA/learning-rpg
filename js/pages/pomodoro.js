@@ -158,7 +158,7 @@ export function render() {
     ${renderTimer()}
     ${renderComplete()}
     ${renderHistory()}
-    <p style="color:var(--color-text-3);margin-top:var(--sp-3);font-size:var(--fs-xs);text-align:center">v0.122</p>
+    <p style="color:var(--color-text-3);margin-top:var(--sp-3);font-size:var(--fs-xs);text-align:center">v0.124</p>
   </div>`;
 }
 
@@ -537,11 +537,27 @@ export function afterRender() {
     isRunning = false;
     isPaused = false;
     elapsed = 0;
+    focusScore = 100;
+    backgroundPeriods = [];
+    bgStart = 0;
     currentRound = 1;
+    celebrationDone = false;
+    const p = getCurrentPreset();
+    totalRounds = p.rounds;
     document.getElementById('pomo-complete').style.display = 'none';
     document.getElementById('pomo-timer').style.display = 'none';
-    document.getElementById('pomo-config').style.display = 'block';
+    const configEl = document.getElementById('pomo-config');
+    if (configEl) { configEl.style.display = ''; }
     updateRoundIndicator();
+    // 重置时间选择器为当前预设值
+    const timeNumEl = document.getElementById('pomo-time-num');
+    if (timeNumEl) timeNumEl.textContent = p.work;
+    // 重置暂停按钮状态
+    const pauseBtnEl = document.getElementById('pomo-pause');
+    if (pauseBtnEl) {
+      pauseBtnEl.querySelector('.pomo-ctrl-icon').textContent = '⏸';
+      pauseBtnEl.querySelector('span:last-child').textContent = '暂停';
+    }
   };
   if (restartBtn) restartBtn.addEventListener('click', onRestart);
 

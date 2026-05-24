@@ -135,7 +135,12 @@ function renderBookshelf(records) {
     const pct = b.completion > 0 ? `${b.completion}%` : '';
     const color = getBookColor(b.title);
     const initial = b.title.charAt(0);
-    return `<div class="book-grid-card">
+    const hours = Math.floor(b.totalMin / 60);
+    const mins = b.totalMin % 60;
+    const timeStr = hours > 0 ? `${hours}时${mins}分` : `${mins}分钟`;
+    const lastDate = b.lastDate ? new Date(b.lastDate).toLocaleDateString('zh-CN') : '未知';
+    const dataAttrs = `data-title="${b.title}" data-author="${b.author}" data-category="${b.category}" data-sessions="${b.sessions}" data-time="${timeStr}" data-pages="${b.pages}" data-status="${st.label}" data-pct="${b.completion}" data-date="${lastDate}" data-format="${b.format}"`;
+    return `<div class="book-grid-card" ${dataAttrs}>
       <div class="book-grid-cover" style="background:${color}"><span class="book-cover-letter">${initial}</span></div>
       <div class="book-grid-title">${b.title}</div>
       <div class="book-grid-status" style="color:${st.color}">${st.label}</div>
@@ -147,7 +152,40 @@ function renderBookshelf(records) {
     <button class="book-view-btn" data-view="grid">网格</button>
   </div>`;
   return fold('bookshelf', `📚 书架 · ${entries.length}本`,
-    `${toggle}<div class="book-list" id="book-list-view">${listItems}</div><div class="book-grid" id="book-grid-view" style="display:none">${gridItems}</div>`);
+    `${toggle}<div class="book-list" id="book-list-view">${listItems}</div><div class="book-grid" id="book-grid-view" style="display:none">${gridItems}</div><div class="book-tooltip" id="book-tooltip"></div>`);
+}
+
+// 每日阅读详情（近30天，按日期聚合）
+function renderDailyReading(records) {
+  const dateMap = {};
+  for (const r of records) {
+    if (!r.timestamp) continue;
+    const day = new Date(r.timestamp).toISOString().slice(0, 10);
+    if (!dateMap[day]) dateMap[day] = { min: 0, books: new Set() };
+    dateMap[day].min += r.durationMinutes || 0;
+    dateMap[day].books.add(r.bookTitle);
+  }
+  const days = Object.entries(dateMap).sort((a, b) => b[0].localeCompare(a[0])).slice(0, 30);
+  if (days.length === 0) return '';
+
+  const maxMin = Math.max(...days.map(d => d[1].min), 1);
+  const items = days.map(([date, d]) => {
+    const pct = Math.round((d.min / maxMin) * 100);
+    const bookNames = Array.from(d.books).slice(0, 3).join('、');
+    const h = Math.floor(d.min / 60);
+    const m = d.min % 60;
+    const timeStr = h > 0 ? `${h}时${m}分` : `${m}分钟`;
+    return `<div class="daily-reading-item">
+      <div class="daily-reading-date">${date.slice(5)}</div>
+      <div class="daily-reading-bar"><div class="daily-reading-fill" style="width:${pct}%"></div></div>
+      <div class="daily-reading-info">
+        <span class="daily-reading-time">${timeStr}</span>
+        <span class="daily-reading-books">${bookNames}${d.books.size > 3 ? '等' : ''}</span>
+      </div>
+    </div>`;
+  }).join('');
+
+  return fold('daily-reading', `📅 每日阅读 · 近${days.length}天`, `<div class="daily-reading-list">${items}</div>`);
 }
 
 // 阅读记录列表（最多显示20条）+ 编辑/删除按钮
@@ -198,6 +236,7 @@ export function render() {
     </div>
     ${renderBookshelfStats(records)}
     ${renderBookshelf(records)}
+    ${renderDailyReading(records)}
     ${renderRecordList(records)}
     ${renderChartSection()}
     <p style="color:var(--color-text-3);margin-top:var(--sp-3);font-size:var(--fs-xs)">v0.121 · 开发者区</p>
@@ -528,6 +567,50 @@ export function afterRender() {
     if (gridView) gridView.style.display = view === 'grid' ? '' : 'none';
   };
   viewBtns.forEach(b => b.addEventListener('click', onViewToggle));
+
+  // 书架网格详情卡（hover/点击）
+  const tooltip = document.getElementById('book-tooltip');
+  const gridCards = document.querySelectorAll('.book-grid-card');
+  let tooltipVisible = false;
+  const showTooltip = (card) => {
+    if (!tooltip) return;
+    const d = card.dataset;
+    const pctBar = d.pct > 0 ? `<div class="book-tooltip-bar"><div class="book-tooltip-bar-fill" style="width:${d.pct}%"></div></div>` : '';
+    tooltip.innerHTML = `
+      <div class="book-tooltip-title">${d.title}</div>
+      <div class="book-tooltip-author">${d.author || '未知作者'}</div>
+      <div class="book-tooltip-grid">
+        <span class="book-tooltip-label">分类</span><span class="book-tooltip-val">${d.category || '未分类'}</span>
+        <span class="book-tooltip-label">状态</span><span class="book-tooltip-val">${d.status}</span>
+        <span class="book-tooltip-label">阅读时长</span><span class="book-tooltip-val">${d.time}</span>
+        <span class="book-tooltip-label">会话数</span><span class="book-tooltip-val">${d.sessions}次</span>
+        ${d.pages > 0 ? `<span class="book-tooltip-label">页数</span><span class="book-tooltip-val">${d.pages}页</span>` : ''}
+        <span class="book-tooltip-label">格式</span><span class="book-tooltip-val">${d.format === 'ebook' ? '电子书' : d.format === 'audio' ? '有声书' : '纸质书'}</span>
+        <span class="book-tooltip-label">最后阅读</span><span class="book-tooltip-val">${d.date}</span>
+      </div>
+      ${pctBar}`;
+    const rect = card.getBoundingClientRect();
+    const parent = card.closest('.fold-content') || card.parentElement;
+    const parentRect = parent.getBoundingClientRect();
+    tooltip.style.top = (rect.bottom - parentRect.top + 6) + 'px';
+    tooltip.style.left = Math.max(0, Math.min(rect.left - parentRect.left, parentRect.width - 250)) + 'px';
+    tooltip.classList.add('visible');
+    tooltipVisible = true;
+  };
+  const hideTooltip = () => {
+    if (!tooltip) return;
+    tooltip.classList.remove('visible');
+    tooltipVisible = false;
+  };
+  gridCards.forEach(card => {
+    card.addEventListener('mouseenter', () => showTooltip(card));
+    card.addEventListener('mouseleave', hideTooltip);
+    card.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (tooltipVisible && tooltip?._card === card) { hideTooltip(); } else { tooltip._card = card; showTooltip(card); }
+    });
+  });
+  document.addEventListener('click', hideTooltip);
 
   return () => {
     addBtn.removeEventListener('click', onAdd);

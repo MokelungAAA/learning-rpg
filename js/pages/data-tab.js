@@ -15,6 +15,7 @@ import {
 } from '../utils/charts.js';
 
 const getRecords = () => Store.get(StorageKeys.STUDY_RECORDS) || [];
+const getReadings = () => Store.get(StorageKeys.READING_RECORDS) || [];
 const getProfile = () => Store.get(StorageKeys.USER_PROFILE) || {};
 
 // 折叠区块通用模板
@@ -36,14 +37,20 @@ function fold(id, title, content, { open = false, badge = '' } = {}) {
 
 // 摘要卡片（移动端横滑，桌面端4列网格）
 function renderSummary(profile, records) {
-  const totalMin = records.reduce((s, r) => s + (r.duration || 0), 0);
+  const readings = getReadings();
+  const studyMin = records.reduce((s, r) => s + (r.duration || 0), 0);
+  const readingMin = readings.reduce((s, r) => s + (r.durationMinutes || 0), 0);
+  const totalMin = studyMin + readingMin;
   const totalXP = records.reduce((s, r) => s + (r.xp || 0), 0);
   const subjects = new Set(records.map(r => r.subject)).size;
   const weekXP = records.filter(r => r.timestamp && (Date.now() - new Date(r.timestamp).getTime()) < 7 * 86400000)
     .reduce((s, r) => s + (r.xp || 0), 0);
+  const totalHours = (totalMin / 60).toFixed(1);
   return `<div class="summary-scroll">
     <div class="data-summary">
-      <div class="summary-item"><div class="summary-value">${formatNumber(totalMin)}</div><div class="summary-label">总时长(分)</div></div>
+      <div class="summary-item"><div class="summary-value">${totalHours}h</div><div class="summary-label">总学习时长</div></div>
+      <div class="summary-item"><div class="summary-value">${formatNumber(studyMin)}</div><div class="summary-label">学科(分)</div></div>
+      <div class="summary-item"><div class="summary-value">${formatNumber(readingMin)}</div><div class="summary-label">阅读(分)</div></div>
       <div class="summary-item"><div class="summary-value">${formatNumber(totalXP)}</div><div class="summary-label">总XP</div></div>
       <div class="summary-item"><div class="summary-value">${subjects}/9</div><div class="summary-label">覆盖学科</div></div>
       <div class="summary-item"><div class="summary-value">${weekXP}</div><div class="summary-label">本周XP</div></div>
@@ -58,6 +65,8 @@ function renderNavGrid() {
     ['📝', '复习中心', '#/data/review'],
     ['📋', '学习日志', '#/data/log'],
     ['📖', '阅读记录', '#/data/reading'],
+    ['✍️', '背诵默写', '#/data/recitation'],
+    ['📊', '成绩趋势', '#/data/score-trend'],
     ['📦', '数据管理', '#/data/export'],
   ];
   return `<div class="nav-grid">${items.map(([icon, label, href]) =>
@@ -77,14 +86,22 @@ function renderTabBar() {
 // === 概览Tab内容 ===
 
 function renderMonthlyReport(records) {
+  const readings = getReadings();
   const now = new Date();
   const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).getTime();
   const monthRecs = records.filter(r => r.timestamp && new Date(r.timestamp).getTime() >= monthStart);
-  if (monthRecs.length === 0) return '';
+  const monthReads = readings.filter(r => r.timestamp && new Date(r.timestamp).getTime() >= monthStart);
+  if (monthRecs.length === 0 && monthReads.length === 0) return '';
 
   const totalXP = monthRecs.reduce((s, r) => s + (r.xp || 0), 0);
-  const totalMin = monthRecs.reduce((s, r) => s + (r.duration || 0), 0);
-  const activeDays = new Set(monthRecs.map(r => new Date(r.timestamp).toISOString().slice(0, 10))).size;
+  const studyMin = monthRecs.reduce((s, r) => s + (r.duration || 0), 0);
+  const readingMin = monthReads.reduce((s, r) => s + (r.durationMinutes || 0), 0);
+  const totalMin = studyMin + readingMin;
+  const allTimestamps = [
+    ...monthRecs.filter(r => r.timestamp).map(r => new Date(r.timestamp).toISOString().slice(0, 10)),
+    ...monthReads.filter(r => r.timestamp).map(r => new Date(r.timestamp).toISOString().slice(0, 10)),
+  ];
+  const activeDays = new Set(allTimestamps).size;
   const daysInMonth = now.getDate();
   const dailyAvgXP = Math.round(totalXP / Math.max(1, activeDays));
 
@@ -107,7 +124,7 @@ function renderMonthlyReport(records) {
         <div class="monthly-stat"><div class="monthly-stat-value">${activeDays}/${daysInMonth}</div><div class="monthly-stat-label">活跃天数</div></div>
         <div class="monthly-stat"><div class="monthly-stat-value">${dailyAvgXP}</div><div class="monthly-stat-label">日均XP</div></div>
       </div>
-      <div class="monthly-highlight">最活跃学科: <b>${topSubjectName}</b> (${topSubject ? topSubject[1] : 0}分钟)</div>
+      <div class="monthly-highlight">最活跃学科: <b>${topSubjectName}</b> (${topSubject ? topSubject[1] : 0}分钟) · 阅读: ${readingMin}分钟</div>
     </div>
   `, { open: true });
 }
@@ -169,8 +186,12 @@ function renderWeakPoints(records) {
 // === 进度Tab内容 ===
 
 function renderHeatmapSection(records) {
-  const activeDays = new Set(records.filter(r => r.timestamp).map(r => new Date(r.timestamp).toISOString().slice(0, 10))).size;
-  return fold('heatmap', '📅 学习日历', renderHeatmap(records), { open: true, badge: `${activeDays}天` });
+  const readings = getReadings();
+  const allDates = new Set([
+    ...records.filter(r => r.timestamp).map(r => new Date(r.timestamp).toISOString().slice(0, 10)),
+    ...readings.filter(r => r.timestamp).map(r => new Date(r.timestamp).toISOString().slice(0, 10)),
+  ]);
+  return fold('heatmap', '📅 学习日历', renderHeatmap(records, readings), { open: true, badge: `${allDates.size}天` });
 }
 
 function renderTextbookProgress(records) {
@@ -356,16 +377,22 @@ export function afterRender() {
     const date = cell.dataset.date;
     const xp = parseInt(cell.dataset.xp, 10) || 0;
     const dayRecords = records.filter(r => r.timestamp && new Date(r.timestamp).toISOString().slice(0, 10) === date);
+    const dayReadings = getReadings().filter(r => r.timestamp && new Date(r.timestamp).toISOString().slice(0, 10) === date);
     const totalMin = dayRecords.reduce((s, r) => s + (r.duration || 0), 0);
-    const recordList = dayRecords.slice(0, 5).map(r => {
+    const readMin = dayReadings.reduce((s, r) => s + (r.durationMinutes || 0), 0);
+    const recordList = dayRecords.slice(0, 3).map(r => {
       const icon = getSubjectIcon(SUBJECTS.find(s => s.name === r.subject || s.id === r.subject)?.id || '');
       return `<div class="heatmap-record">${icon} ${r.subject} · ${r.score || 0}分 · ${r.duration || 0}分 · ${r.xp || 0}XP</div>`;
     }).join('');
+    const readList = dayReadings.slice(0, 3).map(r =>
+      `<div class="heatmap-record">📖 ${r.bookTitle} · ${r.durationMinutes || 0}分钟</div>`
+    ).join('');
+    const totalItems = dayRecords.length + dayReadings.length;
     const popup = document.createElement('div');
     popup.className = 'heatmap-popup';
     popup.innerHTML = `<div class="heatmap-popup-title">${date}</div>
-      <div class="heatmap-popup-row">${totalMin} 分钟 · ${xp} XP · ${dayRecords.length} 条</div>
-      ${recordList}${dayRecords.length > 5 ? `<div class="heatmap-popup-more">还有 ${dayRecords.length - 5} 条...</div>` : ''}`;
+      <div class="heatmap-popup-row">${totalMin + readMin} 分钟 · ${xp} XP · ${totalItems} 条</div>
+      ${recordList}${readList}${totalItems > 6 ? `<div class="heatmap-popup-more">还有 ${totalItems - 6} 条...</div>` : ''}`;
     cell.style.position = 'relative';
     cell.appendChild(popup);
     heatmapPopup = popup;

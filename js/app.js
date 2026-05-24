@@ -19,12 +19,17 @@ import * as dataIO from './pages/data-io.js';
 import * as achievement from './pages/achievement.js';
 import * as subjectDetail from './pages/subject-detail.js';
 import * as debug from './pages/debug.js';
+import * as recitation from './pages/recitation.js';
+import * as scoreTrend from './pages/score-trend.js';
 import { ACHIEVEMENTS } from './data/achievements.js';
 
 const container = document.getElementById('page-container');
 
 // Theme must init before any render (FOUC already handled by inline script)
 Theme.init();
+
+// 清除重载标记（每次新会话允许一次 data:ready 重载）
+sessionStorage.removeItem('lts_data_ready_reload');
 
 // Init data engine + 运行数据迁移（non-blocking, failure won't break the app）
 (async () => {
@@ -42,7 +47,33 @@ Theme.init();
       const migrated = migrate(profile);
       if (migrated !== profile) Store.set(StorageKeys.USER_PROFILE, migrated);
     }
-    // 重算所有记录 XP（XP Engine 2.0 迁移）
+    console.log('[LTS] init done, existing records:', (Store.get(StorageKeys.STUDY_RECORDS) || []).length);
+    // 从本地统一数据文件加载记录（必须在 XP 迁移前，否则 _xpMigrated 会阻止重算）
+    try {
+      const resp = await fetch('data/lts_study_records.json');
+      console.log('[LTS] fetch status:', resp.status, 'ok:', resp.ok);
+      if (resp.ok) {
+        const fileData = await resp.json();
+        const fileRecordCount = fileData.records?.length || 0;
+        console.log('[LTS] file records:', fileRecordCount);
+        if (fileData.records && fileData.records.length > 0) {
+          const existing = Store.get(StorageKeys.STUDY_RECORDS) || [];
+          const existingIds = new Set(existing.map(r => r.id));
+          const newRecords = fileData.records.filter(r => !existingIds.has(r.id));
+          console.log('[LTS] existing:', existing.length, 'new:', newRecords.length);
+          if (newRecords.length > 0) {
+            Store.set(StorageKeys.STUDY_RECORDS, [...existing, ...newRecords]);
+            console.log('[LTS] saved total:', Store.get(StorageKeys.STUDY_RECORDS).length);
+          }
+        }
+      }
+    } catch (e) { console.warn('[LTS] fetch error:', e); }
+    // 重算所有记录 XP（XP Engine 2.0 迁移，含刚导入的记录）
+    const profileForXP = Store.get(StorageKeys.USER_PROFILE);
+    if (profileForXP && profileForXP._xpMigrated) {
+      delete profileForXP._xpMigrated;
+      Store.set(StorageKeys.USER_PROFILE, profileForXP);
+    }
     migrateRecordsXP(Store, StorageKeys, calcXP);
     // 每日首次打开时运行画像自适应
     const today = new Date().toISOString().slice(0, 10);
@@ -63,6 +94,11 @@ Theme.init();
         await SyncEngine.startupLoad();
       }
     } catch { /* sync optional */ }
+    // 数据加载完成，通知页面重新渲染（解决异步数据加载导致等级=0的问题）
+    const _finalRecords = Store.get(StorageKeys.STUDY_RECORDS) || [];
+    const _finalXP = _finalRecords.reduce((s, r) => s + (r.xp || 0), 0);
+    console.log('[LTS] data:ready: records=%d, totalXP=%d', _finalRecords.length, _finalXP);
+    EventBus.emit('data:ready');
   } catch { /* data engine optional */ }
 })();
 
@@ -111,13 +147,19 @@ Router.register('#/subject/:id', (params) => {
   handleRoute(subjectDetail, '#/subject/' + params.id, params);
 });
 Router.register('#/debug', () => handleRoute(debug, '#/debug'));
+Router.register('#/data/recitation', () => handleRoute(recitation, '#/data/recitation'));
+Router.register('#/data/score-trend', () => handleRoute(scoreTrend, '#/data/score-trend'));
 
 // Render navbar
 Navbar.render(document.body);
 
 // 成就解锁检测：新增记录时异步检查，弹 Toast 通知
 // 内部用 dynamic import 避免循环依赖
+// _achLock 防止并发执行导致重复 Toast
+let _achLock = false;
 async function checkAchievements() {
+  if (_achLock) return;
+  _achLock = true;
   try {
     const { checkAndPersist } = await import('./utils/achievements-check.js');
     const { default: Toast } = await import('./components/toast.js');
@@ -130,6 +172,7 @@ async function checkAchievements() {
       Toast.success(`🏆 成就解锁: ${ach.name}`);
     }
   } catch { /* achievement check optional */ }
+  finally { _achLock = false; }
 }
 EventBus.on('record:added', checkAchievements);
 EventBus.on('reading:added', checkAchievements);

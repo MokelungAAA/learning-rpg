@@ -1,0 +1,264 @@
+/* score-trend.css — 成绩趋势页样式 */
+
+/* === 页面头部 === */
+.st-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--sp-3);
+}
+
+.st-add-btn {
+  padding: var(--sp-1) var(--sp-3);
+  border: 1px solid var(--color-accent);
+  border-radius: var(--r-full);
+  background: transparent;
+  color: var(--color-accent);
+  font-size: var(--fs-sm);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--duration-fast) var(--ease);
+}
+
+.st-add-btn:hover {
+  background: var(--color-accent);
+  color: var(--md-on-primary);
+}
+
+/* === 学科选择器（横滑） === */
+.st-subject-bar {
+  display: flex;
+  gap: var(--sp-1);
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  margin: 0 calc(var(--sp-3) * -1);
+  padding: 0 var(--sp-3) var(--sp-3);
+  scrollbar-width: none;
+}
+
+.st-subject-bar::-webkit-scrollbar { display: none; }
+
+.st-subject-btn {
+  flex-shrink: 0;
+  padding: var(--sp-1) var(--sp-3);
+  border: 1px solid var(--color-outline);
+  border-radius: var(--r-full);
+  background: transparent;
+  color: var(--color-text-2);
+  font-size: var(--fs-sm);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--duration-fast) var(--ease);
+  scroll-snap-align: start;
+  white-space: nowrap;
+}
+
+.st-subject-btn.active {
+  background: var(--color-accent);
+  color: var(--md-on-primary);
+  border-color: var(--color-accent);
+}
+
+.st-subject-btn:not(.active):hover {
+  background: var(--color-surface-variant);
+}
+
+/* === 概览统计 === */
+.st-overview {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--sp-2);
+  margin-bottom: var(--sp-3);
+}
+
+.st-stat {
+  background: rgba(255, 255, 255, 0.72);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: var(--r-md);
+  padding: var(--sp-2);
+  text-align: center;
+  box-shadow: var(--shadow-sm);
+}
+
+[data-theme="dark"] .st-stat {
+  background: rgba(30, 30, 30, 0.72);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+.st-stat-value {
+  font-size: var(--fs-lg);
+  font-weight: 700;
+  color: var(--color-text-1);
+}
+
+.st-stat-label {
+  font-size: var(--fs-xs);
+  color: var(--color-text-3);
+}
+
+/* === 考试记录列表 === */
+.st-exam-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+}
+
+.st-exam-card {
+  position: relative;
+  padding: var(--sp-2) var(--sp-3);
+  border-radius: var(--r-md);
+  background: rgba(255, 255, 255, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  transition: box-shadow var(--duration-fast) var(--ease);
+}
+
+.st-exam-card:hover {
+  box-shadow: var(--shadow-md);
+}
+
+[data-theme="dark"] .st-exam-card {
+  background: rgba(30, 30, 30, 0.5);
+  border-color: rgba(255, 255, 255, 0.06);
+}
+
+.st-exam-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--sp-1);
+}
+
+.st-exam-name {
+  font-weight: 600;
+  font-size: var(--fs-sm);
+  color: var(--color-text-1);
+}
+
+.st-exam-date {
+  font-size: var(--fs-xs);
+  color: var(--color-text-3);
+}
+
+.st-exam-body {
+  display: flex;
+  align-items: baseline;
+  gap: var(--sp-3);
+  margin-bottom: var(--sp-1);
+}
+
+.st-exam-score {
+  font-size: var(--fs-xl);
+  font-weight: 700;
+  color: var(--color-text-1);
+}
+
+.st-exam-max {
+  font-size: var(--fs-sm);
+  font-weight: 400;
+  color: var(--color-text-3);
+}
+
+.st-exam-pct {
+  font-size: var(--fs-lg);
+  font-weight: 600;
+}
+
+/* 进度条 */
+.st-exam-bar {
+  height: 4px;
+  background: var(--color-surface-variant);
+  border-radius: var(--r-full);
+  overflow: hidden;
+  margin-bottom: var(--sp-1);
+}
+
+.st-exam-bar-fill {
+  height: 100%;
+  border-radius: var(--r-full);
+  transition: width 0.4s var(--ease);
+}
+
+/* 题型标签 */
+.st-exam-types {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-1);
+  margin-top: var(--sp-1);
+}
+
+.st-type-tag {
+  font-size: 10px;
+  color: var(--color-text-3);
+  background: var(--color-surface-variant);
+  padding: 2px 8px;
+  border-radius: var(--r-full);
+  white-space: nowrap;
+}
+
+/* 删除按钮 */
+.st-delete-btn {
+  position: absolute;
+  top: var(--sp-2);
+  right: var(--sp-2);
+  width: 22px;
+  height: 22px;
+  border: none;
+  background: transparent;
+  color: var(--color-text-3);
+  font-size: 12px;
+  cursor: pointer;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--duration-fast) var(--ease);
+}
+
+.st-delete-btn:hover {
+  background: var(--color-error);
+  color: #fff;
+}
+
+/* 空状态 */
+.st-empty {
+  color: var(--color-text-3);
+  font-size: var(--fs-sm);
+  text-align: center;
+  padding: var(--sp-4) 0;
+}
+
+/* === 录入弹窗题型输入 === */
+.st-type-row {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  margin-bottom: var(--sp-1);
+}
+
+.st-type-label {
+  flex: 1;
+  font-size: var(--fs-xs);
+  color: var(--color-text-2);
+  white-space: nowrap;
+}
+
+.st-type-input {
+  width: 80px;
+  text-align: center;
+}
+
+/* === 响应式 === */
+@media (max-width: 480px) {
+  .st-overview {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .st-exam-score {
+    font-size: var(--fs-lg);
+  }
+  .st-exam-pct {
+    font-size: var(--fs-sm);
+  }
+}

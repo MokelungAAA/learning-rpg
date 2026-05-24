@@ -56,6 +56,82 @@ function exportCSV() {
   Toast.show('CSV 导出成功', 'success');
 }
 
+// Legado 阅读数据导入
+const LEGADO_CAT_RULES = {
+  '文学小说': ['红楼梦','生死疲劳','许三观卖血记','挪威的森林','且听风吟','再袭面包店','第一人称单数','弃猫','局外人','1984','杀死一只知更鸟','Flipped','And Then There Were None','A Farewell To Arms','The Man in the Brown Suit','Wonder','金色梦乡','霍乱时期的爱情','愤怒的葡萄','德米安','夏天烟火和我的尸体','如空气般存在的我','献给阿尔吉侬的花束','86:不存在的战区','86-不存在的战区','判处勇者刑','无职转生','人类群星闪耀时','存在主义咖啡馆','古文观止'],
+  '心理学': ['自控力','不原谅也没关系','我们内心的冲突','被讨厌的勇气','幸福的勇气','自卑与超越','给心理治疗师的礼物','亲密关系','蛤蟆先生去看心理医生'],
+  '个人成长': ['如何成为有效学习的高手','如何成为不完美主义者','如何学习','清醒地活','Atomic Habits','卡片笔记写作法','刻意练习','笨苹果的英语学习法','Tools of Titans'],
+  '哲学': ['你的第一本哲学书','刘擎西方现代思想讲义'],
+  '历史': ['乡土中国','中国历代政治得失','毛泽东选集','浙江宣传文集','青年们，读马克思吧！'],
+  '社会学': ['送你一颗子弹'],
+  '科普/科学': ['思考，快与慢','Being Logical','小说机杼'],
+  '教材/教辅': ['如何阅读一本书'],
+};
+
+function legadoGuessCat(name, author) {
+  for (const [cat, kws] of Object.entries(LEGADO_CAT_RULES)) {
+    for (const kw of kws) { if (name.includes(kw) || kw.includes(name)) return cat; }
+  }
+  if (/村上春树|余华|莫言|乙一/.test(author)) return '文学小说';
+  if (/茨威格|加缪|奥威尔/.test(author)) return '文学小说';
+  if (/阿德勒|霍妮|卡尼曼|凯斯/.test(author)) return '心理学';
+  if (/费孝通|钱穆|刘瑜/.test(author)) return '历史';
+  return '其他';
+}
+
+function importLegado(file) {
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    try {
+      const records = JSON.parse(e.target.result);
+      if (!Array.isArray(records)) { Toast.show('格式错误：应为数组', 'error'); return; }
+
+      // 按书名聚合
+      const bookMap = {};
+      for (const r of records) {
+        const key = r.bookName;
+        if (!bookMap[key]) {
+          bookMap[key] = { bookName: r.bookName, bookAuthor: r.bookAuthor, totalMs: 0, sessions: 0, lastDate: '' };
+        }
+        bookMap[key].totalMs += r.readTime || 0;
+        bookMap[key].sessions++;
+        if (r.date && (!bookMap[key].lastDate || r.date > bookMap[key].lastDate)) bookMap[key].lastDate = r.date;
+      }
+
+      // 生成 LTS 记录
+      const existing = Store.get(StorageKeys.READING_RECORDS) || [];
+      const existingTitles = new Set(existing.map(r => r.bookTitle));
+      let imported = 0, skipped = 0;
+
+      for (const b of Object.values(bookMap)) {
+        const totalMin = Math.round(b.totalMs / 60000);
+        if (totalMin < 1) { skipped++; continue; }
+        if (existingTitles.has(b.bookName)) { skipped++; continue; }
+
+        const ts = b.lastDate ? new Date(b.lastDate + 'T12:00:00').toISOString() : new Date().toISOString();
+        existing.push({
+          recordID: 'rd-legado-' + Date.now() + '-' + Math.random().toString(36).slice(2, 6),
+          timestamp: ts,
+          bookTitle: b.bookName,
+          author: b.bookAuthor,
+          category: legadoGuessCat(b.bookName, b.bookAuthor),
+          status: 'reading',
+          durationMinutes: totalMin,
+          pageStart: 0, pageEnd: 0, pagesRead: 0,
+          completion: 0, format: 'ebook', rating: 0,
+          notes: '从 Legado 导入 | 会话数: ' + b.sessions,
+        });
+        imported++;
+      }
+
+      Store.set(StorageKeys.READING_RECORDS, existing);
+      Toast.show(`Legado 导入完成 · 新增 ${imported} 本 · 跳过 ${skipped} 本`, 'success');
+      EventBus.emit('data:imported');
+    } catch { Toast.show('文件解析失败', 'error'); }
+  };
+  reader.readAsText(file);
+}
+
 // 导入 JSON 备份：数组类数据按 id 去重合并，对象类直接覆盖
 // 坑: 合并逻辑假设数组项都有 id 字段，否则全部追加
 function importJSON(file) {
@@ -115,8 +191,12 @@ export function render() {
           📥 导入 JSON 备份
           <input type="file" id="import-file" accept=".json" style="display:none">
         </label>
+        <label class="data-io-btn data-io-upload" id="import-legado-label">
+          📚 导入 Legado 阅读记录
+          <input type="file" id="import-legado-file" accept=".json" style="display:none">
+        </label>
       </div>
-      <p class="data-io-note">导入会与现有数据合并，相同 ID 的记录不会重复</p>
+      <p class="data-io-note">JSON 备份按 ID 去重合并 · Legado 按书名去重，仅导入新书</p>
     </div>
     <p style="color:var(--color-text-3);margin-top:var(--sp-3);font-size:var(--fs-xs)">v0.121 · 开发者区</p>
   </div>`;
@@ -128,10 +208,12 @@ export function afterRender() {
   const exportJsonBtn = document.getElementById('export-json');
   const exportCsvBtn = document.getElementById('export-csv');
   const importInput = document.getElementById('import-file');
+  const importLegadoInput = document.getElementById('import-legado-file');
 
   if (exportJsonBtn) exportJsonBtn.addEventListener('click', exportJSON);
   if (exportCsvBtn) exportCsvBtn.addEventListener('click', exportCSV);
   if (importInput) importInput.addEventListener('change', (e) => { if (e.target.files[0]) importJSON(e.target.files[0]); });
+  if (importLegadoInput) importLegadoInput.addEventListener('change', (e) => { if (e.target.files[0]) importLegado(e.target.files[0]); });
 
   return () => {
     if (exportJsonBtn) exportJsonBtn.removeEventListener('click', exportJSON);

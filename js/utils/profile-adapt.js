@@ -82,8 +82,66 @@ function autoCalibrateXP(profile, recentRecords) {
   profile._lastXPCalibration = Date.now();
 }
 
+// 动态活动权重计算（综合型：努力因子 + 表现因子）
+// 核心逻辑:
+//   - 长期攻克难题（多次+低正确率）→ 努力因子高 → XP加成
+//   - 短期正确率偏低（次数少）→ 努力因子低 → 正常权重
+//   - 表现好（正确率高）→ 表现因子高 → XP加成
+// @param {Object} profile — 用户画像
+// @param {Object} bySubject — 按学科聚合的记录统计
+function updateDynamicWeights(profile, bySubject) {
+  const baseWeights = profile.activityWeights || {};
+  const dynamicWeights = { ...baseWeights };
+
+  // 计算全局统计（用于 effortFactor）
+  let totalAttempts = 0;
+  let totalCorrect = 0;
+  for (const data of Object.values(bySubject)) {
+    totalAttempts += data.count;
+    totalCorrect += data.correctCount;
+  }
+  const globalAccuracy = totalAttempts > 0 ? totalCorrect / totalAttempts : 0.7;
+
+  // 对每个学科计算动态权重
+  for (const [subjectKey, data] of Object.entries(bySubject)) {
+    if (data.count < 3) continue; // 数据不足，用基础权重
+
+    const avgAcc = data.avgAccuracy;
+    const count = data.count;
+
+    // 努力因子 = 尝试量加成 × 难度补偿
+    // 尝试量加成: log2(count/10+1)，10次=0.69, 50次=2.26, 100次=3.12
+    const volumeBonus = Math.log2(count / 10 + 1);
+    // 难度补偿: 正确率越低+坚持越多 → 补偿越大
+    // 60%正确率→1.17, 40%→1.67, 20%→2.5
+    const difficultyBonus = avgAcc > 0 ? Math.min(3, 0.7 / avgAcc) : 2;
+
+    // 努力因子 = min(2.0, volumeBonus × difficultyBonus × 0.5)
+    const effortFactor = Math.min(2.0, volumeBonus * difficultyBonus * 0.5);
+
+    // 表现因子: 0.6 + accuracy × 0.8 (0.6~1.4)
+    const performanceFactor = 0.6 + avgAcc * 0.8;
+
+    // 综合权重 = 基础权重 × (1 + effortBonus + performanceBonus)
+    // effortBonus 和 performanceBonus 各占一定比例
+    const effortWeight = 0.4; // 努力占40%
+    const perfWeight = 0.3;   // 表现占30%
+    const baseWeight = 0.3;   // 基础占30%
+
+    for (const [actType, baseW] of Object.entries(baseWeights)) {
+      // 只对有该学科记录的活动类型计算动态权重
+      const key = `${subjectKey}_${actType}`;
+      const dynamicW = baseW * (baseWeight + effortWeight * effortFactor + perfWeight * performanceFactor);
+      dynamicWeights[key] = Math.max(0.5, Math.min(3.0, Math.round(dynamicW * 100) / 100));
+    }
+  }
+
+  profile.dynamicActivityWeights = dynamicWeights;
+  profile._dynamicWeightsUpdatedAt = Date.now();
+}
+
 // 编排函数: 每日首次打开时调用，自动校准用户画像
-// 流程: 构建温度→按学科聚合→更新能力/修正/半衰期→XP校准→保存
+// 流程: 构建温度→按学科聚合→更新能力/修正/半衰期→动态权重→XP校准→保存
 // @returns {void} 直接修改 localStorage 中的 USER_PROFILE
 export function adaptProfile() {
   const profile = Store.get(StorageKeys.USER_PROFILE);
@@ -94,14 +152,16 @@ export function adaptProfile() {
   const tempStates = buildTempStates(records, profile);
   if (!tempStates || Object.keys(tempStates).length === 0) return;
 
-  // 按学科聚合温度和正确率
+  // 按学科聚合温度、正确率、记录数
   const bySubject = {};
   for (const st of Object.values(tempStates)) {
     if (st.count === 0) continue;
-    if (!bySubject[st.subjectKey]) bySubject[st.subjectKey] = { temps: [], accuracies: [], halfLives: [] };
+    if (!bySubject[st.subjectKey]) bySubject[st.subjectKey] = { temps: [], accuracies: [], halfLives: [], count: 0, correctCount: 0 };
     bySubject[st.subjectKey].temps.push(st.temp);
     bySubject[st.subjectKey].accuracies.push(st.avgScore);
     bySubject[st.subjectKey].halfLives.push(st.halfLife);
+    bySubject[st.subjectKey].count += st.count;
+    bySubject[st.subjectKey].correctCount += Math.round(st.avgScore * st.count / 100);
   }
 
   // 更新每个学科的参数
@@ -109,9 +169,13 @@ export function adaptProfile() {
     const avgTemp = data.temps.reduce((a, b) => a + b, 0) / data.temps.length;
     const avgAccuracy = data.accuracies.reduce((a, b) => a + b, 0) / data.accuracies.length;
     const avgHalfLife = data.halfLives.reduce((a, b) => a + b, 0) / data.halfLives.length;
+    data.avgAccuracy = avgAccuracy / 100; // 存储为 0-1 范围
     updateSubjectAbility(profile, subjectKey, avgTemp, avgAccuracy);
     updateSubjectModifier(profile, subjectKey, avgHalfLife);
   }
+
+  // 动态活动权重（努力因子+表现因子）
+  updateDynamicWeights(profile, bySubject);
 
   // 更新全局半衰期
   const allHalfLives = Object.values(tempStates).filter(s => s.count > 0).map(s => s.halfLife);

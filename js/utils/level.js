@@ -186,9 +186,11 @@ export function calcXP(record, profile, todayXP = 0, last10Scores = [], talentSu
   const practiceDur = record.practiceDuration || duration * 0.8;
   const reviewDur = record.reviewDuration || duration * 0.2;
 
-  // 活动类型权重
-  const weights = profile.activityWeights || {};
-  const activityWeight = weights[record.activityType] || 1.0;
+  // 活动类型权重（优先使用动态权重，回退到基础权重）
+  const baseWeights = profile.activityWeights || {};
+  const dynamicWeights = profile.dynamicActivityWeights || {};
+  const dynKey = `${record.subject}_${record.activityType}`;
+  const activityWeight = dynamicWeights[dynKey] || baseWeights[record.activityType] || 1.0;
   const hasScore = (record.activityType === 'practice' || record.activityType === 'exam') && score > 0;
 
   let rawXP;
@@ -228,7 +230,36 @@ export function calcXP(record, profile, todayXP = 0, last10Scores = [], talentSu
   // qual = E × difficulty × (1 + momentum) × activityWeight × talentMultiplier
   // §5.4: 特长学科 XP 额外 ×1.1
   const talentMultiplier = (talentSubjects && talentSubjects.has(record.subject)) ? 1.1 : 1.0;
-  const qual = E * difficulty * (1 + momentum) * activityWeight * talentMultiplier;
+  let qual = E * difficulty * (1 + momentum) * activityWeight * talentMultiplier;
+
+  // === 4项心理学增强 ===
+
+  // 1. 进步趋势修正 (Dweck 成长型思维): accuracy 上升时额外加成
+  //    momentum 已经捕获了趋势，这里用额外的 progressBonus 放大效果
+  //    slope > 0 → 进步中 → ×1.0~1.2; slope < 0 → 退步 → ×0.9~1.0
+  const progressBonus = last10Scores.length >= 5
+    ? 1 + Math.max(-0.1, Math.min(0.2, regressionSlope(last10Scores) / 50))
+    : 1;
+  qual *= progressBonus;
+
+  // 2. 挫败下限保护 (Deci & Ryan 自我决定理论):
+  //    正确率 <25% 且已尝试很多次 → 可能是挫败不是努力 → 降低 qual
+  //    用 last10Scores 的平均值判断持续低正确率
+  if (last10Scores.length >= 10) {
+    const recentAvg = last10Scores.reduce((a, b) => a + b, 0) / last10Scores.length;
+    if (recentAvg < 25) {
+      // 持续极低正确率 → qual 降低 30%（但不归零，仍有基础奖励）
+      qual *= 0.7;
+    }
+  }
+
+  // 3. 最佳间隔加成 (Cepeda 间隔效应):
+  //    review 活动 + 学科修正系数较高 → 间隔合理 → ×1.1~1.3
+  //    subjectMod > 1.0 说明该学科半衰期较长，复习间隔合理
+  if (record.activityType === 'review' && subjectMod > 1.0) {
+    const spacingMult = Math.min(1.3, 1 + (subjectMod - 1) * 0.3);
+    qual *= spacingMult;
+  }
 
   // 边际递减: decay = 1 / (1 + totalXP × decayRate)
   const totalXP = profile._runtimeTotalXP || 0;
@@ -242,5 +273,12 @@ export function calcXP(record, profile, todayXP = 0, last10Scores = [], talentSu
     ? Math.max(0.1, 1 - (1 - softness) * (todayXP - limit) / limit)
     : 1;
 
-  return Math.max(1, Math.min(500, Math.round(rawXP * qual * decay * softCap)));
+  let finalXP = rawXP * qual * decay * softCap;
+
+  // 4. XP暴击 (Skinner 变比率强化): 5%概率 ×2
+  //    用 record.id 的 hash 做确定性判断（同一条记录重算时结果一致）
+  const hash = record.id ? record.id.split('').reduce((h, c) => ((h << 5) - h + c.charCodeAt(0)) | 0, 0) : 0;
+  if (Math.abs(hash % 100) < 5) finalXP *= 2;
+
+  return Math.max(1, Math.min(500, Math.round(finalXP)));
 }

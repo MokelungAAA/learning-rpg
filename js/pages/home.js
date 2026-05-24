@@ -1,5 +1,5 @@
-// home.js — 首页：每日任务中心（§18.3）
-// 设计哲学: 首页不是仪表盘，是行动指南。用户打开app第一眼看到"今天做什么"
+// home.js — 首页：智能行动指南
+// 设计哲学: 预测用户行为，突出最可能的下一步操作
 // 读取: STUDY_RECORDS, USER_PROFILE, POMODORO_SESSIONS, KNOWLEDGE_STATE
 // 写入: lts_review_context（一键专注/开始复习时写入）
 import EventBus from '../event-bus.js';
@@ -27,6 +27,84 @@ function getGreeting() {
   if (h < 14) return '中午好';
   if (h < 18) return '下午好';
   return '晚上好';
+}
+
+// 预测用户行为：分析最近记录，返回最可能的下一步操作
+function predictNextAction(records, queue) {
+  const now = new Date();
+  const hour = now.getHours();
+  const today = now.toISOString().slice(0, 10);
+  const todayRecs = records.filter(r => r.timestamp && r.timestamp.slice(0, 10) === today);
+
+  // 1. 有紧急待复习 → 推荐复习
+  if (queue.length > 0 && queue[0].temp < 40) {
+    const top = queue[0];
+    return {
+      type: 'review',
+      icon: '🔥',
+      title: `${top.kp} 快忘了`,
+      subtitle: `${top.subjectName} · 温度 ${Math.round(top.temp)}°`,
+      action: '立即复习',
+      urgency: 'high',
+      kp: top.kp,
+      subject: top.subjectName,
+      skillId: top.skillId,
+    };
+  }
+
+  // 2. 分析最近7天在这个时间段最常学的学科
+  const recent = records.filter(r => {
+    const d = (Date.now() - new Date(r.timestamp).getTime()) / 86400000;
+    return d <= 7;
+  });
+  const hourRecs = recent.filter(r => {
+    const h = new Date(r.timestamp).getHours();
+    return Math.abs(h - hour) <= 1;
+  });
+  const subjFreq = {};
+  for (const r of hourRecs) {
+    subjFreq[r.subject] = (subjFreq[r.subject] || 0) + 1;
+  }
+  const topSubject = Object.entries(subjFreq).sort((a, b) => b[1] - a[1])[0];
+
+  // 3. 今天还没学过 → 推荐开始
+  if (todayRecs.length === 0) {
+    return {
+      type: 'start',
+      icon: '📖',
+      title: '今天还没开始学习',
+      subtitle: topSubject ? `通常这个时间学 ${topSubject[0]}` : '开始新的一天',
+      action: '开始专注',
+      urgency: 'normal',
+    };
+  }
+
+  // 4. 有待复习但不紧急 → 推荐复习
+  if (queue.length > 0) {
+    return {
+      type: 'review',
+      icon: '📋',
+      title: `${queue.length} 个知识点待复习`,
+      subtitle: `最近: ${queue[0].kp}`,
+      action: '开始复习',
+      urgency: 'medium',
+      kp: queue[0].kp,
+      subject: queue[0].subjectName,
+      skillId: queue[0].skillId,
+    };
+  }
+
+  // 5. 默认 → 继续学习
+  const lastRec = todayRecs[todayRecs.length - 1];
+  return {
+    type: 'continue',
+    icon: '⚡',
+    title: `继续 ${lastRec.subject || '学习'}`,
+    subtitle: `已学 ${todayRecs.reduce((s, r) => s + (r.duration || 0), 0)} 分钟`,
+    action: '继续专注',
+    urgency: 'normal',
+    subject: lastRec.subject,
+  };
 }
 
 // 获取本周/上周日期范围
@@ -94,58 +172,60 @@ function detectActivePlan(records) {
   return { subject: top.subject, textbook: top.textbook, count: top.count, sectionsDone: top.sections.size };
 }
 
-// 1. 问候 + 等级 + 设置按钮
+// 1. 紧凑问候栏（一行：问候 + 等级 + 设置）
 function renderGreeting(profile, records) {
   const totalXP = records.reduce((s, r) => s + (r.xp || 0), 0);
   const { level } = calcLevelProgress(totalXP);
   const title = getLevelTitle(level);
   const greeting = getGreeting();
+  const nick = profile.nickname || '墨澜';
+  console.log('[LTS] renderGreeting: records=%d, totalXP=%d, level=%d', records.length, totalXP, level);
   return `<div class="home-greeting">
     <div class="greeting-left">
-      <div class="greeting-text">${greeting}，墨澜</div>
-      <div class="greeting-level">Lv${level} ${title.cn}</div>
+      <span class="greeting-text">${greeting}，${nick}</span>
+      <span class="greeting-level">Lv${level} ${title.cn}</span>
     </div>
     <a href="#/settings" class="greeting-settings" title="设置">⚙️</a>
   </div>`;
 }
 
-// 2. 核心指标：连续天数 / 今日XP 分开 + 等级进度条
-function renderCoreMetrics(profile, records) {
-  const totalXP = records.reduce((s, r) => s + (r.xp || 0), 0);
-  const todayXP = calcTodayXP(records);
-  const streakDays = calcStreakDays(records);
-  const { level, xpInLevel, xpNeeded, percent } = calcLevelProgress(totalXP);
-  return `<div class="metrics-row">
-    <div class="metric-card">
-      <div class="metric-icon">🔥</div>
-      <div class="metric-value" id="stat-streak">${streakDays}</div>
-      <div class="metric-label">连续天数</div>
+// 2. 智能行动卡（预测用户下一步，视觉焦点）
+function renderSmartAction(prediction, queue) {
+  const urgencyClass = prediction.urgency === 'high' ? 'smart-urgent' : prediction.urgency === 'medium' ? 'smart-medium' : 'smart-normal';
+  const dataAttrs = prediction.kp
+    ? `data-kp="${prediction.kp}" data-subject="${prediction.subject || ''}" data-skill="${prediction.skillId || ''}"`
+    : prediction.subject ? `data-subject="${prediction.subject}"` : '';
+  return `<div class="smart-action-card ${urgencyClass}" id="smart-action" ${dataAttrs}>
+    <div class="smart-action-icon">${prediction.icon}</div>
+    <div class="smart-action-body">
+      <div class="smart-action-title">${prediction.title}</div>
+      <div class="smart-action-subtitle">${prediction.subtitle}</div>
     </div>
-    <div class="metric-card">
-      <div class="metric-icon">⚡</div>
-      <div class="metric-value" id="stat-today-xp">+${todayXP}</div>
-      <div class="metric-label">今日XP</div>
-    </div>
-  </div>
-  <div class="level-progress">
-    <div class="progress-header">
-      <span class="progress-label">Lv${level} → Lv${level + 1}</span>
-      <span class="progress-value">${formatNumber(xpInLevel)} / ${formatNumber(xpNeeded)} XP</span>
-    </div>
-    <div class="progress-bar"><div class="progress-fill" style="width:${percent}%"></div></div>
+    <button class="smart-action-btn" id="smart-action-btn">${prediction.action}</button>
   </div>`;
 }
 
-// 3. 今日任务：阴影队列前3条
+// 3. 今日脉搏条（水平：连续天数 | 今日XP | 等级进度）
+function renderPulseBar(profile, records) {
+  const totalXP = records.reduce((s, r) => s + (r.xp || 0), 0);
+  const todayXP = calcTodayXP(records);
+  const streakDays = calcStreakDays(records);
+  const { level, percent } = calcLevelProgress(totalXP);
+  return `<div class="pulse-bar">
+    <div class="pulse-item"><span class="pulse-num" id="stat-streak">${streakDays}</span><span class="pulse-label">🔥连续</span></div>
+    <div class="pulse-divider"></div>
+    <div class="pulse-item"><span class="pulse-num" id="stat-today-xp">+${todayXP}</span><span class="pulse-label">⚡今日</span></div>
+    <div class="pulse-divider"></div>
+    <div class="pulse-item"><span class="pulse-num">Lv${level}</span>
+      <div class="pulse-progress"><div class="pulse-progress-fill" style="width:${percent}%"></div></div>
+    </div>
+  </div>`;
+}
+
+// 4. 待复习任务（紧凑列表，最多3条）
 function renderTodayTasks(queue) {
-  if (queue.length === 0) {
-    return `<div class="section-card">
-      <div class="section-header">📋 今日任务</div>
-      <div class="empty-hint">暂无待复习知识点，继续保持学习节奏！</div>
-    </div>`;
-  }
+  if (queue.length === 0) return '';
   const top3 = queue.slice(0, 3);
-  const totalMin = top3.reduce((s, q) => s + Math.max(5, Math.round(15 - q.temp / 10)), 0);
   const items = top3.map(q => {
     const level = getTempLevel(q.temp);
     const cost = Math.max(5, Math.round(15 - q.temp / 10));
@@ -155,7 +235,7 @@ function renderTodayTasks(queue) {
         <span class="task-icon" style="color:${level.color}">${level.icon}</span>
         <div class="task-info">
           <div class="task-name">${q.kp}</div>
-          <div class="task-meta">${q.subjectName} · ${q.lastDays < 1 ? '今天' : Math.round(q.lastDays) + '天前'} · 约${cost}分钟</div>
+          <div class="task-meta">${q.subjectName} · ${q.lastDays < 1 ? '今天' : Math.round(q.lastDays) + '天前'} · 约${cost}分</div>
         </div>
       </div>
       <div class="task-right">
@@ -164,40 +244,20 @@ function renderTodayTasks(queue) {
       </div>
     </div>`;
   }).join('');
-  return `<div class="section-card">
-    <div class="section-header">📋 今日任务</div>
+  return `<div class="section-card tasks-card">
+    <div class="section-header">📋 待复习 <span class="section-badge">${queue.length}</span></div>
     <div class="task-list">${items}</div>
-    <div class="task-footer">
-      <span class="task-total">总计 ${totalMin} 分钟 · ${queue.length} 个待复习</span>
-      <button class="task-start-all" id="start-all-review">一键全部开始</button>
-    </div>
   </div>`;
 }
 
-// 4. 一键专注
-function renderOneTapFocus(queue) {
-  const top = queue[0];
-  const subject = top ? top.subjectName : '自动选择';
-  return `<div class="section-card onetap-card">
-    <div class="section-header">⚡ 一键专注</div>
-    <button class="onetap-btn" id="onetap-focus">
-      <span class="onetap-icon">▶</span>
-      <span class="onetap-text">开始 25 分钟专注</span>
-    </button>
-    <div class="onetap-hint">${top ? `算法推荐：${subject}` : '记录更多学习数据后自动推荐'}</div>
-  </div>`;
-}
-
-// 4.5 未完成录入提醒（番茄钟完成后未记录得分）
+// 5. 未完成录入提醒
 function renderPendingReminder() {
   const records = getRecords();
   const now = Date.now();
-  // 检查最近24小时内是否有 score=0 的番茄钟来源记录
   const pending = records.filter(r => {
     if (r.source !== 'pomodoro') return false;
     if (r.score > 0) return false;
-    const age = now - new Date(r.timestamp).getTime();
-    return age < 86400000; // 24小时
+    return (now - new Date(r.timestamp).getTime()) < 86400000;
   });
   if (pending.length === 0) return '';
   const latest = pending[pending.length - 1];
@@ -206,14 +266,14 @@ function renderPendingReminder() {
   return `<div class="section-card pending-reminder">
     <div class="pending-icon">💡</div>
     <div class="pending-text">
-      <div class="pending-title">你刚完成 ${latest.duration || 25} 分钟${latest.subject || ''}专注，还没记录得分</div>
+      <div class="pending-title">刚完成 ${latest.duration || 25} 分钟${latest.subject || ''}专注，还没记录得分</div>
       <div class="pending-time">${timeAgo}</div>
     </div>
     <button class="pending-btn" id="pending-record">快速记录</button>
   </div>`;
 }
 
-// 5. 本周变化
+// 6. 本周变化（直接展示，不折叠）
 function renderWeeklyChanges(records) {
   const changes = calcWeeklyChanges(records);
   if (changes.length === 0) return '';
@@ -227,78 +287,68 @@ function renderWeeklyChanges(records) {
       <div class="weekly-delta" style="color:${color}">${sign}${c.delta}% ${arrow}</div>
     </div>`;
   }).join('');
-  return `<div class="section-card">
+  return `<div class="section-card weekly-section">
     <div class="section-header">📊 本周变化</div>
     <div class="weekly-grid">${cards}</div>
   </div>`;
 }
 
-// 6. 当前规划
-function renderCurrentPlan(records) {
+// 7. 当前规划 + 特长弱项 + 雷达图（合并折叠）
+function renderInsights(records, talents) {
   const plan = detectActivePlan(records);
-  if (!plan) return '';
-  return `<div class="section-card">
-    <div class="section-header">🎯 当前规划</div>
-    <div class="plan-info">
-      <div class="plan-textbook">📖 正在刷：${plan.textbook}</div>
-      <div class="plan-progress">最近7天刷了 ${plan.count} 条记录 · 覆盖 ${plan.sectionsDone} 个章节</div>
-      <div class="plan-hint">💡 建议保持每天学习节奏，持续积累</div>
+  const strengths = talents.filter(t => t.type === 'strength');
+  const weaknesses = talents.filter(t => t.type === 'weakness');
+
+  let content = '';
+
+  // 当前规划
+  if (plan) {
+    content += `<div class="insight-block">
+      <div class="insight-title">🎯 正在刷：${plan.textbook}</div>
+      <div class="insight-meta">最近7天 ${plan.count} 条 · ${plan.sectionsDone} 个章节</div>
+    </div>`;
+  }
+
+  // 特长 & 弱项
+  if (strengths.length > 0 || weaknesses.length > 0) {
+    content += `<div class="insight-block">`;
+    for (const s of strengths) {
+      content += `<div class="tw-item tw-strength"><span class="tw-icon">⭐</span><span class="tw-name">${s.name}</span><span class="tw-val">${s.mastery}%</span></div>`;
+    }
+    for (const w of weaknesses) {
+      content += `<div class="tw-item tw-weakness"><span class="tw-icon">⚠️</span><span class="tw-name">${w.name}</span><span class="tw-val">${w.mastery}%</span></div>`;
+    }
+    content += `</div>`;
+  }
+
+  // 雷达图占位
+  content += `<div class="chart-container" id="radar-chart" style="height:240px;margin-top:var(--sp-2)"></div>`;
+
+  if (!content) return '';
+
+  const badge = [plan ? '1' : '', strengths.length + weaknesses.length > 0 ? `${strengths.length + weaknesses.length}科` : ''].filter(Boolean).join(' · ');
+
+  return `<div class="fold-section">
+    <div class="fold-header" data-fold="insights">
+      <span>📈 学习洞察</span>
+      ${badge ? `<span class="fold-badge">${badge}</span>` : ''}
+      <span class="fold-arrow">▾</span>
+    </div>
+    <div class="fold-body" id="fold-insights">
+      <div class="fold-content">${content}</div>
     </div>
   </div>`;
 }
 
-// 7. 特长 & 弱项
-function renderTalentWeakness(talents) {
-  if (talents.length === 0) return '';
-  const strengths = talents.filter(t => t.type === 'strength');
-  const weaknesses = talents.filter(t => t.type === 'weakness');
-  let content = '';
-  if (strengths.length > 0) {
-    content += strengths.map(s =>
-      `<div class="tw-item tw-strength"><span class="tw-icon">⭐</span><span class="tw-name">${s.name}</span><span class="tw-val">掌握度 ${s.mastery}%</span></div>`
-    ).join('');
-  }
-  if (weaknesses.length > 0) {
-    content += weaknesses.map(w => {
-      const impact = Math.round((100 - w.mastery) * 0.15);
-      return `<div class="tw-item tw-weakness"><span class="tw-icon">⚠️</span><span class="tw-name">${w.name}</span><span class="tw-val">掌握度 ${w.mastery}%</span></div>
-      <div class="tw-impact">💡 弱项影响考试约 ${impact} 分，建议优先复习</div>`;
-    }).join('');
-  }
-  if (!content) return '';
-  return `<div class="section-card">
-    <div class="section-header">⭐ 特长 & ⚠️ 弱项</div>
-    <div class="tw-list">${content}</div>
-  </div>`;
-}
-
-// 8. 学科平衡雷达图
-function renderRadarChart() {
-  return `<div class="section-card">
-    <div class="section-header">📈 学科平衡</div>
-    <div class="chart-container" id="radar-chart" style="height:280px"></div>
-  </div>`;
-}
-
-// 9. 更多数据（可折叠）
+// 8. 更多入口（紧凑网格）
 function renderMoreSection(records) {
   const achievements = Store.get(StorageKeys.ACHIEVEMENTS) || {};
   const unlocked = Object.keys(achievements).filter(k => achievements[k]).length;
-  return `<div class="fold-section">
-    <div class="fold-header" data-fold="more">
-      <span>▼ 更多数据</span>
-      <span class="fold-arrow">▾</span>
-    </div>
-    <div class="fold-body" id="fold-more">
-      <div class="fold-content">
-        <div class="more-grid">
-          <a href="#/achievement" class="more-item"><span class="more-icon">🏆</span><span class="more-label">成就</span><span class="more-val">${unlocked} 个已解锁</span></a>
-          <a href="#/data/reading" class="more-item"><span class="more-icon">📖</span><span class="more-label">阅读</span><span class="more-val">书架</span></a>
-          <a href="#/data/log" class="more-item"><span class="more-icon">📋</span><span class="more-label">日志</span><span class="more-val">${records.length} 条</span></a>
-          <a href="#/data/skill-tree" class="more-item"><span class="more-icon">🌳</span><span class="more-label">技能树</span><span class="more-val">详情</span></a>
-        </div>
-      </div>
-    </div>
+  return `<div class="more-grid">
+    <a href="#/achievement" class="more-item"><span class="more-icon">🏆</span><span class="more-label">成就</span><span class="more-val">${unlocked}</span></a>
+    <a href="#/data/log" class="more-item"><span class="more-icon">📋</span><span class="more-label">日志</span><span class="more-val">${records.length}条</span></a>
+    <a href="#/data/reading" class="more-item"><span class="more-icon">📖</span><span class="more-label">阅读</span><span class="more-val">书架</span></a>
+    <a href="#/data/skill-tree" class="more-item"><span class="more-icon">🌳</span><span class="more-label">技能树</span><span class="more-val">详情</span></a>
   </div>`;
 }
 
@@ -308,19 +358,18 @@ export function render() {
   const tempStates = buildTempStates(records, profile);
   const { subjectAbility, talents } = computeAll();
   const queue = calcShadowQueue(tempStates, subjectAbility);
+  const prediction = predictNextAction(records, queue);
 
   return `<div class="page-enter">
     ${renderGreeting(profile, records)}
-    ${renderCoreMetrics(profile, records)}
-    ${renderTodayTasks(queue)}
-    ${renderOneTapFocus(queue)}
+    ${renderSmartAction(prediction, queue)}
+    ${renderPulseBar(profile, records)}
     ${renderPendingReminder()}
+    ${renderTodayTasks(queue)}
     ${renderWeeklyChanges(records)}
-    ${renderCurrentPlan(records)}
-    ${renderTalentWeakness(talents)}
-    ${renderRadarChart()}
+    ${renderInsights(records, talents)}
     ${renderMoreSection(records)}
-    <p style="color:var(--color-text-3);margin-top:var(--sp-3);font-size:var(--fs-xs)">v0.121 · 每日任务中心</p>
+    <p style="color:var(--color-text-3);margin-top:var(--sp-3);font-size:var(--fs-xs);text-align:center">v0.124</p>
   </div>`;
 }
 
@@ -380,12 +429,9 @@ export function afterRender() {
   setTimeout(() => {
     const todayEl = document.getElementById('stat-today-xp');
     const streakEl = document.getElementById('stat-streak');
-    if (todayEl) { countUp(todayEl, todayXP, 600); todayEl.textContent = '+' + todayXP; }
+    if (todayEl) countUp(todayEl, todayXP, 600);
     if (streakEl) countUp(streakEl, streakDays, 600);
   }, 200);
-
-  // 雷达图
-  initRadarChart();
 
   // 折叠面板
   const foldHeaders = document.querySelectorAll('.fold-header');
@@ -395,10 +441,27 @@ export function afterRender() {
     const arrow = e.currentTarget.querySelector('.fold-arrow');
     if (body) body.classList.toggle('open');
     if (arrow) arrow.classList.toggle('open');
+    // 雷达图在 insights 展开时初始化
+    if (foldId === 'insights' && body?.classList.contains('open')) initRadarChart();
   };
   foldHeaders.forEach(h => h.addEventListener('click', onFoldToggle));
 
-  // 复习按钮 → 跳转番茄钟
+  // 智能行动按钮 → 根据预测类型执行不同操作
+  const smartBtn = document.getElementById('smart-action-btn');
+  const smartCard = document.getElementById('smart-action');
+  const onSmartAction = () => {
+    if (!smartCard) return;
+    const kp = smartCard.dataset.kp;
+    const subject = smartCard.dataset.subject;
+    const skill = smartCard.dataset.skill;
+    if (kp) {
+      Store.set('lts_review_context', { kp, subject, skill, startTime: Date.now() });
+    }
+    window.location.hash = '#/pomodoro';
+  };
+  if (smartBtn) smartBtn.addEventListener('click', onSmartAction);
+
+  // 待复习按钮 → 跳转番茄钟
   const reviewBtns = document.querySelectorAll('.task-review-btn');
   const onReviewClick = (e) => {
     const { kp, subject, skill } = e.currentTarget.dataset;
@@ -407,40 +470,25 @@ export function afterRender() {
   };
   reviewBtns.forEach(b => b.addEventListener('click', onReviewClick));
 
-  // 未完成录入提醒 → 打开NLP快速录入
+  // 未完成录入提醒 → 打开数据录入
   const pendingBtn = document.getElementById('pending-record');
-  const onPendingClick = () => {
-    import('../components/nlp-entry.js').then(m => m.open());
+  const onPendingClick = async () => {
+    const { open } = await import('../components/data-entry.js');
+    open();
   };
   if (pendingBtn) pendingBtn.addEventListener('click', onPendingClick);
 
-  // 一键全部开始
-  const startAllBtn = document.getElementById('start-all-review');
-  const onStartAll = () => {
-    const profile = getProfile();
-    const tempStates = buildTempStates(records, profile);
-    const { subjectAbility } = computeAll();
-    const queue = calcShadowQueue(tempStates, subjectAbility);
-    if (queue.length > 0) {
-      Store.set('lts_review_context', { kp: queue[0].kp, subject: queue[0].subjectName, skill: queue[0].skillId, startTime: Date.now() });
-      window.location.hash = '#/pomodoro';
+  // 数据加载完成 → 刷新首页（解决异步数据导致等级=0的问题）
+  // 用 sessionStorage 防止无限重载循环
+  const onDataReady = () => {
+    if (window.location.hash === '#/' || window.location.hash === '') {
+      if (!sessionStorage.getItem('lts_data_ready_reload')) {
+        sessionStorage.setItem('lts_data_ready_reload', '1');
+        window.location.reload();
+      }
     }
   };
-  if (startAllBtn) startAllBtn.addEventListener('click', onStartAll);
-
-  // 一键专注
-  const onetapBtn = document.getElementById('onetap-focus');
-  const onOnetap = () => {
-    const profile = getProfile();
-    const tempStates = buildTempStates(records, profile);
-    const { subjectAbility } = computeAll();
-    const queue = calcShadowQueue(tempStates, subjectAbility);
-    if (queue.length > 0) {
-      Store.set('lts_review_context', { kp: queue[0].kp, subject: queue[0].subjectName, skill: queue[0].skillId, startTime: Date.now() });
-    }
-    window.location.hash = '#/pomodoro';
-  };
-  if (onetapBtn) onetapBtn.addEventListener('click', onOnetap);
+  EventBus.on('data:ready', onDataReady);
 
   // record:added → 刷新页面
   const onRecordAdded = () => window.location.reload();
@@ -448,10 +496,10 @@ export function afterRender() {
 
   return () => {
     foldHeaders.forEach(h => h.removeEventListener('click', onFoldToggle));
+    if (smartBtn) smartBtn.removeEventListener('click', onSmartAction);
     reviewBtns.forEach(b => b.removeEventListener('click', onReviewClick));
     if (pendingBtn) pendingBtn.removeEventListener('click', onPendingClick);
-    if (startAllBtn) startAllBtn.removeEventListener('click', onStartAll);
-    if (onetapBtn) onetapBtn.removeEventListener('click', onOnetap);
+    EventBus.off('data:ready', onDataReady);
     EventBus.off('record:added', onRecordAdded);
     chartInstances.forEach(c => disposeChart(c));
     chartInstances = [];

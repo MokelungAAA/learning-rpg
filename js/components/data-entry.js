@@ -183,6 +183,7 @@ function renderModal() {
             <select id="entry-activity" class="entry-select">
               <option value="practice">做题</option>
               <option value="review">订正/复习</option>
+              <option value="note">笔记</option>
               <option value="reading">阅读</option>
               <option value="video">网课</option>
               <option value="lecture">上课</option>

@@ -104,6 +104,13 @@ class SyncEngine {
     for (const r of remoteRecords) merged.set(r.id, r);
     for (const r of localRecords) merged.set(r.id, r);  // 本地覆盖远程
 
+    // 合并阅读记录（按 recordID 去重，本地优先）
+    const localReadings = local.readingRecords || [];
+    const remoteReadings = remote.readingRecords || [];
+    const mergedReadings = new Map();
+    for (const r of remoteReadings) mergedReadings.set(r.recordID, r);
+    for (const r of localReadings) mergedReadings.set(r.recordID, r);
+
     const result = {
       version: '2.0',
       lastUpdated: new Date().toISOString(),
@@ -113,6 +120,7 @@ class SyncEngine {
       records: Array.from(merged.values()).sort((a, b) =>
         a.timestamp.localeCompare(b.timestamp)
       ),
+      readingRecords: Array.from(mergedReadings.values()),
     };
 
     return result;
@@ -130,6 +138,7 @@ class SyncEngine {
 
       // 2. 从 localStorage 获取本地数据
       const localRecords = Storage.get(StorageKeys.STUDY_RECORDS) || [];
+      const localReadings = Storage.get(StorageKeys.READING_RECORDS) || [];
       const local = {
         version: '2.0',
         lastUpdated: Storage.get('lts_sync_meta')?.lastUpdated || new Date(0).toISOString(),
@@ -137,6 +146,7 @@ class SyncEngine {
         schema: 'lts_study_record',
         schemaVersion: 1,
         records: localRecords,
+        readingRecords: localReadings,
       };
 
       // 3. 智能合并
@@ -144,6 +154,7 @@ class SyncEngine {
 
       // 4. 写回两边
       Storage.set(StorageKeys.STUDY_RECORDS, merged.records);
+      if (merged.readingRecords) Storage.set(StorageKeys.READING_RECORDS, merged.readingRecords);
       Storage.set('lts_sync_meta', { lastSync: Date.now(), lastUpdated: merged.lastUpdated, status: 'success' });
       await this.uploadUnified(merged);
 
@@ -165,10 +176,12 @@ class SyncEngine {
       if (!remote || !remote.records) return false;
 
       const localRecords = Storage.get(StorageKeys.STUDY_RECORDS) || [];
+      const localReadings = Storage.get(StorageKeys.READING_RECORDS) || [];
 
-      let records;
+      let records, readingRecords;
       if (localRecords.length === 0) {
         records = remote.records;
+        readingRecords = remote.readingRecords || localReadings;
       } else {
         const local = {
           version: '2.0',
@@ -177,9 +190,11 @@ class SyncEngine {
           schema: 'lts_study_record',
           schemaVersion: 1,
           records: localRecords,
+          readingRecords: localReadings,
         };
         const merged = this.mergeUnified(local, remote);
         records = merged.records;
+        readingRecords = merged.readingRecords;
       }
 
       // 自动重算 XP（异步，不阻塞渲染）
@@ -195,6 +210,7 @@ class SyncEngine {
       });
 
       Storage.set(StorageKeys.STUDY_RECORDS, records);
+      if (readingRecords) Storage.set(StorageKeys.READING_RECORDS, readingRecords);
       EventBus.emit('data:loaded', { source: 'merged', count: records.length });
       return true;
     } catch (e) {

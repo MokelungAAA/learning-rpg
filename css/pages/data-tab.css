@@ -162,7 +162,7 @@
 
 /* === 折叠区块 === */
 .fold-section {
-  margin-bottom: var(--sp-2);
+  margin-bottom: var(--sp-3);
 }
 
 .fold-header {
@@ -172,7 +172,7 @@
   padding: var(--sp-2) var(--sp-3);
   cursor: pointer;
   border-radius: var(--r-md);
-  transition: background var(--duration-fast) var(--ease);
+  transition: all var(--duration-fast) var(--ease);
   user-select: none;
   box-shadow: var(--shadow-sm);
   background: rgba(255, 255, 255, 0.72);
@@ -182,6 +182,7 @@
 
 .fold-header:hover {
   background: var(--color-surface-variant);
+  box-shadow: var(--shadow-md);
 }
 
 [data-theme="dark"] .fold-header {
@@ -189,6 +190,16 @@
   border-color: rgba(255, 255, 255, 0.08);
   border-left-color: var(--color-accent);
 }
+
+/* 不同区块用不同色条区分 */
+.fold-header[data-fold="monthly-report"] { border-left-color: #2563EB; }
+.fold-header[data-fold="achievements"] { border-left-color: #F59E0B; }
+.fold-header[data-fold="weakpoints"] { border-left-color: #EF4444; }
+.fold-header[data-fold="heatmap"] { border-left-color: #10B981; }
+.fold-header[data-fold="textbooks"] { border-left-color: #8B5CF6; }
+.fold-header[data-fold="courses"] { border-left-color: #EC4899; }
+.fold-header[data-fold="reflections"] { border-left-color: #6366F1; }
+.fold-header[data-fold="charts"] { border-left-color: #0EA5E9; }
 
 .fold-title {
   flex: 1;

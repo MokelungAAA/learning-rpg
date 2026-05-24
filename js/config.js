@@ -16,6 +16,8 @@ export const ROUTES = {
   '#/about':          'about',
   '#/subject/:id':    'subject-detail',
   '#/data/export':    'data-io',
+  '#/data/recitation':'recitation',
+  '#/data/score-trend':'score-trend',
   '#/search':         'search',
   '#/achievement':    'achievement',
   '#/debug':          'debug',
@@ -33,6 +35,8 @@ export const STORAGE_KEYS = {
   SYNC_META:          'lts_sync_meta',
   SEARCH_HISTORY:     'lts_search_history',
   CHART_PREFS:        'lts_chart_preferences',
+  RECITATION_STATE:   'lts_recitation_state',
+  EXAM_SCORES:        'lts_exam_scores',
 };
 
 // 9 科配置：id 用于旧字段，latin 用于新字段，name 用于显示
