@@ -1,141 +1,233 @@
-/* pomodoro.css — 番茄钟系统样式 */
+/* pomodoro.css — 番茄钟系统样式（v0.121: 简约重构） */
+
+.pomo-page {
+  max-width: 400px;
+  margin: 0 auto;
+  padding-bottom: var(--sp-6);
+}
 
 /* === Config === */
 .pomo-config {
-  text-align: center;
-  padding: var(--sp-4) 0;
-}
-
-.pomo-config-header {
-  font-size: var(--fs-2xl);
-  font-weight: 700;
-  color: var(--color-text-1);
-  margin-bottom: var(--sp-3);
-}
-
-.pomo-review-context {
-  font-size: var(--fs-sm);
-  color: var(--color-accent);
-  margin-bottom: var(--sp-3);
-  padding: var(--sp-2);
-  border-radius: var(--r-md);
-  background: rgba(255, 255, 255, 0.4);
-}
-
-[data-theme="dark"] .pomo-review-context {
-  background: rgba(255, 255, 255, 0.04);
-}
-
-.pomo-presets {
   display: flex;
-  justify-content: center;
-  gap: var(--sp-2);
-  margin-bottom: var(--sp-4);
-  flex-wrap: wrap;
+  flex-direction: column;
+  align-items: center;
+  padding: var(--sp-4) 0;
+  gap: var(--sp-4);
 }
 
-.pomo-preset-btn {
-  padding: var(--sp-2) var(--sp-3);
-  border: 1px solid var(--color-outline);
+.pomo-context-tag {
+  font-size: var(--fs-xs);
+  color: var(--color-accent);
+  background: var(--color-accent-light);
+  padding: var(--sp-1) var(--sp-3);
   border-radius: var(--r-full);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+/* 时间选择器 */
+.pomo-time-picker {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-4);
+}
+
+.pomo-time-btn {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 1px solid var(--color-outline);
   background: var(--color-surface);
   color: var(--color-text-2);
-  font-size: var(--fs-sm);
+  font-size: 22px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--duration-fast) var(--ease);
+}
+
+.pomo-time-btn:hover {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+}
+
+.pomo-time-btn:active {
+  transform: scale(0.92);
+}
+
+.pomo-time-value {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.pomo-time-num {
+  font-size: 56px;
+  font-weight: 200;
+  color: var(--color-text-1);
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -2px;
+}
+
+.pomo-time-unit {
+  font-size: var(--fs-xs);
+  color: var(--color-text-3);
+  margin-top: var(--sp-1);
+}
+
+/* 预设按钮行 */
+.pomo-presets-row {
+  display: flex;
+  gap: var(--sp-2);
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.pomo-preset {
+  padding: var(--sp-1) var(--sp-3);
+  border: 1px solid var(--color-outline);
+  border-radius: var(--r-full);
+  background: transparent;
+  color: var(--color-text-3);
+  font-size: var(--fs-xs);
   cursor: pointer;
   transition: all var(--duration-fast) var(--ease);
 }
 
-.pomo-preset-btn:hover {
+.pomo-preset:hover {
   border-color: var(--color-accent);
   color: var(--color-accent);
 }
 
-.pomo-custom,
-.pomo-subject-select {
-  margin-bottom: var(--sp-3);
+.pomo-preset.active {
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+  color: #fff;
 }
 
-.pomo-label {
-  font-size: var(--fs-sm);
+/* 学科选择 chips */
+.pomo-subject-row {
+  width: 100%;
+}
+
+.pomo-subject-label {
+  font-size: var(--fs-xs);
   color: var(--color-text-3);
-  margin-bottom: var(--sp-1);
-}
-
-.pomo-custom-row {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--sp-1);
-}
-
-.pomo-input {
-  width: 80px;
-  padding: var(--sp-2);
-  border: 1px solid var(--color-outline);
-  border-radius: var(--r-md);
-  background: var(--color-surface);
-  color: var(--color-text-1);
-  font-size: var(--fs-xl);
-  font-weight: 700;
+  margin-bottom: var(--sp-2);
   text-align: center;
-  outline: none;
 }
 
-.pomo-input:focus {
+.pomo-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-1);
+  justify-content: center;
+}
+
+.pomo-chip {
+  padding: 6px 14px;
+  border: 1px solid var(--color-outline);
+  border-radius: var(--r-full);
+  background: transparent;
+  color: var(--color-text-2);
+  font-size: var(--fs-xs);
+  cursor: pointer;
+  transition: all var(--duration-fast) var(--ease);
+}
+
+.pomo-chip:hover {
   border-color: var(--color-accent);
 }
 
-.pomo-unit {
-  font-size: var(--fs-sm);
-  color: var(--color-text-3);
+.pomo-chip.selected {
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+  color: #fff;
 }
 
-.pomo-select {
-  padding: var(--sp-2) var(--sp-3);
-  border: 1px solid var(--color-outline);
-  border-radius: var(--r-full);
-  background: var(--color-surface);
-  color: var(--color-text-1);
-  font-size: var(--fs-sm);
-  outline: none;
+/* 回合指示器 */
+.pomo-round-indicator {
+  display: flex;
+  gap: 8px;
+  align-items: center;
 }
 
-.pomo-start-btn {
-  padding: var(--sp-3) var(--sp-6);
+.pomo-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--color-surface-variant);
+  transition: all var(--duration-fast) var(--ease);
+}
+
+.pomo-dot.first {
+  background: var(--color-accent);
+}
+
+/* 开始按钮 */
+.pomo-start {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-2);
+  width: 100%;
+  max-width: 280px;
+  padding: var(--sp-3) var(--sp-4);
   border: none;
   border-radius: var(--r-full);
   background: var(--color-accent-gradient);
   color: #fff;
-  font-size: var(--fs-lg);
+  font-size: var(--fs-base);
   font-weight: 600;
   cursor: pointer;
-  transition: transform var(--duration-fast) var(--ease);
+  transition: transform var(--duration-fast) var(--ease), box-shadow var(--duration-fast) var(--ease);
+  box-shadow: 0 4px 16px rgba(37, 99, 235, 0.3);
 }
 
-.pomo-start-btn:active {
-  transform: scale(0.96);
+.pomo-start:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(37, 99, 235, 0.4);
+}
+
+.pomo-start:active {
+  transform: scale(0.97);
+}
+
+.pomo-start-icon {
+  font-size: 18px;
 }
 
 /* === Timer === */
 .pomo-timer-page {
-  text-align: center;
-  padding: var(--sp-4) 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--sp-6) 0;
+  gap: var(--sp-4);
+  min-height: 60vh;
+}
+
+.pomo-timer-phase {
+  font-size: var(--fs-sm);
+  color: var(--color-text-3);
+  letter-spacing: 2px;
+  text-transform: uppercase;
 }
 
 .pomo-timer-ring {
   position: relative;
-  width: 220px;
-  height: 220px;
-  margin: 0 auto var(--sp-4);
+  width: 240px;
+  height: 240px;
 }
 
 .pomo-svg {
   width: 100%;
   height: 100%;
-}
-
-.pomo-ring-progress {
-  transition: stroke-dashoffset 1s linear;
 }
 
 .pomo-timer-center {
@@ -147,108 +239,170 @@
   justify-content: center;
 }
 
-.pomo-time-display {
-  font-size: var(--fs-4xl);
-  font-weight: 700;
-  font-variant-numeric: tabular-nums;
+.pomo-timer-time {
+  font-size: 52px;
+  font-weight: 200;
   color: var(--color-text-1);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -2px;
+  line-height: 1;
 }
 
-.pomo-timer-label {
-  font-size: var(--fs-sm);
+.pomo-timer-sub {
+  font-size: var(--fs-xs);
   color: var(--color-text-3);
+  margin-top: var(--sp-2);
 }
 
+/* 回合圆点 */
+.pomo-timer-rounds {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.pomo-round-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--color-surface-variant);
+  transition: all var(--duration-fast) var(--ease);
+}
+
+.pomo-round-dot.done {
+  background: var(--color-accent);
+  opacity: 0.4;
+}
+
+.pomo-round-dot.active {
+  background: var(--color-accent);
+  box-shadow: 0 0 8px var(--color-accent);
+}
+
+/* 控制按钮 */
 .pomo-timer-controls {
   display: flex;
-  justify-content: center;
   gap: var(--sp-3);
-  margin-bottom: var(--sp-3);
+  margin-top: var(--sp-2);
 }
 
-.pomo-ctrl-btn {
+.pomo-ctrl {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-1);
   padding: var(--sp-2) var(--sp-5);
   border: 1px solid var(--color-outline);
   border-radius: var(--r-full);
   background: var(--color-surface);
-  color: var(--color-text-1);
+  color: var(--color-text-2);
   font-size: var(--fs-sm);
   cursor: pointer;
   transition: all var(--duration-fast) var(--ease);
 }
 
-.pomo-ctrl-btn:hover {
+.pomo-ctrl:hover {
   border-color: var(--color-accent);
+  color: var(--color-accent);
 }
 
-.pomo-stop-btn {
-  border-color: #e74c3c;
-  color: #e74c3c;
+.pomo-ctrl:active {
+  transform: scale(0.95);
 }
 
-.pomo-focus-score {
-  font-size: var(--fs-sm);
-  color: var(--color-text-3);
+.pomo-ctrl-icon {
+  font-size: 14px;
+}
+
+.pomo-ctrl-stop {
+  border-color: var(--color-error);
+  color: var(--color-error);
+}
+
+.pomo-ctrl-stop:hover {
+  background: var(--color-error);
+  border-color: var(--color-error);
+  color: #fff;
 }
 
 /* === Complete === */
 .pomo-complete {
-  text-align: center;
-  padding: var(--sp-4) 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--sp-6) 0;
+  gap: var(--sp-3);
+  min-height: 60vh;
+  position: relative;
+  overflow: hidden;
 }
 
-.pomo-complete-icon {
-  font-size: 48px;
-  margin-bottom: var(--sp-2);
+.pomo-confetti-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.pomo-complete-badge {
+  font-size: 64px;
+  z-index: 2;
+  animation: badgePop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes badgePop {
+  0% { transform: scale(0); opacity: 0; }
+  60% { transform: scale(1.2); }
+  100% { transform: scale(1); opacity: 1; }
 }
 
 .pomo-complete-title {
   font-size: var(--fs-xl);
-  font-weight: 700;
+  font-weight: 600;
   color: var(--color-text-1);
-  margin-bottom: var(--sp-3);
+  z-index: 2;
 }
 
 .pomo-complete-stats {
   display: flex;
-  justify-content: center;
-  gap: var(--sp-4);
-  font-size: var(--fs-sm);
-  color: var(--color-text-2);
-  margin-bottom: var(--sp-4);
+  gap: var(--sp-6);
+  z-index: 2;
 }
 
-.pomo-rating {
-  margin-bottom: var(--sp-4);
-}
-
-.pomo-stars {
+.pomo-stat-item {
   display: flex;
-  justify-content: center;
-  gap: var(--sp-1);
+  flex-direction: column;
+  align-items: center;
 }
 
-.pomo-star {
-  background: none;
-  border: none;
-  font-size: 28px;
-  cursor: pointer;
-  transition: transform var(--duration-fast) var(--ease);
+.pomo-stat-val {
+  font-size: 32px;
+  font-weight: 200;
+  color: var(--color-accent);
+  line-height: 1;
 }
 
-.pomo-star:active {
-  transform: scale(1.2);
+.pomo-stat-lbl {
+  font-size: var(--fs-xs);
+  color: var(--color-text-3);
+  margin-top: var(--sp-1);
 }
 
 .pomo-complete-actions {
   display: flex;
   flex-direction: column;
   gap: var(--sp-2);
-  align-items: center;
+  width: 100%;
+  max-width: 240px;
+  z-index: 2;
+  margin-top: var(--sp-2);
 }
 
-.pomo-action-btn {
-  padding: var(--sp-3) var(--sp-5);
+.pomo-btn-primary {
+  padding: var(--sp-3);
   border: none;
   border-radius: var(--r-full);
   background: var(--color-accent-gradient);
@@ -256,67 +410,128 @@
   font-size: var(--fs-sm);
   font-weight: 600;
   cursor: pointer;
-  min-width: 200px;
+  transition: transform var(--duration-fast) var(--ease);
 }
 
-.pomo-action-btn.pomo-secondary {
-  background: var(--color-surface-variant);
+.pomo-btn-primary:hover {
+  transform: translateY(-1px);
+}
+
+.pomo-btn-primary:active {
+  transform: scale(0.97);
+}
+
+.pomo-btn-secondary {
+  padding: var(--sp-2) var(--sp-4);
+  border: 1px solid var(--color-outline);
+  border-radius: var(--r-full);
+  background: transparent;
+  color: var(--color-text-2);
+  font-size: var(--fs-sm);
+  cursor: pointer;
+  transition: all var(--duration-fast) var(--ease);
+}
+
+.pomo-btn-secondary:hover {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+}
+
+.pomo-btn-ghost {
+  padding: var(--sp-2);
+  border: none;
+  border-radius: var(--r-full);
+  background: transparent;
+  color: var(--color-text-3);
+  font-size: var(--fs-sm);
+  cursor: pointer;
+  transition: color var(--duration-fast) var(--ease);
+}
+
+.pomo-btn-ghost:hover {
   color: var(--color-text-2);
 }
 
 /* === History === */
-.pomo-history {
+.pomo-history-section {
   margin-top: var(--sp-4);
-  padding-top: var(--sp-4);
-  border-top: 1px solid var(--color-outline);
+  padding: var(--sp-3);
+  background: var(--color-surface);
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow-sm);
 }
 
-.pomo-history-header {
-  font-size: var(--fs-sm);
-  font-weight: 600;
-  color: var(--color-text-2);
-  margin-bottom: var(--sp-2);
-}
-
-.pomo-history-stats {
+.pomo-hist-summary {
   display: flex;
-  gap: var(--sp-3);
-  font-size: var(--fs-sm);
-  color: var(--color-text-3);
+  justify-content: space-around;
   margin-bottom: var(--sp-3);
 }
 
-.pomo-history-stats b {
-  color: var(--color-accent);
-}
-
-.pomo-history-list {
+.pomo-hist-stat {
   display: flex;
   flex-direction: column;
-  gap: var(--sp-1);
+  align-items: center;
 }
 
-.pomo-history-item {
+.pomo-hist-num {
+  font-size: var(--fs-xl);
+  font-weight: 600;
+  color: var(--color-text-1);
+}
+
+.pomo-hint {
+  font-size: 10px;
+  color: var(--color-text-3);
+  margin-top: 2px;
+}
+
+.pomo-hist-list {
   display: flex;
-  gap: var(--sp-3);
-  font-size: var(--fs-xs);
-  color: var(--color-text-3);
-  padding: var(--sp-1) 0;
+  flex-direction: column;
+  gap: 1px;
 }
 
-.pomo-empty {
+.pomo-hist-item {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  padding: var(--sp-1) 0;
   font-size: var(--fs-xs);
   color: var(--color-text-3);
+}
+
+.pomo-hist-icon {
+  width: 20px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.pomo-hist-dur {
+  font-weight: 500;
+  color: var(--color-text-2);
+  min-width: 36px;
+}
+
+.pomo-hist-score {
+  min-width: 36px;
+}
+
+.pomo-hist-time {
+  margin-left: auto;
 }
 
 /* === Responsive === */
 @media (max-width: 480px) {
-  .pomo-timer-ring {
-    width: 180px;
-    height: 180px;
+  .pomo-time-num {
+    font-size: 48px;
   }
 
-  .pomo-time-display {
-    font-size: var(--fs-3xl);
+  .pomo-timer-ring {
+    width: 200px;
+    height: 200px;
+  }
+
+  .pomo-timer-time {
+    font-size: 44px;
   }
 }

@@ -1,12 +1,14 @@
 // navbar.js — 导航组件：移动端底部栏 + 桌面端侧边栏
-// v0.114: "+"核心交互 — 点击扇形展开，长按录入
+// v0.121: 长按打开NLP快速录入，短按扇形菜单
 import { NAV_TABS, STORAGE_KEYS as StorageKeys } from '../config.js';
 import EventBus from '../event-bus.js';
+import * as NlpEntry from './nlp-entry.js';
 
-// 扇形菜单配置：4个快捷操作（去掉番茄钟）
+// 扇形菜单配置：5个快捷操作（番茄钟居中）
 const FAN_ITEMS = [
   { id: 'home',     icon: '🏠', label: '首页', hash: '#/' },
   { id: 'data',     icon: '📊', label: '数据', hash: '#/data' },
+  { id: 'pomodoro', icon: '🍅', label: '番茄钟', hash: '#/pomodoro' },
   { id: 'search',   icon: '🔍', label: '搜索', hash: '#/search' },
   { id: 'settings', icon: '⚙️', label: '设置', hash: '#/settings' },
 ];
@@ -53,7 +55,7 @@ class Navbar {
     fab.innerHTML = '<span class="nav-fab-icon">+</span>';
     fab.setAttribute('aria-label', '快捷操作');
 
-    // 长按500ms → 打开数据录入；短按 → 切换扇形菜单
+    // 长按500ms → 打开NLP快速录入；短按 → 切换扇形菜单
     let pressTimer = null;
     let isLongPress = false;
     fab.addEventListener('pointerdown', () => {
@@ -61,7 +63,7 @@ class Navbar {
       pressTimer = setTimeout(() => {
         isLongPress = true;
         this.closeFan();
-        EventBus.emit('fab:click');
+        NlpEntry.open();
       }, 500);
     });
     fab.addEventListener('pointerup', () => {

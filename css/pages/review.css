@@ -322,6 +322,56 @@
   color: var(--color-text-3);
 }
 
+/* === Fold Sections === */
+.fold-section {
+  margin-bottom: var(--sp-2);
+}
+
+.fold-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--sp-3);
+  background: var(--color-surface);
+  border-radius: var(--r-md);
+  cursor: pointer;
+  font-weight: 500;
+  font-size: var(--fs-sm);
+  color: var(--color-text-1);
+  transition: background var(--duration-fast) var(--ease);
+  user-select: none;
+  box-shadow: var(--shadow-sm);
+  border-left: 3px solid var(--color-accent);
+}
+
+.fold-header:hover {
+  background: var(--color-surface-variant);
+}
+
+.fold-arrow {
+  font-size: 12px;
+  transition: transform var(--duration-normal) var(--ease);
+  color: var(--color-text-3);
+}
+
+.fold-arrow.open {
+  transform: rotate(180deg);
+}
+
+.fold-body {
+  overflow: hidden;
+  max-height: 0;
+  transition: max-height var(--duration-slow) var(--ease);
+}
+
+.fold-body.open {
+  max-height: 2000px;
+}
+
+.fold-content {
+  padding: var(--sp-3);
+}
+
 /* === Responsive === */
 @media (max-width: 480px) {
   .review-header {

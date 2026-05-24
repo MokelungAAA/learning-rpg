@@ -53,6 +53,15 @@ Theme.init();
     }
     // §11.5: 应用启动时全量成就检测
     checkAchievements();
+    // 启动时从 GitHub 智能加载数据（如果已配置同步）
+    try {
+      const { default: SyncEngine } = await import('./sync-engine.js');
+      const syncCfg = Store.get('lts_sync_config');
+      if (syncCfg?.token && syncCfg?.owner && syncCfg?.repo) {
+        SyncEngine.configure(syncCfg.token, syncCfg.owner, syncCfg.repo);
+        await SyncEngine.startupLoad();
+      }
+    } catch { /* sync optional */ }
   } catch { /* data engine optional */ }
 })();
 

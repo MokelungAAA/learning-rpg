@@ -1,4 +1,4 @@
-// pomodoro.js — 番茄钟系统（配置+计时+休息+自动录入+历史）
+// pomodoro.js — 番茄钟系统（v0.121: 简约重构 + 庆祝动画）
 // 读取: SETTINGS, POMODORO_SESSIONS, STUDY_RECORDS, USER_PROFILE
 // 写入: POMODORO_SESSIONS, STUDY_RECORDS（专注完成后自动录入）
 // 坑: 模块级状态变量（isRunning等），页面切换需清理 timer
@@ -9,7 +9,7 @@ import Toast from '../components/toast.js';
 import { playFocusStart, playFocusEnd, playBreakEnd, playLongBreakEnd, sendNotification } from '../utils/sound.js';
 import { calcXP } from '../utils/level.js';
 
-// 模块级状态（非 Store），页面切换需在清理函数中 reset
+// ── 模块级状态 ──
 let timer = null;
 let startTime = 0;
 let plannedDuration = 0;
@@ -21,140 +21,205 @@ let backgroundPeriods = [];
 let bgStart = 0;
 let currentRound = 1;
 let totalRounds = 4;
-let currentPhase = 'focus'; // 'focus' | 'shortBreak' | 'longBreak'
+let currentPhase = 'focus';
 let selectedSubject = '';
+let celebrationDone = false;
 
-// 从 review.js 传入的复习上下文（知识点/学科/技能ID）
 const getReviewContext = () => { try { return JSON.parse(localStorage.getItem('lts_review_context') || 'null'); } catch { return null; } };
 const getSettings = () => Store.get(StorageKeys.SETTINGS) || {};
-// 秒数 → MM:SS 格式化
 const fmt = (s) => `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`;
 
-// 根据 settings.pomodoroPreset 查找预设配置
 function getCurrentPreset() {
   const settings = getSettings();
   return POMODORO_PRESETS.find(p => p.id === (settings.pomodoroPreset || 'classic')) || POMODORO_PRESETS[0];
 }
 
-// 配置界面：预设按钮+自定义时长+学科选择
-// ctx 来自 review.js 的复习上下文（可选）
+// ── 配置界面 ──
 function renderConfig() {
   const ctx = getReviewContext();
   const preset = getCurrentPreset();
-  const presetBtns = POMODORO_PRESETS.map(p =>
-    `<button class="pomo-preset-btn${p.id === preset.id ? ' active' : ''}" data-minutes="${p.work}" data-id="${p.id}">${p.name} ${p.work}分</button>`
-  ).join('');
-  const subjectOpts = SUBJECTS.map(s => `<option value="${s.id}" ${ctx?.subject === s.name ? 'selected' : ''}>${s.name}</option>`).join('');
-  selectedSubject = '';
+  const subjectChips = SUBJECTS.map(s => {
+    const selected = ctx?.subject === s.name ? ' selected' : '';
+    return `<button class="pomo-chip${selected}" data-subject="${s.id}">${s.name}</button>`;
+  }).join('');
 
   return `<div class="pomo-config" id="pomo-config">
-    <div class="pomo-config-header">🍅 番茄钟</div>
-    ${ctx ? `<div class="pomo-review-context">复习: ${ctx.kp} (${ctx.subject})</div>` : ''}
-    <div class="pomo-round-info" id="pomo-round-info">第 1/${preset.rounds} 轮</div>
-    <div class="pomo-presets">${presetBtns}</div>
-    <div class="pomo-custom">
-      <label class="pomo-label">自定义时长</label>
-      <div class="pomo-custom-row">
-        <input type="number" id="pomo-minutes" class="pomo-input" min="1" max="120" value="${preset.work}" placeholder="25">
-        <span class="pomo-unit">分钟</span>
+    ${ctx ? `<div class="pomo-context-tag">复习: ${ctx.kp}</div>` : ''}
+    <div class="pomo-time-picker">
+      <button class="pomo-time-btn" id="pomo-minus">−</button>
+      <div class="pomo-time-value">
+        <span class="pomo-time-num" id="pomo-time-num">${preset.work}</span>
+        <span class="pomo-time-unit">分钟</span>
       </div>
+      <button class="pomo-time-btn" id="pomo-plus">+</button>
     </div>
-    <div class="pomo-subject-select">
-      <label class="pomo-label">学科</label>
-      <select id="pomo-subject" class="pomo-select">
-        <option value="">选择学科（可选）</option>
-        ${subjectOpts}
-      </select>
+    <div class="pomo-presets-row">
+      ${POMODORO_PRESETS.map(p =>
+        `<button class="pomo-preset${p.id === preset.id ? ' active' : ''}" data-id="${p.id}" data-work="${p.work}" data-rounds="${p.rounds}">${p.name}</button>`
+      ).join('')}
     </div>
-    <button class="pomo-start-btn" id="pomo-start">▶ 开始专注</button>
+    <div class="pomo-subject-row">
+      <div class="pomo-subject-label">学科</div>
+      <div class="pomo-chips">${subjectChips}</div>
+    </div>
+    <div class="pomo-round-indicator" id="pomo-round-indicator">
+      ${Array.from({length: totalRounds}, (_, i) => `<span class="pomo-dot${i === 0 ? ' first' : ''}"></span>`).join('')}
+    </div>
+    <button class="pomo-start" id="pomo-start">
+      <span class="pomo-start-icon">▶</span>
+      <span>开始专注</span>
+    </button>
   </div>`;
 }
 
-// 计时界面：SVG 环形进度 + 时间显示 + 暂停/停止按钮
-// 坑: 初始 display:none，startTimer 时才显示
+// ── 计时界面 ──
 function renderTimer() {
-  const circumference = 2 * Math.PI * 90;
+  const r = 110;
+  const circumference = 2 * Math.PI * r;
   return `<div class="pomo-timer-page" id="pomo-timer" style="display:none">
+    <div class="pomo-timer-phase" id="pomo-phase-label">专注中</div>
     <div class="pomo-timer-ring">
-      <svg class="pomo-svg" viewBox="0 0 200 200">
-        <circle class="pomo-ring-bg" cx="100" cy="100" r="90" fill="none" stroke="var(--color-surface-variant)" stroke-width="8"/>
-        <circle id="pomo-ring" class="pomo-ring-progress" cx="100" cy="100" r="90" fill="none" stroke="var(--color-accent)" stroke-width="8"
+      <svg class="pomo-svg" viewBox="0 0 240 240">
+        <circle cx="120" cy="120" r="${r}" fill="none" stroke="var(--color-surface-variant)" stroke-width="6" opacity="0.5"/>
+        <circle id="pomo-ring" cx="120" cy="120" r="${r}" fill="none" stroke="var(--color-accent)" stroke-width="6"
           stroke-dasharray="${circumference}" stroke-dashoffset="0" stroke-linecap="round"
-          transform="rotate(-90 100 100)"/>
+          transform="rotate(-90 120 120)"/>
       </svg>
       <div class="pomo-timer-center">
-        <div class="pomo-time-display" id="pomo-time">25:00</div>
-        <div class="pomo-timer-label" id="pomo-label">专注中</div>
-        <div class="pomo-timer-round" id="pomo-round-display">第 1/4 轮</div>
+        <div class="pomo-timer-time" id="pomo-time">25:00</div>
+        <div class="pomo-timer-sub" id="pomo-timer-sub">专注度 100%</div>
       </div>
     </div>
+    <div class="pomo-timer-rounds" id="pomo-timer-rounds"></div>
     <div class="pomo-timer-controls">
-      <button class="pomo-ctrl-btn" id="pomo-pause">⏸ 暂停</button>
-      <button class="pomo-ctrl-btn pomo-stop-btn" id="pomo-stop">⏹ 结束</button>
+      <button class="pomo-ctrl" id="pomo-pause">
+        <span class="pomo-ctrl-icon">⏸</span>
+        <span>暂停</span>
+      </button>
+      <button class="pomo-ctrl pomo-ctrl-stop" id="pomo-stop">
+        <span class="pomo-ctrl-icon">■</span>
+        <span>结束</span>
+      </button>
     </div>
-    <div class="pomo-focus-score">专注度: <span id="pomo-focus">100</span>%</div>
   </div>`;
 }
 
-// 完成界面：统计+下一轮/重新开始/手动生成记录按钮
-// §7.1: 专注完成后可手动编辑并生成学习记录
+// ── 完成界面（含庆祝动画容器） ──
 function renderComplete() {
   return `<div class="pomo-complete" id="pomo-complete" style="display:none">
-    <div class="pomo-complete-icon">🎉</div>
-    <div class="pomo-complete-title" id="pomo-complete-title">专注完成！</div>
+    <canvas id="pomo-confetti" class="pomo-confetti-canvas"></canvas>
+    <div class="pomo-complete-badge" id="pomo-badge"></div>
+    <div class="pomo-complete-title" id="pomo-complete-title">专注完成</div>
     <div class="pomo-complete-stats" id="pomo-stats"></div>
     <div class="pomo-complete-actions">
-      <button class="pomo-action-btn" id="pomo-generate-record">📝 生成学习记录</button>
-      <button class="pomo-action-btn" id="pomo-next-round">▶ 下一轮</button>
-      <button class="pomo-action-btn pomo-secondary" id="pomo-restart">🔄 重新开始</button>
+      <button class="pomo-btn-primary" id="pomo-next-round">下一轮</button>
+      <button class="pomo-btn-secondary" id="pomo-edit-record">编辑记录</button>
+      <button class="pomo-btn-ghost" id="pomo-restart">重新开始</button>
     </div>
   </div>`;
 }
 
-// 历史面板：最近10条会话 + 统计摘要
+// ── 历史面板 ──
 function renderHistory() {
   const sessions = Store.get(StorageKeys.POMODORO_SESSIONS) || [];
   const completed = sessions.filter(s => s.completed && s.phase === 'focus');
   const totalMin = completed.reduce((s, r) => s + (r.plannedDuration || 0), 0);
-  const avgFocus = completed.length > 0 ? Math.round(completed.reduce((s, r) => s + (r.focusScore || 0), 0) / completed.length) : 0;
+  const todayStr = new Date().toISOString().slice(0, 10);
+  const todayCount = completed.filter(s => s.startTime && new Date(s.startTime).toISOString().slice(0, 10) === todayStr).length;
 
-  const recent = sessions.slice(-10).reverse().map(s => {
-    const date = s.startTime ? new Date(s.startTime).toLocaleDateString('zh-CN') : '';
+  const recent = sessions.slice(-5).reverse().map(s => {
+    const t = s.startTime ? new Date(s.startTime) : null;
+    const time = t ? t.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' }) : '';
     const phase = s.phase === 'focus' ? '🍅' : '☕';
-    const status = s.completed ? phase : '❌';
-    return `<div class="pomo-history-item">
-      <span>${status}</span>
-      <span>${s.plannedDuration || 0}分</span>
-      <span>专注 ${s.focusScore || 0}%</span>
-      <span>${date}</span>
+    return `<div class="pomo-hist-item">
+      <span class="pomo-hist-icon">${s.completed ? phase : '○'}</span>
+      <span class="pomo-hist-dur">${s.plannedDuration || 0}分</span>
+      <span class="pomo-hist-score">${s.focusScore || 0}%</span>
+      <span class="pomo-hist-time">${time}</span>
     </div>`;
   }).join('');
 
-  return `<div class="pomo-history">
-    <div class="pomo-history-header">📊 番茄钟统计</div>
-    <div class="pomo-history-stats">
-      <span>完成 <b>${completed.length}</b> 个</span>
-      <span>总时长 <b>${totalMin}</b> 分钟</span>
-      <span>平均专注 <b>${avgFocus}</b>%</span>
+  return `<div class="pomo-history-section">
+    <div class="pomo-hist-summary">
+      <div class="pomo-hist-stat"><span class="pomo-hist-num">${todayCount}</span><span class="pomo-hint">今日</span></div>
+      <div class="pomo-hist-stat"><span class="pomo-hist-num">${completed.length}</span><span class="pomo-hint">总计</span></div>
+      <div class="pomo-hist-stat"><span class="pomo-hist-num">${totalMin}</span><span class="pomo-hint">分钟</span></div>
     </div>
-    ${recent ? `<div class="pomo-history-list">${recent}</div>` : '<p class="pomo-empty">暂无番茄钟记录</p>'}
+    ${recent ? `<div class="pomo-hist-list">${recent}</div>` : ''}
   </div>`;
 }
 
 export function render() {
-  return `<div class="page-enter">
-    <a href="#/" class="page-back">← 返回首页</a>
+  return `<div class="page-enter pomo-page">
+    <a href="#/" class="page-back">← 返回</a>
     ${renderConfig()}
     ${renderTimer()}
     ${renderComplete()}
     ${renderHistory()}
-    <p style="color:var(--color-text-3);margin-top:var(--sp-3);font-size:var(--fs-xs)">v0.114 · 开发者区</p>
+    <p style="color:var(--color-text-3);margin-top:var(--sp-3);font-size:var(--fs-xs);text-align:center">v0.121</p>
   </div>`;
 }
 
-// 启动计时器：设置 interval + SVG 环形进度 + 专注度跟踪
-// phase: 'focus' | 'shortBreak' | 'longBreak'
-// 坑: visibilitychange 监听仅 focus 阶段添加，需在 complete/stop 时移除
+// ── 庆祝动画：粒子 + 彩纸 ──
+function launchCelebration() {
+  const canvas = document.getElementById('pomo-confetti');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  canvas.width = canvas.offsetWidth * 2;
+  canvas.height = canvas.offsetHeight * 2;
+  ctx.scale(2, 2);
+  const W = canvas.offsetWidth;
+  const H = canvas.offsetHeight;
+
+  const colors = ['#62A0EA', '#FF6B6B', '#FFD93D', '#6BCB77', '#C084FC', '#FF8C00'];
+  const particles = [];
+  for (let i = 0; i < 60; i++) {
+    particles.push({
+      x: W / 2 + (Math.random() - 0.5) * 60,
+      y: H / 2,
+      vx: (Math.random() - 0.5) * 8,
+      vy: -Math.random() * 10 - 4,
+      size: Math.random() * 6 + 3,
+      color: colors[Math.floor(Math.random() * colors.length)],
+      rotation: Math.random() * 360,
+      rotSpeed: (Math.random() - 0.5) * 10,
+      opacity: 1,
+      shape: Math.random() > 0.5 ? 'rect' : 'circle',
+    });
+  }
+
+  let frame = 0;
+  const maxFrames = 120;
+  function animate() {
+    if (frame >= maxFrames) { ctx.clearRect(0, 0, W, H); return; }
+    ctx.clearRect(0, 0, W, H);
+    for (const p of particles) {
+      p.x += p.vx;
+      p.vy += 0.25;
+      p.y += p.vy;
+      p.rotation += p.rotSpeed;
+      p.opacity = Math.max(0, 1 - frame / maxFrames);
+      ctx.save();
+      ctx.translate(p.x, p.y);
+      ctx.rotate((p.rotation * Math.PI) / 180);
+      ctx.globalAlpha = p.opacity;
+      ctx.fillStyle = p.color;
+      if (p.shape === 'rect') {
+        ctx.fillRect(-p.size / 2, -p.size / 4, p.size, p.size / 2);
+      } else {
+        ctx.beginPath();
+        ctx.arc(0, 0, p.size / 2, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.restore();
+    }
+    frame++;
+    requestAnimationFrame(animate);
+  }
+  animate();
+}
+
+// ── 计时器逻辑 ──
 function startTimer(minutes, phase) {
   currentPhase = phase;
   plannedDuration = minutes;
@@ -164,31 +229,44 @@ function startTimer(minutes, phase) {
   focusScore = phase === 'focus' ? 100 : focusScore;
   backgroundPeriods = [];
   startTime = Date.now();
+  celebrationDone = false;
 
   document.getElementById('pomo-config').style.display = 'none';
   document.getElementById('pomo-complete').style.display = 'none';
-  document.getElementById('pomo-timer').style.display = 'block';
+  document.getElementById('pomo-timer').style.display = 'flex';
 
   const totalSeconds = minutes * 60;
-  const circumference = 2 * Math.PI * 90;
+  const r = 110;
+  const circumference = 2 * Math.PI * r;
   const ring = document.getElementById('pomo-ring');
   const timeDisplay = document.getElementById('pomo-time');
-  const focusDisplay = document.getElementById('pomo-focus');
-  const label = document.getElementById('pomo-label');
-  const roundDisplay = document.getElementById('pomo-round-display');
+  const subDisplay = document.getElementById('pomo-timer-sub');
+  const phaseLabel = document.getElementById('pomo-phase-label');
+  const roundsEl = document.getElementById('pomo-timer-rounds');
 
-  // 设置颜色和标签 + 音效
+  // 更新回合指示器
+  if (roundsEl) {
+    roundsEl.innerHTML = Array.from({length: totalRounds}, (_, i) =>
+      `<span class="pomo-round-dot${i < currentRound ? ' done' : ''}${i === currentRound - 1 && phase === 'focus' ? ' active' : ''}"></span>`
+    ).join('');
+  }
+
   if (phase === 'focus') {
     ring.setAttribute('stroke', 'var(--color-accent)');
-    label.textContent = '专注中';
+    phaseLabel.textContent = '专注中';
     playFocusStart();
   } else {
     ring.setAttribute('stroke', 'var(--color-success)');
-    label.textContent = phase === 'longBreak' ? '长休息' : '短休息';
+    phaseLabel.textContent = phase === 'longBreak' ? '长休息' : '短休息';
   }
-  roundDisplay.textContent = `第 ${currentRound}/${totalRounds} 轮`;
   timeDisplay.textContent = fmt(totalSeconds);
+  subDisplay.textContent = '专注度 100%';
+  ring.style.transition = 'none';
   ring.setAttribute('stroke-dashoffset', '0');
+
+  requestAnimationFrame(() => {
+    ring.style.transition = 'stroke-dashoffset 1s linear';
+  });
 
   timer = setInterval(() => {
     if (isPaused) return;
@@ -196,9 +274,9 @@ function startTimer(minutes, phase) {
     if (elapsed >= totalSeconds) { completeSession(); return; }
     const remaining = totalSeconds - elapsed;
     timeDisplay.textContent = fmt(remaining);
-    ring.setAttribute('stroke-dashoffset', circumference * (1 - elapsed / totalSeconds));
+    ring.setAttribute('stroke-dashoffset', circumference * (elapsed / totalSeconds));
     if (phase === 'focus') {
-      focusDisplay.textContent = focusScore;
+      subDisplay.textContent = `专注度 ${focusScore}%`;
       EventBus.emit('pomo:tick', remaining);
     }
   }, 1000);
@@ -209,7 +287,6 @@ function startTimer(minutes, phase) {
   }
 }
 
-// 页面切后台时记录离屏时长，>10秒扣10分 (§7.5)
 function onVisibilityChange() {
   if (!isRunning || currentPhase !== 'focus') return;
   if (document.hidden) { bgStart = Date.now(); }
@@ -221,22 +298,22 @@ function onVisibilityChange() {
   }
 }
 
-// 暂停/继续切换：暂停时停止 elapsed 累加
 function pauseTimer() {
   if (isPaused) {
     startTime = Date.now() - elapsed * 1000;
     isPaused = false;
-    document.getElementById('pomo-pause').textContent = '⏸ 暂停';
-    document.getElementById('pomo-label').textContent = currentPhase === 'focus' ? '专注中' : (currentPhase === 'longBreak' ? '长休息' : '短休息');
+    document.getElementById('pomo-pause').querySelector('.pomo-ctrl-icon').textContent = '⏸';
+    document.getElementById('pomo-pause').querySelector('span:last-child').textContent = '暂停';
+    document.getElementById('pomo-phase-label').textContent = currentPhase === 'focus' ? '专注中' : (currentPhase === 'longBreak' ? '长休息' : '短休息');
   } else {
     isPaused = true;
-    if (currentPhase === 'focus') focusScore = Math.max(0, focusScore - 5); // §7.5: 手动暂停扣5分
-    document.getElementById('pomo-pause').textContent = '▶ 继续';
-    document.getElementById('pomo-label').textContent = '已暂停';
+    if (currentPhase === 'focus') focusScore = Math.max(0, focusScore - 5);
+    document.getElementById('pomo-pause').querySelector('.pomo-ctrl-icon').textContent = '▶';
+    document.getElementById('pomo-pause').querySelector('span:last-child').textContent = '继续';
+    document.getElementById('pomo-phase-label').textContent = '已暂停';
   }
 }
 
-// 强制停止：clearInterval + 移除 visibilitychange + 触发完成
 function stopTimer() {
   clearInterval(timer);
   isRunning = false;
@@ -244,20 +321,16 @@ function stopTimer() {
   completeSession();
 }
 
-// 完成处理：保存会话 + 自动生成学习记录 + 音效通知
-// 提前结束按比例扣分：完成度<90%时 focusScore *= 完成比例
 function completeSession() {
   clearInterval(timer);
   isRunning = false;
   document.removeEventListener('visibilitychange', onVisibilityChange);
   EventBus.emit('pomo:stopped');
 
-  const preset = getCurrentPreset();
   const ctx = getReviewContext();
   const plannedSeconds = plannedDuration * 60;
   const completionRatio = Math.min(1, elapsed / plannedSeconds);
 
-  // 提前结束扣分：完成度<90%时按比例缩减专注分
   if (currentPhase === 'focus' && completionRatio < 0.9) {
     focusScore = Math.round(focusScore * completionRatio);
   }
@@ -271,62 +344,68 @@ function completeSession() {
     isReview: !!(ctx && currentPhase === 'focus'),
   };
 
-  // 保存会话
   const sessions = Store.get(StorageKeys.POMODORO_SESSIONS) || [];
   sessions.push(session);
   Store.set(StorageKeys.POMODORO_SESSIONS, sessions);
 
-  // 专注完成 → 自动生成学习记录
   if (currentPhase === 'focus' && session.completed) {
     autoSaveRecord();
   }
-
   localStorage.removeItem('lts_review_context');
 
-  // 音效 + 通知
   if (currentPhase === 'focus') {
     playFocusEnd();
-    sendNotification('🍅 专注完成！', `专注 ${Math.round(elapsed / 60)} 分钟，专注度 ${focusScore}%`);
+    sendNotification('专注完成', `${Math.round(elapsed / 60)} 分钟 · 专注度 ${focusScore}%`);
   } else if (currentPhase === 'longBreak') {
     playLongBreakEnd();
-    sendNotification('☕ 长休息结束', '准备开始新一轮专注');
+    sendNotification('长休息结束', '准备开始新一轮');
   } else {
     playBreakEnd();
-    sendNotification('☕ 短休息结束', '准备开始下一轮专注');
+    sendNotification('短休息结束', '准备开始下一轮');
   }
 
-  // 显示完成/休息界面
+  // 切换界面
   document.getElementById('pomo-timer').style.display = 'none';
   const completeEl = document.getElementById('pomo-complete');
-  completeEl.style.display = 'block';
+  completeEl.style.display = 'flex';
 
-  const stats = document.getElementById('pomo-stats');
+  const badge = document.getElementById('pomo-badge');
   const title = document.getElementById('pomo-complete-title');
+  const stats = document.getElementById('pomo-stats');
   const nextBtn = document.getElementById('pomo-next-round');
 
   if (currentPhase === 'focus') {
     const actualMin = Math.round(elapsed / 60);
-    stats.innerHTML = `<span>时长 ${actualMin} 分钟</span><span>专注度 ${focusScore}%</span>`;
-
+    badge.textContent = '🍅';
+    badge.className = 'pomo-complete-badge';
+    title.textContent = currentRound >= totalRounds ? '一轮完成' : '专注完成';
+    stats.innerHTML = `
+      <div class="pomo-stat-item"><span class="pomo-stat-val">${actualMin}</span><span class="pomo-stat-lbl">分钟</span></div>
+      <div class="pomo-stat-item"><span class="pomo-stat-val">${focusScore}%</span><span class="pomo-stat-lbl">专注度</span></div>
+    `;
     if (currentRound >= totalRounds) {
-      title.textContent = '🎉 一轮完成！';
-      nextBtn.textContent = '☕ 开始长休息';
+      nextBtn.textContent = '开始长休息';
       nextBtn.dataset.nextPhase = 'longBreak';
     } else {
-      title.textContent = '🍅 专注完成！';
-      nextBtn.textContent = '☕ 开始短休息';
+      nextBtn.textContent = '开始短休息';
       nextBtn.dataset.nextPhase = 'shortBreak';
     }
+    // 庆祝动画
+    if (!celebrationDone && session.completed) {
+      celebrationDone = true;
+      setTimeout(() => launchCelebration(), 200);
+    }
   } else {
-    title.textContent = '☕ 休息结束';
-    stats.innerHTML = `<span>休息 ${Math.round(elapsed / 60)} 分钟</span>`;
+    badge.textContent = '☕';
+    title.textContent = '休息结束';
+    stats.innerHTML = `<div class="pomo-stat-item"><span class="pomo-stat-val">${Math.round(elapsed / 60)}</span><span class="pomo-stat-lbl">分钟休息</span></div>`;
     if (currentPhase === 'longBreak') {
       currentRound = 1;
-      nextBtn.textContent = '▶ 开始新一轮';
+      nextBtn.textContent = '开始新一轮';
       nextBtn.dataset.nextPhase = 'focus';
     } else {
       currentRound++;
-      nextBtn.textContent = '▶ 开始下一轮';
+      nextBtn.textContent = '开始下一轮';
       nextBtn.dataset.nextPhase = 'focus';
     }
   }
@@ -334,9 +413,6 @@ function completeSession() {
   EventBus.emit('pomodoro:completed', session);
 }
 
-// 专注完成后自动生成学习记录并存入 STUDY_RECORDS
-// 有复习上下文时 activityType='review'，否则='practice'
-// 坑: XP 用 calcXP 公式计算，需构造 profile._runtimeTotalXP
 function autoSaveRecord() {
   const ctx = getReviewContext();
   const subject = selectedSubject || ctx?.subject || '';
@@ -355,9 +431,8 @@ function autoSaveRecord() {
     activityType: isReview ? 'review' : 'practice',
     source: 'pomodoro',
     notes: `番茄钟第${currentRound}轮 · 专注度${focusScore}%${isReview ? ' · 复习' : ''}`,
-    xp: 0, // 占位，下方用 calcXP 计算
+    xp: 0,
   };
-  // XP Engine 2.0: 番茄钟完成后用完整公式计算 XP
   const profile = Store.get(StorageKeys.USER_PROFILE) || {};
   const allRecs = Store.get(StorageKeys.STUDY_RECORDS) || [];
   const last10 = allRecs.slice(-10).map(r => r.score || 0);
@@ -370,49 +445,84 @@ function autoSaveRecord() {
   records.push(record);
   Store.set(StorageKeys.STUDY_RECORDS, records);
   EventBus.emit('record:added', record);
-  Toast.show(`${isReview ? '复习' : '学习'}记录已自动保存 · ${duration}分钟`, 'success');
+  Toast.show(`${isReview ? '复习' : '学习'}记录已保存 · ${duration}分钟`, 'success');
 }
 
-// afterRender: 预设按钮+开始/暂停/停止/下一轮/重开事件绑定
-// 返回清理函数：clearInterval + 移除 visibilitychange
+// ── afterRender ──
 export function afterRender() {
   const preset = getCurrentPreset();
   totalRounds = preset.rounds;
   currentRound = 1;
+  selectedSubject = '';
+
+  // 时间 +/- 按钮
+  const timeNum = document.getElementById('pomo-time-num');
+  const minusBtn = document.getElementById('pomo-minus');
+  const plusBtn = document.getElementById('pomo-plus');
+  const onMinus = () => { const v = Math.max(1, parseInt(timeNum.textContent) - 5); timeNum.textContent = v; };
+  const onPlus = () => { const v = Math.min(120, parseInt(timeNum.textContent) + 5); timeNum.textContent = v; };
+  if (minusBtn) minusBtn.addEventListener('click', onMinus);
+  if (plusBtn) plusBtn.addEventListener('click', onPlus);
 
   // 预设按钮
-  const presetBtns = document.querySelectorAll('.pomo-preset-btn');
+  const presetBtns = document.querySelectorAll('.pomo-preset');
   const onPreset = (e) => {
-    const min = parseInt(e.currentTarget.dataset.minutes, 10);
-    const id = e.currentTarget.dataset.id;
-    document.getElementById('pomo-minutes').value = min;
-    const p = POMODORO_PRESETS.find(pp => pp.id === id);
-    if (p) { totalRounds = p.rounds; document.getElementById('pomo-round-info').textContent = `第 1/${totalRounds} 轮`; }
+    const btn = e.currentTarget;
+    const work = parseInt(btn.dataset.work);
+    const rounds = parseInt(btn.dataset.rounds);
+    timeNum.textContent = work;
+    totalRounds = rounds;
+    updateRoundIndicator();
     presetBtns.forEach(b => b.classList.remove('active'));
-    e.currentTarget.classList.add('active');
+    btn.classList.add('active');
   };
   presetBtns.forEach(b => b.addEventListener('click', onPreset));
+
+  // 学科选择 chips
+  const chips = document.querySelectorAll('.pomo-chip');
+  const onChip = (e) => {
+    const btn = e.currentTarget;
+    const wasSelected = btn.classList.contains('selected');
+    chips.forEach(c => c.classList.remove('selected'));
+    if (!wasSelected) {
+      btn.classList.add('selected');
+      selectedSubject = btn.dataset.subject;
+    } else {
+      selectedSubject = '';
+    }
+  };
+  chips.forEach(c => c.addEventListener('click', onChip));
+
+  // 回合指示器
+  function updateRoundIndicator() {
+    const el = document.getElementById('pomo-round-indicator');
+    if (el) {
+      el.innerHTML = Array.from({length: totalRounds}, (_, i) =>
+        `<span class="pomo-dot${i === 0 ? ' first' : ''}"></span>`
+      ).join('');
+    }
+  }
 
   // 开始
   const startBtn = document.getElementById('pomo-start');
   const onStart = () => {
-    const min = parseInt(document.getElementById('pomo-minutes').value, 10) || 25;
-    selectedSubject = document.getElementById('pomo-subject')?.value || '';
+    const min = parseInt(document.getElementById('pomo-time-num').textContent) || 25;
     startTimer(min, 'focus');
   };
-  startBtn.addEventListener('click', onStart);
+  if (startBtn) startBtn.addEventListener('click', onStart);
 
+  // 暂停/停止
   const pauseBtn = document.getElementById('pomo-pause');
   if (pauseBtn) pauseBtn.addEventListener('click', pauseTimer);
   const stopBtn = document.getElementById('pomo-stop');
   if (stopBtn) stopBtn.addEventListener('click', stopTimer);
 
-  // 下一轮/休息
+  // 下一轮
   const nextBtn = document.getElementById('pomo-next-round');
   const onNext = () => {
     const phase = nextBtn.dataset.nextPhase || 'focus';
-    const preset = getCurrentPreset();
-    const min = phase === 'focus' ? preset.work : phase === 'shortBreak' ? preset.shortBreak : preset.longBreak;
+    const p = getCurrentPreset();
+    const min = phase === 'focus' ? p.work : phase === 'shortBreak' ? p.shortBreak : p.longBreak;
     document.getElementById('pomo-complete').style.display = 'none';
     startTimer(min, phase);
   };
@@ -424,32 +534,34 @@ export function afterRender() {
     document.getElementById('pomo-complete').style.display = 'none';
     document.getElementById('pomo-config').style.display = 'block';
     currentRound = 1;
-    document.getElementById('pomo-round-info').textContent = `第 1/${totalRounds} 轮`;
+    updateRoundIndicator();
   };
   if (restartBtn) restartBtn.addEventListener('click', onRestart);
 
-  // §7.1: 手动生成学习记录（跳转数据录入弹窗）
-  const genBtn = document.getElementById('pomo-generate-record');
-  const onGenRecord = async () => {
+  // 编辑记录 → 打开数据录入弹窗
+  const editBtn = document.getElementById('pomo-edit-record');
+  const onEditRecord = async () => {
     const { open } = await import('../components/data-entry.js');
     open();
   };
-  if (genBtn) genBtn.addEventListener('click', onGenRecord);
+  if (editBtn) editBtn.addEventListener('click', onEditRecord);
 
   return () => {
+    if (minusBtn) minusBtn.removeEventListener('click', onMinus);
+    if (plusBtn) plusBtn.removeEventListener('click', onPlus);
     presetBtns.forEach(b => b.removeEventListener('click', onPreset));
-    startBtn.removeEventListener('click', onStart);
+    chips.forEach(c => c.removeEventListener('click', onChip));
+    if (startBtn) startBtn.removeEventListener('click', onStart);
     if (pauseBtn) pauseBtn.removeEventListener('click', pauseTimer);
     if (stopBtn) stopBtn.removeEventListener('click', stopTimer);
     if (nextBtn) nextBtn.removeEventListener('click', onNext);
     if (restartBtn) restartBtn.removeEventListener('click', onRestart);
-    if (genBtn) genBtn.removeEventListener('click', onGenRecord);
+    if (editBtn) editBtn.removeEventListener('click', onEditRecord);
     clearInterval(timer);
     document.removeEventListener('visibilitychange', onVisibilityChange);
   };
 }
 
-// 快速启动：供 FAB 长按调用，直接开始 25 分钟专注
 export function quickStart() {
   const preset = getCurrentPreset();
   startTimer(preset.work, 'focus');

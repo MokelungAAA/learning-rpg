@@ -5,47 +5,18 @@
   margin-bottom: var(--sp-3);
 }
 .settings-section {
-  background: var(--color-surface);
-  border: 1px solid var(--glass-border);
-  border-radius: var(--r-md);
-  padding: var(--sp-3);
   margin-bottom: var(--sp-2);
-  box-shadow: var(--shadow-sm);
 }
-.settings-section h3 {
+.settings-section .fold-title {
   font-size: var(--fs-sm);
-  color: var(--color-text-3);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  margin: 0;
+  color: var(--color-text-2);
+  font-weight: 600;
 }
-/* 可折叠区块 */
+/* 可折叠区块 — 使用 data-tab.css 的 fold-header/fold-body 样式 */
 .fold-section {
   padding: 0;
 }
-.fold-toggle {
-  cursor: pointer;
-  user-select: none;
-  padding: var(--sp-3);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  transition: background var(--duration-fast);
-}
-.fold-toggle:hover {
-  background: var(--color-surface-variant);
-  border-radius: var(--r-md);
-}
-.fold-arrow {
-  font-size: var(--fs-xs);
-  color: var(--color-text-3);
-  transition: transform var(--duration-fast);
-}
-.fold-body {
-  padding: 0 var(--sp-3) var(--sp-3);
-  max-height: none;
-  overflow: visible;
-}
+/* fold-body 使用 data-tab.css 的 max-height 过渡，此处不覆盖 */
 .settings-row {
   display: flex;
   align-items: center;

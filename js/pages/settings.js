@@ -8,12 +8,15 @@ import EventBus from '../event-bus.js';
 import Toast from '../components/toast.js';
 import SyncEngine from '../sync-engine.js';
 
-// 可折叠区块通用模板
+// 可折叠区块通用模板（使用 max-height 过渡，与 data-tab 一致）
 function foldable(id, icon, title, content, open = false) {
   return `<div class="settings-section fold-section">
-    <h3 class="fold-toggle" data-fold="${id}">${icon} ${title} <span class="fold-arrow">${open ? '▴' : '▾'}</span></h3>
-    <div class="fold-body" id="fold-${id}" style="display:${open ? 'block' : 'none'}">
-      ${content}
+    <h3 class="fold-header" data-fold="${id}">
+      <span class="fold-title">${icon} ${title}</span>
+      <span class="fold-arrow${open ? ' open' : ''}">▾</span>
+    </h3>
+    <div class="fold-body${open ? ' open' : ''}" id="fold-${id}">
+      <div class="fold-content">${content}</div>
     </div>
   </div>`;
 }
@@ -137,9 +140,12 @@ function renderDeveloperContent() {
     </div>`;
 }
 
-// 关于区块内容：跳转 #/about 的导航链接
+// 关于区块内容：版本信息 + 跳转关于页
 function renderAboutContent() {
-  return `<a href="#/about" class="settings-nav-link"><span>ℹ️ 关于</span><span class="settings-arrow">→</span></a>`;
+  return `<div class="settings-row"><span class="settings-label">版本</span><span class="settings-value">v0.121</span></div>
+    <div class="settings-row"><span class="settings-label">技术栈</span><span class="settings-value">HTML + CSS + JS + ECharts</span></div>
+    <div class="settings-row"><span class="settings-label">存储</span><span class="settings-value">localStorage + GitHub Sync</span></div>
+    <a href="#/about" class="settings-nav-link"><span>ℹ️ 版本历史与致谢</span><span class="settings-arrow">→</span></a>`;
 }
 
 export function render() {
@@ -149,10 +155,10 @@ export function render() {
     ${foldable('sync', '☁️', '数据同步', renderSyncContent())}
     ${foldable('pomodoro', '🍅', '番茄钟', renderPomodoroContent())}
     ${foldable('profile', '👤', '个人信息', renderProfileContent())}
-    ${foldable('about', 'ℹ️', '关于', renderAboutContent())}
     ${foldable('developer', '🔧', '开发者', renderDeveloperContent())}
+    ${foldable('about', 'ℹ️', '关于', renderAboutContent())}
     ${renderSyncModal()}
-    <p style="color:var(--color-text-3);margin-top:var(--sp-3);font-size:var(--fs-xs)">v0.114 · 开发者区</p>
+    <p style="color:var(--color-text-3);margin-top:var(--sp-3);font-size:var(--fs-xs)">v0.121 · 开发者区</p>
   </div>`;
 }
 
@@ -263,19 +269,17 @@ export function afterRender() {
   if (syncSave) syncSave.addEventListener('click', saveSyncConfig);
   if (syncNowBtn) syncNowBtn.addEventListener('click', doSync);
 
-  // 通用折叠/展开：所有 .fold-toggle 点击切换对应 .fold-body
-  const foldToggles = document.querySelectorAll('.fold-toggle');
+  // 通用折叠/展开：所有 .fold-header 点击切换对应 .fold-body
+  const foldHeaders = document.querySelectorAll('.fold-header');
   const onFoldToggle = (e) => {
-    const toggle = e.currentTarget;
-    const id = toggle.dataset.fold;
-    const body = document.getElementById('fold-' + id);
-    if (!body) return;
-    const shown = body.style.display !== 'none';
-    body.style.display = shown ? 'none' : 'block';
-    const arrow = toggle.querySelector('.fold-arrow');
-    if (arrow) arrow.textContent = shown ? '▾' : '▴';
+    const { fold: foldId } = e.currentTarget.dataset;
+    const body = document.getElementById('fold-' + foldId);
+    const arrow = e.currentTarget.querySelector('.fold-arrow');
+    if (body) body.classList.toggle('open');
+    if (arrow) arrow.classList.toggle('open');
+    e.currentTarget.classList.toggle('open');
   };
-  foldToggles.forEach(t => t.addEventListener('click', onFoldToggle));
+  foldHeaders.forEach(h => h.addEventListener('click', onFoldToggle));
 
   // 恢复已保存的同步配置到引擎（页面加载时执行一次）
   const savedCfg = Store.get('lts_sync_config') || {};
@@ -299,6 +303,6 @@ export function afterRender() {
     if (syncCancel) syncCancel.removeEventListener('click', closeSyncModal);
     if (syncSave) syncSave.removeEventListener('click', saveSyncConfig);
     if (syncNowBtn) syncNowBtn.removeEventListener('click', doSync);
-    foldToggles.forEach(t => t.removeEventListener('click', onFoldToggle));
+    foldHeaders.forEach(h => h.removeEventListener('click', onFoldToggle));
   };
 }

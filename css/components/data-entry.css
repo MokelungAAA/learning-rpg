@@ -252,3 +252,212 @@
     padding-bottom: 0;
   }
 }
+
+/* === NLP Quick Entry Dialog (§18.6.2) === */
+.nlp-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  z-index: 950;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--sp-4);
+  animation: fadeIn 0.2s ease;
+}
+
+.nlp-modal {
+  width: 100%;
+  max-width: 420px;
+  background: var(--color-surface);
+  border-radius: var(--r-xl);
+  overflow: hidden;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.25);
+  animation: modalPop 0.25s ease;
+}
+
+.nlp-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--sp-3) var(--sp-4);
+  font-weight: 700;
+  font-size: var(--fs-md);
+  color: var(--color-text-1);
+  border-bottom: 1px solid var(--glass-border);
+}
+
+.nlp-close {
+  background: none;
+  border: none;
+  font-size: 18px;
+  color: var(--color-text-3);
+  cursor: pointer;
+  padding: var(--sp-1);
+}
+
+.nlp-body {
+  padding: var(--sp-4);
+}
+
+.nlp-input {
+  width: 100%;
+  padding: var(--sp-3);
+  border: 2px solid var(--color-outline);
+  border-radius: var(--r-md);
+  background: var(--color-surface);
+  color: var(--color-text-1);
+  font-size: var(--fs-sm);
+  outline: none;
+  resize: none;
+  transition: border-color var(--duration-fast) var(--ease);
+}
+
+.nlp-input:focus {
+  border-color: var(--color-accent);
+}
+
+.nlp-input::placeholder {
+  color: var(--color-text-3);
+}
+
+.nlp-preview {
+  margin-top: var(--sp-3);
+  min-height: 40px;
+}
+
+.nlp-result {
+  background: rgba(98, 160, 234, 0.08);
+  border: 1px solid rgba(98, 160, 234, 0.2);
+  border-radius: var(--r-md);
+  padding: var(--sp-2) var(--sp-3);
+}
+
+.nlp-result-row {
+  font-size: var(--fs-sm);
+  color: var(--color-text-2);
+  margin-top: 2px;
+}
+
+.nlp-result-row:first-child {
+  margin-top: 0;
+}
+
+.nlp-tag {
+  font-weight: 600;
+  color: var(--color-accent);
+}
+
+.nlp-parse-fail {
+  font-size: var(--fs-xs);
+  color: var(--color-warning);
+  padding: var(--sp-1) 0;
+}
+
+.nlp-hint {
+  margin-top: var(--sp-2);
+  font-size: var(--fs-xs);
+  color: var(--color-text-3);
+  line-height: 1.5;
+}
+
+.nlp-footer {
+  display: flex;
+  gap: var(--sp-2);
+  padding: var(--sp-3) var(--sp-4);
+  border-top: 1px solid var(--glass-border);
+}
+
+.nlp-btn {
+  flex: 1;
+  padding: var(--sp-2) var(--sp-3);
+  border: none;
+  border-radius: var(--r-md);
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--duration-fast) var(--ease);
+}
+
+.nlp-btn-cancel {
+  background: var(--color-surface-variant);
+  color: var(--color-text-2);
+}
+
+.nlp-btn-confirm {
+  background: var(--color-accent-gradient);
+  color: #fff;
+}
+
+.nlp-btn-confirm:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.nlp-btn-confirm:active:not(:disabled) {
+  transform: scale(0.97);
+}
+
+/* === Simplified Form: collapsible more options === */
+.entry-more-toggle {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-1);
+  padding: var(--sp-2) 0;
+  border: none;
+  background: none;
+  color: var(--color-text-3);
+  font-size: var(--fs-xs);
+  cursor: pointer;
+  transition: color var(--duration-fast) var(--ease);
+}
+
+.entry-more-toggle:hover {
+  color: var(--color-accent);
+}
+
+.entry-more-toggle .fold-arrow {
+  font-size: 10px;
+  transition: transform var(--duration-normal) var(--ease);
+}
+
+.entry-more-toggle .fold-arrow.open {
+  transform: rotate(180deg);
+}
+
+.entry-more-body {
+  overflow: hidden;
+  max-height: 0;
+  transition: max-height var(--duration-slow) var(--ease);
+}
+
+.entry-more-body.open {
+  max-height: 500px;
+}
+
+/* === Exam Fields (§18.5) === */
+.exam-fields {
+  background: rgba(98, 160, 234, 0.06);
+  border: 1px solid rgba(98, 160, 234, 0.15);
+  border-radius: var(--r-md);
+  padding: var(--sp-3);
+}
+
+.exam-fields-title {
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  color: var(--color-text-2);
+  margin-bottom: var(--sp-2);
+}
+
+.exam-row {
+  margin-bottom: var(--sp-1);
+}
+
+.exam-note {
+  font-size: var(--fs-xs);
+  color: var(--color-text-3);
+  margin: 0;
+}

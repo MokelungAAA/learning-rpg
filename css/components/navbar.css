@@ -1,4 +1,4 @@
-/* navbar.css — 底部导航栏（v0.114: +核心交互，扇形展开） */
+/* navbar.css — 底部导航栏（v0.121: +核心交互，扇形展开） */
 .bottom-nav {
   position: fixed;
   bottom: var(--nav-bottom);
@@ -156,11 +156,12 @@
   transform: translate(calc(-50% + var(--fan-x)), calc(-50% + var(--fan-y))) scale(0.95);
 }
 
-/* 展开位置 — 弧形排列（半径增大，避免重叠） */
-.fan-item[data-idx="0"] { --fan-x: -90px; --fan-y: -52px; }
-.fan-item[data-idx="1"] { --fan-x: -52px; --fan-y: -90px; }
-.fan-item[data-idx="2"] { --fan-x: 52px; --fan-y: -90px; }
-.fan-item[data-idx="3"] { --fan-x: 90px; --fan-y: -52px; }
+/* 展开位置 — 5按钮弧形排列（番茄钟居中上） */
+.fan-item[data-idx="0"] { --fan-x: -100px; --fan-y: -36px; }
+.fan-item[data-idx="1"] { --fan-x: -58px; --fan-y: -88px; }
+.fan-item[data-idx="2"] { --fan-x: 0px; --fan-y: -108px; }
+.fan-item[data-idx="3"] { --fan-x: 58px; --fan-y: -88px; }
+.fan-item[data-idx="4"] { --fan-x: 100px; --fan-y: -36px; }
 
 .fan-item.open {
   transform: translate(calc(-50% + var(--fan-x)), calc(-50% + var(--fan-y))) scale(1);

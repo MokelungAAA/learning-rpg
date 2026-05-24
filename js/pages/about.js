@@ -1,6 +1,13 @@
 // about.js — 关于页（版本信息+致谢+版本历史）
 // 纯静态页面，无 Store 读写，VERSION_HISTORY 手动维护
 const VERSION_HISTORY = [
+  { version: 'v0.121', date: '2026-05-24', desc: '书架增强+扇形菜单5按钮+NLP正确率格式+首页布局优化' },
+  { version: 'v0.120', date: '2026-05-24', desc: '番茄钟简约重构 — 番茄ToDo风格+粒子庆祝动画+遗忘曲线文字修复' },
+  { version: 'v0.119', date: '2026-05-24', desc: 'Phase 5 考试记录+手势支持+题型分录入+左滑右滑导航' },
+  { version: 'v0.118', date: '2026-05-24', desc: 'Phase 4 UI视觉升级 — 冰蓝毛玻璃+蓝紫渐变+Noto Sans SC/Inter字体+蓝黑深色模式' },
+  { version: 'v0.117', date: '2026-05-24', desc: 'Phase 3 录入系统重构 — NLP快速录入+简化表单+番茄钟自动填入+未完成提醒' },
+  { version: 'v0.116', date: '2026-05-24', desc: 'Phase 2 首页重设计 — 每日任务中心+一键专注+本周变化+特长弱项+雷达图' },
+  { version: 'v0.115', date: '2026-05-24', desc: 'Phase 1 Bug修复 — 折叠按钮修复+搜索精简+设置页统一+版本号更新' },
   { version: 'v0.114', date: '2026-05-24', desc: 'Phase B: 导航+视觉 — "+"扇形菜单+粒子网络启动页+MD3阴影系统' },
   { version: 'v0.113', date: '2026-05-24', desc: 'Phase A: 数据+算法 — 9科完整教材数据+FSRS幂律遗忘曲线+交错效应+心流检测+元认知校准' },
   { version: 'v0.112', date: '2026-05-24', desc: '全面升级规划 — §17规划写入参考文档+学习科学调研+课本/网课/教辅数据规划' },
@@ -95,7 +102,7 @@ export function render() {
       <div class="about-hero">
         <div class="about-logo">LTS</div>
         <div class="about-title">学习RPG · 认知操作系统</div>
-        <div class="about-version">v0.114</div>
+        <div class="about-version">v0.120</div>
         <div class="about-credit">Created by 墨澜 × Miku</div>
       </div>
       <div class="about-section">

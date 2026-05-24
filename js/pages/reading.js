@@ -60,6 +60,39 @@ function renderHeatmap(records) {
   </div>`;
 }
 
+// 生成书籍封面色（根据书名哈希取色）
+function getBookColor(title) {
+  let hash = 0;
+  for (let i = 0; i < title.length; i++) hash = title.charCodeAt(i) + ((hash << 5) - hash);
+  const colors = ['#62A0EA', '#FF6B6B', '#FFD93D', '#6BCB77', '#C084FC', '#FF8C00', '#F472B6', '#34D399', '#FBBF24'];
+  return colors[Math.abs(hash) % colors.length];
+}
+
+// 书架统计摘要
+function renderBookshelfStats(records) {
+  const books = {};
+  for (const r of records) {
+    const key = r.bookTitle;
+    if (!books[key]) books[key] = { status: 'reading', totalMin: 0 };
+    books[key].totalMin += r.durationMinutes || 0;
+    if (r.status) books[key].status = r.status;
+  }
+  const entries = Object.values(books);
+  const total = entries.length;
+  const reading = entries.filter(b => b.status === 'reading').length;
+  const finished = entries.filter(b => b.status === 'finished').length;
+  const totalMin = entries.reduce((s, b) => s + b.totalMin, 0);
+  const hours = Math.floor(totalMin / 60);
+  const mins = totalMin % 60;
+
+  return `<div class="bookshelf-stats">
+    <div class="bs-stat"><span class="bs-stat-num">${total}</span><span class="bs-stat-lbl">总书数</span></div>
+    <div class="bs-stat"><span class="bs-stat-num">${reading}</span><span class="bs-stat-lbl">在读</span></div>
+    <div class="bs-stat"><span class="bs-stat-num">${finished}</span><span class="bs-stat-lbl">已读</span></div>
+    <div class="bs-stat"><span class="bs-stat-num">${hours}h${mins}m</span><span class="bs-stat-lbl">总时长</span></div>
+  </div>`;
+}
+
 // 书架视图：按书名聚合，支持网格/列表切换
 function renderBookshelf(records) {
   const books = {};
@@ -76,7 +109,7 @@ function renderBookshelf(records) {
     }
   }
   const entries = Object.values(books).sort((a, b) => b.lastDate.localeCompare(a.lastDate));
-  if (entries.length === 0) return fold('bookshelf', '📚 书架', '<p class="pomo-empty">暂无阅读记录</p>');
+  if (entries.length === 0) return fold('bookshelf', '📚 书架', '<p class="empty-hint">暂无阅读记录，点击上方按钮开始</p>');
 
   const statusMap = Object.fromEntries(BOOK_STATUSES.map(s => [s.value, s]));
   const listItems = entries.map(b => {
@@ -84,8 +117,10 @@ function renderBookshelf(records) {
     const st = statusMap[b.status] || statusMap.reading;
     const badge = `<span class="book-status-badge" style="color:${st.color}">${st.label}</span>`;
     const pct = b.completion > 0 ? `<div class="book-completion"><div class="book-completion-fill" style="width:${b.completion}%"></div></div>` : '';
+    const color = getBookColor(b.title);
+    const initial = b.title.charAt(0);
     return `<div class="book-card">
-      <div class="book-cover">📖</div>
+      <div class="book-cover" style="background:${color}"><span class="book-cover-letter">${initial}</span></div>
       <div class="book-info">
         <div class="book-title">${b.title} ${badge}</div>
         <div class="book-meta">${b.author ? b.author + ' · ' : ''}${b.category}</div>
@@ -98,8 +133,10 @@ function renderBookshelf(records) {
   const gridItems = entries.map(b => {
     const st = statusMap[b.status] || statusMap.reading;
     const pct = b.completion > 0 ? `${b.completion}%` : '';
+    const color = getBookColor(b.title);
+    const initial = b.title.charAt(0);
     return `<div class="book-grid-card">
-      <div class="book-grid-cover">📖</div>
+      <div class="book-grid-cover" style="background:${color}"><span class="book-cover-letter">${initial}</span></div>
       <div class="book-grid-title">${b.title}</div>
       <div class="book-grid-status" style="color:${st.color}">${st.label}</div>
       ${pct ? `<div class="book-grid-pct">${pct}</div>` : ''}
@@ -159,10 +196,11 @@ export function render() {
       <div class="section-title">📖 阅读记录</div>
       <button class="reading-add-btn" id="reading-add">+ 记录阅读</button>
     </div>
+    ${renderBookshelfStats(records)}
     ${renderBookshelf(records)}
     ${renderRecordList(records)}
     ${renderChartSection()}
-    <p style="color:var(--color-text-3);margin-top:var(--sp-3);font-size:var(--fs-xs)">v0.114 · 开发者区</p>
+    <p style="color:var(--color-text-3);margin-top:var(--sp-3);font-size:var(--fs-xs)">v0.121 · 开发者区</p>
   </div>`;
 }
 

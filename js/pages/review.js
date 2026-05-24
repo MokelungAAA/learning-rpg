@@ -148,7 +148,7 @@ export function render() {
     ${renderPotential(potentials)}
     ${renderFalseMastery(falseItems)}
     ${renderExamRecommend(queue)}
-    <p style="color:var(--color-text-3);margin-top:var(--sp-3);font-size:var(--fs-xs)">v0.114 · 开发者区</p>
+    <p style="color:var(--color-text-3);margin-top:var(--sp-3);font-size:var(--fs-xs)">v0.121 · 开发者区</p>
   </div>`;
 }
 
@@ -169,18 +169,36 @@ async function initForgettingCurveChart() {
 
   chart.setOption({
     tooltip: { trigger: 'axis', formatter: (params) => `第 ${params[0].axisValue} 天<br/>保留率: ${params[0].value}%` },
-    grid: { left: 40, right: 20, top: 20, bottom: 30 },
-    xAxis: { type: 'category', data: days, name: '天数', axisLabel: { fontSize: 11 } },
-    yAxis: { type: 'value', min: 0, max: 100, name: '保留率%', axisLabel: { fontSize: 11 } },
+    grid: { left: 48, right: 24, top: 24, bottom: 40 },
+    xAxis: {
+      type: 'category', data: days,
+      name: '天',
+      nameLocation: 'end',
+      nameTextStyle: { fontSize: 11, color: 'var(--color-text-3)', padding: [0, 0, 0, 4] },
+      axisLabel: { fontSize: 11, color: 'var(--color-text-3)' },
+      axisLine: { lineStyle: { color: 'var(--color-outline)' } },
+    },
+    yAxis: {
+      type: 'value', min: 0, max: 100,
+      name: '保留率 %',
+      nameLocation: 'end',
+      nameTextStyle: { fontSize: 11, color: 'var(--color-text-3)', padding: [0, 0, 4, 0] },
+      axisLabel: { fontSize: 11, color: 'var(--color-text-3)', formatter: '{value}%' },
+      splitLine: { lineStyle: { color: 'var(--color-outline)', type: 'dashed', opacity: 0.5 } },
+    },
     series: [
       {
         type: 'line', data: retentions, smooth: true,
         lineStyle: { color: '#62A0EA', width: 2 },
         areaStyle: { color: 'rgba(98,160,234,0.1)' },
+        symbol: 'circle',
+        symbolSize: 6,
+        itemStyle: { color: '#62A0EA' },
         markLine: {
-          data: [{ yAxis: 80, name: '复习阈值' }],
-          lineStyle: { color: '#FF8C00', type: 'dashed' },
-          label: { formatter: '80% 阈值', fontSize: 11 },
+          data: [{ yAxis: 80 }],
+          lineStyle: { color: '#FF8C00', type: 'dashed', width: 1 },
+          label: { formatter: '80% 阈值', fontSize: 11, color: '#FF8C00', position: 'insideEndTop' },
+          symbol: 'none',
         },
       },
     ],

@@ -58,7 +58,6 @@ function renderNavGrid() {
     ['📝', '复习中心', '#/data/review'],
     ['📋', '学习日志', '#/data/log'],
     ['📖', '阅读记录', '#/data/reading'],
-    ['🔍', '全局搜索', '#/search'],
     ['📦', '数据管理', '#/data/export'],
   ];
   return `<div class="nav-grid">${items.map(([icon, label, href]) =>
@@ -242,7 +241,7 @@ function renderChartsSection() {
     ${extra}
     <div class="chart-container" id="${id}"></div>
   </div>`).join('');
-  return fold('charts', '📈 数据图表', charts, { badge: '6个' });
+  return fold('charts', '📈 数据图表', chartItems, { badge: '6个' });
 }
 
 // === 主渲染 ===

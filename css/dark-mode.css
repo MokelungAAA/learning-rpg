@@ -1,28 +1,28 @@
-/* dark-mode.css — Material Design 3 dark theme overrides */
+/* dark-mode.css — 蓝黑深色主题 (v0.118) */
 [data-theme="dark"] {
-  --md-primary: #D0BCFF;
-  --md-primary-container: #4F378B;
-  --md-on-primary: #381E72;
-  --md-on-primary-container: #EADDFF;
-  --md-secondary: #CCC2DC;
-  --md-secondary-container: #4A4458;
-  --md-surface: #1C1B1F;
-  --md-surface-variant: #49454F;
-  --md-background: #1C1B1F;
-  --md-on-surface: #E6E1E5;
-  --md-on-surface-variant: #CAC4D0;
-  --md-outline: #938F99;
-  --md-error: #F2B8B5;
+  --md-primary: #60A5FA;
+  --md-primary-container: #1E3A5F;
+  --md-on-primary: #0F172A;
+  --md-on-primary-container: #DBEAFE;
+  --md-secondary: #818CF8;
+  --md-secondary-container: #312E81;
+  --md-surface: #0F172A;
+  --md-surface-variant: #1E293B;
+  --md-background: #0B1120;
+  --md-on-surface: #E2E8F0;
+  --md-on-surface-variant: #94A3B8;
+  --md-outline: #64748B;
+  --md-error: #FCA5A5;
 
-  --color-accent-light: #4F378B;
-  --color-accent-dark: #D0BCFF;
-  --color-accent-gradient: linear-gradient(135deg, #D0BCFF, #6750A4);
-  --color-success: #66BB6A;
-  --color-warning: #FFA726;
-  --color-info: #42A5F5;
-  --glass-border: rgba(255,255,255,0.08);
+  --color-accent-light: #1E3A5F;
+  --color-accent-dark: #93C5FD;
+  --color-accent-gradient: linear-gradient(135deg, #3B82F6, #8B5CF6);
+  --color-success: #34D399;
+  --color-warning: #FBBF24;
+  --color-info: #60A5FA;
+  --glass-border: rgba(255,255,255,0.06);
 
-  --elevation-1: 0 1px 2px rgba(0,0,0,0.3), 0 1px 3px 1px rgba(0,0,0,0.15);
-  --elevation-2: 0 1px 2px rgba(0,0,0,0.3), 0 2px 6px 2px rgba(0,0,0,0.15);
-  --elevation-3: 0 4px 8px 3px rgba(0,0,0,0.15), 0 1px 3px rgba(0,0,0,0.3);
+  --elevation-1: 0 1px 2px rgba(0,0,0,0.4), 0 1px 3px 1px rgba(0,0,0,0.2);
+  --elevation-2: 0 1px 2px rgba(0,0,0,0.4), 0 2px 6px 2px rgba(0,0,0,0.2);
+  --elevation-3: 0 4px 8px 3px rgba(0,0,0,0.2), 0 1px 3px rgba(0,0,0,0.4);
 }

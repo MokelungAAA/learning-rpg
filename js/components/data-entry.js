@@ -100,7 +100,7 @@ function getKPOptions(subjectId, textbookId, chapterId, sectionId) {
   return sec.knowledgePoints || [];
 }
 
-// 生成完整弹窗HTML，内部调用buildKPIndex初始化搜索索引
+// 生成完整弹窗HTML — 精简表单：3个必填+可选展开
 function renderModal() {
   buildKPIndex();
   return `<div class="entry-overlay" id="entry-overlay">
@@ -111,81 +111,92 @@ function renderModal() {
       </div>
       <form id="entry-form" class="entry-form">
         <div class="entry-field">
-          <label class="entry-label">搜索知识点</label>
-          <input type="text" id="entry-search" class="entry-input" placeholder="输入知识点名称搜索...">
-          <div id="entry-search-results" class="entry-search-results"></div>
-        </div>
-        <div class="entry-field">
           <label class="entry-label">学科 *</label>
           <select id="entry-subject" class="entry-select" required>
             <option value="">选择学科</option>
             ${getSubjectOptions()}
           </select>
         </div>
-        <div class="entry-field">
-          <label class="entry-label">教材</label>
-          <select id="entry-textbook" class="entry-select" disabled>
-            <option value="">先选择学科</option>
-          </select>
-        </div>
-        <div class="entry-field">
-          <label class="entry-label">章节</label>
-          <select id="entry-chapter" class="entry-select" disabled>
-            <option value="">先选择教材</option>
-          </select>
-        </div>
-        <div class="entry-field">
-          <label class="entry-label">小节</label>
-          <select id="entry-section" class="entry-select" disabled>
-            <option value="">先选择章节</option>
-          </select>
-        </div>
-        <div class="entry-field">
-          <label class="entry-label">知识点</label>
-          <div id="entry-kp-chips" class="entry-kp-chips"></div>
-        </div>
         <div class="entry-row">
-          <div class="entry-field entry-field-half">
-            <label class="entry-label">得分 <span id="entry-score-display" class="score-display">0</span></label>
-            <input type="range" id="entry-score" class="entry-range" min="0" max="100" value="0" step="5">
-          </div>
           <div class="entry-field entry-field-half">
             <label class="entry-label">时长 (分钟) *</label>
             <input type="number" id="entry-duration" class="entry-input" min="1" value="30" required placeholder="30">
           </div>
-        </div>
-        <div class="entry-row">
           <div class="entry-field entry-field-half">
-            <label class="entry-label">总题数</label>
-            <input type="number" id="entry-total-q" class="entry-input" min="0" placeholder="可选">
-          </div>
-          <div class="entry-field entry-field-half">
-            <label class="entry-label">正确题数</label>
-            <input type="number" id="entry-correct-q" class="entry-input" min="0" placeholder="可选">
+            <label class="entry-label">得分 <span id="entry-score-display" class="score-display">0</span></label>
+            <input type="range" id="entry-score" class="entry-range" min="0" max="100" value="0" step="5">
           </div>
         </div>
-        <div class="entry-row">
-          <div class="entry-field entry-field-half">
-            <label class="entry-label">做题时长</label>
-            <input type="number" id="entry-practice-dur" class="entry-input" min="0" value="24" placeholder="自动">
+        <button type="button" class="entry-more-toggle" id="entry-more-toggle">
+          ▼ 更多选项 <span class="fold-arrow">▾</span>
+        </button>
+        <div class="entry-more-body" id="entry-more-body">
+          <div class="entry-field">
+            <label class="entry-label">搜索知识点</label>
+            <input type="text" id="entry-search" class="entry-input" placeholder="输入知识点名称搜索...">
+            <div id="entry-search-results" class="entry-search-results"></div>
           </div>
-          <div class="entry-field entry-field-half">
-            <label class="entry-label">订正时长</label>
-            <input type="number" id="entry-review-dur" class="entry-input" min="0" value="6" placeholder="自动">
+          <div class="entry-field">
+            <label class="entry-label">教材</label>
+            <select id="entry-textbook" class="entry-select" disabled>
+              <option value="">先选择学科</option>
+            </select>
           </div>
-        </div>
-        <div class="entry-field">
-          <label class="entry-label">活动类型</label>
-          <select id="entry-activity" class="entry-select">
-            <option value="practice">做题</option>
-            <option value="review">订正/复习</option>
-            <option value="reading">阅读</option>
-            <option value="video">网课</option>
-          </select>
-        </div>
-        <div class="entry-field">
-          <label class="entry-label">备注</label>
-          <textarea id="entry-notes" class="entry-textarea" rows="2" placeholder="可选备注..."></textarea>
+          <div class="entry-field">
+            <label class="entry-label">章节</label>
+            <select id="entry-chapter" class="entry-select" disabled>
+              <option value="">先选择教材</option>
+            </select>
+          </div>
+          <div class="entry-field">
+            <label class="entry-label">小节</label>
+            <select id="entry-section" class="entry-select" disabled>
+              <option value="">先选择章节</option>
+            </select>
+          </div>
+          <div class="entry-field">
+            <label class="entry-label">知识点</label>
+            <div id="entry-kp-chips" class="entry-kp-chips"></div>
+          </div>
+          <div class="entry-row">
+            <div class="entry-field entry-field-half">
+              <label class="entry-label">总题数</label>
+              <input type="number" id="entry-total-q" class="entry-input" min="0" placeholder="可选">
+            </div>
+            <div class="entry-field entry-field-half">
+              <label class="entry-label">正确题数</label>
+              <input type="number" id="entry-correct-q" class="entry-input" min="0" placeholder="可选">
+            </div>
+          </div>
+          <div class="entry-row">
+            <div class="entry-field entry-field-half">
+              <label class="entry-label">做题时长</label>
+              <input type="number" id="entry-practice-dur" class="entry-input" min="0" value="24" placeholder="自动">
+            </div>
+            <div class="entry-field entry-field-half">
+              <label class="entry-label">订正时长</label>
+              <input type="number" id="entry-review-dur" class="entry-input" min="0" value="6" placeholder="自动">
+            </div>
+          </div>
+          <div class="entry-field">
+            <label class="entry-label">活动类型</label>
+            <select id="entry-activity" class="entry-select">
+              <option value="practice">做题</option>
+              <option value="review">订正/复习</option>
+              <option value="reading">阅读</option>
+              <option value="video">网课</option>
+              <option value="lecture">上课</option>
+              <option value="exam">考试</option>
+            </select>
+          </div>
+          <div id="exam-fields" class="exam-fields" style="display:none">
+            <div class="exam-fields-title">📊 题型得分（可选）</div>
+            <div id="exam-sub-fields"></div>
+          </div>
+          <div class="entry-field">
+            <label class="entry-label">备注</label>
+            <textarea id="entry-notes" class="entry-textarea" rows="2" placeholder="可选备注..."></textarea>
+          </div>
         </div>
         <button type="submit" class="entry-submit">保存记录</button>
       </form>
@@ -223,6 +234,60 @@ function bindEvents() {
   // 关闭
   closeBtn.addEventListener('click', close);
   overlay.addEventListener('click', (e) => { if (e.target === overlay) close(); });
+
+  // 更多选项折叠
+  const moreToggle = document.getElementById('entry-more-toggle');
+  const moreBody = document.getElementById('entry-more-body');
+  if (moreToggle && moreBody) {
+    moreToggle.addEventListener('click', () => {
+      moreBody.classList.toggle('open');
+      const arrow = moreToggle.querySelector('.fold-arrow');
+      if (arrow) arrow.classList.toggle('open');
+    });
+  }
+
+  // 考试字段：根据学科和活动类型动态显示
+  const examFields = document.getElementById('exam-fields');
+  const examSubFields = document.getElementById('exam-sub-fields');
+  const activitySelect = document.getElementById('entry-activity');
+  const EXAM_FIELDS_MAP = {
+    chinese: [
+      { id: 'modern-reading', label: '现代文阅读', max: 35 },
+      { id: 'classical', label: '古诗文', max: 35 },
+      { id: 'language-use', label: '语言文字运用', max: 20 },
+      { id: 'writing', label: '作文', max: 60 },
+    ],
+    english: [
+      { id: 'listening', label: '听力', max: 30 },
+      { id: 'reading-comp', label: '阅读理解', max: 50 },
+      { id: 'cloze', label: '完形填空', max: 30 },
+      { id: 'grammar-fill', label: '语法填空', max: 15 },
+      { id: 'writing', label: '作文', max: 25 },
+    ],
+  };
+  function updateExamFields() {
+    const isExam = activitySelect.value === 'exam';
+    const subj = subjectSelect.value;
+    examFields.style.display = isExam ? 'block' : 'none';
+    if (!isExam) return;
+    const fields = EXAM_FIELDS_MAP[subj];
+    if (!fields) {
+      examSubFields.innerHTML = '<p class="exam-note">其他科目只录总分</p>';
+      return;
+    }
+    examSubFields.innerHTML = fields.map(f =>
+      `<div class="entry-row exam-row">
+        <div class="entry-field entry-field-half">
+          <label class="entry-label">${f.label} (满分${f.max})</label>
+          <input type="number" id="exam-${f.id}" class="entry-input exam-score-input" min="0" max="${f.max}" placeholder="0">
+        </div>
+      </div>`
+    ).join('');
+  }
+  activitySelect.addEventListener('change', updateExamFields);
+  subjectSelect.addEventListener('change', () => {
+    if (activitySelect.value === 'exam') updateExamFields();
+  });
 
   // 三级联动
   subjectSelect.addEventListener('change', () => {
@@ -354,6 +419,22 @@ function bindEvents() {
     const totalQ = parseInt(document.getElementById('entry-total-q').value, 10) || 0;
     const correctQ = parseInt(document.getElementById('entry-correct-q').value, 10) || 0;
 
+    // 收集考试题型分
+    const activityType = document.getElementById('entry-activity').value;
+    let examScores = null;
+    if (activityType === 'exam') {
+      const examInputs = document.querySelectorAll('.exam-score-input');
+      if (examInputs.length > 0) {
+        examScores = {};
+        examInputs.forEach(inp => {
+          const fieldId = inp.id.replace('exam-', '');
+          const val = parseInt(inp.value, 10);
+          if (val > 0) examScores[fieldId] = val;
+        });
+        if (Object.keys(examScores).length === 0) examScores = null;
+      }
+    }
+
     const record = {
       id: 'rec-' + Date.now() + '-' + Math.random().toString(36).slice(2, 6),
       timestamp: new Date().toISOString(),
@@ -366,10 +447,11 @@ function bindEvents() {
       duration,
       practiceDuration: practiceDur,
       reviewDuration: reviewDur,
-      activityType: document.getElementById('entry-activity').value,
+      activityType,
       notes: document.getElementById('entry-notes').value || '',
       totalQuestions: totalQ,
       correctQuestions: correctQ,
+      examScores,
       xp: 0,
     };
     // XP Engine 2.0: 用完整公式替代简化公式

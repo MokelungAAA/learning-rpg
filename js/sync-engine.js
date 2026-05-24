@@ -1,34 +1,35 @@
 // sync-engine.js — GitHub Contents API 同步引擎
 // 单例模式，通过 Personal Access Token 认证
 // 数据以 JSON 文件存储在仓库的 data/ 目录下
+// v0.121: 支持统一数据文件 data/lts_study_records.json 的双向同步
 import Storage from './store.js';
 import EventBus from './event-bus.js';
 import { STORAGE_KEYS as StorageKeys } from './config.js';
 
+// 统一数据文件路径
+const UNIFIED_FILE = 'data/lts_study_records.json';
+
 class SyncEngine {
   constructor() {
-    this.token = null;  // GitHub PAT
-    this.owner = null;  // 仓库所有者
-    this.repo = null;   // 仓库名
-    this.isSyncing = false; // 防止并发同步
+    this.token = null;
+    this.owner = null;
+    this.repo = null;
+    this.isSyncing = false;
   }
 
-  // 配置 GitHub 认证信息，三者缺一不可
   configure(token, owner, repo) {
     this.token = token;
     this.owner = owner;
     this.repo = repo;
   }
 
-  // 检查是否已配置（token + owner + repo 都存在）
   get isConfigured() {
     return !!(this.token && this.owner && this.repo);
   }
 
-  // 上传数据到 GitHub：PUT data/{key}.json
-  // 需要先获取文件 SHA（用于更新已有文件）
-  async upload(key, data) {
-    const path = `data/${key}.json`;
+  // ─── GitHub API 基础操作 ───
+
+  async uploadFile(path, data, message) {
     const content = btoa(unescape(encodeURIComponent(JSON.stringify(data, null, 2))));
     const sha = await this.getFileSha(path);
 
@@ -40,11 +41,7 @@ class SyncEngine {
           'Authorization': `token ${this.token}`,
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          message: `Update ${key} via LTS`,
-          content,
-          sha,
-        }),
+        body: JSON.stringify({ message, content, sha }),
       }
     );
 
@@ -52,9 +49,7 @@ class SyncEngine {
     return response.json();
   }
 
-  // 从 GitHub 下载数据，404 返回 null
-  async download(key) {
-    const path = `data/${key}.json`;
+  async downloadFile(path) {
     const response = await fetch(
       `https://api.github.com/repos/${this.owner}/${this.repo}/contents/${path}`,
       { headers: { 'Authorization': `token ${this.token}` } }
@@ -68,8 +63,6 @@ class SyncEngine {
     return JSON.parse(decoded);
   }
 
-  // 获取文件 SHA（用于 GitHub API 的更新操作）
-  // 文件不存在时返回 undefined
   async getFileSha(path) {
     try {
       const response = await fetch(
@@ -84,31 +77,77 @@ class SyncEngine {
     return undefined;
   }
 
-  // 全量双向同步：遍历所有 STORAGE_KEYS
-  // 策略：remote 为空→上传，local 为空→下载，都有→合并
+  // ─── 统一数据文件同步 ───
+
+  // 从 GitHub 下载统一数据文件
+  async downloadUnified() {
+    return this.downloadFile(UNIFIED_FILE);
+  }
+
+  // 上传统一数据文件到 GitHub
+  async uploadUnified(data) {
+    return this.uploadFile(UNIFIED_FILE, data, 'Update study records via LTS');
+  }
+
+  // 智能合并：本地 vs 远程
+  // 策略：按 record.id 去重，本地记录优先（用户最近操作的）
+  mergeUnified(local, remote) {
+    // 如果一边没有数据，直接用另一边
+    if (!local || !local.records) return remote;
+    if (!remote || !remote.records) return local;
+
+    const localRecords = local.records;
+    const remoteRecords = remote.records;
+
+    // 按 id 建立 map，本地优先
+    const merged = new Map();
+    for (const r of remoteRecords) merged.set(r.id, r);
+    for (const r of localRecords) merged.set(r.id, r);  // 本地覆盖远程
+
+    const result = {
+      version: '2.0',
+      lastUpdated: new Date().toISOString(),
+      learnerName: '墨澜',
+      schema: 'lts_study_record',
+      schemaVersion: 1,
+      records: Array.from(merged.values()).sort((a, b) =>
+        a.timestamp.localeCompare(b.timestamp)
+      ),
+    };
+
+    return result;
+  }
+
+  // ─── 全量同步（智能合并模式）───
+
   async fullSync() {
     if (this.isSyncing) return;
     this.isSyncing = true;
 
     try {
-      const keys = Object.values(StorageKeys);
-      for (const key of keys) {
-        const local = Storage.get(key);
-        const remote = await this.download(key);
+      // 1. 从 GitHub 下载远程数据
+      const remote = await this.downloadUnified();
 
-        if (!remote) {
-          if (local) await this.upload(key, local);
-        } else if (!local) {
-          Storage.set(key, remote);
-        } else {
-          const merged = this.mergeData(key, local, remote);
-          Storage.set(key, merged);
-          await this.upload(key, merged);
-        }
-      }
+      // 2. 从 localStorage 获取本地数据
+      const localRecords = Storage.get(StorageKeys.STUDY_RECORDS) || [];
+      const local = {
+        version: '2.0',
+        lastUpdated: Storage.get('lts_sync_meta')?.lastUpdated || new Date(0).toISOString(),
+        learnerName: '墨澜',
+        schema: 'lts_study_record',
+        schemaVersion: 1,
+        records: localRecords,
+      };
 
-      Storage.set(StorageKeys.SYNC_META, { lastSync: Date.now(), status: 'success' });
-      EventBus.emit('sync:complete', { status: 'success' });
+      // 3. 智能合并
+      const merged = this.mergeUnified(local, remote);
+
+      // 4. 写回两边
+      Storage.set(StorageKeys.STUDY_RECORDS, merged.records);
+      Storage.set('lts_sync_meta', { lastSync: Date.now(), lastUpdated: merged.lastUpdated, status: 'success' });
+      await this.uploadUnified(merged);
+
+      EventBus.emit('sync:complete', { status: 'success', count: merged.records.length });
     } catch (e) {
       Storage.set(StorageKeys.SYNC_META, { lastSync: Date.now(), status: 'error', error: e.message });
       EventBus.emit('sync:error', { error: e });
@@ -117,16 +156,60 @@ class SyncEngine {
     }
   }
 
-  // 合并策略：数组按 id 去重（local 优先），
-  // 对象按 updatedAt 取新值
-  mergeData(key, local, remote) {
-    if (Array.isArray(local) && Array.isArray(remote)) {
-      const map = new Map();
-      remote.forEach(item => map.set(item.id, item));
-      local.forEach(item => map.set(item.id, item));
-      return Array.from(map.values()).sort((a, b) => b.timestamp - a.timestamp);
+  // ─── 启动时加载（智能合并）───
+  // app 启动时调用：比较本地和远程，取更新的一方
+  async startupLoad() {
+    if (!this.isConfigured) return false;
+
+    try {
+      const remote = await this.downloadUnified();
+      if (!remote || !remote.records) return false;
+
+      const localRecords = Storage.get(StorageKeys.STUDY_RECORDS) || [];
+
+      // 如果本地没有数据，直接用远程
+      if (localRecords.length === 0) {
+        Storage.set(StorageKeys.STUDY_RECORDS, remote.records);
+        EventBus.emit('data:loaded', { source: 'github', count: remote.records.length });
+        return true;
+      }
+
+      // 智能合并
+      const local = {
+        version: '2.0',
+        lastUpdated: Storage.get('lts_sync_meta')?.lastUpdated || new Date(0).toISOString(),
+        learnerName: '墨澜',
+        schema: 'lts_study_record',
+        schemaVersion: 1,
+        records: localRecords,
+      };
+
+      const merged = this.mergeUnified(local, remote);
+      Storage.set(StorageKeys.STUDY_RECORDS, merged.records);
+
+      // 如果有新数据，上传回 GitHub
+      if (merged.records.length > localRecords.length) {
+        await this.uploadUnified(merged);
+      }
+
+      EventBus.emit('data:loaded', { source: 'merged', count: merged.records.length });
+      return true;
+    } catch (e) {
+      console.error('Startup load failed:', e);
+      return false;
     }
-    return (local.updatedAt > remote.updatedAt) ? local : remote;
+  }
+
+  // ─── 旧版兼容：逐 key 同步 ───
+
+  async upload(key, data) {
+    const path = `data/${key}.json`;
+    return this.uploadFile(path, data, `Update ${key} via LTS`);
+  }
+
+  async download(key) {
+    const path = `data/${key}.json`;
+    return this.downloadFile(path);
   }
 }
 

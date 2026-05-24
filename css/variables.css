@@ -1,21 +1,21 @@
-/* variables.css — Material Design 3 design tokens + legacy aliases */
+/* variables.css — 冰蓝毛玻璃主题 (v0.118) */
 :root {
-  /* === Material Design 3 颜色 === */
-  --md-primary: #6750A4;
-  --md-primary-container: #EADDFF;
+  /* === 冰蓝主题色 === */
+  --md-primary: #2563EB;
+  --md-primary-container: #DBEAFE;
   --md-on-primary: #FFFFFF;
-  --md-on-primary-container: #21005D;
-  --md-secondary: #625B71;
-  --md-secondary-container: #E8DEF8;
-  --md-surface: #FFFBFE;
-  --md-surface-variant: #E7E0EC;
-  --md-background: #FFFBFE;
-  --md-on-surface: #1C1B1F;
-  --md-on-surface-variant: #49454F;
-  --md-outline: #79747E;
-  --md-error: #B3261E;
+  --md-on-primary-container: #1E3A5F;
+  --md-secondary: #6366F1;
+  --md-secondary-container: #E0E7FF;
+  --md-surface: #F8FAFC;
+  --md-surface-variant: #E2E8F0;
+  --md-background: #F0F4F8;
+  --md-on-surface: #0F172A;
+  --md-on-surface-variant: #475569;
+  --md-outline: #94A3B8;
+  --md-error: #DC2626;
 
-  /* === Legacy aliases (映射到 MD3) === */
+  /* === Legacy aliases === */
   --color-bg: var(--md-background);
   --color-surface: var(--md-surface);
   --color-surface-variant: var(--md-surface-variant);
@@ -23,15 +23,15 @@
   --color-text-2: var(--md-on-surface-variant);
   --color-text-3: var(--md-outline);
   --color-accent: var(--md-primary);
-  --color-accent-light: #EADDFF;
-  --color-accent-dark: #4F378B;
-  --color-accent-gradient: linear-gradient(135deg, #6750A4, #D0BCFF);
+  --color-accent-light: #DBEAFE;
+  --color-accent-dark: #1D4ED8;
+  --color-accent-gradient: linear-gradient(135deg, #2563EB, #7C3AED);
   --color-success: #10B981;
   --color-warning: #F59E0B;
   --color-error: var(--md-error);
   --color-info: #3B82F6;
   --color-outline: var(--md-outline);
-  --glass-border: rgba(255,255,255,0.18);
+  --glass-border: rgba(255,255,255,0.25);
 
   /* === 语义色 === */
   --color-danger: #EF4444;
@@ -50,8 +50,8 @@
   --temp-5: var(--temp-cool);
   --temp-6: var(--temp-frozen);
 
-  /* === 排版 === */
-  --font-sans: 'Roboto', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  /* === 排版 (Noto Sans SC + Inter) === */
+  --font-sans: 'Inter', 'Noto Sans SC', 'PingFang SC', 'Microsoft YaHei', sans-serif;
   --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
 
   /* === 间距 === */

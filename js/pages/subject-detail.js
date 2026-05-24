@@ -245,7 +245,7 @@ export function render(params) {
     ${renderReviewCard(subjectId)}
     ${renderLogCard(subjectId)}
     ${renderChartCard(subjectId)}
-    <p style="color:var(--color-text-3);margin-top:var(--sp-3);font-size:var(--fs-xs)">v0.114 · 开发者区</p>
+    <p style="color:var(--color-text-3);margin-top:var(--sp-3);font-size:var(--fs-xs)">v0.121 · 开发者区</p>
   </div>`;
 }
 
